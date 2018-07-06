@@ -105,6 +105,18 @@ SpawnLog::logNewSpawn(const uint8_t* data)
 }
 
 void
+SpawnLog::logNewSpawn(const Item *item)
+{
+  if (item->type() != tSpawn)
+    return;
+  
+  const Spawn* spawn = (const Spawn*)item;
+  
+  logSpawnInfo("+",(const char *)spawn->name(),spawn->id(),spawn->level(),
+	       spawn->x(), spawn->y(), spawn->z(), "",0, spawn->guildID());
+}
+
+void
 SpawnLog::logKilledSpawn(const Item *item, const Item* kitem, uint16_t kid)
 {
   if (item == NULL)

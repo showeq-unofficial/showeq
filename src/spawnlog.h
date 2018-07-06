@@ -38,6 +38,7 @@ public slots:
     void logNewSpawn(const uint8_t* spawn);
     void logKilledSpawn(const Item* item, const Item* kitem, uint16_t kid);
     void logDeleteSpawn(const Item *spawn);
+    void logNewSpawn(const Item *spawn);
 
 protected:
     void logSpawnInfo(const char *type, const char *name, int id, int level, 

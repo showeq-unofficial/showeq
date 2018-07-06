@@ -5929,6 +5929,8 @@ void EQInterface::createSpawnLog(void)
 // 		      m_spawnLogger, SLOT(logNewSpawn(const uint8_t*)));
    
    // Connect SpawnLog slots to SpawnShell signals
+   connect(m_spawnShell, SIGNAL(addItem(const Item*)),
+           m_spawnLogger, SLOT(logNewSpawn(const Item *)));
    connect(m_spawnShell, SIGNAL(delItem(const Item*)),
 	   m_spawnLogger, SLOT(logDeleteSpawn(const Item *)));
    connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
