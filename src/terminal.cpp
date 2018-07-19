@@ -212,6 +212,7 @@ void Terminal::newMessage(const MessageEntry& message)
     fputs(defaultStyle, stdout);
   
   fputc('\n', stdout);
+  fflush (stdout);
 }
 
 #ifndef QMAKEBUILD

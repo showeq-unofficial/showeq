@@ -1,3 +1,11 @@
+BlueAdept (7/18/18)
+-------------------
+- Updated version to 5.13.10.69
+- Support EQ patch 7/18/18
+- Updated Opcodes (Newby)
+- Updated Structs (Newby)
+- Added a "fflush (stdout);" to terminal.cpp
+
 BlueAdept (7/06/18)
 -------------------
 - Updated version to 5.13.10.68
