@@ -652,7 +652,8 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->deity = netStream.readUInt32NC();
    spawn->guildID = netStream.readUInt32NC();
    netStream.skipBytes(4);			/* new data in 11/16/2016 patch */
-   spawn->guildstatus = netStream.readUInt32NC();
+   /* spawn->guildstatus = netStream.readUInt32NC();	disappeared 11/14/2018 */
+   spawn->guildstatus = 0;
    spawn->class_ = netStream.readUInt32NC();
 
 #ifdef FILLSPAWNSTRUCT_DIAG

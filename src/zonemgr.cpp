@@ -472,7 +472,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->platinum_shared = netStream.readUInt32NC();
 
   // Unknown
-  netStream.skipBytes(12);
+  netStream.skipBytes(7);
 
   // Something (236 ints)
   int sCount6 = netStream.readUInt32NC();
