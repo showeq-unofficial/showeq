@@ -340,7 +340,7 @@
     "Troll",                      // 331
     "Troll",                      // 332
     "Troll",                      // 333
-    "Ghost",                      // 334
+    "Troll Pirate Ghost",         // 334
     "Pirate",                     // 335
     "Pirate",                     // 336
     "Pirate",                     // 337
@@ -455,7 +455,7 @@
     "Dragon Statue",              // 446
     "Lava Rock",                  // 447
     "Animated Statue",            // 448
-    "Spider Egg Sack",            // 449
+    "Spider Egg Sac",             // 449
     "Lava Spider",                // 450
     "Lava Spider Queen",          // 451
     "Dragon",                     // 452
@@ -517,7 +517,7 @@
     "Stone Ring",                 // 508
     "Root Tentacle",              // 509
     "Runic Symbol",               // 510
-    "Saltpetter Bomb",            // 511
+    "Saltpeter Bomb",             // 511
     "Floating Skull",             // 512
     "Spike Trap",                 // 513
     "Totem",                      // 514
@@ -856,7 +856,7 @@
     "Dragon",                     // 847
     "Venril Sathir",              // 848
     "Fae Drake",                  // 849
-    "Iksar Golem",                // 850
+    "Horse",                      // 850
     "Dragon",                     // 851
     "Dragon",                     // 852
     "Chokidai Mount",             // 853
@@ -865,4 +865,11 @@
     "Air Elemental",              // 856
     "Water Elemental",            // 857
     "Fire Elemental",             // 858
+    "Bear",                       // 859
+    "Djinn",                      // 860
+    "Snail Mount",                // 861
+    "Djinn",                      // 862
+    "Elemental",                  // 863
+    "Snail",                      // 864
+    "Nilborien",                  // 865
 #endif

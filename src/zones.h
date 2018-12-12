@@ -16,14 +16,14 @@
 { "freportn", "North Freeport" }, // 8
 { "freportw", "West Freeport" }, // 9
 { "freporte", "East Freeport" }, // 10
-{ "runnyeye", "Clan Runnyeye" }, // 11
-{ "qey2hh1", "West Karana" }, // 12
-{ "northkarana", "North Karana" }, // 13
-{ "southkarana", "South Karana" }, // 14
-{ "eastkarana", "East Karana" }, // 15
-{ "beholder", "Gorge of King Xorbb" }, // 16
-{ "blackburrow", "BlackBurrow" }, // 17
-{ "paw", "Infected Paw" }, // 18
+{ "runnyeye", "The Liberated Citadel of Runnyeye" }, // 11
+{ "qey2hh1", "The Western Plains of Karana" }, // 12
+{ "northkarana", "The Northern Plains of Karana" }, // 13
+{ "southkarana", "The Southern Plains of Karana" }, // 14
+{ "eastkarana", "Then Eastern Plains of Karana" }, // 15
+{ "beholder", "The Gorge of King Xorbb" }, // 16
+{ "blackburrow", "Blackburrow" }, // 17
+{ "paw", "The Lair of the Splitpaw" }, // 18
 { "rivervale", "Rivervale" }, // 19
 { "kithicor", "Kithicor Forest" }, // 20
 { "commons", "West Commonlands" }, // 21
@@ -32,71 +32,71 @@
 { "erudnext", "Erudin" }, // 24
 { "nektulos", "Nektulos Forest" }, // 25
 { "cshome", "Sunset Home" }, // 26
-{ "lavastorm", "Lavastorm Mountains" }, // 27
-{ "nektropos", "Nektropos" }, // 28
+{ "lavastorm", "The Lavastorm Mountains" }, // 27
+{ NULL, NULL }, // 28
 { "halas", "Halas" }, // 29
 { "everfrost", "Everfrost Peaks" }, // 30
 { "soldunga", "Solusek's Eye" }, // 31
 { "soldungb", "Nagafen's Lair" }, // 32
-{ "misty", "Misty Thicket" }, // 33
-{ "nro", "North Ro" }, // 34
-{ "sro", "South Ro" }, // 35
+{ NULL, NULL }, // 33
+{ "nro", "The Northern Desert of Ro" }, // 34
+{ "sro", "The Southern Desert of Ro" }, // 35
 { "befallen", "Befallen" }, // 36
-{ "oasis", "Oasis of Marr" }, // 37
-{ "tox", "Toxxulia Forest" }, // 38
+{ "oasis", "The Oasis of Marr" }, // 37
+{ NULL, NULL }, // 38
 { "hole", "The Ruins of Old Paineel" }, // 39
 { "neriaka", "Neriak - Foreign Quarter" }, // 40
 { "neriakb", "Neriak - Commons" }, // 41
 { "neriakc", "Neriak - Third Gate" }, // 42
 { "neriakd", "Neriak - Fourth Gate" }, // 43
 { "najena", "Najena" }, // 44
-{ "qcat", "Qeynos Catacombs" }, // 45
-{ "innothule", "Innothule Swamp" }, // 46
+{ "qcat", "The Qeynos Aqueduct System" }, // 45
+{ NULL, NULL }, // 46
 { "feerrott", "The Feerrott" }, // 47
-{ "cazicthule", "Cazic-Thule" }, // 48
+{ "cazicthule", "Temple of Cazic-Thule" }, // 48
 { "oggok", "Oggok" }, // 49
-{ "rathemtn", "Mountains of Rathe" }, // 50
+{ "rathemtn", "The Rathe Mountains" }, // 50
 { "lakerathe", "Lake Rathetear" }, // 51
 { "grobb", "Grobb" }, // 52
-{ "aviak", "Aviak Village" }, // 53
-{ "gfaydark", "Greater Faydark" }, // 54
+{ NULL, NULL }, // 53
+{ "gfaydark", "The Greater Faydark" }, // 54
 { "akanon", "Ak'Anon" }, // 55
-{ "steamfont", "Steamfont Mountains" }, // 56
-{ "lfaydark", "Lesser Faydark" }, // 57
+{ NULL, NULL }, // 56
+{ "lfaydark", "The Lesser Faydark" }, // 57
 { "crushbone", "Clan Crushbone" }, // 58
-{ "mistmoore", "Castle Mistmoore" }, // 59
-{ "kaladima", "Kaladim" }, // 60
-{ "felwithea", "Felwithe" }, // 61
-{ "felwitheb", "Felwithe" }, // 62
-{ "unrest", "Estate of Unrest" }, // 63
+{ "mistmoore", "The Castle of Mistmoore" }, // 59
+{ "kaladima", "South Kaladim" }, // 60
+{ "felwithea", "Northern Felwithe" }, // 61
+{ "felwitheb", "Southern Felwithe" }, // 62
+{ "unrest", "The Estate of Unrest" }, // 63
 { "kedge", "Kedge Keep" }, // 64
-{ "guktop", "Upper Guk" }, // 65
-{ "gukbottom", "Lower Guk" }, // 66
-{ "kaladimb", "Kaladim" }, // 67
+{ "guktop", "The City of Guk" }, // 65
+{ "gukbottom", "The Ruins of Old Guk" }, // 66
+{ "kaladimb", "North Kaladim" }, // 67
 { "butcher", "Butcherblock Mountains" }, // 68
-{ "oot", "Ocean of Tears" }, // 69
+{ "oot", "The Ocean of Tears" }, // 69
 { "cauldron", "Dagnor's Cauldron" }, // 70
-{ "airplane", "Plane of Sky" }, // 71
-{ "fearplane", "Plane of Fear" }, // 72
+{ "airplane", "The Plane of Sky" }, // 71
+{ "fearplane", "The Plane of Fear" }, // 72
 { "permafrost", "Permafrost Keep" }, // 73
-{ "kerraridge", "Kerra Isle" }, // 74
+{ NULL, NULL }, // 74
 { "paineel", "Paineel" }, // 75
 { "hateplane", "The Plane of Hate" }, // 76
 { "arena", "The Arena" }, // 77
 { "fieldofbone", "The Field of Bone" }, // 78
-{ "warslikswood", "Warsliks Woods" }, // 79
-{ "soltemple", "Temple of Solusek Ro" }, // 80
-{ "droga", "Temple of Droga" }, // 81
-{ "cabwest", "West Cabilis" }, // 82
-{ "swampofnohope", "Swamp of No Hope" }, // 83
+{ "warslikswood", "The Warsliks Woods" }, // 79
+{ "soltemple", "The Temple of Solusek Ro" }, // 80
+{ "droga", "The Temple of Droga" }, // 81
+{ "cabwest", "Cabilis West" }, // 82
+{ "swampofnohope", "The Swamp of No Hope" }, // 83
 { "firiona", "Firiona Vie" }, // 84
 { "lakeofillomen", "Lake of Ill Omen" }, // 85
-{ "dreadlands", "Dreadlands" }, // 86
-{ "burningwood", "Burning Woods" }, // 87
+{ "dreadlands", "The Dreadlands" }, // 86
+{ "burningwood", "The Burning Woods" }, // 87
 { "kaesora", "Kaesora" }, // 88
-{ "sebilis", "Old Sebilis" }, // 89
-{ "citymist", "City of Mist" }, // 90
-{ "skyfire", "Skyfire Mountains" }, // 91
+{ "sebilis", "The Ruins of Sebilis" }, // 89
+{ "citymist", "The City of Mist" }, // 90
+{ "skyfire", "The Skyfire Mountains" }, // 91
 { "frontiermtns", "Frontier Mountains" }, // 92
 { "overthere", "The Overthere" }, // 93
 { "emeraldjungle", "The Emerald Jungle" }, // 94
@@ -105,37 +105,37 @@
 { "kurn", "Kurn's Tower" }, // 97
 { "erudsxing", "Erud's Crossing" }, // 98
 { NULL, NULL }, // 99
-{ "stonebrunt", "Stonebrunt Mountains" }, // 100
+{ "stonebrunt", "The Stonebrunt Mountains" }, // 100
 { "warrens", "The Warrens" }, // 101
 { "karnor", "Karnor's Castle" }, // 102
 { "chardok", "Chardok" }, // 103
-{ "dalnir", "Dalnir" }, // 104
+{ "dalnir", "The Crypt of Dalnir" }, // 104
 { "charasis", "Howling Stones" }, // 105
-{ "cabeast", "East Cabilis" }, // 106
-{ "nurga", "Mines of Nurga" }, // 107
+{ "cabeast", "Cabilis East" }, // 106
+{ "nurga", "The Mines of Nurga" }, // 107
 { "veeshan", "Veeshan's Peak" }, // 108
 { "veksar", "Veksar" }, // 109
-{ "iceclad", "Iceclad Ocean" }, // 110
-{ "frozenshadow", "Tower of Frozen Shadow" }, // 111
+{ "iceclad", "The Iceclad Ocean" }, // 110
+{ "frozenshadow", "The Tower of Frozen Shadow" }, // 111
 { "velketor", "Velketor's Labyrinth" }, // 112
 { "kael", "Kael Drakkel" }, // 113
 { "skyshrine", "Skyshrine" }, // 114
-{ "thurgadina", "Thurgadin" }, // 115
+{ "thurgadina", "The City of Thurgadin" }, // 115
 { "eastwastes", "Eastern Wastes" }, // 116
 { "cobaltscar", "Cobalt Scar" }, // 117
-{ "greatdivide", "Great Divide" }, // 118
+{ "greatdivide", "The Great Divide" }, // 118
 { "wakening", "The Wakening Land" }, // 119
-{ "westwastes", "Western Wastes" }, // 120
+{ "westwastes", "The Western Wastes" }, // 120
 { "crystal", "Crystal Caverns" }, // 121
 { NULL, NULL }, // 122
 { "necropolis", "Dragon Necropolis" }, // 123
-{ "templeveeshan", "Temple of Veeshan" }, // 124
+{ "templeveeshan", "The Temple of Veeshan" }, // 124
 { "sirens", "Siren's Grotto" }, // 125
-{ "mischiefplane", "Plane of Mischief" }, // 126
-{ "growthplane", "Plane of Growth" }, // 127
-{ "sleeper", "Sleeper's Tomb" }, // 128
+{ "mischiefplane", "The Plane of Mischief" }, // 126
+{ "growthplane", "The Plane of Growth" }, // 127
+{ "sleeper", "The Sleeper's Tomb" }, // 128
 { "thurgadinb", "Icewell Keep" }, // 129
-{ "erudsxing2", "Marauder's Mire" }, // 130
+{ NULL, NULL }, // 130
 { NULL, NULL }, // 131
 { NULL, NULL }, // 132
 { NULL, NULL }, // 133
@@ -162,7 +162,7 @@
 { "acrylia", "Acrylia Caverns" }, // 154
 { "sharvahl", "Shar Vahl" }, // 155
 { "paludal", "Paludal Caverns" }, // 156
-{ "fungusgrove", "Fungus Grove" }, // 157
+{ "fungusgrove", "The Fungus Grove" }, // 157
 { "vexthal", "Vex Thal" }, // 158
 { "sseru", "Sanctus Seru" }, // 159
 { "katta", "Katta Castellum" }, // 160
@@ -184,17 +184,17 @@
 { "umbral", "The Umbral Plains" }, // 176
 { NULL, NULL }, // 177
 { NULL, NULL }, // 178
-{ "akheva", "Akheva Ruins" }, // 179
-{ "arena2", "The Arena" }, // 180
-{ "jaggedpine", "The Jaggedpine Forest" }, // 181
+{ "akheva", "The Akheva Ruins" }, // 179
+{ NULL, NULL }, // 180
+{ "jaggedpine", "Jaggedpine Forest" }, // 181
 { "nedaria", "Nedaria's Landing" }, // 182
-{ "tutorial", "Tutorial Zone" }, // 183
-{ "load", "Loading" }, // 184
-{ "load2", "Loading" }, // 185
+{ NULL, NULL }, // 183
+{ NULL, NULL }, // 184
+{ NULL, NULL }, // 185
 { "hateplaneb", "The Plane of Hate" }, // 186
 { "shadowrest", "Shadowrest" }, // 187
-{ "tutoriala", "The Mines of Gloomingdeep" }, // 188
-{ "tutorialb", "The Mines of Gloomingdeep" }, // 189
+{ NULL, NULL }, // 188
+{ NULL, NULL }, // 189
 { NULL, NULL }, // 190
 { NULL, NULL }, // 191
 { NULL, NULL }, // 192
@@ -206,115 +206,115 @@
 { NULL, NULL }, // 198
 { NULL, NULL }, // 199
 { "codecay", "Ruins of Lxanvom" }, // 200
-{ "pojustice", "Plane of Justice" }, // 201
-{ "poknowledge", "Plane of Knowledge" }, // 202
-{ "potranquility", "Plane of Tranquility" }, // 203
-{ "ponightmare", "Plane of Nightmare" }, // 204
-{ "podisease", "Plane of Disease" }, // 205
-{ "poinnovation", "Plane of Innovation" }, // 206
-{ "potorment", "Plane of Torment" }, // 207
-{ "povalor", "Plane of Valor" }, // 208
-{ "bothunder", "Torden, The Bastion of Thunder" }, // 209
-{ "postorms", "Plane of Storms" }, // 210
-{ "hohonora", "Halls of Honor" }, // 211
-{ "solrotower", "Solusek Ro's Tower" }, // 212
-{ "powar", "Plane of War" }, // 213
-{ "potactics", "Drunder, Fortress of Zek" }, // 214
+{ "pojustice", "The Plane of Justice" }, // 201
+{ "poknowledge", "The Plane of Knowledge" }, // 202
+{ "potranquility", "The Plane of Tranquility" }, // 203
+{ "ponightmare", "The Plane of Nightmare" }, // 204
+{ "podisease", "The Plane of Disease" }, // 205
+{ "poinnovation", "The Plane of Innovation" }, // 206
+{ "potorment", "Torment, the Plane of Pain" }, // 207
+{ "povalor", "The Plane of Valor" }, // 208
+{ "bothunder", "Torden, the Bastion of Thunder" }, // 209
+{ "postorms", "The Plane of Storms" }, // 210
+{ "hohonora", "The Halls of Honor" }, // 211
+{ "solrotower", "The Tower of Solusek Ro" }, // 212
+{ "powar", "The Plane of War" }, // 213
+{ "potactics", "Drunder, the Fortress of Zek" }, // 214
 { "poair", "Eryslai, the Kingdom of Wind" }, // 215
-{ "powater", "Reef of Coirnav" }, // 216
-{ "pofire", "Doomfire, The Burning Lands" }, // 217
+{ "powater", "The Reef of Coirnav" }, // 216
+{ "pofire", "Doomfire, the Burning Lands" }, // 217
 { "poeartha", "Vegarlson, The Earthen Badlands" }, // 218
-{ "potimea", "Plane of Time" }, // 219
-{ "hohonorb", "Temple of Marr" }, // 220
-{ "nightmareb", "Lair of Terris Thule" }, // 221
-{ "poearthb", "Stronghold of the Twelve" }, // 222
-{ "potimeb", "Plane of Time" }, // 223
-{ "gunthak", "Gulf of Gunthak" }, // 224
+{ "potimea", "The Plane of Time" }, // 219
+{ "hohonorb", "The Temple of Marr" }, // 220
+{ "nightmareb", "The Lair of Terris-Thule" }, // 221
+{ "poearthb", "Ragrax, Stronghold of the Twelve" }, // 222
+{ "potimeb", "The Prison of the Forsaken" }, // 223
+{ "gunthak", "The Gulf of Gunthak" }, // 224
 { "dulak", "Dulak's Harbor" }, // 225
-{ "torgiran", "Torgiran Mines" }, // 226
-{ "nadox", "Crypt of Nadox" }, // 227
-{ "hatesfury", "Hate's Fury, The Scorned Maiden" }, // 228
-{ "guka", "The Cauldron of Lost Souls" }, // 229
-{ "ruja", "The Bloodied Quarries" }, // 230
-{ "taka", "The Sunken Library" }, // 231
-{ "mira", "The Silent Gallery" }, // 232
-{ "mmca", "The Forlorn Caverns" }, // 233
-{ "gukb", "The Drowning Crypt" }, // 234
-{ "rujb", "The Halls of War" }, // 235
-{ "takb", "The Shifting Tower" }, // 236
-{ "mirb", "The Maw of the Menagerie" }, // 237
-{ "mmcb", "The Dreary Grotto" }, // 238
-{ "gukc", "The Ancient Aqueducts" }, // 239
-{ "rujc", "The Wind Bridges" }, // 240
-{ "takc", "The Fading Temple" }, // 241
-{ "mirc", "The Spider Den" }, // 242
-{ "mmcc", "The Asylum of Invoked Stone" }, // 243
-{ "gukd", "The Mushroom Grove" }, // 244
-{ "rujd", "The Gladiator Pits" }, // 245
-{ "takd", "The Royal Observatory" }, // 246
-{ "mird", "The Hushed Banquet" }, // 247
-{ "mmcd", "The Chambers of Eternal Affliction" }, // 248
-{ "guke", "The Foreboding Prison" }, // 249
-{ "ruje", "The Drudge Hollows" }, // 250
-{ "take", "The River of Recollection" }, // 251
-{ "mire", "The Frosted Halls" }, // 252
-{ "mmce", "The Sepulcher of the Damned" }, // 253
-{ "gukf", "The Chapel of the Witnesses" }, // 254
-{ "rujf", "The Fortified Lair of the Taskmasters" }, // 255
-{ "takf", "The Sandfall Corridors" }, // 256
-{ "mirf", "The Forgotten Wastes" }, // 257
-{ "mmcf", "The Ritualistic Summoning Grounds" }, // 258
-{ "gukg", "The Root Garden" }, // 259
-{ "rujg", "The Hidden Vale" }, // 260
-{ "takg", "The Balancing Chamber" }, // 261
-{ "mirg", "The Heart of the Menagerie" }, // 262
-{ "mmcg", "The Cesspits of Putrescence" }, // 263
-{ "gukh", "The Accursed Sanctuary" }, // 264
-{ "rujh", "The Blazing Forge" }, // 265
-{ "takh", "The Sweeping Tides" }, // 266
-{ "mirh", "The Morbid Laboratory" }, // 267
-{ "mmch", "The Aisles of Blood" }, // 268
-{ "ruji", "The Arena of Chance" }, // 269
-{ "taki", "The Antiquated Palace" }, // 270
-{ "miri", "The Theater of Imprisoned Horrors" }, // 271
-{ "mmci", "The Halls of Sanguinary Rites" }, // 272
-{ "rujj", "The Barracks of War" }, // 273
-{ "takj", "The Prismatic Corridors" }, // 274
-{ "mirj", "The Grand Library" }, // 275
-{ "mmcj", "The Infernal Sanctuary" }, // 276
-{ "chardokb", "The Halls of Betrayal" }, // 277
+{ "torgiran", "The Torgiran Mines" }, // 226
+{ "nadox", "The Crypt of Nadox" }, // 227
+{ "hatesfury", "Hate's Fury" }, // 228
+{ "guka", "Deepest Guk: Cauldron of Lost Souls" }, // 229
+{ "ruja", "The Rujarkian Hills: Bloodied Quarries" }, // 230
+{ "taka", "Takish-Hiz: Sunken Library" }, // 231
+{ "mira", "Miragul's Menagerie: Silent Gallery" }, // 232
+{ "mmca", "Mistmoore's Catacombs: Forlorn Caverns" }, // 233
+{ "gukb", "Deepest Guk: Drowning Crypt" }, // 234
+{ "rujb", "The Rujarkian Hills: Halls of War" }, // 235
+{ "takb", "Takish-Hiz: Shifting Tower" }, // 236
+{ "mirb", "Miragul's Menagerie: Maw of the Menagerie" }, // 237
+{ "mmcb", "Mistmoore's Catacombs: Dreary Grotto" }, // 238
+{ "gukc", "Deepest Guk: Ancient Aqueducts" }, // 239
+{ "rujc", "The Rujarkian Hills: Wind Bridges" }, // 240
+{ "takc", "Takish-Hiz: Fading Temple" }, // 241
+{ "mirc", "Miragul's Menagerie: Spider Den" }, // 242
+{ "mmcc", "Mistmoore's Catacombs: Asylum of Invoked Stone" }, // 243
+{ "gukd", "Deepest Guk: Mushroom Grove" }, // 244
+{ "rujd", "The Rujarkian Hills: Gladiator Pits" }, // 245
+{ "takd", "Takish-Hiz: Royal Observatory" }, // 246
+{ "mird", "Miragul's Menagerie: Hushed Banquet" }, // 247
+{ "mmcd", "Mistmoore's Catacombs: Chambers of Eternal Affliction" }, // 248
+{ "guke", "Deepest Guk: Foreboding Prison" }, // 249
+{ "ruje", "The Rujarkian Hills: Drudge Hollows" }, // 250
+{ "take", "Takish-Hiz: River of Recollection" }, // 251
+{ "mire", "Miragul's Menagerie: Frosted Halls" }, // 252
+{ "mmce", "Mistmoore's Catacombs: Sepulcher of the Damned" }, // 253
+{ "gukf", "Deepest Guk: Chapel of the Witnesses" }, // 254
+{ "rujf", "The Rujarkian Hills: Fortified Lair of the Taskmasters" }, // 255
+{ "takf", "Takish-Hiz: Sandfall Corridors" }, // 256
+{ "mirf", "Miragul's Menagerie: Forgotten Wastes" }, // 257
+{ "mmcf", "Mistmoore's Catacombs: Ritualistic Summoning Grounds" }, // 258
+{ "gukg", "Deepest Guk: Root Garden" }, // 259
+{ "rujg", "The Rujarkian Hills: Hidden Vale" }, // 260
+{ "takg", "Takish-Hiz: Balancing Chamber" }, // 261
+{ "mirg", "Miragul's Menagerie: Heart of the Menagerie" }, // 262
+{ "mmcg", "Mistmoore's Catacombs: Cesspits of Putrescence" }, // 263
+{ "gukh", "Deepest Guk: Accursed Sanctuary" }, // 264
+{ "rujh", "The Rujarkian Hills: Blazing Forge" }, // 265
+{ "takh", "Takish-Hiz: Sweeping Tides" }, // 266
+{ "mirh", "Miragul's Menagerie: Morbid Laboratory" }, // 267
+{ "mmch", "Mistmoore's Catacombs: Aisles of Blood" }, // 268
+{ "ruji", "The Rujarkian Hills: Arena of Chance" }, // 269
+{ "taki", "Takish-Hiz: Antiquated Palace" }, // 270
+{ "miri", "Miragul's Menagerie: Theater of Imprisoned Horrors" }, // 271
+{ "mmci", "Mistmoore's Catacombs: Halls of Sanguinary Rites" }, // 272
+{ "rujj", "The Rujarkian Hills: Barracks of War" }, // 273
+{ "takj", "Takish-Hiz: Prismatic Corridors" }, // 274
+{ "mirj", "Miragul's Menagerie: Grand Library" }, // 275
+{ "mmcj", "Mistmoore's Catacombs: Infernal Sanctuary" }, // 276
+{ "chardokb", "Chardok: The Halls of Betrayal" }, // 277
 { "soldungc", "The Caverns of Exile" }, // 278
-{ "abysmal", "Abysmal Sea" }, // 279
-{ "natimbi", "Natimbi, The Broken Shores" }, // 280
+{ "abysmal", "The Abysmal Sea" }, // 279
+{ "natimbi", "Natimbi, the Broken Shores" }, // 280
 { "qinimi", "Qinimi, Court of Nihilia" }, // 281
 { "riwwi", "Riwwi, Coliseum of Games" }, // 282
 { "barindu", "Barindu, Hanging Gardens" }, // 283
 { "ferubi", "Ferubi, Forgotten Temple of Taelosia" }, // 284
 { "snpool", "Sewers of Nihilia, Pool of Sludge" }, // 285
-{ "snlair", "Sewers of Nihilia, Lair of Trapped Ones..." }, // 286
+{ "snlair", "Sewers of Nihilia, Lair of Trapped Ones" }, // 286
 { "snplant", "Sewers of Nihilia, Purifying Plant" }, // 287
-{ "sncrematory", "Sewers of Nihilia, the Crematory" }, // 288
+{ "sncrematory", "Sewers of Nihilia, Emanating Crematory" }, // 288
 { "tipt", "Tipt, Treacherous Crags" }, // 289
-{ "vxed", "Vxed, The Crumbling Caverns" }, // 290
+{ "vxed", "Vxed, the Crumbling Caverns" }, // 290
 { "yxtta", "Yxtta, Pulpit of Exiles" }, // 291
-{ "uqua", "Uqua, The Ocean God Chantry" }, // 292
+{ "uqua", "Uqua, the Ocean God Chantry" }, // 292
 { "kodtaz", "Kod'Taz, Broken Trial Grounds" }, // 293
 { "ikkinz", "Ikkinz, Chambers of Destruction" }, // 294
 { "qvic", "Qvic, Prayer Grounds of Calling" }, // 295
-{ "inktuta", "Inktu`Ta, The Unmasked Chapel" }, // 296
+{ "inktuta", "Inktu'Ta, the Unmasked Chapel" }, // 296
 { "txevu", "Txevu, Lair of the Elite" }, // 297
-{ "tacvi", "Tacvi, Seat of the Slaver" }, // 298
-{ "qvicb", "Qvic, the Hidden Vault" }, // 299
+{ "tacvi", "Tacvi, the Broken Temple" }, // 298
+{ NULL, NULL }, // 299
 { "wallofslaughter", "Wall of Slaughter" }, // 300
 { "bloodfields", "The Bloodfields" }, // 301
 { "draniksscar", "Dranik's Scar" }, // 302
 { "causeway", "Nobles' Causeway" }, // 303
-{ "chambersa", "Muramite Proving Grounds" }, // 304
-{ "chambersb", "Muramite Proving Grounds" }, // 305
-{ "chambersc", "Muramite Proving Grounds" }, // 306
-{ "chambersd", "Muramite Proving Grounds" }, // 307
-{ "chamberse", "Muramite Proving Grounds" }, // 308
-{ "chambersf", "Muramite Proving Grounds" }, // 309
+{ "chambersa", "Proving Grounds" }, // 304
+{ "chambersb", "Proving Grounds" }, // 305
+{ "chambersc", "Proving Grounds" }, // 306
+{ "chambersd", "Proving Grounds" }, // 307
+{ "chamberse", "Proving Grounds" }, // 308
+{ "chambersf", "Proving Grounds" }, // 309
 { NULL, NULL }, // 310
 { NULL, NULL }, // 311
 { NULL, NULL }, // 312
@@ -323,9 +323,9 @@
 { NULL, NULL }, // 315
 { "provinggrounds", "Muramite Proving Grounds" }, // 316
 { "anguish", "Anguish, the Fallen Palace" }, // 317
-{ "dranikhollowsa", "Dranik's Hollows" }, // 318
-{ "dranikhollowsb", "Dranik's Hollows" }, // 319
-{ "dranikhollowsc", "Dranik's Hollows" }, // 320
+{ "dranikhollowsa", "Dranik's Hollows: Watering Hole" }, // 318
+{ "dranikhollowsb", "Dranik's Hollows: Fire Pit" }, // 319
+{ "dranikhollowsc", "Dranik's Hollows: Murkglider Hive" }, // 320
 { "dranikhollowsd", "Dranik's Hollows" }, // 321
 { "dranikhollowse", "Dranik's Hollows" }, // 322
 { "dranikhollowsf", "Dranik's Hollows" }, // 323
@@ -340,7 +340,7 @@
 { "draniksewersb", "Sewers of Dranik" }, // 332
 { "draniksewersc", "Sewers of Dranik" }, // 333
 { "riftseekers", "Riftseekers' Sanctum" }, // 334
-{ "harbingers", "Harbingers' Spire" }, // 335
+{ "harbingers", "Harbinger's Spire" }, // 335
 { "dranik", "The Ruined City of Dranik" }, // 336
 { "broodlands", "The Broodlands" }, // 337
 { "stillmoona", "Stillmoon Temple" }, // 338
@@ -349,33 +349,33 @@
 { "delvea", "Lavaspinner's Lair" }, // 341
 { "delveb", "Tirranun's Delve" }, // 342
 { "thenest", "The Accursed Nest" }, // 343
-{ "guildlobby", "The Guild Lobby" }, // 344
+{ "guildlobby", "Guild Lobby" }, // 344
 { "guildhall", "Guild Hall" }, // 345
-{ "barter", "The Barter Hall" }, // 346
+{ NULL, NULL }, // 346
 { "illsalin", "Ruins of Illsalin" }, // 347
-{ "illsalina", "Imperial Bazaar" }, // 348
+{ "illsalina", "Illsalin Marketplace" }, // 348
 { "illsalinb", "Temple of the Korlach" }, // 349
 { "illsalinc", "The Nargilor Pits" }, // 350
 { "dreadspire", "Dreadspire Keep" }, // 351
-{ "dreadspirea", "The Torture Chamber" }, // 352(removed before launch)
-{ "dreadspireb", "The Artifact Room" }, // 353(removed before launch)
+{ NULL, NULL }, // 352
+{ NULL, NULL }, // 353
 { "drachnidhive", "The Hive" }, // 354
-{ "drachnidhivea", "Living Larder" }, // 355
-{ "drachnidhiveb", "Coven of the Skinwalkers" }, // 356
-{ "drachnidhivec", "Queen Sendaii's Lair" }, // 357
+{ "drachnidhivea", "The Hatchery" }, // 355
+{ "drachnidhiveb", "The Cocoons" }, // 356
+{ "drachnidhivec", "The Queen's Lair" }, // 357
 { "westkorlach", "Stoneroot Falls" }, // 358
 { "westkorlacha", "Chambers of Xill" }, // 359
 { "westkorlachb", "Caverns of the Lost" }, // 360
 { "westkorlachc", "Lair of the Korlach" }, // 361
-{ "eastkorlach", "Undershore" }, // 362
+{ "eastkorlach", "The Undershore" }, // 362
 { "eastkorlacha", "Snarlstone Dens" }, // 363
 { "shadowspine", "Shadowspine" }, // 364
 { "corathus", "Corathus Creep" }, // 365
 { "corathusa", "Sporali Caverns" }, // 366
 { "corathusb", "Corathus Lair" }, // 367
 { "nektulosa", "Shadowed Grove" }, // 368
-{ "arcstone", "Arcstone" }, // 369
-{ "relic", "Relic" }, // 370
+{ "arcstone", "Arcstone, Isle of Spirits" }, // 369
+{ "relic", "Relic, the Artifact City" }, // 370
 { "skylance", "Skylance" }, // 371
 { "devastation", "The Devastation" }, // 372
 { "devastationa", "The Seething Wall" }, // 373
@@ -397,8 +397,8 @@
 { "freeportcityhall", "City Hall" }, // 389
 { "freeporttheater", "Theater" }, // 390
 { "freeporthall", "Hall of Truth" }, // 391
-{ "northro", "North Ro" }, // 392
-{ "southro", "South Ro" }, // 393
+{ "northro", "North Desert of Ro" }, // 392
+{ "southro", "South Desert of Ro" }, // 393
 { "crescent", "Crescent Reach" }, // 394
 { "moors", "Blightfire Moors" }, // 395
 { "stonehive", "Stone Hive" }, // 396
@@ -413,11 +413,11 @@
 { "direwind", "Direwind Cliffs" }, // 405
 { "ashengate", "Ashengate, Reliquary of the Scale" }, // 406
 { "highpasshold", "Highpass Hold" }, // 407
-{ "commonlands", "Commonlands" }, // 408
-{ "oceanoftears", "Ocean of Tears" }, // 409
-{ "kithforest", "Kithicor Forest" }, // 410
-{ "befallenb", "Befallen" }, // 411
-{ "highpasskeep", "High Keep" }, // 412
+{ "commonlands", "The Commonlands" }, // 408
+{ "oceanoftears", "The Ocean of Tears" }, // 409
+{ NULL, NULL }, // 410
+{ NULL, NULL }, // 411
+{ NULL, NULL }, // 412
 { "innothuleb", "Innothule Swamp" }, // 413
 { "toxxulia", "Toxxulia Forest" }, // 414
 { "mistythicket", "Misty Thicket" }, // 415
@@ -453,17 +453,17 @@
 { "bloodmoon", "Bloodmoon Keep" }, // 445
 { "crystallos", "Crystallos, Lair of the Awakened" }, // 446
 { "guardian", "The Mechamatic Guardian" }, // 447
-{ "steamfontmts", "Steamfont Mountains" }, // 448
+{ "steamfontmts", "The Steamfont Mountains" }, // 448
 { "cryptofshade", "Crypt of Shade" }, // 449
 { "dragonscalea", "Tinmizer's Wunderwerks" }, // 450
 { "dragonscaleb", "Deepscar's Den" }, // 451
 { "oldfieldofbone", "Field of Scale" }, // 452
 { "oldkaesoraa", "Kaesora Library" }, // 453
-{ "oldkaesorab", "Hatchery Wing" }, // 454
+{ "oldkaesorab", "Kaesora Hatchery" }, // 454
 { "oldkurn", "Kurn's Tower" }, // 455
 { "oldkithicor", "Bloody Kithicor" }, // 456
 { "oldcommons", "Old Commonlands" }, // 457
-{ "oldhighpass", "Highpass Hold" }, // 458
+{ NULL, NULL }, // 458
 { "thevoida", "The Void" }, // 459
 { "thevoidb", "The Void" }, // 460
 { "thevoidc", "The Void" }, // 461
@@ -478,18 +478,18 @@
 { "discord", "Korafax, Home of the Riders" }, // 470
 { "discordtower", "Citadel of the Worldslayer" }, // 471
 { "oldbloodfield", "Old Bloodfields" }, // 472
-{ "precipiceofwar", "The Precipice of War" }, // 473
+{ "precipiceofwar", "Precipice of War" }, // 473
 { "olddranik", "City of Dranik" }, // 474
 { "toskirakk", "Toskirakk" }, // 475
 { "korascian", "Korascian Warrens" }, // 476
-{ "rathechamber", "Rathe Council Chambers" }, // 477
+{ "rathechamber", "Rathe Council Chamber" }, // 477
 { "oldfieldofboneb", "Field of Scale" }, // 478
-{ "crafthalls", "Ngreth's Den" }, // 479
+{ NULL, NULL }, // 479
 { "brellsrest", "Brell's Rest" }, // 480
 { "fungalforest", "Fungal Forest" }, // 481
 { "underquarry", "The Underquarry" }, // 482
 { "coolingchamber", "The Cooling Chamber" }, // 483
-{ "shiningcity", "Kernagir, The Shining City" }, // 484
+{ "shiningcity", "Kernagir, the Shining City" }, // 484
 { "arthicrex", "Arthicrex" }, // 485
 { "foundation", "The Foundation" }, // 486
 { "lichencreep", "Lichen Creep" }, // 487
@@ -507,44 +507,44 @@
 { NULL, NULL }, // 499
 { NULL, NULL }, // 500
 { NULL, NULL }, // 501
-{ NULL, NULL }, // 502
-{ NULL, NULL }, // 503
-{ NULL, NULL }, // 504
-{ NULL, NULL }, // 505
-{ NULL, NULL }, // 506
-{ NULL, NULL }, // 507
-{ NULL, NULL }, // 508
+{ "qeynos2", "North Qeynos" }, // 502
+{ "firiona", "Firiona Vie" }, // 503
+{ NULL, "The Spell of the Undead" }, // 504
+{ "mistmoore", "The Castle of Mistmoore" }, // 505
+{ "kithicor", "Kithicor Forest" }, // 506
+{ "kithicor", "Kithicor Forest" }, // 507
+{ "veeshan", "Veeshan's Peak" }, // 508
 { NULL, NULL }, // 509
-{ NULL, NULL }, // 510
+{ "crushbone", "Reinforced Clan Crushbone" }, // 510
 { NULL, NULL }, // 511
-{ NULL, NULL }, // 512
-{ NULL, NULL }, // 513
+{ NULL, "Rejuvenating Plains of Karana" }, // 512
+{ "northkarana", "The Northern Plains of Karana" }, // 513
 { NULL, NULL }, // 514
-{ NULL, NULL }, // 515
+{ NULL, "The Graveyard of the Dead" }, // 515
 { NULL, NULL }, // 516
-{ NULL, NULL }, // 517
-{ NULL, NULL }, // 518
+{ "blackburrow", "Reinforced Blackburrow" }, // 517
+{ "paw", "The Invaded Lair of the Splitpaw" }, // 518
 { NULL, NULL }, // 519
 { NULL, NULL }, // 520
 { NULL, NULL }, // 521
 { NULL, NULL }, // 522
 { NULL, NULL }, // 523
 { NULL, NULL }, // 524
-{ NULL, NULL }, // 525
-{ NULL, NULL }, // 526
+{ "nektulos", "Nektulos Forest" }, // 525
+{ "mischiefplane", "The Plane of Mischief" }, // 526
 { NULL, NULL }, // 527
 { NULL, NULL }, // 528
 { NULL, NULL }, // 529
-{ NULL, NULL }, // 530
-{ NULL, NULL }, // 531
+{ "everfrost", "Everfrost- Unseasonably Warm" }, // 530
+{ "everfrost", "Everfrost Peaks" }, // 531
 { NULL, NULL }, // 532
 { NULL, NULL }, // 533
-{ NULL, NULL }, // 534
+{ NULL, "The Feast of Tishe Virm" }, // 534
 { NULL, NULL }, // 535
 { NULL, NULL }, // 536
-{ NULL, NULL }, // 537
+{ "oasis", "The Oasis of Marr" }, // 537
 { NULL, NULL }, // 538
-{ NULL, NULL }, // 539
+{ "hole", "The Hole" }, // 539
 { NULL, NULL }, // 540
 { NULL, NULL }, // 541
 { NULL, NULL }, // 542
@@ -553,45 +553,45 @@
 { NULL, NULL }, // 545
 { NULL, NULL }, // 546
 { NULL, NULL }, // 547
-{ NULL, NULL }, // 548
-{ NULL, NULL }, // 549
-{ NULL, NULL }, // 550
-{ NULL, NULL }, // 551
+{ "cazicthule", "Accursed Temple of Cazic-Thule" }, // 548
+{ "cazicthule", "Reinforced Temple of Cazic-Thule" }, // 549
+{ NULL, "The Nightfall Haunting" }, // 550
+{ "rathemtn", "The Rathe Mountains" }, // 551
 { NULL, NULL }, // 552
 { NULL, NULL }, // 553
 { NULL, NULL }, // 554
 { NULL, NULL }, // 555
 { NULL, NULL }, // 556
-{ NULL, NULL }, // 557
+{ "lfaydark", "The Lesser Faydark" }, // 557
 { NULL, NULL }, // 558
 { NULL, NULL }, // 559
 { NULL, NULL }, // 560
 { NULL, NULL }, // 561
 { NULL, NULL }, // 562
-{ NULL, NULL }, // 563
+{ "unrest", "The Reinforced Estate of Unrest" }, // 563
 { NULL, NULL }, // 564
 { NULL, NULL }, // 565
-{ NULL, NULL }, // 566
+{ "gukbottom", "The Reinforced Ruins of Old Guk" }, // 566
 { NULL, NULL }, // 567
 { NULL, NULL }, // 568
-{ NULL, NULL }, // 569
+{ "oceanoftears", "The Ocean of Tears" }, // 569
 { NULL, NULL }, // 570
 { NULL, NULL }, // 571
-{ NULL, NULL }, // 572
+{ "fearplane", "The Plane of Fear" }, // 572
 { NULL, NULL }, // 573
 { NULL, NULL }, // 574
 { NULL, NULL }, // 575
-{ NULL, NULL }, // 576
+{ NULL, "The Testing Grounds" }, // 576
 { NULL, NULL }, // 577
 { NULL, NULL }, // 578
 { NULL, NULL }, // 579
 { NULL, NULL }, // 580
-{ NULL, NULL }, // 581
+{ "droga", "The Temple of Droga" }, // 581
 { NULL, NULL }, // 582
 { NULL, NULL }, // 583
 { NULL, NULL }, // 584
 { NULL, NULL }, // 585
-{ NULL, NULL }, // 586
+{ "hateplane", "The Plane of Hate" }, // 586
 { NULL, NULL }, // 587
 { NULL, NULL }, // 588
 { NULL, NULL }, // 589
@@ -601,9 +601,9 @@
 { NULL, NULL }, // 593
 { NULL, NULL }, // 594
 { NULL, NULL }, // 595
-{ NULL, NULL }, // 596
+{ "timorous", "Timorous Deep" }, // 596
 { NULL, NULL }, // 597
-{ NULL, NULL }, // 598
+{ "erudsxing", "Erud's Crossing" }, // 598
 { NULL, NULL }, // 599
 { NULL, NULL }, // 600
 { NULL, NULL }, // 601
@@ -612,7 +612,7 @@
 { NULL, NULL }, // 604
 { NULL, NULL }, // 605
 { NULL, NULL }, // 606
-{ NULL, NULL }, // 607
+{ "nurga", "The Mines of Nurga" }, // 607
 { NULL, NULL }, // 608
 { NULL, NULL }, // 609
 { NULL, NULL }, // 610
@@ -620,10 +620,10 @@
 { NULL, NULL }, // 612
 { NULL, NULL }, // 613
 { NULL, NULL }, // 614
-{ NULL, NULL }, // 615
-{ NULL, NULL }, // 616
+{ "thurgadina", "The City of Thurgadin" }, // 615
+{ "eastwastes", "Eastern Wastes" }, // 616
 { NULL, NULL }, // 617
-{ NULL, NULL }, // 618
+{ "greatdivide", "The Great Divide" }, // 618
 { NULL, NULL }, // 619
 { NULL, NULL }, // 620
 { NULL, NULL }, // 621
@@ -631,10 +631,10 @@
 { NULL, NULL }, // 623
 { NULL, NULL }, // 624
 { NULL, NULL }, // 625
-{ NULL, NULL }, // 626
+{ "mischiefplane", "The Plane of Mischief" }, // 626
 { NULL, NULL }, // 627
-{ NULL, NULL }, // 628
-{ NULL, NULL }, // 629
+{ "sleeper", "The Sleeper's Tomb" }, // 628
+{ "thurgadinb", "Icewell Keep" }, // 629
 { NULL, NULL }, // 630
 { NULL, NULL }, // 631
 { NULL, NULL }, // 632
@@ -671,7 +671,7 @@
 { NULL, NULL }, // 663
 { NULL, NULL }, // 664
 { NULL, NULL }, // 665
-{ NULL, NULL }, // 666
+{ "hollowshade", "Hollowshade Moor" }, // 666
 { NULL, NULL }, // 667
 { NULL, NULL }, // 668
 { NULL, NULL }, // 669
@@ -705,7 +705,7 @@
 { NULL, NULL }, // 697
 { NULL, NULL }, // 698
 { NULL, NULL }, // 699
-{ "feerrott2", "The Feerrott" }, // 700
+{ "feerrott", "The Feerrott" }, // 700
 { "thulehouse1", "House of Thule" }, // 701
 { "thulehouse2", "House of Thule, Upper Floors" }, // 702
 { "housegarden", "The Grounds" }, // 703
@@ -719,16 +719,16 @@
 { "thuledream", "Fear Itself" }, // 711
 { "neighborhood", "Sunrise Hills" }, // 712
 { "phylactery", "Miragul's Phylactery" }, // 713
-{ "phinterior3a1", "House Interior" }, // 714
-{ "phinterior1a1", "House Interior" }, // 715
-{ "phinterior3a2", "House Interior" }, // 716
-{ "phinterior3a3", "House Interior" }, // 717
-{ "phinterior1a2", "House Interior" }, // 718
-{ "phinterior1a3", "House Interior" }, // 719
-{ "phinterior1b1", "Dragon House Interior" }, // 720
-{ NULL, NULL }, // 721
-{ NULL, NULL }, // 722
-{ "phinterior1d1", "Dragon House Interior" }, // 723
+{ "phinterior3a1", "Three Room House Interior" }, // 714
+{ "phinterior1a1", "One Room House Interior" }, // 715
+{ "phinterior3a2", "Three Room House Interior" }, // 716
+{ "phinterior3a3", "Three Room House Interior" }, // 717
+{ "phinterior1a2", "One Room House Interior" }, // 718
+{ "phinterior1a3", "One Room House Interior" }, // 719
+{ "phinterior1b1", "One Room House Interior" }, // 720
+{ "phinterior1a1", "One Room House Interior" }, // 721
+{ "phinterior1a1", "One Room House Interior" }, // 722
+{ "phinterior1d1", "Hermit's Hideaway Interior" }, // 723
 { "argath", "Argath, Bastion of Illdaera" }, // 724
 { "arelis", "Valley of Lunanyn" }, // 725
 { "sarithcity", "Sarith, City of Tides" }, // 726
@@ -742,8 +742,8 @@
 { "eastsepulcher", "Sepulcher East" }, // 734
 { "westsepulcher", "Sepulcher West" }, // 735
 { "shadowedmount", "Shadowed Mount" }, // 736
-{ "guildhalllrg", "Grand Guild Hall" }, // 737
-{ "guildhallsml", "Greater Guild Hall" }, // 738
+{ "guildhalllrg", "Palatial Guild Hall" }, // 737
+{ "guildhallsml", "Grand Guild Hall" }, // 738
 { "plhogrinteriors1a1", "One Bedroom House Interior" }, // 739
 { "plhogrinteriors1a2", "One Bedroom House Interior" }, // 740
 { "plhogrinteriors3a1", "Three Bedroom House Interior" }, // 741
@@ -764,15 +764,15 @@
 { "crystalshard", "The Crystal Caverns: Fragment of Fear" }, // 756
 { "breedinggrounds", "The Breeding Grounds" }, // 757
 { "eviltree", "Evantil, the Vile Oak" }, // 758
-{ "grelleth", "Grelleth's Palace, the Chateau of Filth..." }, // 759
+{ "grelleth", "Grelleth's Palace, the Chateau of Filth" }, // 759
 { "chapterhouse", "Chapterhouse of the Fallen" }, // 760
-{ "pomischief", "The Plane of Mischief" }, // 761
-{ "burnedwoods", "The Burned Woods" }, // 762
+{ NULL, NULL }, // 761
+{ NULL, NULL }, // 762
 { "chelsithreborn", "Chelsith Reborn" }, // 763
 { "poshadow", "Plane of Shadow" }, // 764
 { "heartoffear", "Heart of Fear: The Threshold" }, // 765
 { "phinteriortree", "Evantil's Abode" }, // 766
-{ "interiorwalltest", "Wall Wall Wall" }, // 767
+{ NULL, NULL }, // 767
 { "heartoffearb", "Heart of Fear: The Rebirth" }, // 768
 { "heartoffearc", "Heart of Fear: The Epicenter" }, // 769
 { "bixiewarfront", "Bixie Warfront" }, // 770
@@ -791,43 +791,43 @@
 { "thuliasaur", "Thuliasaur Island" }, // 783
 { "degmar", "Degmar, the Lost Castle" }, // 784
 { "tempesttemple", "Tempest Temple" }, // 785
-{ "plhpirateshipint", "Pirate Ship" }, // 786
-{ "gnomemtn", "Gnome Memorial Mountain" }, // 787
+{ "plhpirateshipint", "The Wayward Lady" }, // 786
+{ NULL, NULL }, // 787
 { "drogab", "The Temple of Droga" }, // 788
 { "charasisb", "Sathir's Tomb" }, // 789
-{ "scorchedwoods", "Scorched Woods" }, // 790
+{ "scorchedwoods", "The Scorched Woods" }, // 790
 { "frontiermtnsb", "Frontier Mountains" }, // 791
 { "gorowyn", "Gorowyn" }, // 792
 { "korshaext", "Gates of Kor-Sha" }, // 793
 { "lceanium", "Lceanium" }, // 794
 { "cosul", "Crypt of Sul" }, // 795
-{ "codecayb", "Ruins of Lxanvom" }, // 796
+{ "codecay", "Ruins of Lxanvom" }, // 796
 { "exaltedb", "Sul Vius: Demiplane of Decay" }, // 797
 { "pohealth", "The Plane of Health" }, // 798
 { "korshaint", "Kor-Sha Laboratory" }, // 799
-{ "chardoktwo", "Chardok" }, // 800
-{ NULL, NULL }, // 801
-{ NULL, NULL }, // 802
-{ NULL, NULL }, // 803
-{ NULL, NULL }, // 804
-{ NULL, NULL }, // 805
-{ NULL, NULL }, // 806
-{ NULL, NULL }, // 807
-{ NULL, NULL }, // 808
-{ NULL, NULL }, // 809
-{ NULL, NULL }, // 810
-{ NULL, NULL }, // 811
-{ NULL, NULL }, // 812
+{ "chardok", "Chardok" }, // 800
+{ "sleeper", "The Sleeper's Tomb" }, // 801
+{ "sleeper", "Kerafyrm's Lair" }, // 802
+{ "skyshrine", "Skyshrine" }, // 803
+{ "permafrost", "Permafrost Keep" }, // 804
+{ "permafrost", "Reinforced Permafrost Keep" }, // 805
+{ NULL, "Gukta, Outpost of Marr" }, // 806
+{ "innothuleb", "Innothule Swamp" }, // 807
+{ "neriaka", "Neriak - Foreign Quarter" }, // 808
+{ "grimling", "Grimling Forest" }, // 809
+{ "mistmoore", "The Reinforced Castle of Mistmoore" }, // 810
+{ "soldungb", "Reinforced Nagafen's Lair" }, // 811
+{ "sebilis", "The Reinforced Ruins of Sebilis" }, // 812
 { "charasistwo", "Howling Stones" }, // 813
-{ "skyfiretwo", "Skyfire Mountains" }, // 814
+{ "skyfiretwo", "The Skyfire Mountains" }, // 814
 { "overtheretwo", "The Overthere" }, // 815
 { "veeshantwo", "Veeshan's Peak" }, // 816
-{ "clz-winter", "Loading" }, // 817
-{ "clz-anniversary", "Loading" }, // 818
-{ "clz-spring", "Loading" }, // 819
-{ "clz-autumn", "Loading" }, // 820
-{ "clz-frostfell", "Loading" }, // 821
-{ NULL, NULL }, // 822
+{ "trialsofsmoke", "Plane of Smoke" }, // 817
+{ "stratos", "Stratos: Zephyr's Flight" }, // 818
+{ "aalishai", "Aalishai: Palace of Embers" }, // 819
+{ "empyr", "Empyr: Realms of Ash" }, // 820
+{ "esianti", "Esianti: Palace of the Winds" }, // 821
+{ "mearatas", "Mearatas: The Stone Demesne" }, // 822
 { NULL, NULL }, // 823
 { NULL, NULL }, // 824
 { NULL, NULL }, // 825
@@ -909,7 +909,7 @@
 { NULL, NULL }, // 901
 { NULL, NULL }, // 902
 { NULL, NULL }, // 903
-{ NULL, NULL }, // 904
+{ "qeytoqrg", "Qeynos Hills" }, // 904
 { NULL, NULL }, // 905
 { NULL, NULL }, // 906
 { NULL, NULL }, // 907
@@ -1001,7 +1001,7 @@
 { NULL, NULL }, // 993
 { NULL, NULL }, // 994
 { NULL, NULL }, // 995
-{ "arttest", "Art Testing Domain" }, // 996
+{ "arttest", "The Pit of Rathpher" }, // 996
 { NULL, NULL }, // 997
 { "fhalls", "The Forgotten Halls" }, // 998
-{ "apprentice", "Designer Apprentice" }, // 999
+{ NULL, NULL }, // 999
