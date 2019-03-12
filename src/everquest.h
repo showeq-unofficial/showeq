@@ -436,14 +436,14 @@ struct spellBuff
 /*0001*/ uint8_t unknown0001;                    //
 /*0002*/ uint8_t unknown0002;                    //
 /*0003*/ uint8_t unknown0003;                    //
-/*0004*/ uint8_t unknown0004;                    //
-/*0005*/ uint32_t playerId;                      // Global id of caster (for wear off)
-/*0009*/ uint8_t unknown0009[5];                 //
-/*0014*/ int32_t duration;                       // Time remaining in ticks
-/*0018*/ int8_t level;                           // Level of person who cast buff
-/*0019*/ int32_t spellid;                        // Spell
-/*0023*/ int32_t effect;                         // holds the dmg absorb amount on runes
-/*0027*/ uint8_t unknown0027[55];
+/*0004*/ uint32_t playerId;                      // Global id of caster (for wear off)
+/*0008*/ uint32_t unknown0008;                   // *** Placeholder
+/*0012*/ int32_t duration;                       // Time remaining in ticks
+/*0016*/ int32_t unknown0016;                    // Buff length in ticks
+/*0020*/ int8_t level;                           // Level of person who cast buff
+/*0021*/ int32_t spellid;                        // Spell
+/*0025*/ int32_t effect;                         // holds the dmg absorb amount on runes
+/*0029*/ uint8_t unknown0029[53];
 /*0082*/
 };
 
@@ -591,38 +591,38 @@ struct newZoneStruct
 /*0479*/ uint8_t fog_blue[4];                    // Zone fog (blue)
 /*0483*/ uint8_t unknown0483[55];                // *** Placeholder
 /*0538*/ uint8_t sky;                            // Zone sky
-/*0539*/ uint8_t unknown0571[13];                // *** Placeholder
+/*0539*/ uint8_t unknown0539[13];                // *** Placeholder
 /*0551*/ float   zone_exp_multiplier;            // Experience Multiplier
 /*0556*/ float   safe_y;                         // Zone Safe Y
 /*0560*/ float   safe_x;                         // Zone Safe X
 /*0564*/ float   safe_z;                         // Zone Safe Z
-/*0568*/ float   unknown0600;                    // *** Placeholder
-/*0572*/ float   unknown0604;                    // *** Placeholder
+/*0568*/ float   unknown0568;                    // *** Placeholder
+/*0572*/ float   unknown0572;                    // *** Placeholder
 /*0576*/ float   underworld;                     // Underworld
 /*0580*/ float   minclip;                        // Minimum view distance
 /*0584*/ float   maxclip;                        // Maximum view distance
-/*0588*/ uint8_t unknown0616[84];                // *** Placeholder
+/*0588*/ uint8_t unknown0588[84];                // *** Placeholder
 /*0672*/ char    zonefile[64];                   // Zone file name?
-/*0736*/ uint8_t unknown0764[36];                // *** Placeholder (12/05/2006)
-/*0772*/ uint8_t unknown0800[32];                // *** Placeholder (02/13/2007)
-/*0804*/ uint8_t unknown0832[12];                // *** Placeholder 
-/*0816*/ uint8_t unknown0844[4];                 // *** Placeholder (06/29/2005)
-/*0820*/ uint8_t unknown0848[4];                 // *** Placeholder (09/13/2005)
-/*0824*/ uint8_t unknown0852[4];                 // *** Placeholder (02/21/2006)
-/*0828*/ uint8_t unknown0856[36];                // *** Placeholder (06/13/2006)
-/*0864*/ uint8_t unknown0892[12];                // *** Placeholder (12/05/2006)
-/*0876*/ uint8_t unknown0904[8];                 // *** Placeholder (02/13/2007)
-/*0884*/ uint8_t unknown0916[4];                 // *** Placeholder (11/24/2007)
-/*0888*/ uint8_t unknown0920[4];                 // *** Placeholder (01/17/2008)
-/*0892*/ uint8_t unknown0924[4];                 // *** Placeholder (09/03/2008)
-/*0896*/ uint8_t unknown0928[4];                 // *** Placeholder (10/07/2008)
-/*0900*/ uint8_t unknown0932[8];                 // *** Placeholder (11/04/2009)
-/*0908*/ uint8_t unknown0940[4];                 // *** Placeholder (12/15/2009)
-/*0912*/ uint8_t unknown0944[4];                 // *** Placeholder (11/15/2011)
-/*0916*/ uint8_t unknown0948[4];                 // *** Placeholder (04/29/2014)
-/*0920*/ uint8_t unknown0952[4];                 // *** Placeholder (10/28/2014)
-/*0924*/ uint8_t unknown0956[4];                 // *** Placeholder (03/16/2016)
-/*0928*/ uint8_t unknown0960[8];		 // *** Placeholder (09/21/2016)
+/*0736*/ uint8_t unknown0736[36];                // *** Placeholder (12/05/2006)
+/*0772*/ uint8_t unknown0772[32];                // *** Placeholder (02/13/2007)
+/*0804*/ uint8_t unknown0804[12];                // *** Placeholder 
+/*0816*/ uint8_t unknown0816[4];                 // *** Placeholder (06/29/2005)
+/*0820*/ uint8_t unknown0820[4];                 // *** Placeholder (09/13/2005)
+/*0824*/ uint8_t unknown0824[4];                 // *** Placeholder (02/21/2006)
+/*0828*/ uint8_t unknown0828[36];                // *** Placeholder (06/13/2006)
+/*0864*/ uint8_t unknown0864[12];                // *** Placeholder (12/05/2006)
+/*0876*/ uint8_t unknown0876[8];                 // *** Placeholder (02/13/2007)
+/*0884*/ uint8_t unknown0884[4];                 // *** Placeholder (11/24/2007)
+/*0888*/ uint8_t unknown0888[4];                 // *** Placeholder (01/17/2008)
+/*0892*/ uint8_t unknown0892[4];                 // *** Placeholder (09/03/2008)
+/*0896*/ uint8_t unknown0896[4];                 // *** Placeholder (10/07/2008)
+/*0900*/ uint8_t unknown0900[8];                 // *** Placeholder (11/04/2009)
+/*0908*/ uint8_t unknown0908[4];                 // *** Placeholder (12/15/2009)
+/*0912*/ uint8_t unknown0912[4];                 // *** Placeholder (11/15/2011)
+/*0916*/ uint8_t unknown0916[4];                 // *** Placeholder (04/29/2014)
+/*0920*/ uint8_t unknown0920[4];                 // *** Placeholder (10/28/2014)
+/*0924*/ uint8_t unknown0924[4];                 // *** Placeholder (03/16/2016)
+/*0928*/ uint8_t unknown0928[8];		 // *** Placeholder (09/21/2016)
 /*0936*/
 };
 
@@ -1427,7 +1427,7 @@ struct timeOfDayStruct
 /*0002*/ uint8_t  day;                           // Day (1-28)
 /*0003*/ uint8_t  month;                         // Month (1-12)
 /*0004*/ uint16_t year;                          // Year
-/*0006*/ uint16_t unknown0016;                   // Placeholder
+/*0006*/ uint16_t unknown0006;                   // Placeholder
 /*0008*/
 };
 
@@ -1498,7 +1498,7 @@ struct spawnRenameStruct
 /*128*/	char        new_name[64];
 /*192*/	uint32_t	unknown192;	         //set to 0
 /*196*/	uint32_t	unknown196;	         //set to 1
-/*200*/ uint8_t    unknown0084[32];              // ***Placeholder
+/*200*/ uint8_t    unknown0200[32];              // ***Placeholder
 /*232*/
 };
 
@@ -1612,7 +1612,7 @@ struct sysMsgStruct
 
 struct emoteTextStruct
 {
-/*0000*/ uint8_t  unknown0002[4];                // ***Placeholder
+/*0000*/ uint8_t  unknown0000[4];                // ***Placeholder
 /*0002*/ char     text[0];                       // Emote `Text
 };
 
@@ -1646,10 +1646,10 @@ struct channelMessageStruct
 {
 /*0000*/ char     sender[64];
 /*0064*/ char     target[64];
-/*0128*/ uint32_t language;
-/*0132*/ uint32_t chanNum;
-/*0144*/ uint32_t skillInLanguage;
-/*0148*/ char     message[2048];                 // Maximum message size according to eqgame.exe
+/*0136*/ uint32_t language;
+/*0140*/ uint32_t chanNum;
+/*0149*/ uint32_t skillInLanguage;
+/*0153*/ char     message[2048];                   // Maximum message size according to eqgame.exe
 };
 
 /*
@@ -1661,10 +1661,11 @@ struct channelMessageStruct
 struct formattedMessageStruct
 {
 /*0000*/ uint8_t  unknown0000;
-/*0001*/ uint8_t  unknown0002[4];                // ***Placeholder
+/*0001*/ uint8_t  unknown0001[4];                // ***Placeholder
 /*0005*/ uint32_t messageFormat;                 // Indicates the message format
 /*0009*/ ChatColor messageColor;                 // Message color
-/*0013*/ char     messages[0];                   // no longer null terminated
+/*0013*/ uint32_t unknown0013;                   // Message length
+/*0017*/ char     messages[0];                   // no longer null terminated
 						 // repeat (4-bytes len, string of len)
 };
 
@@ -1710,7 +1711,7 @@ struct guildMOTDStruct
   /*0004*/ uint32_t unknown0004;		 // added 11/16/2016
   /*0008*/ char     target[64];                  // motd target
   /*0072*/ char     sender[64];                  // motd "sender" (who set it)
-  /*0136*/ uint32_t unknown0132;                 //***Placeholder
+  /*0136*/ uint32_t unknown0136;                 //***Placeholder
   /*0140*/ char     message[0];
 };
 
@@ -1812,7 +1813,7 @@ struct groupDeclineStruct
 /*0064*/ char     membername[64];                // Invited Member Name
 /*0128*/ uint8_t  unknown0128[24];               // ***Placeholder
 /*0148*/ uint8_t  reason;                        // Already in Group = 1, Declined Invite = 3
-/*0149*/ uint8_t  unknown0141[3];                // ***Placeholder
+/*0149*/ uint8_t  unknown0149[3];                // ***Placeholder
 /*0156*/
 };
 
@@ -1826,7 +1827,7 @@ struct groupFollowStruct
 {
 /*0000*/ char     unknown0000[64];               // ***Placeholder (zeros)
 /*0064*/ char     invitee[64];                   // Invitee's Member Name
-/*0128*/ uint8_t  unknown0132[4];                // ***Placeholder
+/*0128*/ uint8_t  unknown0128[4];                // ***Placeholder
 /*0132*/ uint32_t level;                         // Invitee's level
 /*0136*/ uint8_t  unknown0136[16];               // ***Placeholder (zeros)
 /*0152*/
@@ -1894,9 +1895,9 @@ struct removeSpawnStruct
 struct remDropStruct
 {
 /*0000*/ uint16_t dropId;                        // ID assigned to drop
-/*0002*/ uint8_t  unknown0004[2];                // ***Placeholder
+/*0002*/ uint8_t  unknown0002[2];                // ***Placeholder
 /*0004*/ uint16_t spawnId;                       // ID of player picking item up
-/*0006*/ uint8_t  unknown0008[2];                // ***Placeholder
+/*0006*/ uint8_t  unknown0006[2];                // ***Placeholder
 /*0008*/
 };
 
@@ -1979,7 +1980,7 @@ struct environmentDamageStruct
 
 struct moneyOnCorpseStruct
 {
-/*0000*/ uint8_t  unknown0002[4];                // ***Placeholder
+/*0000*/ uint8_t  unknown0000[4];                // ***Placeholder
 /*0004*/ uint32_t platinum;                      // Platinum Pieces
 /*0008*/ uint32_t gold;                          // Gold Pieces
 /*0012*/ uint32_t silver;                        // Silver Pieces
@@ -2027,10 +2028,10 @@ struct actionStruct
 /*0004*/ uint8_t  level;                         // Caster level
 /*0005*/ uint8_t  unknown0005[23];               // ***Placeholder
 /*0028*/ uint8_t  type;                          // Casts, Falls, Bashes, etc...
-/*0029*/ uint8_t  unknown0031[8];
+/*0029*/ uint8_t  unknown0029[8];
 /*0037*/ int16_t  spell;                         // SpellID
-/*0039*/ uint8_t  unknown0035[2];                // ***Placeholder
-/*0041*/ uint8_t  unknown0037[2];                // ***Placeholder
+/*0039*/ uint8_t  unknown0039[2];                // ***Placeholder
+/*0041*/ uint8_t  unknown0041[2];                // ***Placeholder
 /*0043*/
 };
 
@@ -2044,11 +2045,11 @@ struct actionAltStruct
 /*0004*/ uint8_t  level;                         // Caster level
 /*0005*/ uint8_t  unknown0005[23];               // ***Placeholder
 /*0028*/ uint8_t  type;                          // Casts, Falls, Bashes, etc...
-/*0029*/ uint8_t  unknown0031[8];
+/*0029*/ uint8_t  unknown0029[8];
 /*0037*/ int16_t  spell;                         // SpellID
-/*0039*/ uint8_t  unknown0035[2];                // ***Placeholder
-/*0041*/ uint32_t unknown0037;
-/*0045*/ uint8_t  unknown0041[15];
+/*0039*/ uint8_t  unknown0039[2];                // ***Placeholder
+/*0041*/ uint32_t unknown0041;
+/*0045*/ uint8_t  unknown0045[15];
 /*0060*/
 };
 
@@ -2123,7 +2124,7 @@ struct spellFadedStruct
 
 /*
 ** Spell Action Struct
-** Length: 10 Octets
+** Length: 11 Octets
 ** OpCode: BeginCastCode
 */
 struct beginCastStruct
@@ -2133,7 +2134,8 @@ struct beginCastStruct
 /*0004*/ uint16_t spawnId;                       // Id of who is casting
 /*0006*/ int16_t  param1;                        // Paramater 2
 /*0008*/ int16_t  param3;                        // Paramater 3
-/*0010*/
+/*0010*/ uint8_t  unknown0010;                   // *** Placeholder
+/*0011*/
 };
 
 /*
@@ -2395,7 +2397,7 @@ struct playerSelfPosStruct
 {
 /*0000*/ uint16_t unknown0000;                   // ***Placeholder (update time counter?)
 /*0002*/ uint16_t spawnId;                       // Player's spawn id
-/*0004*/ uint16_t unknown0001;                   // ***Placeholder
+/*0004*/ uint16_t unknown0004;                   // ***Placeholder
 /*0006*/
 	 float z;                                // z coord (3rd loc value)
 /*0010*/
@@ -2565,9 +2567,9 @@ struct tradeSpellBookSlotsStruct
 struct serverLFGStruct
 {
 /*0000*/ uint16_t spawnID;
-/*0002*/ uint16_t unknown0004;
+/*0002*/ uint16_t unknown0002;
 /*0004*/ uint16_t LFG;                           //1=LFG
-/*0006*/ uint16_t unknown0008;
+/*0006*/ uint16_t unknown0006;
 /*0008*/
 };
 
@@ -2581,27 +2583,28 @@ struct clientLFGStruct
 {
 /*0000*/ uint8_t  name[64];
 /*0064*/ uint16_t LFG;                           //1=LFG
-/*0066*/ uint16_t unknown0008;
+/*0066*/ uint16_t unknown0066;
 };
 
 /*
 ** buffStruct
-** Length: 100 Octets
+** Length: 120 Octets
 ** 
 */
 
 struct buffStruct
 {
 /*0000*/ uint32_t spawnid;                       //spawn id
-/*0004*/ uint8_t  unknown0004; 
-/*0005*/ int8_t   level;                         // Level of person who cast buff
-/*0006*/ uint8_t  unknown006[6];
-/*0012*/ uint32_t spellid;                       // spellid
-/*0016*/ uint32_t duration;                      // duration
-/*0020*/ uint8_t  unknown020[72];
-/*0092*/ uint32_t spellslot;                     // spellslot
-/*0096*/ uint32_t changetype;                    // 1=buff fading,2=buff duration
-/*0100*/ 
+/*0004*/ uint8_t  unknown0004[5]; 
+/*0009*/ int8_t   level;                         // Level of person who cast buff
+/*0010*/ uint8_t  unknown010[6];
+/*0016*/ uint32_t spellid;                       // spellid
+/*0020*/ uint32_t duration;                      // Time remaining in ticks
+/*0024*/ int32_t unknown0024;                    // Buff length in ticks
+/*0028*/ uint8_t  unknown028[84];
+/*0112*/ uint32_t spellslot;                     // spellslot
+/*0116*/ uint32_t changetype;                    // 1=buff fading,2=buff duration
+/*0120*/ 
 };
 
 /*

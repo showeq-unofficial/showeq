@@ -56,7 +56,7 @@ void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
    if(qTmp.length())
       strcpy(cmsg->target, qTmp.latin1());
 
-   netStream.readUInt32(); // unknown
+   netStream.skipBytes(8); // Unknown
 
    cmsg->language = netStream.readUInt32NC(); // language
 

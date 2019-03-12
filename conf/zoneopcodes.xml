@@ -163,7 +163,7 @@
         <comment>Group leader change</comment>
         <payload dir="server" typename="groupLeaderChangeStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="348f" name="OP_Buff" updated="11/20/15">
+    <opcode id="65f1" name="OP_Buff" updated="02/20/19">
         <comment>old BuffDropCode</comment>
         <payload dir="both" typename="buffStruct" sizechecktype="match"/>
     </opcode>
@@ -171,11 +171,11 @@
         <comment>SpellFadeCode</comment>
         <payload dir="both" typename="spellFadedStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="55d3" name="OP_BeginCast" updated="11/20/15">
+    <opcode id="3105" name="OP_BeginCast" updated="02/20/19">
         <comment>BeginCastCode</comment>
         <payload dir="both" typename="beginCastStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6b19" name="OP_CastSpell" updated="11/20/15">
+    <opcode id="4656" name="OP_CastSpell" updated="02/20/19">
         <comment>StartCastCode</comment>
         <payload dir="both" typename="startCastStruct" sizechecktype="match"/>
     </opcode>

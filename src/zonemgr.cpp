@@ -312,19 +312,19 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     netStream.skipBytes(4);
   }
 
-  // Spellbook (800 ints)
+  // Spellbook (960 ints)
   int spellBookSlots = netStream.readUInt32NC();
   for (int i = 0; i < spellBookSlots; i++) {
     player->profile.sSpellBook[i] = netStream.readInt32();
   }
 
-  // Mem Spell Slots (16 ints)
+  // Mem Spell Slots (18 ints)
   int spellMemSlots = netStream.readUInt32NC();
   for (int i = 0; i < spellMemSlots; i++) {
     player->profile.sMemSpells[i] = netStream.readInt32();
   }
 
-  // Spell Slot Refresh Timers (13 ints)
+  // Spell Slot Refresh Timers (15 ints)
   int spellSlotRefreshTimer = netStream.readUInt32NC();
   for (int i = 0; i < spellSlotRefreshTimer; i++) {
     player->profile.spellSlotRefresh[i] = netStream.readInt32();
@@ -463,7 +463,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->guildID = netStream.readUInt32NC();
 
   // Unknown
-  netStream.skipBytes(19);
+  netStream.skipBytes(14);
 
   player->platinum_bank = netStream.readUInt32NC();
   player->gold_bank = netStream.readUInt32NC();
@@ -472,9 +472,9 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->platinum_shared = netStream.readUInt32NC();
 
   // Unknown
-  netStream.skipBytes(7);
+  netStream.skipBytes(12);
 
-  // Something (236 ints)
+  // Something (134 ints)
   int sCount6 = netStream.readUInt32NC();
   for (int i = 0; i < sCount6; i++) {
     netStream.skipBytes(8);

@@ -36,20 +36,20 @@ static inline int16_t min(const int16_t& __a,  const int16_t& __b)
 // 1   - Name
 // 2   - player_1
 // 3   - Teleport zone
-// 4   - You Cast
-// 5   - Other Cast
-// 6   - Cast on You
-// 7   - Cast on Other
-// 8   - Spell Fades
-// 9   - Range
-// 10  - AOE range
-// 11  - Push back
-// 12  - Push up
-// 13  - Cast time
-// 14  - Recovery time
-// 15  - Recast time
-// 16  - Buff duration formula
-// 17  - Buff duration argument
+// 4   - You Cast		Moved to spells_us_str.txt
+// 5   - Other Cast		Moved to spells_us_str.txt		
+// 6   - Cast on You		Moved to spells_us_str.txt
+// 7   - Cast on Other		Moved to spells_us_str.txt
+// 8   - Spell Fades		Moved to spells_us_str.txt
+// 4   - Range
+// 5   - AOE range
+// 6   - Push back
+// 7   - Push up
+// 8   - Cast time
+// 9   - Recovery time
+// 10  - Recast time
+// 11  - Buff duration formula
+// 12  - Buff duration argument
 // 18  - Impact duration
 // 19  - Mana
 // 21  - Base
@@ -157,12 +157,12 @@ Spell::Spell(const QString& spells_enLine)
   // I'll add support for the rest of the fields later
   m_spell = spellInfo[0].toUShort();
   m_name = spellInfo[1];
-  m_buffDurationFormula = spellInfo[16].toUShort();
-  m_buffDurationArgument = spellInfo[17].toUShort();
-  m_targetType = uint8_t(spellInfo[98].toUShort());
+  m_buffDurationFormula = spellInfo[11].toUShort();		//spells_us.txt layout changed December 2018
+  m_buffDurationArgument = spellInfo[12].toUShort();		//spells_us.txt layout changed December 2018
+  m_targetType = uint8_t(spellInfo[32].toUShort());		//spells_us.txt layout changed December 2018
 
   for (size_t i = 0; i < playerClasses; i++)
-    m_classLevels[i] = uint8_t(spellInfo[104 + i].toUShort());
+    m_classLevels[i] = uint8_t(spellInfo[38 + i].toUShort());	//spells_us.txt layout changed December 2018
 #if 0 // ZBTEMP
   seqDebug("Spell: %d  Fields: %d", m_spell, 
 	   spellInfo.count());
