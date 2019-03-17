@@ -137,7 +137,7 @@
 #define ITEM_CMN_FIELD_SEPERATOR_COUNT  102
 
 //Combat Flags
-#define COMBAT_MISS						0
+#define COMBAT_MISS					0
 #define COMBAT_BLOCK					-1
 #define COMBAT_PARRY					-2
 #define COMBAT_RIPOSTE					-3
@@ -156,7 +156,7 @@ enum ItemPacketType
   ItemPacketLoot		= 0x66,
   ItemPacketTrade		= 0x67,
   ItemPacketSummonItem		= 0x6a,
-  ItemPacketWorldContainer       = 0x6b
+  ItemPacketWorldContainer      = 0x6b
 };
 
 /*
@@ -164,7 +164,7 @@ enum ItemPacketType
 */
 enum ItemType
 {
-  ItemTypeCommon		= 0,
+  ItemTypeCommon	= 0,
   ItemTypeContainer	= 1,
   ItemTypeBook		= 2
 };
@@ -659,7 +659,8 @@ struct dzInfo
 /*0012*/ uint32_t maxPlayers;
 /*0016*/ char     dzName[128];                   // Instance name
 /*0144*/ char     name[64];                      // Your player's name
-/*0208*/
+/*0208*/ uint32_t unknown0208;
+/*0212*/
 };
 
 /**
@@ -1445,15 +1446,16 @@ struct itemPacketStruct
 
 /*
 ** Item Info Request Struct 
-** Length: 72 Octets 
+** Length: 80 Octets 
 ** OpCode: ItemInfoCode
 */
 struct itemInfoReqStruct
 {
 /*000*/ uint32_t itemNr;                         // ItemNr 
-/*005*/ uint32_t requestSeq;                     // Request sequence number
+/*004*/ uint32_t requestSeq;                     // Request sequence number
 /*008*/ char     name[64];                       // Item name
-/*072*/
+/*072*/ uint8_t unknown0006[8];                  // Placeholder
+/*080*/
 };
 
 /*
@@ -2211,7 +2213,8 @@ struct levelUpUpdateStruct
 /*0000*/ uint32_t level;                         // New level
 /*0004*/ uint32_t levelOld;                      // Old level
 /*0008*/ uint32_t exp;                           // Current Experience
-/*0012*/
+/*0012*/ uint32_t  unknown0012;                  // unknown
+/*0016*/
 };
 
 /*
@@ -2223,8 +2226,10 @@ struct levelUpUpdateStruct
 struct expUpdateStruct
 {
 /*0000*/ uint32_t exp;                           // experience value  x/330
-/*0004*/ uint32_t type;                          // 0=set, 2=update
-/*0008*/
+/*0004*/ uint32_t unknown0004;                   // unknown
+/*0008*/ uint32_t type;                          // 0=set, 2=update
+/*0012*/ uint32_t unknown0012;                   // unknown
+/*0016*/
 };
 
 /*
@@ -2292,18 +2297,19 @@ struct hpNpcUpdateStruct
 
 /*
 ** Inspecting Information
-** Length: 1860 Octets
+** Length: 1956 Octets
 ** OpCode: InspectDataCode
 */
 
 struct inspectDataStruct
 {
-/*0000*/ uint8_t  unknown0000[8];                // ***Placeholder
+/*0000*/ uint8_t  unknown0000[4];                // ***Placeholder
+/*0004*/ uint32_t spawnId;                       // Id of spawn inspected
 /*0008*/ char     itemNames[23][64];             // 23 items with names 
-                                                 //    64 characters long.
+                                                 // 64 characters long.
 /*1480*/ int32_t  icons[23];                     // Icon Information
 /*1572*/ char     mytext[200];                   // Player Defined Text Info
-/*1772*/ uint8_t  unknown1772[184];               // ***Placeholder
+/*1772*/ uint8_t  unknown1772[184];              // ***Placeholder
 /*1956*/
 };
 
@@ -2669,6 +2675,25 @@ struct bazaarSearchResponseStruct
 /*0156*/ uint8_t uknown0156[4];                  // ***unknown***
 /*0160*/
 };
+
+/*
+bazaarSearchResponseStruct as of 03/13/19
+Beginning of packet includes:
+
+	uint32_t player_id;                      // player ID
+	uint8_t uknown0004[10];                  // ***unknown***
+
+If there are multiple results, they use the following repeating struct:
+
+		uint8_t uknown0014[21];                 // ***unknown***
+		uint32_t price;                         // price in copper
+		uint32_t count;                         // Count of items for sale
+		uint32_t item_id;                       // ID of item for sale
+		uint32_t icon_id;                       // Icon of item for sale
+		char     item_name[64];                 // null termintated (00) item name
+		uint32_t uknownXXXX;                    // ***unknown***
+*/
+
 
 /*
 ** Item Bazaar Search Result
