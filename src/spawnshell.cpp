@@ -741,7 +741,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->isMercenary = netStream.readUInt8();
 
    // unknowns
-   netStream.skipBytes(62);
+   netStream.skipBytes(66);
 
    // now we're at the end
 
