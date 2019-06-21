@@ -561,7 +561,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
 
    spawn->level = netStream.readUInt8();
    // skip the next 4 bytes
-   netStream.skipBytes(4);
+   netStream.skipBytes(12);
 
    spawn->NPC = netStream.readUInt8();
    spawn->miscData = netStream.readUInt32NC();
