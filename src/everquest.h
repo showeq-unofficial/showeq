@@ -647,7 +647,7 @@ struct dzSwitchInfo
 
 /*
 ** Dynamic Zone Info Struct
-** Length: 208 Octets
+** Length: 212 Octets
 ** OpCode: DzInfo
 */
 struct dzInfo
@@ -1494,7 +1494,7 @@ struct spawnPositionUpdate
 
 /*
 ** Rename a spawn
-** Length: 232 Octets
+** Length: 195 Octets
 ** OpCode: SpawnRename
 */
 struct spawnRenameStruct
@@ -1502,10 +1502,8 @@ struct spawnRenameStruct
 /*000*/	char        old_name[64];
 /*064*/	char        old_name_again[64];	         //not sure what the difference is
 /*128*/	char        new_name[64];
-/*192*/	uint32_t	unknown192;	         //set to 0
-/*196*/	uint32_t	unknown196;	         //set to 1
-/*200*/ uint8_t    unknown0200[32];              // ***Placeholder
-/*232*/
+/*192*/	uint8_t     unknown0192[3];              // ***Placeholder
+/*195*/
 };
 
 /*
@@ -1619,7 +1617,7 @@ struct sysMsgStruct
 struct emoteTextStruct
 {
 /*0000*/ uint8_t  unknown0000[4];                // ***Placeholder
-/*0002*/ char     text[0];                       // Emote `Text
+/*0004*/ char     text[0];                       // Emote `Text
 };
 
 /*
@@ -1670,8 +1668,7 @@ struct formattedMessageStruct
 /*0001*/ uint8_t  unknown0001[4];                // ***Placeholder
 /*0005*/ uint32_t messageFormat;                 // Indicates the message format
 /*0009*/ ChatColor messageColor;                 // Message color
-/*0013*/ uint32_t unknown0013;                   // Message length
-/*0017*/ char     messages[0];                   // no longer null terminated
+/*0013*/ char     messages[0];                   // no longer null terminated
 						 // repeat (4-bytes len, string of len)
 };
 
@@ -1818,8 +1815,8 @@ struct groupDeclineStruct
 /*0000*/ char     yourname[64];                  // Player Name
 /*0064*/ char     membername[64];                // Invited Member Name
 /*0128*/ uint8_t  unknown0128[24];               // ***Placeholder
-/*0148*/ uint8_t  reason;                        // Already in Group = 1, Declined Invite = 3
-/*0149*/ uint8_t  unknown0149[3];                // ***Placeholder
+/*0152*/ uint8_t  reason;                        // Already in Group = 1, Declined Invite = 3
+/*0153*/ uint8_t  unknown0149[3];                // ***Placeholder
 /*0156*/
 };
 
@@ -1964,18 +1961,18 @@ struct newCorpseStruct
 
 /**
 ** Environmental damage (lava, falls)
-** Length: 39 Octets
+** Length: 46 Octets
 */
 
 struct environmentDamageStruct
 {
 /*0000*/ uint32_t spawnId;                       // Who is taking the damage
-/*0004*/ uint8_t unknown0004[2];
-/*0006*/ uint32_t damage;                        // how much damage?
-/*0010*/ uint8_t unknown0010[12];
-/*0022*/ uint8_t type;                           // Damage type. FC = fall. FA = lava.
-/*0023*/ uint8_t unknown0023[16];
-/*0039*/
+/*0004*/ uint8_t unknown0004[4];
+/*0008*/ uint32_t damage;                        // how much damage?
+/*0012*/ uint8_t unknown0010[16];
+/*0028*/ uint8_t type;                           // Damage type. FC = fall. FA = lava.
+/*0029*/ uint8_t unknown0029[17];
+/*0046*/
 };
 
 /*
@@ -2209,7 +2206,7 @@ struct wearChangeStruct
 
 /*
 ** Level Update
-** Length: 12 Octets
+** Length: 16 Octets
 ** OpCode: LevelUpUpdateCode
 */
 
@@ -2224,7 +2221,7 @@ struct levelUpUpdateStruct
 
 /*
 ** Experience Update
-** Length: 8 Octets
+** Length: 16 Octets
 ** OpCode: ExpUpdateCode
 */
 
@@ -2288,7 +2285,7 @@ struct SpawnUpdateStruct
 
 /*
 ** NPC Hp Update
-** Length: 10 Octets
+** Length: 18 Octets
 ** Opcode NpcHpUpdateCode
 */
 
@@ -2296,8 +2293,10 @@ struct hpNpcUpdateStruct
 {
 /*0000*/ uint16_t spawnId;
 /*0002*/ int32_t curHP;
-/*0006*/ int32_t maxHP;
-/*0010*/
+/*0006*/ uint32_t unknown0006;                   // Placeholder added 06/19/19
+/*0010*/ int32_t maxHP;
+/*0014*/ uint32_t unknown0014;                   // Placeholder added 06/19/19
+/*0018*/
 };
 
 /*

@@ -560,7 +560,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->spawnId = netStream.readUInt32NC();
 
    spawn->level = netStream.readUInt8();
-   // skip the next 4 bytes
+   // skip the next 12 bytes
    netStream.skipBytes(12);
 
    spawn->NPC = netStream.readUInt8();
@@ -994,7 +994,7 @@ void SpawnShell::npcMoveUpdate(const uint8_t* data, size_t len, uint8_t dir)
 #define MASK_DELTA_Z 0x20
 
     // Variable length movement packet. Sanity check.
-	if ((len < 13) || (len > 21)) 
+	if ((len < 13) || (len > 24)) 
     {
         // Ignore it.
 		seqWarn("Ignoring invalid length %d for movement packet", len);

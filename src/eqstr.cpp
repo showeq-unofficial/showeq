@@ -11,6 +11,7 @@
 
 #include "eqstr.h"
 #include "diagnosticmessages.h"
+#include "packetcommon.h"
 
 #include <stdio.h>
 
@@ -156,15 +157,22 @@ QString EQStr::formatMessage(uint32_t formatid,
 	QValueVector<QString> argList;
 	argList.reserve(5); // reserve space for 5 elements to handle most common sizes
 
-	// 
+	//Adjusted to handle prepended string length 05/28/2019
 	size_t totalArgsLen = 0;
 	const char* curArg;
+        uint32_t curSize = 0;
 	while (totalArgsLen < argsLen)
 	{
 	    curArg = arguments + totalArgsLen;
-	    // insert argument into the argument list
-	    argList.push_back(QString::fromUtf8(curArg));
-	    totalArgsLen += strlen(curArg) + 1;
+            curSize = eqtohuint32((const uint8_t*) curArg);
+            curArg += 4;
+
+            if (curSize > 0) {
+	        // insert argument into the argument list
+	        argList.push_back(QString::fromUtf8(curArg, curSize));
+            }
+
+	    totalArgsLen += curSize + 4;
 	}
 
 	bool ok;

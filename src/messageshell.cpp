@@ -486,21 +486,27 @@ void MessageShell::handleSpell(const uint8_t* data, size_t, uint8_t dir)
   case 1:
     {
       if (!client)
-	tempStr = "You have finished memorizing '";
+	tempStr = "You finish casting '";
       break;
     }
     
   case 2:
     {
       if (!client)
-	tempStr = "You forget '";
+	tempStr = "You have finished memorizing '";
       break;
     }
     
   case 3:
     {
       if (!client)
-	tempStr = "You finish casting '";
+	tempStr = "You forget '";
+      break;
+    }
+
+  case 4:
+    {
+      if (!client)
       break;
     }
     
@@ -526,16 +532,20 @@ void MessageShell::handleSpell(const uint8_t* data, size_t, uint8_t dir)
     else
       spellName = spell_name(mem->spellId);
 
-    if (mem->param1 != 3)
+    if (mem->param1 != 4)
       tempStr.sprintf("%s%s', slot %d.", 
 		      tempStr.ascii(), 
 		      (const char*)spellName, 
 		      mem->slotId);
+
     else 
     {
-      tempStr.sprintf("%s%s'.", 
+    // Spell procs send memspell packet for spell at slot 15 which causes duplicate spell cast console messages
+    // Commenting out code below and adding a case 4 above with no output removes the duplicate messages 
+      /*tempStr.sprintf("%s%s'.", 
 		      tempStr.ascii(), 
 		      (const char*)spellName);
+      */
     }
 
     m_messages->addMessage(MT_Spell, tempStr);

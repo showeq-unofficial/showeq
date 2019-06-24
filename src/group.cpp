@@ -108,7 +108,7 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
   {
      memNumber = netStream.readUInt32NC();
      name = netStream.readText();
-     netStream.skipBytes(3);
+     netStream.skipBytes(4);
      level = netStream.readUInt32NC();
 
      // copy the member name
@@ -126,7 +126,7 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 
      emit added(m_members[i]->m_name, m_members[i]->m_spawn);
 
-     netStream.skipBytes(12);
+     netStream.skipBytes(16);
   }
 
   // clear the rest
