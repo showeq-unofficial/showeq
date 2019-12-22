@@ -829,13 +829,13 @@
 { "esianti", "Esianti: Palace of the Winds" }, // 821
 { "mearatas", "Mearatas: The Stone Demesne" }, // 822
 { "chamberoftears", "The Chamber of Tears" }, // 823
-{ "clz-winter", "Loading" }, // 824
-{ "clz-anniversary", "Loading" }, // 825
-{ "clz-spring", "Loading" }, // 826
-{ "clz-autumn", "Loading" }, // 827
-{ "clz-frostfell", "Loading" }, // 828
-{ NULL, NULL }, // 829
-{ NULL, NULL }, // 830
+{ "eastwastestwo", "The Eastern Wastes" }, // 824
+{ "frozenshadowtwo", "The Tower of Frozen Shadow" }, // 825
+{ "crystaltwoa", "The Ry`Gorr Mines" }, // 826
+{ "greatdividetwo", "The Great Divide" }, // 827
+{ "velketortwo", "Velketor's Labyrinth" }, // 828
+{ "kaeltwo", "Kael Drakkel" }, // 829
+{ "crystaltwob", "Crystal Caverns" }, // 830
 { NULL, NULL }, // 831
 { NULL, NULL }, // 832
 { NULL, NULL }, // 833
