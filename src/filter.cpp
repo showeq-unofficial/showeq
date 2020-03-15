@@ -444,13 +444,11 @@ bool Filters::clear(void)
   {
     // get the Filter object
     filter = it->second;
-    
-    // erase the member from the list
-    m_filters.erase(it);
 
     // delete the filter
     delete filter;
   }
+  m_filters.clear ();
 
   return true;
 }
