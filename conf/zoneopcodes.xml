@@ -37,7 +37,7 @@
       <comment>Receiving AA experience. Also when percent to AA changes.</comment>
       <payload dir="server" typename="altExpUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="2cda" name="OP_ExpUpdate" updated="03/11/20">
+    <opcode id="3bfc" name="OP_ExpUpdate" updated="03/18/20">
         <comment>ExpUpdateCode</comment>
         <payload dir="server" typename="expUpdateStruct" sizechecktype="match"/>
     </opcode>
@@ -82,7 +82,7 @@
         <comment>Server updating on hunger/thirst</comment>
         <payload dir="server" typename="staminaStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="5755" name="OP_HPUpdate" updated="03/11/20">
+    <opcode id="5306" name="OP_HPUpdate" updated="03/18/20">
         <comment>NpcHpUpdateCode Update HP % of a PC or NPC</comment>
         <payload dir="both" typename="hpNpcUpdateStruct" sizechecktype="match"/>
     </opcode>
@@ -111,7 +111,7 @@
         <comment>Targeting a person - old ClientTargetCode</comment>
         <payload dir="both" typename="clientTargetStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="0523" name="OP_SpawnRename" updated="03/11/20">
+    <opcode id="3c3d" name="OP_SpawnRename" updated="03/18/20">
         <comment>Spawns getting renamed after initial NewSpawn</comment>
         <payload dir="server" typename="spawnRenameStruct" sizechecktype="match"/>
     </opcode>
@@ -175,11 +175,11 @@
         <comment>StartCastCode</comment>
         <payload dir="both" typename="startCastStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6102" name="OP_SwapSpell" updated="03/11/20">
+    <opcode id="5916" name="OP_SwapSpell" updated="03/18/20">
         <comment>TradeSpellBookSlotsCode</comment>
         <payload dir="both" typename="tradeSpellBookSlotsStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6dd3" name="OP_MemorizeSpell" updated="03/11/20">
+    <opcode id="4fd1" name="OP_MemorizeSpell" updated="03/18/20">
         <comment>MemSpellCode</comment>
         <payload dir="both" typename="memSpellStruct" sizechecktype="match"/>
     </opcode>
@@ -223,7 +223,7 @@
         <comment>Server replying with deny information after /deny</comment>
         <payload dir="server" typename="consentResponseStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6b2b" name="OP_ManaChange" updated="03/11/20">
+    <opcode id="48d3" name="OP_ManaChange" updated="03/18/20">
         <comment>Mana change. Bards send this up with no size. Casters receive this for mana updates.</comment>
         <payload dir="server" typename="manaDecrementStruct" sizechecktype="match"/>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
@@ -240,11 +240,11 @@
         <comment>MoneyOnCorpseCode</comment>
         <payload dir="server" typename="moneyOnCorpseStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="093b" name="OP_SkillUpdate" updated="03/11/20">
+    <opcode id="37c4" name="OP_SkillUpdate" updated="03/18/20">
         <comment>Skill up code</comment>
         <payload dir="server" typename="skillIncStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="463f" name="OP_LevelUpdate" updated="03/11/20">
+    <opcode id="09cc" name="OP_LevelUpdate" updated="03/18/20">
         <comment>LevelUpUpdateCode</comment>
         <payload dir="server" typename="levelUpUpdateStruct" sizechecktype="match"/>
     </opcode>
@@ -311,11 +311,11 @@
         <comment>List of guild members - Variable length</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="01d7" name="OP_ManaUpdate" updated="03/11/20">
+    <opcode id="246d" name="OP_ManaUpdate" updated="03/18/20">
     <comment>Mana Update opcode - 10 bytes</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="7379" name="OP_EndUpdate" updated="03/11/20">
+    <opcode id="30c2" name="OP_EndUpdate" updated="03/18/20">
     <comment>Endurance Update opcode - 10 bytes</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
