@@ -1,0 +1,44 @@
+
+# Opcodes from 2020-04-15 patch (Live)
+
+13cd     OP_AAExpUpdate
+3139     OP_Action
+0022     OP_Action2
+62fd     OP_ClickObject
+7753     OP_ClientUpdate
+1692     OP_CommonMessage
+03da     OP_Consider
+71c1     OP_Death
+7718     OP_DeleteSpawn
+2713     OP_EndUpdate
+329d     OP_ExpandedGuildInfo
+129b     OP_ExpUpdate
+69db     OP_Find
+456d     OP_FormattedMessage
+2bc1     OP_GroundSpawn
+2366     OP_GuildMemberList
+4074     OP_GuildMemberUpdate
+699f     OP_GuildMOTD
+305d     OP_HPUpdate
+3aa3     OP_LevelUpdate
+5e20     OP_ManaChange
+0865     OP_ManaUpdate
+4fcc     OP_MemorizeSpell
+445f     OP_MobUpdate
+4df8     OP_NewZone
+0055     OP_NpcMoveUpdate
+64e7     OP_PlayerProfile
+4209     OP_RemoveSpawn
+316b     OP_SendZonePoints
+03d8     OP_SimpleMessage
+2e1f     OP_SkillUpdate
+202d     OP_SpawnAppearance
+6d33     OP_SpawnDoor
+6bd4     OP_SpawnRename
+1d19     OP_SpecialMesg
+67b6     OP_SwapSpell
+3333     OP_TargetMouse
+67e2     OP_TimeOfDay
+29ed     OP_WearChange
+0c40     OP_ZoneChange
+0b23     OP_ZoneEntry
