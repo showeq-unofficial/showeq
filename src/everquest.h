@@ -2709,7 +2709,7 @@ union bazaarSearchStruct
 {
   uint32_t mark;
   struct bazaarSearchQueryStruct query;
-  struct bazaarSearchResponseStruct response[];
+  struct bazaarSearchResponseStruct response[0];
 };
 
 /*******************************/
