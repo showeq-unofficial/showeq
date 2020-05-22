@@ -471,9 +471,6 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->copper_bank = netStream.readUInt32NC();
   player->platinum_shared = netStream.readUInt32NC();
 
-  // Unknown
-  netStream.skipBytes(12);
-
   // Something (134 ints)
   int sCount6 = netStream.readUInt32NC();
   for (int i = 0; i < sCount6; i++) {
@@ -529,7 +526,6 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->ldon_ruj_points = netStream.readUInt32NC();
   player->ldon_tak_points = netStream.readUInt32NC();
   player->ldon_avail_points = netStream.readUInt32NC();
-
 
   // Below are the structs still not found in the new playerpacket
 
