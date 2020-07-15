@@ -94,10 +94,6 @@ def update_zoneopcodes_filter(opcodes, infile, outfile):
         opname = match.group(2)
         update = match.group(3)
 
-        if opname not in opcodes:
-            outfile.write(line)
-            continue
-
         opcode_start = match.start(1)
         opcode_end = match.end(1)
 
@@ -107,8 +103,13 @@ def update_zoneopcodes_filter(opcodes, infile, outfile):
         date_start = match.start(3)
         date_end = match.end(3)
 
-        new_line = line[:opcode_start] + opcodes[opname]
-        new_line += line[opcode_end:date_start] + new_date + line[date_end:]
+        new_line = line[:opcode_start]
+        if opname not in opcodes:
+            new_line += 'ffff'
+            new_line += line[opcode_end:]
+        else:
+            new_line += opcodes[opname]
+            new_line += line[opcode_end:date_start] + new_date + line[date_end:]
 
         outfile.write(new_line)
 
