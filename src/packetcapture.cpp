@@ -108,18 +108,18 @@ void PacketCaptureThread::start(const char *device, const char *host,
         if (strcmp(host, AUTOMATIC_CLIENT_IP) == 0)
         {
             seqInfo("Filtering packets on device %s, searching for EQ client...", device);
-            sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800");
+            sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800 and not broadcast and not multicast");
         }
         else
         {
             seqInfo("Filtering packets on device %s, IP host %s", device, host);
-            sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and host %s and ether proto 0x0800", host);
+            sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and host %s and ether proto 0x0800 and not broadcast and not multicast", host);
         }
     }
     else if (address_type == MAC_ADDRESS_TYPE)
     {
         seqInfo("Filtering packets on device %s, MAC host %s", device, host);
-        sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether host %s and ether proto 0x0800", host);
+        sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether host %s and ether proto 0x0800 and not broadcast and not multicast", host);
     }
     else
     {
@@ -444,35 +444,35 @@ void PacketCaptureThread::setFilter (const char *device,
     {
         // Restrict to client port and ip, plus world streams.
         sprintf(filter_buf, 
-            "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", 
-            client_port, client_port, hostname);
+            "udp and (portrange 9000-9007 or port 9876 or port %d) and host %s and ether proto 0x0800 and not broadcast and not multicast", 
+            client_port, hostname);
     }
     else if (address_type == IP_ADDRESS_TYPE && zone_port) 
     {
         // Restrict to zone port and world streams.
         sprintf(filter_buf, 
-            "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", 
-            zone_port, zone_port, hostname);
+            "udp and (portrange 9000-9007 or port 9876 or port %d) and host %s and ether proto 0x0800 and not broadcast and not multicast", 
+            zone_port, hostname);
     }
     else if (address_type == MAC_ADDRESS_TYPE && client_port)
     {
         // Restrict to client port and world streams.
         sprintf(filter_buf, 
-            "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", 
-            client_port, client_port, hostname);
+            "udp and (portrange 9000-9007 or port 9876 or port %d) and ether host %s and ether proto 0x0800 and not broadcast and not multicast", 
+            client_port, hostname);
     }
     else if (address_type == MAC_ADDRESS_TYPE && zone_port)
     {
         // Restrict to zone port and world streams.
         sprintf(filter_buf, 
-            "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", 
-            zone_port, zone_port, hostname);
+            "udp and (portrange 9000-9007 or port 9876 or port %d) and ether host %s and ether proto 0x0800 and not broadcast and not multicast", 
+            zone_port, hostname);
     }
     else if (hostname != NULL && !client_port && !zone_port)
     {
         // Leave wide open.
         sprintf(filter_buf, 
-          "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800 and host %s", 
+          "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800 and host %s and not broadcast and not multicast", 
           hostname);
     }
     else
@@ -481,7 +481,7 @@ void PacketCaptureThread::setFilter (const char *device,
         seqInfo("Filtering packets on device %s, searching for EQ client...", 
                 device);
         sprintf(filter_buf, 
-                "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800");
+                "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800 and not broadcast and not multicast");
     }
 
     if (pcap_compile (m_pcache_pcap, &bpp, filter_buf, 1, net) == -1)

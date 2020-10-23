@@ -60,7 +60,8 @@
 //----------------------------------------------------------------------
 // constants
 
-const in_port_t WorldServerGeneralPort = 9000;
+const in_port_t WorldServerGeneralMinPort = 9000;
+const in_port_t WorldServerGeneralMaxPort = 9007;
 const in_port_t WorldServerChatPort = 9876;
 const in_port_t WorldServerChat2Port = 9875; // xgame tells, mail
 const in_port_t LoginServerMinPort = 15900;
@@ -590,7 +591,9 @@ void EQPacket::dispatchPacket(int size, unsigned char *buffer)
 void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
 {
   // Detect client by world server port traffic...
-  if (m_detectingClient && packet.getSourcePort() == WorldServerGeneralPort)
+  if (m_detectingClient &&
+        (packet.getSourcePort() >= WorldServerGeneralMinPort
+         && packet.getSourcePort() <= WorldServerGeneralMaxPort))
   {
     m_ip = packet.getIPv4DestA();
     m_client_addr = packet.getIPv4DestN();
@@ -598,7 +601,9 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     emit clientChanged(m_client_addr);
     seqInfo("Client Detected: %s", (const char*)m_ip);
   }
-  else if (m_detectingClient && packet.getDestPort() == WorldServerGeneralPort)
+  else if (m_detectingClient &&
+            (packet.getDestPort() >= WorldServerGeneralMinPort
+             && packet.getDestPort() <= WorldServerGeneralMaxPort))
   {
     m_ip = packet.getIPv4SourceA();
     m_client_addr = packet.getIPv4SourceN();
@@ -634,8 +639,10 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     // Drop login server traffic
     return;
   }
-  else if (packet.getDestPort() == WorldServerGeneralPort ||
-      packet.getSourcePort() == WorldServerGeneralPort)
+  else if ((packet.getDestPort() >= WorldServerGeneralMinPort &&
+            packet.getDestPort() <= WorldServerGeneralMaxPort) ||
+           (packet.getSourcePort() >= WorldServerGeneralMinPort &&
+            packet.getSourcePort() <= WorldServerGeneralMaxPort))
   {
     // World server traffic. Dispatch it.
     if (packet.getIPv4SourceN() == m_client_addr)
