@@ -832,7 +832,7 @@
     "Anashti Sul",                // 823
     "Anashti Sul",                // 824
     "Cat",                        // 825
-    "Peacock",                    // 826
+    "Wolf",                       // 826
     "Quellious",                  // 827
     "Void Hulk",                  // 828
     "Valkyrie",                   // 829
@@ -846,7 +846,7 @@
     "Gnoll Pup",                  // 837
     "Dragon",                     // 838
     "Trakanon",                   // 839
-    "Sarnak Golem",               // 840
+    "20th Anniversary Cake",      // 840
     "Sarnak Skeleton",            // 841
     "Yeti",                       // 842
     "Drolvarg",                   // 843
@@ -872,4 +872,26 @@
     "Elemental",                  // 863
     "Snail",                      // 864
     "Nilborien",                  // 865
+    "Rallos Zek",                 // 866
+    "Vampire",                    // 867
+    "Giant",                      // 868
+    "Hag",                        // 869
+    "Walrus",                     // 870
+    "Ulthork",                    // 871
+    "Rabbit",                     // 872
+    "Zombie",                     // 873
+    "Griffin",                    // 874
+    "Griffin Mount",              // 875
+    "Tserrina Syl`Tor",           // 876
+    "Tserrina Syl`Tor",           // 877
+    "Mermaid",                    // 878
+    "Dragon",                     // 879
+    "Zlandicar",                  // 880
+    "Leech",                      // 881
+    "Othmir",                     // 882
+    "Shark",                      // 883
+    "Jaled Dar",                  // 884
+    "Rabbit Mount",               // 885
+    "Dragon",                     // 886
+    "Dragon",                     // 887
 #endif
