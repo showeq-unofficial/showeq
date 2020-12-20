@@ -89,6 +89,7 @@ QString ZoneMgr::zoneNameFromID(uint16_t zoneId)
    if (zoneName != NULL)
       return zoneName;
 
+   seqDebug("ZoneMgr::zoneNameFromID: zone name not found: zoneId=%d", zoneId);
    QString tmpStr;
    tmpStr.sprintf("unk_zone_%d", zoneId);
    return tmpStr;
@@ -96,7 +97,6 @@ QString ZoneMgr::zoneNameFromID(uint16_t zoneId)
 
 QString ZoneMgr::zoneLongNameFromID(uint16_t zoneId)
 {
-
    const char* zoneName = NULL;
    if (zoneId < (sizeof(zoneNames) / sizeof (ZoneNames)))
        zoneName = zoneNames[zoneId].longName;
@@ -104,6 +104,7 @@ QString ZoneMgr::zoneLongNameFromID(uint16_t zoneId)
    if (zoneName != NULL)
       return zoneName;
 
+   seqDebug("ZoneMgr::zoneLongNameFromID: zone name not found: zoneId=%d", zoneId);
    QString tmpStr;
    tmpStr.sprintf("unk_zone_%d", zoneId);
    return tmpStr;

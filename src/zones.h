@@ -836,12 +836,12 @@
 { "velketortwo", "Velketor's Labyrinth" }, // 828
 { "kaeltwo", "Kael Drakkel" }, // 829
 { "crystaltwob", "Crystal Caverns" }, // 830
-{ NULL, NULL }, // 831
-{ NULL, NULL }, // 832
-{ NULL, NULL }, // 833
-{ NULL, NULL }, // 834
-{ NULL, NULL }, // 835
-{ NULL, NULL }, // 836
+{ "sleepertwo", "The Sleeper's Tomb" }, // 831
+{ "necropolistwo", "Dragon Necropolis" }, // 832
+{ "cobaltscartwo", "Cobalt Scar" }, // 833
+{ "westwastestwo", "The Western Wastes" }, // 834
+{ "skyshrinetwo", "Skyshrine" }, // 835
+{ "templeveeshantwo", "Temple of Veeshan" }, // 836
 { NULL, NULL }, // 837
 { NULL, NULL }, // 838
 { NULL, NULL }, // 839
