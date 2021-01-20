@@ -33,6 +33,23 @@ build-essential
 libpcap0.8-dev
 zlib1g-dev
 libqt4-dev
+autoconf
+automake
+libtool
+
+
+------------------
+CentOS
+------------------
+
+If you wish to build and install on a CentOS-based system, you will need to
+install the following packages in addition to your chosen Desktop Environment:
+
+group "Development Tools"
+qt-devel
+libpcap-devel
+
+
 
 
 ------------------
@@ -253,6 +270,7 @@ Code:
 
 Version 6.0.0.0
 - added section about Debian and derivatives
+- added section about CentOS
   Need to update Fedora info.
 
 Version 5.0.0.15
