@@ -487,7 +487,6 @@ bool Filters::clear(void)
     // delete the filter
     delete filter;
   }
-  m_filters.clear ();
 
   // empty the container
   m_filters.clear();
