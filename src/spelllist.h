@@ -1,8 +1,24 @@
 /*
- * spelllist.h
+ *  spelllist.h
+ *  Copyright 2001 Crazy Joe Divola (cjd1@users.sourceforge.net)
+ *  Copyright 2001-2005, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /*
@@ -13,10 +29,8 @@
 #ifndef SPELLLIST_H
 #define SPELLLIST_H
 
-#include <qvaluelist.h>
-#include <qlistview.h>
-#include <qpopupmenu.h>
-#include <time.h>
+#include <QList>
+#include <ctime>
 #include <sys/time.h>
 
 #include "seqwindow.h"
@@ -33,13 +47,12 @@
 #define SPELLCOL_CASTTIME   6
 #define SPELLCOL_DURATION   7
 
-class SpellListItem : public QListViewItem 
+class SpellListItem : public SEQListViewItem
 {
  public:
-  SpellListItem(QListViewItem *parent);
-  SpellListItem(QListView *parent = NULL);
-  virtual void paintCell( QPainter *p, const QColorGroup &cg,
-			  int column, int width, int alignment );
+  SpellListItem(SEQListViewItem *parent);
+  SpellListItem(SEQListView *parent = NULL);
+  QVariant data(int column, int role) const;
   const QColor textColor();
   void setTextColor(const QColor &color);
   void update();
@@ -54,12 +67,12 @@ class SpellListItem : public QListViewItem
   QString m_category;
 };
 
-class SpellList : public SEQListView 
+class SpellList : public SEQListView
 {
   Q_OBJECT
  public:
   SpellList(SpellShell* sshell, QWidget *parent = 0, const char *name = 0);
-  QPopupMenu* menu();
+  QMenu* menu();
   void SelectItem(const SpellItem *item);
   SpellListItem* Selected();
   SpellListItem* InsertSpell(const SpellItem *item);
@@ -70,7 +83,7 @@ class SpellList : public SEQListView
   QColor pickSpellColor(const SpellItem *item, QColor def = Qt::black) const;
   //QString& getCategory(SpellListItem *);
   SpellListItem* Find(const SpellItem *);
-  
+
  signals:
   void listUpdated();   // flags in spawns have changed
   void listChanged();   // categories have changed
@@ -83,24 +96,28 @@ class SpellList : public SEQListView
   void selectSpell(const SpellItem *);
   void clear();
 
-  void mouseDoubleClicked(QListViewItem *item);
-  void rightButtonClicked(QListViewItem *, const QPoint&, int);
-  void activated(int);
+  void activated(QAction*);
 
  protected slots:  
    void init_menu(void);
+  void listItemDoubleClicked(QTreeWidgetItem* litem, int col);
+  void listMouseRightButtonPressed(QMouseEvent* event);
 
  private:
   void selectAndOpen(SpellListItem *);
   SpellShell* m_spellShell;
-  QValueList<QString> m_categoryList;
-  QValueList<SpellListItem *> m_spellList;
-  QPopupMenu *m_menu;
-  
-  int mid_spellName, mid_spellId;
-  int mid_casterId, mid_casterName;
-  int mid_targetId, mid_targetName;
-  int mid_casttime, mid_duration;
+  QList<QString> m_categoryList;
+  QList<SpellListItem *> m_spellList;
+  QMenu *m_menu;
+
+  QAction* m_action_spellName;
+  QAction* m_action_spellId;
+  QAction* m_action_casterId;
+  QAction* m_action_casterName;
+  QAction* m_action_targetId;
+  QAction* m_action_targetName;
+  QAction* m_action_casttime;
+  QAction* m_action_duration;
 };
 
 class SpellListWindow : public SEQWindow
@@ -110,7 +127,7 @@ class SpellListWindow : public SEQWindow
  public:
   SpellListWindow(SpellShell* sshell, QWidget* parent = 0, const char* name = 0);
   ~SpellListWindow();
-  virtual QPopupMenu* menu();
+  virtual QMenu* menu();
 
   SpellList* spellList() { return m_spellList; }
 

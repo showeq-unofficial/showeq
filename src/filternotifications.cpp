@@ -1,11 +1,24 @@
 /*
- * filternotifications.cpp
+ *  filternotifications.cpp
+ *  Copyright 2004, 207, 2019 by the respective ShowEQ Developers
+ *  Portions Copyright 2003-2007 Zaphod (dohpaz@users.sourceforge.net).
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sourceforge.net/
- * 
- * Portions Copyright 2003-2007 Zaphod (dohpaz@users.sourceforge.net). 
- * 
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "filternotifications.h"
@@ -13,22 +26,24 @@
 #include "spawn.h"
 #include "main.h"
 
-#include <stdio.h>
+#include <cstdio>
 
-#include <qstring.h>
-#include <qregexp.h>
-#include <qapplication.h>
+#include <QString>
+#include <QRegExp>
+#include <QApplication>
 
 FilterNotifications::FilterNotifications(QObject* parent, const char* name)
-  : QObject(parent, name),
+  : QObject(parent),
     m_useSystemBeep(false),
     m_useCommands(false)
 {
-  m_useSystemBeep = 
+  setObjectName(name);
+
+  m_useSystemBeep =
     pSEQPrefs->getPrefBool("SystemBeep", "Filters", m_useSystemBeep);
-  m_useCommands = 
-    pSEQPrefs->getPrefBool("EnableCommands", "Filters", 
-			   m_useCommands);
+  m_useCommands =
+    pSEQPrefs->getPrefBool("EnableCommands", "Filters",
+            m_useCommands);
 }
 
 FilterNotifications::~FilterNotifications()
@@ -124,9 +139,9 @@ void FilterNotifications::executeCommand(const Item* item,
   
   // now, replace all occurrances of %c with the audio cue
   command.replace(cueExp, audioCue);
-  
+
   // fire off the command
-  system ((const char*)command);
+  system (command.toAscii().data());
 }
 
 #ifndef QMAKEBUILD

@@ -1,10 +1,23 @@
 /*
- * skilllist.cpp
+ *  skilllist.cpp
+ *  Copyright 2001-2007, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sourceforge.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "player.h"
@@ -13,14 +26,14 @@
 #include "main.h" // for pSEQPrefs & showeq_params
 #include "diagnosticmessages.h"
 
-#include <qlayout.h>
+#include <QLayout>
 
 
 SkillList::SkillList(Player* player,
-			 QWidget* parent, 
-			 const char* name)
-  : SEQListView("SkillList", parent, name), 
-  m_pPlayer(player)
+                     QWidget* parent,
+                     const char* name)
+    : SEQListView("SkillList", parent, name),
+    m_pPlayer(player)
 {
   int i;
 
@@ -102,8 +115,11 @@ void SkillList::addSkill (int skillId, int value)
    * to the list
    */
   if (!m_skillList[skillId])
-    m_skillList[skillId] =
-      new QListViewItem (this, skill_name (skillId), str);
+  {
+      QStringList item_values;
+      item_values << skill_name(skillId) << str;
+      m_skillList[skillId] = new SEQListViewItem (this, item_values);
+  }
   else
     m_skillList[skillId]->setText (1, str);
 }
@@ -113,20 +129,23 @@ void SkillList::changeSkill (int skillId, int value)
 {
   if (skillId >= MAX_KNOWN_SKILLS)
   {
-    seqWarn("skillId (%d) is more than max skillId (%d)\n", 
-	   skillId, MAX_KNOWN_SKILLS - 1);
+    seqWarn("skillId (%d) is more than max skillId (%d)\n",
+            skillId, MAX_KNOWN_SKILLS - 1);
 
     return;
   }
-                                
+
   QString str;
   /* Update skill value with new value */
   str.sprintf ("%3d", value);
 
   // create skill entry if needed or set the value of the existing item
   if (!m_skillList[skillId])
-    m_skillList[skillId] =
-      new QListViewItem (this, skill_name (skillId), str);
+  {
+      QStringList item_values;
+      item_values << skill_name(skillId) << str;
+      m_skillList[skillId] = new SEQListViewItem (this, item_values);
+  }
   else
     m_skillList[skillId]->setText (1, str);
 }
@@ -156,7 +175,7 @@ void SkillList::addLanguage (int langId, int value)
 
     return;
   }
-                                
+
   // Check if this is a valid skill 
   if (value == 255)
     return;
@@ -172,8 +191,11 @@ void SkillList::addLanguage (int langId, int value)
   // If the language is not added yet, look up the correct skill namd and 
   // add it to the list
   if (!m_languageList[langId])
-    m_languageList[langId] =
-      new QListViewItem (this, language_name(langId), str);
+  {
+      QStringList item_values;
+      item_values << language_name(langId) << str;
+      m_languageList[langId] = new SEQListViewItem (this, item_values);
+  }
   else
       m_languageList[langId]->setText (1, str);
 }
@@ -192,7 +214,7 @@ void SkillList::changeLanguage (int langId, int value)
 
     return;
   }
-                                
+
   QString str;
 
   /* Update skill value with new value */
@@ -200,8 +222,11 @@ void SkillList::changeLanguage (int langId, int value)
 
   // create language entry if needed or set the value of the existing item
   if (!m_languageList[langId])
-    m_languageList[langId] =
-      new QListViewItem (this, language_name (langId), str);
+  {
+      QStringList item_values;
+      item_values << language_name(langId) << str;
+      m_languageList[langId] = new SEQListViewItem (this, item_values);
+  }
   else
     m_languageList[langId]->setText (1, str);
 }

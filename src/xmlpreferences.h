@@ -1,15 +1,28 @@
 /*
- * xmlconv.cpp
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  xmlpreferences.h
+ *  Copyright 2002-2003 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Copyright 2002-2005, 2019 by the respective ShowEQ Developers
  *
- * Copyright 2002-2003 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net)
+ *  for use under the terms of the GNU General Public License,
+ *  incorporated herein by reference.
  *
- * Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
- * for use under the terms of the GNU General Public License, 
- * incorporated herein by reference.
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef __XMLPREFERENCE_H__
@@ -18,21 +31,21 @@
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #else
-#include <stdint.h>
+#include <cstdint>
 #endif
 
-#include <qobject.h>
-#include <qstring.h>
-#include <qvariant.h>
-#include <qdict.h>
-#include <qdom.h>
-#include <qcolor.h>
-#include <qpen.h>
-#include <qbrush.h>
-#include <qfont.h>
-#include <qsizepolicy.h>
-#include <qcursor.h>
-#include <qstringlist.h>
+#include <QObject>
+#include <QString>
+#include <QVariant>
+#include <QHash>
+#include <QColor>
+#include <QPen>
+#include <QBrush>
+#include <QFont>
+#include <QSizePolicy>
+#include <QCursor>
+#include <QStringList>
+#include <QKeySequence>
 
 // XMLPreferences is a generic class that implements a persistant config
 // file in the XML format specified in seqpref.dtd.
@@ -48,11 +61,11 @@
 //         TRUE value overrides this.  This is usefull for command line args 
 //         which should override config file prefs but not overwrite them  
 
-typedef QDict<QVariant> PreferenceDict;
-typedef QDict<PreferenceDict> PrefSectionDict;
+typedef QHash<QString, QVariant*> PreferenceDict;
+typedef QHash<QString, PreferenceDict*> PrefSectionDict;
 
-typedef QDict<QString> CommentDict;
-typedef QDict<CommentDict> CommentSectionDict;
+typedef QHash<QString, QString*> CommentDict;
+typedef QHash<QString, CommentDict*> CommentSectionDict;
 
 // PreferenceFile
 // A File comprised of NameValuePair Items
@@ -117,10 +130,10 @@ class XMLPreferences
 		    const QRect& def = QRect(), Persistence pers = Any);
   QSize getPrefSize(const QString& inName, const QString& inSection, 
 		    const QSize& def = QSize(), Persistence pers = Any);
-  int getPrefKey(const QString& inName, const QString& inSection, 
+  QKeySequence getPrefKey(const QString& inName, const QString& inSection,
 		 const QString& def, Persistence pers = Any);
-  int getPrefKey(const QString& inName, const QString& inSection, 
-		 int def, Persistence pers = Any);
+  QKeySequence getPrefKey(const QString& inName, const QString& inSection,
+		 const QKeySequence& def, Persistence pers = Any);
   QFont getPrefFont(const QString& inName, const QString& inSection, 
 		    const QFont& def = QFont(), Persistence pers = Any);
   QSizePolicy getPrefSizePolicy(const QString& inName, 

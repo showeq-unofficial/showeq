@@ -1,22 +1,32 @@
 /*
- * spawnpointlist.h
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  spawnpointlist.h
+ *  Borrowed from:  SINS Distributed under GPL
+ *  Portions Copyright 2001 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2002-2005, 2019 by the respective ShowEQ Developers
  *
- * Borrowed from:  SINS Distributed under GPL
- * Portions Copyright 2001 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- * For use under the terms of the GNU General Public License, 
- * incorporated herein by reference.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef SPAWNPOINTLIST_H
 #define SPAWNPOINTLIST_H
 
-#include <qtimer.h>
-#include <qpopupmenu.h>
+#include <QTimer>
+#include <QMenu>
 
 #include "seqlistview.h"
 #include "seqwindow.h"
@@ -39,19 +49,19 @@ class SpawnPointListItem;
 class SpawnPointListMenu;
 class SpawnPointWindow;
 
-class SpawnPointListItem: public QListViewItem
+class SpawnPointListItem: public SEQListViewItem
 {
 public:
-  SpawnPointListItem(QListView* parent, const SpawnPoint* spawn);
+  SpawnPointListItem(SEQListView* parent, const SpawnPoint* spawn);
   virtual ~SpawnPointListItem();
 
+  QVariant data(int column, int role) const;
+
   void update(void);
-  virtual void paintCell(QPainter *p, const QColorGroup &cg, 
-			 int column, int width, int alignment );
-  
   const QColor textColor() const { return m_textColor; }
   void setTextColor(const QColor &color);
   const SpawnPoint* spawnPoint() { return m_spawnPoint; }
+  bool operator<(const SEQListViewItem& other) const;
 
  protected:
   QColor m_textColor;
@@ -61,7 +71,7 @@ public:
 
 //--------------------------------------------------
 // SpawnListMenu
-class SpawnPointListMenu : public QPopupMenu
+class SpawnPointListMenu : public QMenu
 {
    Q_OBJECT
 
@@ -73,19 +83,20 @@ class SpawnPointListMenu : public QPopupMenu
 
  protected slots:
    void init_menu(void);
-   void rename_item(int id);
-   void delete_item(int id);
-   void toggle_col( int id );
-   void set_font(int id);
-   void set_caption(int id);
-   void toggle_keepSorted(int id);
+   void rename_item();
+   void delete_item();
+   void toggle_col(QAction* col);
+   void set_font();
+   void set_caption();
+   void toggle_keepSorted();
 
  protected:
   SpawnPointList* m_spawnPointList;
   const SpawnPointListItem* m_currentItem;
-  int m_id_rename;
-  int m_id_delete;
-  int m_id_cols[tSpawnPointMaxCols];
+  QAction* m_action_rename;
+  QAction* m_action_delete;
+  QAction* m_action_cols[tSpawnPointMaxCols];
+  QAction* m_action_keepSorted;
 };
 
 class SpawnPointList : public SEQListView
@@ -101,12 +112,12 @@ class SpawnPointList : public SEQListView
   void setKeepSorted(bool val);
 
  public slots:
-  void rightButtonClicked(QListViewItem*, const QPoint&, int);
+  void listMouseRightButtonPressed(QMouseEvent* event);
   void renameItem(const SpawnPointListItem* item);
   void deleteItem(const SpawnPointListItem* item);
   void clearItems(void);
   void refresh();
-  void handleSelectItem(QListViewItem* item);
+  void handleSelectItem();
   void newSpawnPoint(const SpawnPoint* sp);
   void clear();
   void handleSelChanged(const SpawnPoint* sp);
@@ -127,7 +138,7 @@ class SpawnPointWindow : public SEQWindow
   SpawnPointWindow(SpawnMonitor* spawnMonitor, 
 		   QWidget* parent = 0, const char* name = 0);
   ~SpawnPointWindow();
-  virtual QPopupMenu* menu();
+  virtual QMenu* menu();
 
   SpawnPointList* spawnPointList() { return m_spawnPointList; }
 

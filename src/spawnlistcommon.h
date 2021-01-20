@@ -1,8 +1,24 @@
 /*
- * spawnlist.h
+ *  spawnlistcommon.h
+ *  Copyright 2000 Maerlyn (MaerlynTheWiz@yahoo.com)
+ *  Copyright 2002-2005, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://www.hackersquest.gomp.ch/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /*
@@ -16,14 +32,15 @@
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #else
-#include <stdint.h>
+#include <cstdint>
 #endif
 
-#include <qlistview.h>
-#include <qstring.h>
-#include <qpopupmenu.h>
+#include <QString>
+#include <QMenu>
 
 #include "spawn.h"
+#include "seqlistview.h"
+
 
 //--------------------------------------------------
 // forward declarations
@@ -60,28 +77,27 @@ const int tSpawnColMaxCols = 16;
 
 //--------------------------------------------------
 // SpawnListItem
-class SpawnListItem : public QListViewItem
+class SpawnListItem : public SEQListViewItem
 {
 public:
-   SpawnListItem(QListViewItem *parent);
-   SpawnListItem(QListView *parent);
+   SpawnListItem(SEQListViewItem *parent);
+   SpawnListItem(SEQListView *parent);
    virtual ~SpawnListItem();
-
-   virtual void paintCell( QPainter *p, const QColorGroup &cg,
-                           int column, int width, int alignment );
 
    const QColor textColor()  { return m_textColor; }
    void setTextColor(const QColor &color) { m_textColor = color; }
    void pickTextColor(const Item* item,
 		      Player* player, 
 		      QColor def = Qt::black);
-   const Item*    item() { return m_item; }
+   const Item*    item() const { return m_item; }
 
    void update(Player* player, uint32_t changeType);
    void updateTitle(const QString& name);
    void setShellItem(const Item *);
    spawnItemType type();
-   virtual int compare(QListViewItem *i, int col, bool ascending) const;
+
+   QVariant data(int column, int role) const;
+   bool operator<(const SEQListViewItem& other) const;
 
    //--------------------------------------------------
    int m_npc;
@@ -93,7 +109,7 @@ private:
 
 //--------------------------------------------------
 // SpawnListMenu
-class SpawnListMenu : public QPopupMenu
+class SpawnListMenu : public QMenu
 {
    Q_OBJECT
 
@@ -109,15 +125,15 @@ class SpawnListMenu : public QPopupMenu
 
  protected slots:
    void init_Menu(void);
-   void toggle_spawnListCol( int id );
-   void add_filter(int id);
-   void add_zoneFilter(int id);
-   void add_category(int id);
-   void edit_category(int id);
-   void delete_category(int id);
-   void reload_categories(int id);
-   void set_font(int id);
-   void set_caption(int id);
+   void toggle_spawnListCol( QAction* col );
+   void add_filter(QAction* selection);
+   void add_zoneFilter(QAction* selection);
+   void add_category();
+   void edit_category();
+   void delete_category();
+   void reload_categories();
+   void set_font();
+   void set_caption();
 
  protected:
   SEQListView* m_spawnlist;
@@ -126,11 +142,11 @@ class SpawnListMenu : public QPopupMenu
   CategoryMgr* m_categoryMgr;
   const Category* m_currentCategory;
   const Item* m_currentItem;
-  int m_id_filterMenu;
-  int m_id_zoneFilterMenu;
-  int m_id_spawnList_Cols[tSpawnColMaxCols];
-  int m_id_edit_category;
-  int m_id_delete_category;
+  QMenu* m_filterMenu;
+  QMenu* m_zoneFilterMenu;
+  QAction* m_action_spawnList_Cols[tSpawnColMaxCols];
+  QAction* m_action_edit_category;
+  QAction* m_action_delete_category;
 };
 
 #endif // SPAWNLISTCOMMON_H

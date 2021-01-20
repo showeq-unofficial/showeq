@@ -1,15 +1,25 @@
 /*
- * spawnmonitor.h
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  spawnmonitor.cpp
+ *  Borrowed from:  SINS Distributed under GPL
+ *  Portions Copyright 2001,2007 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2002-2007, 2013, 2019 by the respective ShowEQ Developers
  *
- * Borrowed from:  SINS Distributed under GPL
- * Portions Copyright 2001,2007 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- * For use under the terms of the GNU General Public License, 
- * incorporated herein by reference.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "spawnmonitor.h"
@@ -18,10 +28,10 @@
 #include "datalocationmgr.h"
 #include "diagnosticmessages.h"
 
-#include <qdir.h>
-#include <qfile.h>
-#include <qfileinfo.h>
-#include <qtextstream.h>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
 
 
 SpawnPoint::SpawnPoint(uint16_t spawnID, 
@@ -99,16 +109,15 @@ void SpawnPoint::update(const Spawn* spawn)
 SpawnMonitor::SpawnMonitor(const DataLocationMgr* dataLocMgr, 
 			   ZoneMgr* zoneMgr, SpawnShell* spawnShell, 
 			   QObject* parent, const char* name )
-: QObject( parent, name ),
+: QObject( parent),
   m_dataLocMgr(dataLocMgr),
   m_spawnShell(spawnShell),
-  m_spawns( 613 ),
-  m_points( 211 ),
+  m_spawns(),
+  m_points(),
   m_selected(NULL)
 {
-  m_spawns.setAutoDelete( true );
-  m_points.setAutoDelete( true );
-  
+  setObjectName(name);
+
   connect(spawnShell, SIGNAL(addItem(const Item*)), 
 	  this, SLOT( newSpawn(const Item*)));
   connect(spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)), 
@@ -154,7 +163,9 @@ void SpawnMonitor::setSelected(const SpawnPoint* selected)
 void SpawnMonitor::clear(void)
 {
   emit clearSpawnPoints();
+  qDeleteAll(m_spawns);
   m_spawns.clear();
+  qDeleteAll(m_points);
   m_points.clear();
   m_selected = NULL;
 }
@@ -168,8 +179,8 @@ void SpawnMonitor::deleteSpawnPoint(const SpawnPoint* sp)
     emit selectionChanged(m_selected);
   }
 
-  // remove the spawn point (will automatically delete it).
-  m_spawns.remove(sp->key());
+  // remove the spawn point
+  delete m_spawns.take(sp->key());
   m_modified = true;
 }
 
@@ -181,17 +192,19 @@ void SpawnMonitor::newSpawn(const Item* item)
 
 void SpawnMonitor::killSpawn(const Item* killedSpawn)
 {
-  QAsciiDictIterator<SpawnPoint>		it( m_points );
-  
-  SpawnPoint*		sp;
-  while ( ( sp = it.current() ) )
+  QHashIterator<QString, SpawnPoint*> it( m_points );
+
+  SpawnPoint* sp;
+  while (it.hasNext())
   {
+    it.next();
+    sp = it.value();
+
     if ( killedSpawn->id() == sp->lastID() )
     {
-      restartSpawnPoint( sp );
+      restartSpawnPoint(sp);
       break;
     }
-    ++it;
   }
 }
 
@@ -210,8 +223,8 @@ void SpawnMonitor::zoneChanged( const QString& newZoneName )
 
 void SpawnMonitor::zoneEnd( const QString& newZoneName )
 {
-  QString lower = newZoneName.lower();
-  
+  QString lower = newZoneName.toLower();
+
   if ( m_zoneName != lower )
   {
     saveSpawnPoints();
@@ -232,10 +245,10 @@ void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
   if ( ( spawn->NPC() != SPAWN_NPC ) || ( spawn->petOwnerID() != 0 ) || spawn->isMount() || spawn->isAura() || spawn->isMercenary() )
     return;
   
-  QString		key = SpawnPoint::key( *spawn );
+  QString key = SpawnPoint::key( *spawn );
   
-  SpawnPoint*		sp;
-  sp = m_points.find( key );
+  SpawnPoint* sp;
+  sp = m_points.value(key, nullptr);
   if ( sp )
   {
     m_modified = true;
@@ -243,7 +256,7 @@ void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
   }
   else
   {
-    sp = m_spawns.find( key );
+    sp = m_spawns.value(key, nullptr);
     if ( sp )
     {
       sp->update(spawn);
@@ -277,28 +290,30 @@ void SpawnMonitor::saveSpawnPoints()
   
   fileName = m_zoneName + ".sp";
 
-  QFileInfo fileInfo = 
+  QFileInfo fileInfo =
     m_dataLocMgr->findWriteFile("spawnpoints", fileName, false);
 
-  fileName = fileInfo.absFilePath();
+  fileName = fileInfo.absoluteFilePath();
 
   QString newName = fileName + ".new";
   QFile spFile( newName );
-  
-  if (!spFile.open(IO_WriteOnly))
+
+  if (!spFile.open(QIODevice::WriteOnly))
   {
-    seqWarn("Failed to open %s for writing", (const char*)newName);
+    seqWarn("Failed to open %s for writing", newName.toAscii().data());
     return;
   }
-  
+
   QTextStream output(&spFile);
-  
-  QAsciiDictIterator<SpawnPoint> it( m_points );
+
+  QHashIterator<QString, SpawnPoint*> it( m_points );
   SpawnPoint* sp;
-  
-  while ((sp = it.current()))
+
+  while (it.hasNext())
   {
-    ++it;
+    it.next();
+    sp = it.value();
+
     output	<< sp->x()
 		<< " "
 		<< sp->y()
@@ -319,55 +334,55 @@ void SpawnMonitor::saveSpawnPoints()
   QFile old( fileName );
   QDir dir( fi.dir() );
   QString backupName = fileName + ".bak";
-  
+
   if (old.exists())
   {
     if (dir.rename( fileName, backupName))
     {
       if (!dir.rename( newName, fileName))
-	seqWarn( "Failed to rename %s to %s", 
-		(const char*)newName, (const char*)fileName);
+          seqWarn( "Failed to rename %s to %s",
+                  newName.toAscii().data(), fileName.toAscii().data());
     }
   }
   else
   {
     if (!dir.rename(newName, fileName))
-      seqWarn("Failed to rename %s to %s", 
-	     (const char*)newName, (const char*)fileName);
+      seqWarn("Failed to rename %s to %s",
+              newName.toAscii().data(), fileName.toAscii().data());
   }
   m_modified = false;
-  seqInfo("Saved spawn points: %s", (const char*)fileName);
+  seqInfo("Saved spawn points: %s", fileName.toAscii().data());
 }
 
 
 void SpawnMonitor::loadSpawnPoints()
 {
   QString fileName;
-  
+
   fileName = m_zoneName + ".sp";
 
-  QFileInfo fileInfo = 
+  QFileInfo fileInfo =
     m_dataLocMgr->findExistingFile("spawnpoints", fileName, false);
 
   if (!fileInfo.exists())
   {
-    seqWarn("Can't find spawn point file %s", 
-	   (const char*)fileInfo.absFilePath());
+    seqWarn("Can't find spawn point file %s",
+            fileInfo.absoluteFilePath().toAscii().data());
     return;
   }
-  
-  fileName = fileInfo.absFilePath();
+
+  fileName = fileInfo.absoluteFilePath();
 
   QFile spFile(fileName);
-  
-  if (!spFile.open(IO_ReadOnly))
+
+  if (!spFile.open(QIODevice::ReadOnly))
   {
-    seqWarn( "Can't open spawn point file %s", (const char*)fileName );
+    seqWarn( "Can't open spawn point file %s", fileName.toAscii().data());
     return;
   }
-  
+
   QTextStream input( &spFile );
-  
+
   int16_t x, y, z;
   unsigned long diffTime;
   uint32_t count;
@@ -381,15 +396,15 @@ void SpawnMonitor::loadSpawnPoints()
     input >> diffTime;
     input >> count;
     name = input.readLine();
-    name = name.stripWhiteSpace();
-    
+    name = name.trimmed();
+
     EQPoint	loc(x, y, z);
     SpawnPoint*	p = new SpawnPoint( 0, loc, name, diffTime, count );
     if (p)
     {
       QString key = p->key();
-      
-      if (!m_points.find(key))
+
+      if (!m_points.value(key, nullptr))
       {
 	m_points.insert(key, p);
 	emit newSpawnPoint(p);
@@ -402,7 +417,7 @@ void SpawnMonitor::loadSpawnPoints()
     }
   }
 
-  seqInfo("Loaded spawn points: %s", (const char*)fileName);
+  seqInfo("Loaded spawn points: %s", fileName.toAscii().data());
   m_modified = false;
 }
 

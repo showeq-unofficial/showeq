@@ -1,15 +1,25 @@
 /*
- * spawnmonitor.h
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  spawnmonitor.h
+ *  Borrowed from:  SINS Distributed under GPL
+ *  Portions Copyright 2001 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2002-2006, 2019 by the respective ShowEQ Developers
  *
- * Borrowed from:  SINS Distributed under GPL
- * Portions Copyright 2001 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- * For use under the terms of the GNU General Public License, 
- * incorporated herein by reference.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef SPAWNMONITOR_H
@@ -39,9 +49,9 @@
 //	it... i don't know enough yet to determine what length is "too old", since there
 //	are rumored to be very rare, yet static, spawns in EQ
 
-#include <time.h>
-#include <qobject.h>
-#include <qasciidict.h>
+#include <ctime>
+#include <QObject>
+#include <QHash>
 #include "spawn.h"
 #include "zonemgr.h"
 #include "spawnshell.h"
@@ -103,9 +113,9 @@ public:
 			     QObject* parent = 0, 
 			     const char* name = "spawnmonitor" );
   virtual ~SpawnMonitor();
- 
-  const QAsciiDict<SpawnPoint>& spawnPoints() { return m_points; }
-  const QAsciiDict<SpawnPoint>& spawns() { return m_spawns; }
+
+  const QHash<QString, SpawnPoint*>& spawnPoints() { return m_points; }
+  const QHash<QString, SpawnPoint*>& spawns() { return m_spawns; }
   const SpawnPoint* selected() { return m_selected; }
 
 public slots:
@@ -133,8 +143,8 @@ protected:
   const DataLocationMgr* m_dataLocMgr;
   SpawnShell* m_spawnShell;
   QString m_zoneName;
-  QAsciiDict<SpawnPoint> m_spawns;
-  QAsciiDict<SpawnPoint> m_points;
+  QHash<QString, SpawnPoint*> m_spawns;
+  QHash<QString, SpawnPoint*> m_points;
   const SpawnPoint* m_selected;
   bool m_modified;
 };

@@ -1,10 +1,23 @@
 /*
- * util.cpp
+ *  util.cpp
+ *  Copyright 2000-2007, 2014, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sourceforge.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
 
@@ -12,14 +25,14 @@
 #include "diagnosticmessages.h"
 #include "main.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include <sys/time.h>
 
-#include <qcolor.h>
-#include <qfileinfo.h>
-#include <qdir.h>
+#include <QColor>
+#include <QFileInfo>
+#include <QDir>
 
 #ifdef __FreeBSD__
 long int lroundf(float x)
@@ -725,7 +738,7 @@ QString reformatMoney (unsigned int uiCopper)
 
   if (uiDivisor == 100 && (uiCopper / uiDivisor) > 0)
   {
-    qsMoney.sprintf("%s%s%d Gold", qsMoney.ascii(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
+    qsMoney.sprintf("%s%s%d Gold", qsMoney.toAscii().data(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
     bNeedComma = true;
     uiCopper -= ((uiCopper / uiDivisor) * uiDivisor);
   }
@@ -734,7 +747,7 @@ QString reformatMoney (unsigned int uiCopper)
 
   if (uiDivisor == 10 && (uiCopper / uiDivisor) > 0)
   {
-    qsMoney.sprintf("%s%s%d Silver", qsMoney.ascii(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
+    qsMoney.sprintf("%s%s%d Silver", qsMoney.toAscii().data(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
     bNeedComma = true;
     uiCopper -= ((uiCopper / uiDivisor) * uiDivisor);
   }
@@ -742,7 +755,7 @@ QString reformatMoney (unsigned int uiCopper)
   uiDivisor /= 10;
 
   if (uiDivisor == 1 && uiCopper != 0)
-    qsMoney.sprintf("%s%s%d Copper", qsMoney.ascii(), bNeedComma ? ", " : "", uiCopper);
+    qsMoney.sprintf("%s%s%d Copper", qsMoney.toAscii().data(), bNeedComma ? ", " : "", uiCopper);
 
   return ( qsMoney );
 }
@@ -801,48 +814,47 @@ void diagFileWriteFail(QString filename)
   QFileInfo fileInfo(filename);
 
   // Get information about the directory the file should be in
-  QFileInfo dirInfo(fileInfo.dirPath());
-  
+  QFileInfo dirInfo(fileInfo.absolutePath());
+
   // Check out the directory
   if (dirInfo.exists())
   {
     // if what's supposed to be a directory isn't somethings wierd.
     if (!dirInfo.isDir())
       seqWarn("\tDirectory '%s' isn't a directory!",
-	      (const char*)dirInfo.absFilePath());
+              dirInfo.absoluteFilePath().toAscii().data());
     else
     {
       // if the directory isn't writable, that might explain it
       if (!dirInfo.isWritable())
-	seqWarn("\tCan't write to directory: %s",
-		(const char*)dirInfo.absFilePath());
+          seqWarn("\tCan't write to directory: %s",
+                  dirInfo.absoluteFilePath().toAscii().data());
       // if the directory isn't readable, that might explain it
       if (!dirInfo.isReadable())
-	seqWarn("\tCan't read directory: %s",
-		(const char*)dirInfo.absFilePath());
+          seqWarn("\tCan't read directory: %s",
+                  dirInfo.absoluteFilePath().toAscii().data());
       // is the directory executable (listable),
       if (!dirInfo.isExecutable())
-	seqWarn("\tCan't execute/access directory: %s",
-		(const char*)dirInfo.absFilePath());
+          seqWarn("\tCan't execute/access directory: %s",
+                  dirInfo.absoluteFilePath().toAscii().data());
     }
   }
   else // directory doesn't exist
     seqWarn("\tDirectory '%s' doesn't exist!",
-	    (const char*)dirInfo.absFilePath());
-  
-  
+                  dirInfo.absoluteFilePath().toAscii().data());
+
   // Check out the file
   if (fileInfo.exists())
   {
     // The file exists, but is it writable
     if (!fileInfo.isWritable())
       seqWarn("\tCan't write to file: %s",
-	      (const char*)fileInfo.absFilePath());
+              fileInfo.absoluteFilePath().toAscii().data());
 
     // Is the file really a file (or did someone do something wierd)
     if (!fileInfo.isFile())
       seqWarn("\tNot a file:'%s'!",
-	      (const char*)fileInfo.absFilePath());
+              fileInfo.absoluteFilePath().toAscii().data());
   }
 }
 
@@ -852,48 +864,47 @@ void diagFileReadFail(QString filename)
   QFileInfo fileInfo(filename);
 
   // Get information about the directory the file should be in
-  QFileInfo dirInfo(fileInfo.dirPath());
-  
+  QFileInfo dirInfo(fileInfo.absolutePath());
+
   // Check out the directory
   if (dirInfo.exists())
   {
     // if what's supposed to be a directory isn't somethings wierd.
     if (!dirInfo.isDir())
       seqWarn("\tDirectory '%s' isn't a directory!",
-	      (const char*)dirInfo.absFilePath());
+              dirInfo.absoluteFilePath().toAscii().data());
     else
     {
       // if the directory isn't readable, that might explain it
       if (!dirInfo.isReadable())
-	seqWarn("\tCan't read directory: %s",
-		(const char*)dirInfo.absFilePath());
+          seqWarn("\tCan't read directory: %s",
+              dirInfo.absoluteFilePath().toAscii().data());
       // is the directory executable (listable),
       if (!dirInfo.isExecutable())
-	seqWarn("\tCan't execute/access directory: %s",
-		(const char*)dirInfo.absFilePath());
+          seqWarn("\tCan't execute/access directory: %s",
+              dirInfo.absoluteFilePath().toAscii().data());
     }
   }
   else // directory doesn't exist
     seqWarn("\tDirectory '%s' doesn't exist!",
-	    (const char*)dirInfo.absFilePath());
-  
-  
+              dirInfo.absoluteFilePath().toAscii().data());
+
   // Check out the file
   if (fileInfo.exists())
   {
     // The file exists, but is it writable
     if (!fileInfo.isReadable())
       seqWarn("\tCan't read to file: %s",
-	      (const char*)fileInfo.absFilePath());
+              fileInfo.absoluteFilePath().toAscii().data());
 
     // Is the file really a file (or did someone do something wierd)
     if (!fileInfo.isFile())
       seqWarn("\tNot a file:'%s'!",
-	      (const char*)fileInfo.absFilePath());
+              fileInfo.absoluteFilePath().toAscii().data());
   }
   else
     seqWarn("\tFile '%s' doesn't exist.",
-	    (const char*)fileInfo.absFilePath());
+              fileInfo.absoluteFilePath().toAscii().data());
 }
 
 

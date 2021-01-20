@@ -1,28 +1,44 @@
 /*
- * experiencelog.h
+ *  combatlog.h
+ *  Copyright 2002-2005, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef COMBATLOG_H
 # define COMBATLOG_H
 
-# include <qobject.h>
-# include <qwidget.h>
-# include <qtabwidget.h>
-# include <qlist.h>
-# include <qlistview.h>
-# include <qcombobox.h>
-# include <qlabel.h>
-# include <qlayout.h>
-# include <qmenubar.h>
+# include <QObject>
+# include <QWidget>
+# include <QTabWidget>
+# include <QList>
+# include <QComboBox>
+# include <QLabel>
+# include <QLayout>
+# include <QMenuBar>
+#include <QMenu>
+#include <QVBoxLayout>
 
 # include <sys/time.h>
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <fcntl.h>
-# include <stdio.h>
+# include <cstdio>
 
 #include "seqwindow.h"
 #include "seqlistview.h"
@@ -227,12 +243,12 @@ private:
 	QLabel*		m_label_mob_currentdps;
 	QLabel*		m_label_mob_lastdps;
 
-	QList<CombatOffenseRecord> m_combat_offense_list;
+	QList<CombatOffenseRecord*> m_combat_offense_list;
 	CombatDefenseRecord *m_combat_defense_record;
-	QList<CombatMobRecord> m_combat_mob_list;
+	QList<CombatMobRecord*> m_combat_mob_list;
 
 	QMenuBar	*m_menu_bar;
-	QPopupMenu	*m_clear_menu;
+	QMenu	*m_clear_menu;
 
 	int		m_iCurrentDPSTotal;
 	int		m_iDPSStartTime;

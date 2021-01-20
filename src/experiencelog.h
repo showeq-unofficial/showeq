@@ -1,8 +1,23 @@
 /*
- * experiencelog.h
+ *  experiencelog.h
+ *  Copyright 2001-2005, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://www.hackersquest.gomp.ch/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef EXPERIENCELOG_H
@@ -11,21 +26,24 @@
 #include "seqwindow.h"
 #include "seqlistview.h"
 
-# include <qobject.h>
-# include <qwidget.h>
-# include <qlist.h>
-# include <qlistview.h>
-# include <qcombobox.h>
-# include <qlabel.h>
-# include <qlayout.h>
-# include <qmenubar.h>
+#include <QObject>
+#include <QWidget>
+#include <QList>
+#include <QComboBox>
+#include <QLabel>
+#include <QLayout>
+#include <QMenuBar>
+#include <QResizeEvent>
+#include <QVBoxLayout>
+#include <QMenu>
 
-#include <stdint.h>
-# include <sys/time.h>
-# include <sys/types.h>
-# include <sys/stat.h>
-# include <fcntl.h>
-# include <stdio.h>
+#include <cstdint>
+#include <cstdio>
+
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -117,20 +135,22 @@ private:
    QVBoxLayout *m_layout;
 
    SEQListView *m_exp_listview;
+   //QTreeWidget *m_exp_listview;
 
    QLabel *m_experience_rate_label;
    QLabel *m_total_received, *m_mob_count, *m_average_per_mob,
       *m_experience_remaining, *m_play_time,
       *m_experience_rate, *m_kills_to_level, *m_time_to_level;
 
-   QPtrList<ExperienceRecord> m_exp_list;
+   QList<ExperienceRecord*> m_exp_list;
 
    QMenuBar *m_menu_bar;
-   QPopupMenu *m_view_menu, *m_exp_rate_menu, *m_ZEM_menu;
+   QMenu *m_view_menu, *m_exp_rate_menu, *m_ZEM_menu;
 
    int m_timeframe;
    int m_ratio;
    int m_calcZEM;
+   QAction* m_action_calc_zem;
    int m_ZEMviewtype;
    int m_log_exp;
    FILE* m_log;

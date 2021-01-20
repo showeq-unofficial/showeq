@@ -1,16 +1,32 @@
 /*
- * messagefilterdialog.h
+ *  messagefilterdialog.h
+ *  Copyright 2003-2009, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sf.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef _MESSAGEFILTERDIALOG_H_
 #define _MESSAGEFILTERDIALOG_H_
 
-#include <stdint.h>
+#include <cstdint>
 
-#include <qdialog.h>
+#include <QDialog>
+#include <QLabel>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -21,9 +37,10 @@ class QComboBox;
 class QLineEdit;
 class QLabel;
 class QPushButton;
-class QListBox;
-class QListBoxItem;
+class QListWidget;
+class QListWidgetItem;
 class QGroupBox;
+class QItemSelection;
 
 //----------------------------------------------------------------------
 // MessageFilterDialog
@@ -43,8 +60,10 @@ class MessageFilterDialog : public QDialog
 
  protected slots:
    void anyTextChanged(const QString& newText);
-   void messageTypeSelectionChanged();
-   void existingFilterSelectionChanged(QListBoxItem * item);
+   void messageTypeSelectionChanged(const QItemSelection& selected,
+           const QItemSelection& deselected);
+   void existingFilterSelectionChanged(const QItemSelection& selected,
+           const QItemSelection& deselected);
    void removedFilter(uint32_t mask, uint8_t filter);
    void addedFilter(uint32_t mask, uint8_t filterid, const MessageFilter& filter);
 
@@ -53,12 +72,12 @@ class MessageFilterDialog : public QDialog
    void checkState();
 
   MessageFilters* m_filters;
-  QListBox* m_existingFilters;
+  QListWidget* m_existingFilters;
   QPushButton* m_new;
   QGroupBox* m_filterGroup;
   QLineEdit* m_name;
   QLineEdit* m_pattern;
-  QListBox* m_messageTypes;
+  QListWidget* m_messageTypes;
   QPushButton* m_add;
   QPushButton* m_update;
   QPushButton* m_delete;

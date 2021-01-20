@@ -1,10 +1,24 @@
 /*
- * spelllist.cpp
+ *  spelllist.cpp
+ *  Copyright 2001 Crazy Joe Divola (cjd1@users.sourceforge.net)
+ *  Copyright 2001-2007, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2001-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
  
 /*
@@ -12,42 +26,38 @@
  * Date - 9/7/2001
  */
 
-#include <qpainter.h>
-#include <qlayout.h>
+#include <QPainter>
+#include <QLayout>
+#include <QList>
+#include <QMenu>
 
 #include "spelllist.h"
 #include "main.h"
 
-SpellListItem::SpellListItem(QListViewItem *parent) : QListViewItem(parent)
+SpellListItem::SpellListItem(SEQListViewItem *parent) : SEQListViewItem(parent)
 {
    m_textColor = Qt::black;
    m_item = NULL;
 }
 
-SpellListItem::SpellListItem(QListView *parent) : QListViewItem(parent)
+SpellListItem::SpellListItem(SEQListView *parent) : SEQListViewItem(parent)
 {
    m_textColor = Qt::black;
    m_item = NULL;
 }
 
-
-//Added in by Worried to make color change by time remaining work
-// paintCell 
-//
-// overridden from base class in order to change color and style attributes
-//
-void SpellListItem::paintCell( QPainter *p, const QColorGroup &cg,
-                               int column, int width, int alignment )
+QVariant SpellListItem::data(int column, int role) const
 {
-  QColorGroup newCg( cg );
-  
-  newCg.setColor( QColorGroup::Text, m_textColor);
-  
-  QFont font = this->listView()->font();
-  p->setFont(font);
-  
-  QListViewItem::paintCell( p, newCg, column, width, alignment );
+    switch(role)
+    {
+        case Qt::ForegroundRole:
+            return m_textColor;
+
+        default:
+            return SEQListViewItem::data(column, role);
+    }
 }
+
 
 const QColor SpellListItem::textColor()
 {
@@ -126,46 +136,57 @@ SpellList::SpellList(SpellShell* sshell, QWidget *parent, const char *name)
 
    restoreColumns();
 
-   connect (this, SIGNAL(doubleClicked(QListViewItem*)),
-	    this, SLOT(mouseDoubleClicked(QListViewItem*)));
-   connect(this, SIGNAL(rightButtonClicked(QListViewItem*, const QPoint&, int)),
-	   this, SLOT(rightButtonClicked(QListViewItem*, const QPoint&, int)));
+   connect (this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
+	    this, SLOT(listItemDoubleClicked(QTreeWidgetItem*, int)));
+   connect(this, SIGNAL(mouseRightButtonPressed(QMouseEvent*)),
+	   this, SLOT(listMouseRightButtonPressed(QMouseEvent*)));
 }
 
-QPopupMenu* SpellList::menu()
+QMenu* SpellList::menu()
 {
   // if the menu already exists, return it
   if (m_menu)
     return m_menu;
-  
-  m_menu = new QPopupMenu(this);
-  m_menu->setCheckable(true);
-  
-  mid_spellName = m_menu->insertItem("Spell Name");
-  mid_spellId = m_menu->insertItem("Spell ID");
-  mid_casterId = m_menu->insertItem("Caster ID");
-  mid_casterName = m_menu->insertItem("Caster Name");
-  mid_targetId = m_menu->insertItem("Target ID");
-  mid_targetName = m_menu->insertItem("Target Name");
-  mid_casttime = m_menu->insertItem("Cast Time");
-  mid_duration = m_menu->insertItem("Remaining Time");
 
-  connect(m_menu, SIGNAL(activated(int)), this, SLOT(activated(int)));
+  m_menu = new QMenu(this);
+
+  m_action_spellName = m_menu->addAction("Spell Name");
+  m_action_spellName->setCheckable(true);
+  m_action_spellName->setData(SPELLCOL_SPELLNAME);
+  m_action_spellId = m_menu->addAction("Spell ID");
+  m_action_spellId->setCheckable(true);
+  m_action_spellId->setData(SPELLCOL_SPELLID);
+  m_action_casterId = m_menu->addAction("Caster ID");
+  m_action_casterId->setCheckable(true);
+  m_action_casterId->setData(SPELLCOL_CASTERID);
+  m_action_casterName = m_menu->addAction("Caster Name");
+  m_action_casterName->setCheckable(true);
+  m_action_casterName->setData(SPELLCOL_CASTERNAME);
+  m_action_targetId = m_menu->addAction("Target ID");
+  m_action_targetId->setCheckable(true);
+  m_action_targetId->setData(SPELLCOL_TARGETID);
+  m_action_targetName = m_menu->addAction("Target Name");
+  m_action_targetName->setCheckable(true);
+  m_action_targetName->setData(SPELLCOL_TARGETNAME);
+  m_action_casttime = m_menu->addAction("Cast Time");
+  m_action_casttime->setCheckable(true);
+  m_action_casttime->setData(SPELLCOL_CASTTIME);
+  m_action_duration = m_menu->addAction("Remaining Time");
+  m_action_duration->setCheckable(true);
+  m_action_duration->setData(SPELLCOL_DURATION);
+
+  connect(m_menu, SIGNAL(triggered(QAction*)), this, SLOT(activated(QAction*)));
   connect(m_menu, SIGNAL(aboutToShow()), this, SLOT(init_menu()));
-  
+
   return m_menu;
 }
 
 void SpellList::init_menu(void)
-{ 
-  m_menu->setItemChecked(mid_spellName, columnWidth(SPELLCOL_SPELLNAME) != 0);
-  m_menu->setItemChecked(mid_spellId, columnWidth(SPELLCOL_SPELLID) != 0);
-  m_menu->setItemChecked(mid_casterId, columnWidth(SPELLCOL_CASTERID) != 0);
-  m_menu->setItemChecked(mid_casterName, columnWidth(SPELLCOL_CASTERNAME) != 0);
-  m_menu->setItemChecked(mid_targetId, columnWidth(SPELLCOL_TARGETID) != 0);
-  m_menu->setItemChecked(mid_targetName, columnWidth(SPELLCOL_TARGETNAME) != 0);
-  m_menu->setItemChecked(mid_casttime, columnWidth(SPELLCOL_CASTTIME) != 0);
-  m_menu->setItemChecked(mid_duration, columnWidth(SPELLCOL_DURATION) != 0);
+{
+    foreach (QAction* action, m_menu->actions())
+    {
+        action->setChecked(columnWidth(action->data().value<int>()) != 0);
+    }
 }
 
 void SpellList::selectSpell(const SpellItem *item)
@@ -181,7 +202,7 @@ SpellListItem* SpellList::InsertSpell(const SpellItem *item)
    if (!item)
       return NULL;
 
-   QValueList<SpellListItem *>::Iterator it;
+   QList<SpellListItem *>::Iterator it;
    for(it = m_spellList.begin(); it != m_spellList.end(); it++) {
       if ((*it)->item() == item)
          break;
@@ -217,8 +238,7 @@ void SpellList::DeleteItem(const SpellItem *item)
    if (item) {
       SpellListItem *i = Find(item);
       if (i) {
-         m_spellList.remove(i);
-         delete i;
+         delete m_spellList.takeAt(m_spellList.indexOf(i));
       }
    }
 }
@@ -243,7 +263,7 @@ QColor SpellList::pickSpellColor(const SpellItem *item, QColor def) const
 SpellListItem* SpellList::Find(const SpellItem *item)
 {
    if (item) {
-      QValueList<SpellListItem*>::Iterator it;
+      QList<SpellListItem*>::Iterator it;
       for(it = m_spellList.begin(); it != m_spellList.end(); ++it) {
          if ((*it)->item() == item)
             return (*it);
@@ -286,19 +306,19 @@ void SpellList::changeSpell(const SpellItem *item)
 
 void SpellList::clear()
 {
-   QListView::clear();
+   SEQListView::clear();
    m_spellList.clear();
    // rebuild categories...
 }
 
 void SpellList::selectAndOpen(SpellListItem *item)
 {
-   QListViewItem *i = item;
+   SEQListViewItem *i = item;
    while(i) {
-      item->setOpen(true);
+      expandItem(item);
       item = (SpellListItem *)item->parent();
    }
-   setSelected(i, 1);
+   setCurrentItem(i);
    // CJD TODO - use keep selected setting?
 }
 
@@ -308,62 +328,33 @@ void SpellList::selectAndOpen(SpellListItem *item)
 //void interruptSpellCast(struct interruptCastStruct *);
 //void spellMessage(QString&);
 
-void SpellList::mouseDoubleClicked(QListViewItem *item) 
-{
-  if (!item)
-    return;
 
-  SpellListItem *i = (SpellListItem *)item;
-  const SpellItem *j = i->item(); 
-  if (j)
-    m_spellShell->deleteSpell(j);
+void SpellList::listItemDoubleClicked(QTreeWidgetItem* litem, int col)
+{
+    SpellListItem* lvitem = dynamic_cast<SpellListItem*>(litem);
+    if (!lvitem) return;
+
+    const SpellItem *j = lvitem->item();
+    if (j)
+        m_spellShell->deleteSpell(j);
 }
 
-void SpellList::rightButtonClicked(QListViewItem *item, const QPoint& pos,
-      int col)
-{
-  QPopupMenu* slMenu = menu();
 
-  if (slMenu)
-    slMenu->popup(pos);
+void SpellList::listMouseRightButtonPressed(QMouseEvent* event)
+{
+    if (event->button() == Qt::RightButton)
+    {
+        QMenu* slMenu = menu();
+
+        if (slMenu)
+            slMenu->popup(event->globalPos());
+    }
 }
 
-void SpellList::activated(int mid)
+void SpellList::activated(QAction* action)
 {
-   int col = 0;
-   int id = 0;
-
-   if (mid == mid_spellName) {
-      id = mid_spellName;
-      col = SPELLCOL_SPELLNAME;
-   } else if (mid == mid_spellId) {
-      id = mid_spellId;
-      col = SPELLCOL_SPELLID;
-   } else if (mid == mid_casterId) {
-      id = mid_casterId;
-      col = SPELLCOL_CASTERID;
-   } else if (mid == mid_casterName) {
-      id = mid_casterName;
-      col = SPELLCOL_CASTERNAME;
-   } else if (mid == mid_targetId) {
-      id = mid_targetId;
-      col = SPELLCOL_TARGETID;
-   } else if (mid == mid_targetName) {
-      id = mid_targetName;
-      col = SPELLCOL_TARGETNAME;
-   } else if (mid == mid_casttime) {
-      id = mid_casttime;
-      col = SPELLCOL_CASTTIME;
-   } else if (mid == mid_duration) {
-      id = mid_duration;
-      col = SPELLCOL_DURATION;
-   }
-
-   if (id) 
-   {
-     setColumnVisible(col, !columnVisible(col));
-     m_menu->setItemChecked(id, columnVisible(col));
-   }
+   int col = action->data().value<int>();
+   setColumnVisible(col, !columnVisible(col));
 }
 
 SpellListWindow::SpellListWindow(SpellShell* sshell, 
@@ -382,7 +373,7 @@ SpellListWindow::~SpellListWindow()
   delete m_spellList;
 }
 
-QPopupMenu* SpellListWindow::menu()
+QMenu* SpellListWindow::menu()
 {
   return m_spellList->menu();
 }

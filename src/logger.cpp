@@ -1,34 +1,47 @@
 /*
- * logger.cpp
+ *  logger.cpp - packet/data logging class
+ *  Copyright 2002-2007, 2019 by the respective ShowEQ Developers
  *
- * packet/data logging class
- *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <qstring.h>
-#include <qlist.h>
+#include <cstdio>
+#include <cstdarg>
+#include <cstring>
+#include <cstdlib>
+#include <cerrno>
+#include <QString>
+#include <QList>
 
 #include "logger.h"
 
 SEQLogger::SEQLogger(FILE *fp, QObject* parent, const char* name)
-  : QObject(parent, name)
+  : QObject(parent)
 {
+    setObjectName(name);
     m_fp = fp;
     m_errOpen = false;
 }
 
 SEQLogger::SEQLogger(const QString& fname, QObject* parent, const char* name)
-  : QObject(parent, name)
+  : QObject(parent)
 {
+    setObjectName(name);
     m_fp = NULL;
     m_filename = fname;
     m_errOpen = false;
@@ -38,33 +51,33 @@ bool SEQLogger::open()
 {
   if (m_fp)
     return true;
-  
-  m_fp = fopen((const char*)m_filename,"a");
-  
+
+  m_fp = fopen(m_filename.toAscii().data(),"a");
+
   if (!m_fp)
-  { 
+  {
     if (!m_errOpen)
     {
       ::fprintf(stderr, "Error opening %s: %s (will keep trying)\n",
-		(const char*)m_filename, strerror(errno));
+              m_filename.toAscii().data(), strerror(errno));
       m_errOpen = true;
     }
-    
+
     return false;
   }
- 
+
   m_errOpen = false;
 
-  if (!m_file.open(IO_Append | IO_WriteOnly, m_fp))
+  if (!m_file.open(m_fp, QIODevice::Append | QIODevice::WriteOnly))
     return false;
-  
+
   m_out.setDevice(&m_file);
-  
+
   return true;
 }
 
 void SEQLogger::flush()
-{ 
+{
   m_file.flush();
 }
 
@@ -73,14 +86,14 @@ int SEQLogger::outputf(const char *fmt, ...)
 {
   va_list args;
   int count;
-  
+
   if (!m_fp)
     return 0;
-  
+
   va_start(args, fmt);
   count = vfprintf(m_fp, fmt, args);
   va_end(args);
-  
+
   return count;
 }
 

@@ -1,10 +1,23 @@
 /*
- * player.cpp
+ *  player.cpp
+ *  Copyright 2000-2008, 2012-2016, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sourceforge.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "player.h"
@@ -15,12 +28,12 @@
 #include "zonemgr.h"
 #include "main.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
 
-#include <qdir.h>
-#include <qfile.h>
-#include <qdatastream.h>
+#include <QDir>
+#include <QFile>
+#include <QDataStream>
 
 
 // #define DEBUG_PLAYER
@@ -47,13 +60,14 @@ Player::Player (QObject* parent,
 		ZoneMgr* zoneMgr,
 		GuildMgr* guildMgr,
 		const char* name)
-  : QObject(parent, name),
+  : QObject(parent),
     Spawn(),
     m_zoneMgr(zoneMgr),
     m_guildMgr(guildMgr)
 {
+  setObjectName(name);
 #ifdef DEBUG_PLAYER
-  debug("Player()");
+  qDebug ("Player()");
 #endif
 
   connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
@@ -108,7 +122,7 @@ Player::Player (QObject* parent,
   m_conColorBases[tUnknownSpawn] = 
     pSEQPrefs->getPrefColor(conColorBasePrefNames[tUnknownSpawn],
 			    "Player",
-			    gray);
+			    Qt::gray);
 						 
   // restore the player state if the user requested it...
   if (showeq_params->restorePlayerState)
@@ -1268,7 +1282,7 @@ uint8_t Player::classVal() const
 void Player::savePlayerState(void)
 {
   QFile keyFile(showeq_params->saveRestoreBaseFilename + "Player.dat");
-  if (keyFile.open(IO_WriteOnly))
+  if (keyFile.open(QIODevice::WriteOnly))
   {
     QDataStream d(&keyFile);
 
@@ -1278,12 +1292,12 @@ void Player::savePlayerState(void)
     d << *magic;
 
     // write a test value at the top of the file for a validity check
-    size_t testVal = sizeof(charProfileStruct);
+    uint32_t testVal = sizeof(charProfileStruct);
     d << testVal;
     d << MAX_KNOWN_SKILLS;
     d << MAX_KNOWN_LANGS;
 
-    d << m_zoneMgr->shortZoneName().lower();
+    d << m_zoneMgr->shortZoneName().toLower();
 
     // write out the rest
     d << m_name;
@@ -1352,10 +1366,10 @@ void Player::restorePlayerState(void)
 {
   QString fileName = showeq_params->saveRestoreBaseFilename + "Player.dat";
   QFile keyFile(fileName);
-  if (keyFile.open(IO_ReadOnly))
+  if (keyFile.open(QIODevice::ReadOnly))
   {
     int i;
-    size_t testVal;
+    uint32_t testVal;
     QDataStream d(&keyFile);
 
     // check the magic string
@@ -1365,7 +1379,7 @@ void Player::restorePlayerState(void)
     if (magicTest != *magic)
     {
       seqWarn("Failure loading %s: Bad magic string!",
-	      (const char*)fileName);
+              fileName.toAscii().data());
       reset();
       clear();
       return;
@@ -1375,8 +1389,8 @@ void Player::restorePlayerState(void)
     d >> testVal;
     if (testVal != sizeof(charProfileStruct))
     {
-      seqWarn("Failure loading %s: Bad player size!", 
-	      (const char*)fileName);
+      seqWarn("Failure loading %s: Bad player size!",
+              fileName.toAscii().data());
       reset();
       clear();
       return;
@@ -1385,8 +1399,8 @@ void Player::restorePlayerState(void)
     d >> testVal;
     if (testVal != MAX_KNOWN_SKILLS)
     {
-      seqWarn("Failure loading %s: Bad known skills!", 
-	      (const char*)fileName);
+      seqWarn("Failure loading %s: Bad known skills!",
+              fileName.toAscii().data());
       reset();
       clear();
       return;
@@ -1395,21 +1409,21 @@ void Player::restorePlayerState(void)
     d >> testVal;
     if (testVal != MAX_KNOWN_LANGS)
     {
-      seqWarn("Failure loading %s: Bad known langs!", 
-	      (const char*)fileName);
+      seqWarn("Failure loading %s: Bad known langs!",
+              fileName.toAscii().data());
       reset();
       clear();
       return;
     }
-    
+
     // attempt to validate that the info is from the current zone
     QString zoneShortName;
     d >> zoneShortName;
-    if (zoneShortName != m_zoneMgr->shortZoneName().lower())
+    if (zoneShortName != m_zoneMgr->shortZoneName().toLower())
     {
       seqWarn("\aWARNING: Restoring player state for potentially incorrect zone (%s != %s)!",
-	      (const char*)zoneShortName, 
-	      (const char*)m_zoneMgr->shortZoneName().lower());
+              zoneShortName.toAscii().data(),
+              m_zoneMgr->shortZoneName().toLower().toAscii().data());
     }
 
     // read in the rest
@@ -1479,13 +1493,13 @@ void Player::restorePlayerState(void)
     fillConTable();
 
     seqInfo("Restored PLAYER: %s (%s)!",
-	    (const char*)m_name,
-	    (const char*)m_lastName);
+            m_name.toAscii().data(),
+            m_lastName.toAscii().data());
   }
   else
   {
-    seqWarn("Failure loading %s: Unable to open!", 
-	    (const char*)fileName);
+    seqWarn("Failure loading %s: Unable to open!",
+            fileName.toAscii().data());
     reset();
     clear();
   }

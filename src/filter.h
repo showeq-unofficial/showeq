@@ -1,8 +1,23 @@
 /*
- * filter.h
+ *  filter.h - regex filter module
+ *  Copyright 2001-2005, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 //
@@ -13,14 +28,14 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <sys/types.h>
 
-#include <qstring.h>
-#include <qlist.h>
-#include <qregexp.h>
-#include <qxml.h>
-#include <qtextstream.h>
+#include <QString>
+#include <QList>
+#include <QRegExp>
+#include <QXmlAttributes>
+#include <QTextStream>
 
 #include <map>
 
@@ -33,8 +48,8 @@ class FilterTypes;
 
 //--------------------------------------------------
 // typedefs
-typedef QList<FilterItem> FilterList;
-typedef QListIterator<FilterItem> FilterListIterator;
+typedef QList<FilterItem*> FilterList;
+typedef QListIterator<FilterItem*> FilterListIterator;
 typedef std::map<uint32_t, QString> FilterTypeMap;
 typedef std::map<uint32_t, Filter*> FilterMap;
 

@@ -1,19 +1,34 @@
 /*
-* showitem.cpp
-*
-* ShowEQ Distributed under GPL
-* http://seq.sourceforge.net/
-*/
+ *  showitem.cpp
+ *  Copyright 2001-2003, 2019 by the respective ShowEQ Developers
+ *
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 /* CGI program to display details about a specific item - The ID of the item
 * is passed on the commandline
 */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
-#include <qtextstream.h>
+#include <QTextStream>
 
 #include "cgiconv.h"
 #include "util.h"
@@ -25,7 +40,7 @@ void printdata (QTextStream& out, int len, char *data);
 int main (int argc, char *argv[])
 {
   // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
+  QTextStream out(stdout, QIODevice::WriteOnly);
   
   const char* header =
     "Content-type: text/html; charset=iso-8859-1\n\n"

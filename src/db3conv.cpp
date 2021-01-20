@@ -1,15 +1,28 @@
 /*
- * gdbmconv.cpp
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  db3conv.cpp
+ *  Copyright 2001 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Copyright 2019 by the respective ShowEQ Developers
  *
- * Copyright 2001 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
+ *  for use under the terms of the GNU General Public License, 
+ *  incorporated herein by reference.
  *
- * Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
- * for use under the terms of the GNU General Public License, 
- * incorporated herein by reference.
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 //
@@ -18,13 +31,13 @@
 // dependencies will be migrated out.
 //
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cerrno>
+#include <cstring>
 
-#include <qstring.h>
-#include <qfileinfo.h>
+#include <QString>
+#include <QFileInfo>
 
 #include "db3conv.h"
 #include "util.h"
@@ -74,14 +87,14 @@ Db* DB3Convenience::GetDatabase(QString dbName)
   QFileInfo fileInfo(dbName);
 
   // Get information about the directory the file should be in
-  QFileInfo dirInfo(fileInfo.dirPath());
+  QFileInfo dirInfo(fileInfo.absoluteFilePath());
 
   // if the directory that the db will be opened in doesn't exist, just
   // warn and fail now
   if (!dirInfo.exists())
     {
       fprintf(stderr, "DB3Convenience: Data Directory '%s' doesn't exist.\n",
-	      (const char*)dirInfo.absFilePath());
+              dirInfo.absoluteFilePath().toAscii().data());
 
       // nothing more to do, just return NULL
       return (Db*)NULL;
@@ -91,7 +104,7 @@ Db* DB3Convenience::GetDatabase(QString dbName)
   if (!dirInfo.isDir())
     {
       fprintf(stderr, "DB3Convenience: Data Directory '%s isn't a directory.\n",
-	      (const char*)dirInfo.absFilePath());
+              dirInfo.absoluteFilePath().toAscii().data());
 
       // nothing more to do, just return NULL
       return (Db*)NULL;
@@ -106,8 +119,8 @@ Db* DB3Convenience::GetDatabase(QString dbName)
 	{
 	  // if the file isn't readable, no point in going on is there...
 	  fprintf(stderr, "DB3Convenience: Data File '%s isn't readable.\n",
-		  (const char*)dirInfo.absFilePath());
-      
+              dirInfo.absoluteFilePath().toAscii().data());
+
 	  // nothing more to do, just return NULL
 	  return (Db*)NULL;
 	}
@@ -143,9 +156,9 @@ Db* DB3Convenience::GetDatabase(QString dbName)
       
       // setup the common database environment for all databases opened
       // using this object
-      ret = m_dbEnv->open((const char*)dirInfo.absFilePath(), dbEnvFlags,
-			  0664);
-	
+      ret = m_dbEnv->open(dirInfo.absoluteFilePath().toAscii().data(), dbEnvFlags,
+              0664);
+
       if (ret != 0)
       {
 	// display a human readable error
@@ -174,16 +187,16 @@ Db* DB3Convenience::GetDatabase(QString dbName)
 
 #if 1 // can't do verify with transactions, logging, or locking
   // verify the database before we go any further
-  ret = retdbp->verify((const char*)dbName, NULL, NULL, 0);
+  ret = retdbp->verify(dbName.toAscii().data(), NULL, NULL, 0);
 
   if (ret != 0)
     {
       // display a human readable error
       fprintf(stderr, "DB3Convenience: Db::verify() failed on file '%s': %s\n", 
-	      (const char*)dbName, DbEnv::strerror(ret));
+              dbName.toAscii().data(), DbEnv::strerror(ret));
       if (ret == DB_RUNRECOVERY)
-	fprintf(stderr, "DB3Convenience: Please run db_recover on file '%s'\n",
-		(const char*)dbName);
+          fprintf(stderr, "DB3Convenience: Please run db_recover on file '%s'\n",
+                  dbName.toAscii().data());
 
       // check if it's a file access problem
       if (openForReadOnly)
@@ -207,8 +220,8 @@ Db* DB3Convenience::GetDatabase(QString dbName)
     {
       // display a human readable error
       fprintf(stderr, 
-	      "DB3Convenience: Db::set_flags(0) failed on file '%s': %s\n", 
-	      (const char*)dbName, DbEnv::strerror(ret));
+              "DB3Convenience: Db::set_flags(0) failed on file '%s': %s\n",
+              dbName.toAscii().data(), DbEnv::strerror(ret));
 
       // delete the database handle since it's not usable
       delete retdbp;
@@ -220,13 +233,13 @@ Db* DB3Convenience::GetDatabase(QString dbName)
 
   // open the database
   //  ret = retdbp->open((const char*)dbName, NULL, DB_HASH, dbOpenFlags, 0664);
-  ret = retdbp->open((const char*)dbName, NULL, DB_BTREE, dbOpenFlags, 0664);
-    
+  ret = retdbp->open(NULL, dbName.toAscii().data(), NULL, DB_BTREE, dbOpenFlags, 0664);
+
   if (ret != 0)
     {
       // display a human readable error
-      fprintf(stderr, "DB3Convenience: Db::open() failed on file '%s': %s\n", 
-	      (const char*)dbName, DbEnv::strerror(ret));
+      fprintf(stderr, "DB3Convenience: Db::open() failed on file '%s': %s\n",
+              dbName.toAscii().data(), DbEnv::strerror(ret));
 
       // check if it's a file access problem
       if (openForReadOnly)
@@ -270,7 +283,7 @@ bool DB3Convenience::Insert(QString dbName, Datum& key, Datum& data,
 	success = true;
 	break;
       default:
-	displayDB3Error(ret, "Insert: put", (const char*)dbName);
+    displayDB3Error(ret, "Insert: put", dbName.toAscii().data());
       }
   }
 
@@ -294,7 +307,7 @@ bool DB3Convenience::Delete(QString dbName, Datum& key)
 	success = true;
 	break;
       default:
-	displayDB3Error(ret, "Delete: del", (const char*)dbName);
+    displayDB3Error(ret, "Delete: del", dbName.toAscii().data());
       }
   }
 
@@ -322,7 +335,7 @@ bool DB3Convenience::IsEntryExist(QString dbName, Datum& key)
 	success = false;
 	break;
       default:
-	displayDB3Error(ret, "IsEntryExist: get", (const char*)dbName);
+    displayDB3Error(ret, "IsEntryExist: get", dbName.toAscii().data());
       }
   }
 
@@ -355,7 +368,7 @@ bool DB3Convenience::GetEntry(QString dbName, Datum& key, Datum& data)
 	success = false;
 	break;
       default:
-	displayDB3Error(ret, "GetEntry: get", (const char*)dbName);
+    displayDB3Error(ret, "GetEntry: get", dbName.toAscii().data());
       }
   }
 
@@ -391,7 +404,7 @@ void DB3Convenience::Close(QString dbName)
     int ret = db->close(0);
 
     if (ret != 0)
-      displayDB3Error(ret, "Close: close", (const char*)dbName);
+      displayDB3Error(ret, "Close: close", dbName.toAscii().data());
 
     // remove the db from the dictionary
     m_dbDict.remove(dbName);
@@ -404,7 +417,7 @@ void DB3Convenience::Close(QString dbName)
 void DB3Convenience::Shutdown()
 {
   // create an iterator over the dictionary of DB's
-  QDictIterator<Db> it(m_dbDict);
+  QHashIterator<QString, Db*> it(m_dbDict);
 
   // attempt to get the DB from the cache
   Db* db;
@@ -412,9 +425,11 @@ void DB3Convenience::Shutdown()
   int ret;
 
   // iterate over the cached databases, shutting them down 1 at a time
-  while ((db = it.current()) != NULL)
+  while (it.hasNext())
   {
-    dbName = it.currentKey();
+    it.next();
+    db = it.value();
+    dbName = it.key();
 
 #if 0
     fprintf(stderr, "Closing database '%s', db = %08.8x\n",
@@ -425,10 +440,7 @@ void DB3Convenience::Shutdown()
     ret = db->close(0);
 
     if (ret != 0)
-      displayDB3Error(ret, "Shutdown: close", (const char*)dbName);
-
-    // increment to next database
-    ++it;
+      displayDB3Error(ret, "Shutdown: close", dbName.toAscii().data());
 
     // remove the db from the dictionary
     m_dbDict.remove(dbName);
@@ -498,7 +510,7 @@ bool DB3Iterator::GetFirstKey(DB3Convenience* db3c,
 
   if (ret != 0)
   {
-    displayDB3Error(ret, "GetFirstKey: cursor", (const char*)dbName);
+    displayDB3Error(ret, "GetFirstKey: cursor", dbName.toAscii().data());
 
     return false;
   }
@@ -516,7 +528,7 @@ bool DB3Iterator::GetFirstKey(DB3Convenience* db3c,
   // display an error on any other error returns
   if (ret != 0)
   {
-    displayDB3Error(ret, "GetFirstKey: get", (const char*)m_dbName);
+    displayDB3Error(ret, "GetFirstKey: get", m_dbName.toAscii().data());
 
     return false;
   }
@@ -567,7 +579,7 @@ bool DB3Iterator::GetNextKey(Datum& nextkey)
   // display an error on any other error returns
   if (ret != 0)
   {
-    displayDB3Error(ret, "GetNextKey: get", (const char*)m_dbName);
+    displayDB3Error(ret, "GetNextKey: get", m_dbName.toAscii().data());
 
     return false;
   }
@@ -630,7 +642,7 @@ void DB3Iterator::Done()
     int ret = m_db->close(0);
 
     if (ret != 0)
-      displayDB3Error(ret, "Done: close", (const char*)m_dbName);
+      displayDB3Error(ret, "Done: close", m_dbName.toAscii().data());
   }
 
   // if there is any data left over that the user didn't get, then free it

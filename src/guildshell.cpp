@@ -1,11 +1,24 @@
 /*
- * guildshell.h
+ *  guildshell.h
+ *  Copyright 2004-2007 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2004-2007, 2013, 2016, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2004-2007 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "guildshell.h"
@@ -15,7 +28,8 @@
 #include "everquest.h"
 #include "diagnosticmessages.h"
 
-#include <qdatetime.h>
+#include <QDateTime>
+#include <QTextStream>
 
 //----------------------------------------------------------------------
 // diagnostic defines
@@ -159,15 +173,17 @@ const QString& GuildMember::memberRankString() const
 //----------------------------------------------------------------------
 // GuildShell implementation
 GuildShell::GuildShell(ZoneMgr* zoneMgr, QObject* parent, const char* name)
-  : QObject(parent, name),
+  : QObject(parent),
     m_maxNameLength(0),
     m_zoneMgr(zoneMgr)
 {
-  m_members.setAutoDelete(true);
+    setObjectName(name);
 }
 
 GuildShell::~GuildShell()
 {
+    qDeleteAll(m_members);
+    m_members.clear();
 }
 
 QString GuildShell::zoneString(uint16_t zoneid) const
@@ -188,13 +204,13 @@ void GuildShell::dumpMembers(QTextStream& out)
 
   QString format("%1 %2  %3 %4%5%6%7  %8  %9");
   QString dateFormat("ddd MMM dd hh:mm:ss yyyy");
-  
+
   // calculate the maximum class name width
-  size_t maxClassNameLength = 0;
+  int maxClassNameLength = 0;
   for (uint8_t i = 1; i <= PLAYER_CLASSES; i++)
     if (classString(i).length() > maxClassNameLength)
       maxClassNameLength = classString(i).length();
-    
+
   out << "Guild has " << m_members.count() << " members: " << endl;
 
   int nameFieldWidth = - m_maxNameLength;
@@ -211,8 +227,11 @@ void GuildShell::dumpMembers(QTextStream& out)
   out << " Public Note" << endl;
 
   QString zone;
-  while ((member = it.current()))
+  while (it.hasNext())
   {
+    it.next();
+    member = it.value();
+
     dt.setTime_t(member->lastOn());
     zone = zoneString(member->zoneId());
     if (member->zoneInstance())
@@ -227,7 +246,6 @@ void GuildShell::dumpMembers(QTextStream& out)
       .arg(zone, -18);
 
     out << " " << member->publicNote() << endl;
-    ++it;
   }
 }
 
@@ -236,6 +254,7 @@ void GuildShell::guildMemberList(const uint8_t* data, size_t len)
 {
   // clear out any existing member data
   emit cleared();
+  qDeleteAll(m_members);
   m_members.clear();
 
   m_maxNameLength = 0;
@@ -273,7 +292,7 @@ void GuildShell::guildMemberList(const uint8_t* data, size_t len)
 
     // insert the new member into the dictionary
     m_members.insert(member->name(), member);
-    
+
     // check for new longest member name
     if (member->name().length() > m_maxNameLength)
       m_maxNameLength = member->name().length();

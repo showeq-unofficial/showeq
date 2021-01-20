@@ -1,10 +1,23 @@
 /*
- * messagewindow.cpp
+ *  messagewindow.cpp
+ *  Copyright 2003-2007, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sf.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "messagefilterdialog.h"
@@ -13,26 +26,34 @@
 #include "messages.h"
 #include "main.h"
 
-#include <qpopupmenu.h>
-#include <qinputdialog.h>
-#include <qfontdialog.h>
-#include <qcolordialog.h>
-#include <qregexp.h>
-#include <qlayout.h>
-#include <qpushbutton.h>
-#include <qcheckbox.h>
-#include <qlabel.h>
-#include <qlineedit.h>
-#include <qgroupbox.h>
-#include <qfiledialog.h>
-#include <qfile.h>
-#include <qtextstream.h>
+#include <QMenu>
+#include <QInputDialog>
+#include <QFontDialog>
+#include <QColorDialog>
+#include <QRegExp>
+#include <QLayout>
+#include <QPushButton>
+#include <QCheckBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QGroupBox>
+#include <QFileDialog>
+#include <QFile>
+#include <QTextStream>
+#include <QHBoxLayout>
+#include <QKeyEvent>
+#include <QGridLayout>
+#include <QFormLayout>
+#include <QFrame>
+#include <QMouseEvent>
+#include <QEvent>
 
 //---------------------------------------------------------------------- 
 // MessageBrowser
 MessageBrowser::MessageBrowser(QWidget* parent, const char* name)
-  : QTextEdit(parent, name)
+  : QTextEdit(parent)
 {
+    setObjectName(name);
 }
 
 bool MessageBrowser::eventFilter(QObject *o, QEvent *e)
@@ -49,7 +70,7 @@ bool MessageBrowser::eventFilter(QObject *o, QEvent *e)
 
   QMouseEvent* m = (QMouseEvent*)e;
 
-  if (m->button() == RightButton)
+  if (m->button() == Qt::RightButton)
   {
     emit rightClickedMouse(m);
 
@@ -64,26 +85,26 @@ void MessageBrowser::keyPressEvent(QKeyEvent* e)
   //fprintf(stderr, "MessageBrowser::keyPressEvent(%x)\n", e->key());
   switch (e->key())
   {
-  case Key_R:
-    if (e->state() == ControlButton)
+  case Qt::Key_R:
+    if (e->modifiers() == Qt::ControlModifier)
     {
       emit refreshRequest();
       return;
     }
-  case Key_F:
-    if (e->state() == ControlButton)
+  case Qt::Key_F:
+    if (e->modifiers() == Qt::ControlModifier)
     {
       emit findRequest();
       return;
     }
-  case Key_L:
-    if (e->state() == ControlButton)
+  case Qt::Key_L:
+    if (e->modifiers() == Qt::ControlModifier)
     {
       emit lockRequest();
       return;
     }
   };
-  
+
   QTextEdit::keyPressEvent(e);
 }
 
@@ -92,15 +113,16 @@ void MessageBrowser::keyPressEvent(QKeyEvent* e)
 MessageFindDialog::MessageFindDialog(MessageBrowser* messageWindow, 
 				     const QString& caption,
 				     QWidget* parent, const char* name)
-  : QDialog(parent, name, false, 0),
+  : QDialog(parent),
     m_messageWindow(messageWindow),
     m_lastParagraph(0),
     m_lastIndex(0)
 {
-  setCaption(caption);
-  
+  setObjectName(name);
+  setWindowTitle(caption);
+
   // setup the GUI
-  QGridLayout* grid = new QGridLayout(this, 5, 2);
+  QGridLayout* grid = new QGridLayout(this);
 
   // sets margin around the grid
   grid->setMargin(5);
@@ -108,8 +130,8 @@ MessageFindDialog::MessageFindDialog(MessageBrowser* messageWindow,
   m_findText = new QLineEdit(this);
   m_findText->setReadOnly(false);
   connect(m_findText, SIGNAL(textChanged(const QString&)),
-	  this, SLOT(textChanged(const QString&)));
-  grid->addMultiCellWidget(m_findText, 0, 0, 1, 2);
+          this, SLOT(textChanged(const QString&)));
+  grid->addWidget(m_findText, 0, 1, 1, 3);
   QLabel* label = new QLabel("Find &Text:", this);
   label->setBuddy(m_findText);
   grid->addWidget(label, 0, 0);
@@ -120,20 +142,14 @@ MessageFindDialog::MessageFindDialog(MessageBrowser* messageWindow,
   m_findBackwards = new QCheckBox("Find &Backwards", this);
   grid->addWidget(m_findBackwards, 3, 1);
 
-  QHBoxLayout* layout = new QHBoxLayout(grid);
-  grid->addMultiCell(layout, 5, 5, 0, 2);
-  layout->addStretch();
+
   m_find = new QPushButton("&Find", this);
-  layout->addWidget(m_find);
+  grid->addWidget(m_find, 4, 1);
   m_find->setEnabled(false);
-  connect(m_find, SIGNAL(clicked()),
-	  this, SLOT(find()));
-  layout->addStretch();
+  connect(m_find, SIGNAL(clicked()), this, SLOT(find()));
   QPushButton* close = new QPushButton("&Close", this);
-  layout->addWidget(close);
-  connect(close, SIGNAL(clicked()),
-	  this, SLOT(close()));
-  layout->addStretch();
+  grid->addWidget(close, 4, 3);
+  connect(close, SIGNAL(clicked()), this, SLOT(close()));
 
   // turn off resizing
   setSizeGripEnabled(false);
@@ -143,17 +159,17 @@ void MessageFindDialog::find()
 {
   // perform a find in the message window, starting at the current position
   // using the settings from the checkboxes.
-  m_messageWindow->find(m_findText->text(),
-			m_matchCase->isChecked(),
-			m_wholeWords->isChecked(), 
-			!m_findBackwards->isChecked(), 
-			0, 0);
+  QTextDocument::FindFlags options = 0;
+  if (m_matchCase->isChecked()) options |= QTextDocument::FindCaseSensitively;
+  if (m_wholeWords->isChecked()) options |= QTextDocument::FindWholeWords;
+  if (m_findBackwards->isChecked()) options |= QTextDocument::FindBackward;
+  m_messageWindow->find(m_findText->text(), options);
 }
 
 void MessageFindDialog::close()
 {
   // close the dialog
-  QDialog::close(false);
+  QDialog::close();
 }
 
 void MessageFindDialog::textChanged(const QString& newText)
@@ -225,84 +241,120 @@ MessageTypeStyleDialog::MessageTypeStyleDialog(MessageTypeStyle& style,
 					       const QString& caption, 
 					       QWidget* parent, 
 					       const char* name)
-  :QDialog(parent, name, true, 0),
+  :QDialog(parent),
    m_style(style),
    m_defaultColor(color),
    m_defaultBGColor(bgColor)
 {
-  setCaption(caption);
-  
+  setObjectName(name);
+  setWindowTitle(caption);
+  setModal(true);
+
   // setup the GUI
-  QGridLayout* grid = new QGridLayout(this, 6, 2);
+  QFormLayout* grid = new QFormLayout(this);
 
   // sets margin around the grid
   grid->setMargin(10);
 
-  m_color = new QPushButton("...", this, "color");
+  m_color = new QPushButton("...", this);
+  m_color->setObjectName("color");
   if (m_style.color().isValid())
-    m_color->setPaletteBackgroundColor(m_style.color());
+  {
+    QPalette p = m_color->palette();
+    p.setColor(m_color->backgroundRole(), m_style.color());
+    m_color->setPalette(p);
+  }
   else
-    m_color->setPaletteBackgroundColor(m_defaultColor);
+  {
+    QPalette p = m_color->palette();
+    p.setColor(m_color->backgroundRole(), m_defaultColor);
+    m_color->setPalette(p);
+  }
   connect(m_color, SIGNAL(clicked()),
 	  this, SLOT(selectColor()));
 
-  grid->addWidget(m_color, 0, 1);
-  QLabel* label = new QLabel("&Color", this);
-  label->setBuddy(m_color);
-  grid->addWidget(label, 0, 0);
+  grid->addRow("&Color", m_color);
 
-  m_bgColor = new QPushButton("...", this, "backgroundcolor");
+  m_bgColor = new QPushButton("...", this);
+  m_bgColor->setObjectName("backgroundcolor");
   if (m_style.bgColor().isValid())
-    m_bgColor->setPaletteBackgroundColor(m_style.bgColor());
+  {
+    QPalette p = m_bgColor->palette();
+    p.setColor(m_bgColor->backgroundRole(), m_style.bgColor());
+    m_bgColor->setPalette(p);
+  }
   else
-    m_bgColor->setPaletteBackgroundColor(m_defaultBGColor);
+  {
+    QPalette p = m_bgColor->palette();
+    p.setColor(m_bgColor->backgroundRole(), m_defaultBGColor);
+    m_bgColor->setPalette(p);
+  }
   connect(m_bgColor, SIGNAL(clicked()),
 	  this, SLOT(selectBGColor()));
 
-  grid->addWidget(m_bgColor, 1,1);
-  label = new QLabel("&Background Color", this);
-  label->setBuddy(m_bgColor);
-  grid->addWidget(label, 1, 0);
+  grid->addRow("&Background Color", m_bgColor);
 
-  m_useDefaultFont = new QCheckBox("Use &Default Font", 
-				   this, "usedefaultfont");
+  m_useDefaultFont = new QCheckBox("Use &Default Font", this);
+  m_useDefaultFont->setObjectName("usedefaultfont");
   m_useDefaultFont->setChecked(m_style.useDefaultFont());
   connect(m_useDefaultFont, SIGNAL(toggled(bool)),
 	  this, SLOT(useDefaultFontToggled(bool)));
-  grid->addWidget(m_useDefaultFont, 2, 0);
-  
-  m_font = new QPushButton("&Font", this, "font");
+
+  m_font = new QPushButton("&Font", this);
+  m_font->setObjectName("font");
   m_font->setEnabled(!m_style.useDefaultFont());
-  grid->addWidget(m_font, 2, 1);
   connect(m_font, SIGNAL(clicked()),
 	  this, SLOT(selectFont()));
 
-  grid->addRowSpacing(3, 10);
+  grid->addRow(m_useDefaultFont, m_font);
 
-  QGroupBox* exampleBox = new QGroupBox(1, Horizontal, "Example", 
-					this, "examplebox");
-  grid->addMultiCellWidget(exampleBox, 4, 4, 0, 2);
+  QGroupBox* exampleBox = new QGroupBox("Example", this);
+  exampleBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  QVBoxLayout * exampleBoxLayout = new QVBoxLayout(exampleBox);
 
-  m_example = new QLabel(caption, exampleBox, "example");
+  m_example = new QLabel(caption, exampleBox);
+  m_example->setObjectName("example");
   m_example->setFrameShape(QFrame::Box);
   m_example->setFrameShadow(QFrame::Sunken);
+  m_example->setAutoFillBackground(true);
   if (m_style.color().isValid())
-    m_example->setPaletteForegroundColor(m_style.color());
+  {
+    QPalette p = m_example->palette();
+    p.setColor(m_example->foregroundRole(), m_style.color());
+    m_example->setPalette(p);
+  }
   else
-    m_example->setPaletteForegroundColor(m_defaultColor);
+  {
+    QPalette p = m_example->palette();
+    p.setColor(m_example->foregroundRole(), m_defaultColor);
+    m_example->setPalette(p);
+  }
   if (m_style.bgColor().isValid())
-    m_example->setPaletteBackgroundColor(m_style.bgColor());
-  else 
-    m_example->setPaletteBackgroundColor(m_defaultBGColor);
+  {
+    QPalette p = m_example->palette();
+    p.setColor(m_example->backgroundRole(), m_style.bgColor());
+    m_example->setPalette(p);
+  }
+  else
+  {
+    QPalette p = m_example->palette();
+    p.setColor(m_example->backgroundRole(), m_defaultBGColor);
+    m_example->setPalette(p);
+  }
   if (m_style.useDefaultFont())
     m_example->setFont(parent->font());
   else
     m_example->setFont(m_style.font());
 
-  grid->addRowSpacing(5, 0);
+  exampleBoxLayout->addWidget(m_example);
+  exampleBoxLayout->addItem(new QSpacerItem(10, 10, QSizePolicy::Preferred, QSizePolicy::Expanding));
 
-  QHBoxLayout* layout = new QHBoxLayout(grid);
-  grid->addMultiCell(layout, 6, 6, 0, 2);
+  grid->addRow(exampleBox);
+
+  grid->setSpacing(5);
+
+  QHBoxLayout* layout = new QHBoxLayout();
+  grid->addRow(layout);
   layout->addStretch();
   QPushButton* ok = new QPushButton("OK", this);
   connect(ok, SIGNAL(clicked()),
@@ -316,6 +368,7 @@ MessageTypeStyleDialog::MessageTypeStyleDialog(MessageTypeStyle& style,
   cancel->setDefault(true);
   layout->addWidget(cancel);
   layout->addStretch();
+
 }
 
 MessageTypeStyleDialog::~MessageTypeStyleDialog()
@@ -336,31 +389,39 @@ void MessageTypeStyleDialog::useDefaultFontToggled(bool on)
 
 void MessageTypeStyleDialog::selectColor()
 {
-  QColor color = QColorDialog::getColor(m_style.color(), this, 
-					caption() + " Color");
-    
+  QColor color = QColorDialog::getColor(m_style.color(), this,
+          windowTitle() + " Color");
+
   if (color.isValid())
   {
     m_style.setColor(color);
-    
-    m_color->setPaletteBackgroundColor(m_style.color());
-    
-    m_example->setPaletteForegroundColor(m_style.color());
+
+    QPalette p_bg = m_color->palette();
+    p_bg.setColor(m_color->backgroundRole(), m_style.color());
+    m_color->setPalette(p_bg);
+
+    QPalette p_ex = m_example->palette();
+    p_ex.setColor(m_example->foregroundRole(), m_style.color());
+    m_example->setPalette(p_ex);
   }
 }
 
 void MessageTypeStyleDialog::selectBGColor()
 {
-  QColor color = QColorDialog::getColor(m_style.bgColor(), this, 
-					caption() + " Background Color");
-    
+  QColor color = QColorDialog::getColor(m_style.bgColor(), this,
+          windowTitle() + " Background Color");
+
   if (color.isValid())
   {
     m_style.setBGColor(color);
-    
-    m_bgColor->setPaletteBackgroundColor(m_style.bgColor());
 
-    m_example->setPaletteBackgroundColor(m_style.bgColor());
+    QPalette p_bg = m_bgColor->palette();
+    p_bg.setColor(m_bgColor->backgroundRole(), m_style.bgColor());
+    m_bgColor->setPalette(p_bg);
+
+    QPalette p_ex = m_example->palette();
+    p_ex.setColor(m_example->backgroundRole(), m_style.bgColor());
+    m_example->setPalette(p_ex);
   }
 }
 
@@ -370,9 +431,9 @@ void MessageTypeStyleDialog::selectFont()
   bool ok = false;
   // get a new font
   newFont = QFontDialog::getFont(&ok, m_style.font(),
-				 this, caption() + " Font");
-  
-  
+          this, windowTitle() + " Font");
+
+
   // if the user entered a font and clicked ok, set the windows font
   if (ok)
   {
@@ -401,8 +462,8 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
     m_enabledTypes(0xFFFFFFFFFFFFFFFFULL),
     m_enabledShowUserFilters(0),
     m_enabledHideUserFilters(0),
-    m_defaultColor(black),
-    m_defaultBGColor(white),
+    m_defaultColor(Qt::black),
+    m_defaultBGColor(Qt::white),
     m_dateTimeFormat("hh:mm"),
     m_eqDateTimeFormat("ddd M/d/yyyy h:mm"),
     m_typeStyles(0),
@@ -462,24 +523,23 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
   m_messageWindow->setCurrentFont(font());
 
   // set the colors
-  m_messageWindow->setColor(m_defaultColor);
-  m_messageWindow->setPaper(m_defaultBGColor);
+  QPalette p = m_messageWindow->palette();
+  p.setColor(QPalette::Base, m_defaultBGColor);
+  p.setColor(QPalette::Text, m_defaultColor);
+  m_messageWindow->setPalette(p);
 
   // make sure history isn't kept
-  m_messageWindow->setUndoDepth(0);
   m_messageWindow->setUndoRedoEnabled(false);
-
-  m_messageWindow->setTextFormat(PlainText);
 
   // set it to read only
   m_messageWindow->setReadOnly(true);
 
-  // set the word wrap 
-  m_messageWindow->setWordWrap(m_wrapText ? 
-			       QTextEdit::WidgetWidth : QTextEdit::NoWrap);
+  // set the word wrap
+  m_messageWindow->setLineWrapMode(m_wrapText ?
+          QTextEdit::WidgetWidth : QTextEdit::NoWrap);
 
   // set the wrap policy to break at space
-  m_messageWindow->setWrapPolicy(QTextEdit::AtWhiteSpace);
+  m_messageWindow->setWordWrapMode(QTextOption::WordWrap);
 
   // connect to the Messages signal(s)
   connect(m_messages, SIGNAL(newMessage(const MessageEntry&)),
@@ -504,18 +564,20 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
   connect(m_messageWindow, SIGNAL(lockRequest()),
 	  this, SLOT(toggleLockedText()));
 
-  m_menu = new QPopupMenu;
-  QPopupMenu* typeStyleMenu = new QPopupMenu;
+  m_menu = new QMenu;
+  QMenu* typeStyleMenu = new QMenu("Type St&yles");
 
-  m_typeFilterMenu = new QPopupMenu;
-  m_menu->insertItem("Message &Type Filter - Show", m_typeFilterMenu);
+  m_typeFilterMenu = new QMenu("Message &Type Filter - Show");
+  m_menu->addMenu(m_typeFilterMenu);
 
-  m_typeFilterMenu->insertItem("&Enable All", 
-			       this, SLOT(enableAllTypeFilters()), 0, 64);
-  m_typeFilterMenu->insertItem("&Disable All", 
-			       this, SLOT(disableAllTypeFilters()), 0, 65);
-  
-  m_typeFilterMenu->insertSeparator(-1);
+  QAction* tmpAction;
+
+  tmpAction = m_typeFilterMenu->addAction("&Enable All", this, SLOT(enableAllTypeFilters()));
+  tmpAction->setData(-1);
+  tmpAction = m_typeFilterMenu->addAction("&Disable All", this, SLOT(disableAllTypeFilters()));
+  tmpAction->setData(-1);
+
+  m_typeFilterMenu->addSeparator();
 
   QString typeName;
   // iterate over the message types, filling in various menus and getting 
@@ -525,36 +587,45 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
     typeName = MessageEntry::messageTypeString((MessageType)i);
     if (!typeName.isEmpty())
     {
-      m_typeFilterMenu->insertItem(typeName, i);
-      m_typeFilterMenu->setItemChecked(i, (((uint64_t(1) << i) & m_enabledTypes) != 0));
-      typeStyleMenu->insertItem(typeName + "...", i);
+      tmpAction = m_typeFilterMenu->addAction(typeName);
+      tmpAction->setData(i);
+      tmpAction->setCheckable(true);
+      tmpAction->setChecked(((uint64_t(1) << i) & m_enabledTypes) != 0);
+
+      tmpAction = typeStyleMenu->addAction(typeName + "...");
+      tmpAction->setData(i);
 
       m_typeStyles[i].load(preferenceName(), typeName);
     }
   }
-  
-  connect(m_typeFilterMenu, SIGNAL(activated(int)),
-	  this, SLOT(toggleTypeFilter(int)));
-  connect(typeStyleMenu, SIGNAL(activated(int)),
-	  this, SLOT(setTypeStyle(int)));
 
-  m_showUserFilterMenu = new QPopupMenu;
-  m_menu->insertItem("User Message Filter - &Show", m_showUserFilterMenu);
+  connect(m_typeFilterMenu, SIGNAL(triggered(QAction*)),
+          this, SLOT(toggleTypeFilter(QAction*)));
+  connect(typeStyleMenu, SIGNAL(triggered(QAction*)),
+          this, SLOT(setTypeStyle(QAction*)));
 
-  m_showUserFilterMenu->insertItem("&Enable All", 
-			       this, SLOT(enableAllShowUserFilters()), 0, 66);
-  m_showUserFilterMenu->insertItem("&Disable All", 
-			       this, SLOT(disableAllShowUserFilters()), 0, 67);
-  m_showUserFilterMenu->insertSeparator(-1);
+  m_showUserFilterMenu = new QMenu("User Message Filter - &Show");
+  m_menu->addMenu(m_showUserFilterMenu);
 
-  m_hideUserFilterMenu = new QPopupMenu;
-  m_menu->insertItem("User Message Filter - &Hide", m_hideUserFilterMenu);
+  tmpAction = m_showUserFilterMenu->addAction("&Enable All", this,
+                                             SLOT(enableAllShowUserFilters()));
+  tmpAction->setData(-1);
+  tmpAction = m_showUserFilterMenu->addAction("&Disable All", this,
+                                              SLOT(disableAllShowUserFilters()));
+  tmpAction->setData(-1);
+  m_showUserFilterMenu->addSeparator();
 
-  m_hideUserFilterMenu->insertItem("&Enable All", 
-			       this, SLOT(enableAllHideUserFilters()), 0, 66);
-  m_hideUserFilterMenu->insertItem("&Disable All", 
-			       this, SLOT(disableAllHideUserFilters()), 0, 67);
-  m_hideUserFilterMenu->insertSeparator(-1);
+
+  m_hideUserFilterMenu = new QMenu("User Message Filter - &Hide");
+  m_menu->addMenu(m_hideUserFilterMenu);
+
+  tmpAction = m_hideUserFilterMenu->addAction("&Enable All", this,
+                                              SLOT(enableAllHideUserFilters()));
+  tmpAction->setData(-1);
+  tmpAction = m_hideUserFilterMenu->addAction("&Disable All", this,
+                                              SLOT(disableAllHideUserFilters()));
+  tmpAction->setData(-1);
+  m_hideUserFilterMenu->addSeparator();
 
   const MessageFilter* filter;
   for(int i = 0; i < maxMessageFilters; i++)
@@ -562,53 +633,70 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
     filter = m_messageFilters->filter(i);
     if (filter)
     {
-      m_showUserFilterMenu->insertItem(filter->name(), i);
-      m_showUserFilterMenu->setItemChecked(i, (1 << i) & m_enabledShowUserFilters);
+      tmpAction = m_showUserFilterMenu->addAction(filter->name());
+      tmpAction->setData(i);
+      tmpAction->setCheckable(true);
+      tmpAction->setChecked((1 << i) & m_enabledShowUserFilters);
 
-      m_hideUserFilterMenu->insertItem(filter->name(), i);
-      m_hideUserFilterMenu->setItemChecked(i, (1 << i) & m_enabledHideUserFilters);
+      tmpAction = m_hideUserFilterMenu->addAction(filter->name());
+      tmpAction->setData(i);
+      tmpAction->setCheckable(true);
+      tmpAction->setChecked((1 << i) & m_enabledHideUserFilters);
     }
   }
 
-  connect(m_showUserFilterMenu, SIGNAL(activated(int)),
-	  this, SLOT(toggleShowUserFilter(int)));
-  connect(m_hideUserFilterMenu, SIGNAL(activated(int)),
-	  this, SLOT(toggleHideUserFilter(int)));
-  m_menu->insertItem("Edit User &Message Filters...", 
-		     this, SLOT(messageFilterDialog()));
+  connect(m_showUserFilterMenu, SIGNAL(triggered(QAction*)),
+          this, SLOT(toggleShowUserFilter(QAction*)));
+  connect(m_hideUserFilterMenu, SIGNAL(triggered(QAction*)),
+          this, SLOT(toggleHideUserFilter(QAction*)));
 
-  m_menu->insertSeparator(-1);
-  m_menu->insertItem("&Find...", this, SLOT(findDialog()), 
-		     CTRL+Key_F);
-  m_menu->insertSeparator(-1);
-  m_id_lockText = m_menu->insertItem("&Lock Text", this,
-				     SLOT(toggleLockedText()), CTRL+Key_L);
-  int x;
-  x = m_menu->insertItem("Refresh Messages...", this, SLOT(refreshMessages()),
-			 CTRL+Key_R);
-  m_menu->insertItem("Save Message Text...", this, SLOT(saveText()),
-		     CTRL+Key_S);
-  m_menu->insertSeparator(-1);
-  m_menu->setItemChecked(x, m_lockedText);
-  m_menu->insertSeparator(-1);
-  x = m_menu->insertItem("&Display Type", this, SLOT(toggleDisplayType(int)));
-  m_menu->setItemChecked(x, m_displayType);
-  x = m_menu->insertItem("Display T&ime/Date", this,
-			 SLOT(toggleDisplayTime(int)));
-  m_menu->setItemChecked(x, m_displayDateTime);
-  x = m_menu->insertItem("Display &EQ Date/Time", this,
-			 SLOT(toggleEQDisplayTime(int)));
-  m_menu->setItemChecked(x, m_displayEQDateTime);
-  x = m_menu->insertItem("&Use Type Styles", this,
-			 SLOT(toggleUseTypeStyles(int)));
-  m_menu->setItemChecked(x, m_useTypeStyles);
-  x = m_menu->insertItem("&Wrap Text", this, SLOT(toggleWrapText(int)));
-  m_menu->setItemChecked(x, m_wrapText);
-  m_menu->insertItem("Fo&nt...", this, SLOT(setFont()));
-  m_menu->insertItem("&Caption...", this, SLOT(setCaption()));
-  m_menu->insertItem("Text Colo&r...", this, SLOT(setColor()));
-  m_menu->insertItem("Text Back&ground Color...", this, SLOT(setBGColor()));
-  m_menu->insertItem("Type St&yles", typeStyleMenu);
+  m_menu->addAction("Edit User &Message Filters...", this,
+                    SLOT(messageFilterDialog()));
+
+  m_menu->addSeparator();
+  m_menu->addAction("&Find...", this, SLOT(findDialog()), Qt::CTRL+Qt::Key_F);
+  m_menu->addSeparator();
+
+  m_action_lockText = m_menu->addAction("&Lock Text", this,
+          SLOT(toggleLockedText()), Qt::CTRL+Qt::Key_L);
+  m_action_lockText->setCheckable(true);
+  m_action_lockText->setChecked(m_lockedText);
+  m_menu->addAction("Refresh Messages...", this,
+          SLOT(refreshMessages()), Qt::CTRL+Qt::Key_R);
+  m_menu->addAction("Save Message Text...", this, SLOT(saveText()),
+          Qt::CTRL+Qt::Key_S);
+  m_menu->addSeparator();
+
+  tmpAction = m_menu->addAction("&Display Type", this,
+          SLOT(toggleDisplayType(bool)));
+  tmpAction->setCheckable(true);
+  tmpAction->setChecked(m_displayType);
+
+  tmpAction = m_menu->addAction("Display T&ime/Date", this,
+          SLOT(toggleDisplayTime(bool)));
+  tmpAction->setCheckable(true);
+  tmpAction->setChecked(m_displayDateTime);
+
+  tmpAction = m_menu->addAction("Display &EQ Date/Time", this,
+          SLOT(toggleEQDisplayTime(bool)));
+  tmpAction->setCheckable(true);
+  tmpAction->setChecked(m_displayEQDateTime);
+
+  tmpAction = m_menu->addAction("&Use Type Styles", this,
+          SLOT(toggleUseTypeStyles(bool)));
+  tmpAction->setCheckable(true);
+  tmpAction->setChecked(m_useTypeStyles);
+
+  tmpAction = m_menu->addAction("&Wrap Text", this, SLOT(toggleWrapText(bool)));
+  tmpAction->setCheckable(true);
+  tmpAction->setChecked(m_wrapText);
+
+  m_menu->addAction("Fo&nt...", this, SLOT(setFont()));
+  m_menu->addAction("&Caption...", this, SLOT(setCaption()));
+  m_menu->addAction("Text Colo&r...", this, SLOT(setColor()));
+  m_menu->addAction("Text Back&ground Color...", this, SLOT(setBGColor()));
+
+  m_menu->addMenu(typeStyleMenu);
 
   refreshMessages();
 }
@@ -618,7 +706,7 @@ MessageWindow::~MessageWindow()
   delete [] m_typeStyles;
 }
 
-QPopupMenu* MessageWindow::menu()
+QMenu* MessageWindow::menu()
 {
   return m_menu;
 }
@@ -668,11 +756,11 @@ void MessageWindow::addColorMessage(const MessageEntry& message)
 
   // if the message has a specific color, then use it
   if (message.color() != ME_InvalidColor)
-    m_messageWindow->setColor(QColor(message.color()));
+    m_messageWindow->setTextColor(QColor(message.color()));
   else if (m_typeStyles[type].color().isValid()) // or use the types color
-    m_messageWindow->setColor(m_typeStyles[type].color());
+    m_messageWindow->setTextColor(m_typeStyles[type].color());
   else // otherwise use the default color
-    m_messageWindow->setColor(m_defaultColor);
+    m_messageWindow->setTextColor(m_defaultColor);
 
   if (m_typeStyles[type].useDefaultFont())
     m_messageWindow->setCurrentFont(font());
@@ -698,15 +786,25 @@ void MessageWindow::addColorMessage(const MessageEntry& message)
 
   text.replace(m_itemPattern, "\\2 (#\\1)");
 
+  //Set the fg/bg colors
+  if (m_typeStyles[type].bgColor().isValid() &&
+          m_typeStyles[type].color().isValid())
+  {
+      QTextCharFormat format = m_messageWindow->currentCharFormat();
+      format.setForeground(m_typeStyles[type].color());
+      format.setBackground(m_typeStyles[type].bgColor());
+      m_messageWindow->setCurrentCharFormat(format);
+  }
+
   // now append the message text to the buffer
   m_messageWindow->append(text);
 
-  int para = m_messageWindow->paragraphs() - 1;
-  if (m_typeStyles[type].bgColor().isValid())
-    m_messageWindow->setParagraphBackgroundColor(para, 
-						 m_typeStyles[type].bgColor());
-  else
-    m_messageWindow->setParagraphBackgroundColor(para, m_defaultBGColor);
+  //Reset the fg/bg colors
+  QTextCharFormat format = m_messageWindow->currentCharFormat();
+  format.setForeground(m_defaultColor);
+  format.setBackground(m_defaultBGColor);
+  m_messageWindow->setCurrentCharFormat(format);
+
 }
 
 void MessageWindow::newMessage(const MessageEntry& message)
@@ -740,10 +838,10 @@ void MessageWindow::refreshMessages(void)
   m_messageWindow->append(" ");
 
   // set the cursor to the beginning of the document
-  m_messageWindow->setCursorPosition(0, 0);
+  m_messageWindow->moveCursor(QTextCursor::Start, QTextCursor::MoveAnchor);
 
   // move the cursor to the end of the document
-  m_messageWindow->moveCursor(QTextEdit::MoveEnd, false);
+  m_messageWindow->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
 
   // iterate over the message list and add the messages
   MessageList::const_iterator it;
@@ -767,7 +865,7 @@ void MessageWindow::refreshMessages(void)
   m_messageWindow->unsetCursor();
 
   // move the cursor to the end of the document
-  m_messageWindow->moveCursor(QTextEdit::MoveEnd, false);
+  m_messageWindow->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
 
   // move the cursor to the end of the document
   m_messageWindow->ensureCursorVisible();
@@ -777,8 +875,8 @@ void MessageWindow::findDialog(void)
 {
   // create the find dialog, if necessary
   if (!m_findDialog)
-    m_findDialog = new MessageFindDialog(m_messageWindow, caption() + " Find",
-					 this, "messagefinddialog");
+    m_findDialog = new MessageFindDialog(m_messageWindow, windowTitle() + " Find",
+            this, "messagefinddialog");
 
   // show the find dialog
   m_findDialog->show();
@@ -788,9 +886,9 @@ void MessageWindow::messageFilterDialog(void)
 {
   // create the filter dialog, if necessary
   if (!m_filterDialog)
-    m_filterDialog = new MessageFilterDialog(m_messageFilters, 
-					     caption() + " Message Filters",
-					     this, "messagefilterdialog");
+    m_filterDialog = new MessageFilterDialog(m_messageFilters,
+            windowTitle() + " Message Filters",
+            this, "messagefilterdialog");
 
   // show the message filter dialog
   m_filterDialog->show();
@@ -798,27 +896,32 @@ void MessageWindow::messageFilterDialog(void)
 
 void MessageWindow::saveText(void)
 {
-  QString fileName = 
-    QFileDialog::getSaveFileName("", "*.txt", this,
-				 "ShowEQ - Message Text File");
+  QString fileName =
+    QFileDialog::getSaveFileName(this, "ShowEQ - Message Text File", QString(), "*.txt");
 
   if (fileName.isEmpty())
     return;
 
   QFile file( fileName ); // Write the text to a file
-  if ( file.open( IO_WriteOnly ) ) 
+  if ( file.open( QIODevice::WriteOnly ) ) 
   {
     QTextStream stream( &file );
 
-    // save all the paragraphs
-    //   ZBNOTE: unfortunately just using ->text() doesn't work.
-    for (int i = 0; i < m_messageWindow->paragraphs(); i++)
-      stream << m_messageWindow->text(i) << endl;
+    stream << m_messageWindow->toPlainText() << endl;
   }
 }
 
-void MessageWindow::toggleTypeFilter(int id)
+void MessageWindow::toggleTypeFilter(QAction* action)
 {
+
+  int id = action->data().value<int>();
+
+  //Enable/Disable All also invokes this method (due to connecting via the
+  //menu rather than the individual items), and this causes issues
+  //with MT_Guild since it's type 0.  So we've given Enable/Disable all their
+  //own bogus type value
+  if (id == -1) return;
+
   // toggle whether the message type is shown or not
   if (((uint64_t(1) << id) & m_enabledTypes) != 0)
     m_enabledTypes &= ~(uint64_t(1) << id);
@@ -828,8 +931,6 @@ void MessageWindow::toggleTypeFilter(int id)
   // save the new setting
   pSEQPrefs->setPrefUInt64("EnabledTypes", preferenceName(), m_enabledTypes);
 
-  // (un)check the appropriate menu item
-  m_typeFilterMenu->setItemChecked(id, ((m_enabledTypes & (uint64_t(1) << id)) != 0));
 }
 
 void MessageWindow::disableAllTypeFilters()
@@ -838,17 +939,16 @@ void MessageWindow::disableAllTypeFilters()
   m_enabledTypes = 0;
   pSEQPrefs->setPrefUInt64("EnabledTypes", preferenceName(), m_enabledTypes);
 
-  // make sure the All menu items are unchecked
-  m_typeFilterMenu->setItemChecked(64, false);
-  m_typeFilterMenu->setItemChecked(65, false);
 
   // uncheck all the menu items
-  QString typeName;
-  for (int i = MT_Guild; i <= MT_Max; i++)
+  foreach (QAction* action, m_typeFilterMenu->actions())
   {
-    typeName = MessageEntry::messageTypeString((MessageType)i);
-    if (!typeName.isEmpty())
-      m_typeFilterMenu->setItemChecked(i, false);
+      if (action->text().contains("&Enable All") ||
+              action->text().contains("&Disable All") ||
+              action->isSeparator())
+          continue;
+
+      action->setChecked(false);
   }
 }
 
@@ -858,22 +958,29 @@ void MessageWindow::enableAllTypeFilters()
   m_enabledTypes = 0xFFFFFFFFFFFFFFFFULL;
   pSEQPrefs->setPrefUInt64("EnabledTypes", preferenceName(), m_enabledTypes);
 
-  // make sure the All menu items are unchecked
-  m_typeFilterMenu->setItemChecked(64, false);
-  m_typeFilterMenu->setItemChecked(65, false);
 
   // check all the menu items
-  QString typeName;
-  for (int i = MT_Guild; i <= MT_Max; i++)
+  foreach (QAction* action, m_typeFilterMenu->actions())
   {
-    typeName = MessageEntry::messageTypeString((MessageType)i);
-    if (!typeName.isEmpty())
-      m_typeFilterMenu->setItemChecked(i, true);
+      if (action->text().contains("&Enable All") ||
+              action->text().contains("&Disable All") ||
+              action->isSeparator())
+          continue;
+
+      action->setChecked(true);
   }
 }
 
-void MessageWindow::toggleShowUserFilter(int id)
+void MessageWindow::toggleShowUserFilter(QAction* action)
 {
+  int id = action->data().value<int>();
+
+  //Enable/Disable All also invokes this method (due to connecting via the
+  //menu rather than the individual items), and this causes issues
+  //with MT_Guild since it's type 0.  So we've given Enable/Disable all their
+  //own bogus type value
+  if (id == -1) return;
+
   // toggle whether the filter is enabled/disabled
   if (((1 << id) & m_enabledShowUserFilters) != 0)
     m_enabledShowUserFilters &= ~(1 << id);
@@ -881,31 +988,27 @@ void MessageWindow::toggleShowUserFilter(int id)
     m_enabledShowUserFilters |= (1 << id);
 
   // save the new setting
-  pSEQPrefs->setPrefUInt("EnabledShowUserFilters", preferenceName(), 
-			 m_enabledShowUserFilters);
- 
-  // (un)check the appropriate menu item
-  m_showUserFilterMenu->setItemChecked(id, 
-				   ((m_enabledShowUserFilters & (1 << id)) != 0));
+  pSEQPrefs->setPrefUInt("EnabledShowUserFilters", preferenceName(),
+          m_enabledShowUserFilters);
+
 }
 
 void MessageWindow::disableAllShowUserFilters()
 {
   // set and save all filters disabled setting
   m_enabledShowUserFilters = 0;
-  pSEQPrefs->setPrefUInt("EnabledShowUserFilters", preferenceName(), 
-			 m_enabledShowUserFilters);
-  
-  // make sure the All menu items are unchecked
-  m_showUserFilterMenu->setItemChecked(66, false);
-  m_showUserFilterMenu->setItemChecked(67, false);
+  pSEQPrefs->setPrefUInt("EnabledShowUserFilters", preferenceName(),
+          m_enabledShowUserFilters);
 
   // uncheck all the menu items
-  QString typeName;
-  for (int i = 0; i <= maxMessageFilters; i++)
+  foreach (QAction* action, m_showUserFilterMenu->actions())
   {
-    if (m_messageFilters->filter(i))
-      m_showUserFilterMenu->setItemChecked(i, false);
+      if (action->text().contains("&Enable All") ||
+              action->text().contains("&Disable All") ||
+              action->isSeparator())
+          continue;
+
+      action->setChecked(false);
   }
 }
 
@@ -913,24 +1016,31 @@ void MessageWindow::enableAllShowUserFilters()
 {
   // set and save all filters enabled flag
   m_enabledShowUserFilters = 0xFFFFFFFF;
-  pSEQPrefs->setPrefUInt("EnabledShowUserFilters", preferenceName(), 
-			 m_enabledShowUserFilters);
-
-  // make sure the All menu items are unchecked
-  m_showUserFilterMenu->setItemChecked(66, false);
-  m_showUserFilterMenu->setItemChecked(67, false);
+  pSEQPrefs->setPrefUInt("EnabledShowUserFilters", preferenceName(),
+          m_enabledShowUserFilters);
 
   // check all the menu items
-  QString typeName;
-  for (int i = 0; i <= maxMessageFilters; i++)
+  foreach (QAction* action, m_showUserFilterMenu->actions())
   {
-    if (m_messageFilters->filter(i))
-      m_showUserFilterMenu->setItemChecked(i, true);
+      if (action->text().contains("&Enable All") ||
+              action->text().contains("&Disable All") ||
+              action->isSeparator())
+          continue;
+
+      action->setChecked(true);
   }
 }
 
-void MessageWindow::toggleHideUserFilter(int id)
+void MessageWindow::toggleHideUserFilter(QAction* action)
 {
+  int id = action->data().value<int>();
+
+  //Enable/Disable All also invokes this method (due to connecting via the
+  //menu rather than the individual items), and this causes issues
+  //with MT_Guild since it's type 0.  So we've given Enable/Disable all their
+  //own bogus type value
+  if (id == -1) return;
+
   // toggle whether the filter is enabled/disabled
   if (((1 << id) & m_enabledHideUserFilters) != 0)
     m_enabledHideUserFilters &= ~(1 << id);
@@ -938,31 +1048,26 @@ void MessageWindow::toggleHideUserFilter(int id)
     m_enabledHideUserFilters |= (1 << id);
 
   // save the new setting
-  pSEQPrefs->setPrefUInt("EnabledHideUserFilters", preferenceName(), 
-			 m_enabledHideUserFilters);
- 
-  // (un)check the appropriate menu item
-  m_hideUserFilterMenu->setItemChecked(id, 
-				   ((m_enabledHideUserFilters & (1 << id)) != 0));
+  pSEQPrefs->setPrefUInt("EnabledHideUserFilters", preferenceName(),
+          m_enabledHideUserFilters);
 }
 
 void MessageWindow::disableAllHideUserFilters()
 {
   // set and save all filters disabled setting
   m_enabledHideUserFilters = 0;
-  pSEQPrefs->setPrefUInt("EnabledHideUserFilters", preferenceName(), 
-			 m_enabledHideUserFilters);
-  
-  // make sure the All menu items are unchecked
-  m_hideUserFilterMenu->setItemChecked(66, false);
-  m_hideUserFilterMenu->setItemChecked(67, false);
+  pSEQPrefs->setPrefUInt("EnabledHideUserFilters", preferenceName(),
+          m_enabledHideUserFilters);
 
   // uncheck all the menu items
-  QString typeName;
-  for (int i = 0; i <= maxMessageFilters; i++)
+  foreach (QAction* action, m_hideUserFilterMenu->actions())
   {
-    if (m_messageFilters->filter(i))
-      m_hideUserFilterMenu->setItemChecked(i, false);
+      if (action->text().contains("&Enable All") ||
+              action->text().contains("&Disable All") ||
+              action->isSeparator())
+          continue;
+
+      action->setChecked(false);
   }
 }
 
@@ -970,84 +1075,84 @@ void MessageWindow::enableAllHideUserFilters()
 {
   // set and save all filters enabled flag
   m_enabledHideUserFilters = 0xFFFFFFFF;
-  pSEQPrefs->setPrefUInt("EnabledHideUserFilters", preferenceName(), 
-			 m_enabledHideUserFilters);
-
-  // make sure the All menu items are unchecked
-  m_hideUserFilterMenu->setItemChecked(66, false);
-  m_hideUserFilterMenu->setItemChecked(67, false);
+  pSEQPrefs->setPrefUInt("EnabledHideUserFilters", preferenceName(),
+          m_enabledHideUserFilters);
 
   // check all the menu items
-  QString typeName;
-  for (int i = 0; i <= maxMessageFilters; i++)
+  foreach (QAction* action, m_hideUserFilterMenu->actions())
   {
-    if (m_messageFilters->filter(i))
-      m_hideUserFilterMenu->setItemChecked(i, true);
+      if (action->text().contains("&Enable All") ||
+              action->text().contains("&Disable All") ||
+              action->isSeparator())
+          continue;
+
+      action->setChecked(true);
   }
 }
 
 void MessageWindow::toggleLockedText()
 {
+//  m_lockedText = enable;
   m_lockedText = !m_lockedText;
-  m_menu->setItemChecked(m_id_lockText, m_lockedText);
 
   // if the text had been locked, refresh the messages
   if (!m_lockedText)
     refreshMessages();
 }
 
-void MessageWindow::toggleDisplayType(int id)
+void MessageWindow::toggleDisplayType(bool enable)
 {
-  m_displayType = !m_displayType;
-  m_menu->setItemChecked(id, m_displayType);
+  m_displayType = enable;
 
   pSEQPrefs->setPrefBool("DisplayType", preferenceName(), m_displayType);
 }
 
-void MessageWindow::toggleDisplayTime(int id)
+void MessageWindow::toggleDisplayTime(bool enable)
 {
-  m_displayDateTime = !m_displayDateTime;
-  m_menu->setItemChecked(id, m_displayDateTime);
+  m_displayDateTime = enable;
+
   pSEQPrefs->setPrefBool("DisplayDateTime", preferenceName(),
-			 m_displayDateTime);
+          m_displayDateTime);
 }
 
-void MessageWindow::toggleEQDisplayTime(int id)
+void MessageWindow::toggleEQDisplayTime(bool enable)
 {
-  m_displayEQDateTime = ! m_displayEQDateTime;
-  m_menu->setItemChecked(id, m_displayEQDateTime);
+  m_displayEQDateTime = enable;
+
   pSEQPrefs->setPrefBool("DisplayEQDateTime", preferenceName(),
-			 m_displayEQDateTime);
+          m_displayEQDateTime);
 }
 
-void MessageWindow::toggleUseTypeStyles(int id)
+void MessageWindow::toggleUseTypeStyles(bool enable)
 {
-  m_useTypeStyles = !m_useTypeStyles;
-  m_menu->setItemChecked(id, m_useTypeStyles);
+  m_useTypeStyles = enable;
+
   pSEQPrefs->setPrefBool("UseTypeStyles", preferenceName(), m_useTypeStyles);
 }
 
-void MessageWindow::toggleWrapText(int id)
+void MessageWindow::toggleWrapText(bool enable)
 {
-  m_wrapText = !m_wrapText;
-  m_menu->setItemChecked(id, m_wrapText);
+  m_wrapText = enable;
 
   pSEQPrefs->setPrefBool("WrapText", preferenceName(), m_wrapText);
 
   // set the wrap policy according to the setting
-  m_messageWindow->setWordWrap(m_wrapText ? 
-			       QTextEdit::WidgetWidth : QTextEdit::NoWrap);
+  m_messageWindow->setLineWrapMode(m_wrapText ?
+          QTextEdit::WidgetWidth : QTextEdit::NoWrap);
 }
 
-void MessageWindow::setTypeStyle(int id)
+void MessageWindow::setTypeStyle(QAction* action)
 {
+
+  int id = action->data().value<int>();
+
   // Create the dialog object
   QString typeName = MessageEntry::messageTypeString((MessageType)id);
-  QString styleCaption = caption() + " - " + typeName + " Style";
+  QString styleCaption = windowTitle() + " - " + typeName + " Style";
   MessageTypeStyleDialog dialog(m_typeStyles[id],
-				m_defaultColor, m_defaultBGColor,
-				styleCaption, 
-				this, styleCaption);
+          m_defaultColor, m_defaultBGColor,
+          styleCaption.toAscii().data(),
+          this, styleCaption.toAscii().data());
 
   // popup the modal dialog
   int result = dialog.exec();
@@ -1065,8 +1170,8 @@ void MessageWindow::setTypeStyle(int id)
 
 void MessageWindow::setColor()
 {
-  QString clrCaption = caption() + " Default Text Color";
-  
+  QString clrCaption = windowTitle() + " Default Text Color";
+
   // get a new color
   QColor color = QColorDialog::getColor(m_defaultColor, this, clrCaption);
 
@@ -1082,7 +1187,7 @@ void MessageWindow::setColor()
 
 void MessageWindow::setBGColor()
 {
-  QString clrCaption = caption() + " Default Text Background Color";
+  QString clrCaption = windowTitle() + " Default Text Background Color";
 
   // get a new background color
   QColor color = QColorDialog::getColor(m_defaultBGColor, this, clrCaption);
@@ -1091,7 +1196,9 @@ void MessageWindow::setBGColor()
   if (color.isValid())
   {
     m_defaultBGColor = color;
-    m_messageWindow->setPaper(m_defaultBGColor);
+    QPalette p = m_messageWindow->palette();
+    p.setColor(QPalette::Base, m_defaultBGColor);
+    m_messageWindow->setPalette(p);
 
     pSEQPrefs->setPrefColor("DefaultBGColor", preferenceName(), 
 			    m_defaultBGColor);
@@ -1105,9 +1212,9 @@ void MessageWindow::setFont()
 
   // get a new font
   newFont = QFontDialog::getFont(&ok, m_messageWindow->currentFont(),
-				 this, caption() + " Font");
-  
-  
+          this, windowTitle() + " Font");
+
+
   // if the user entered a font and clicked ok, set the windows font
   if (ok)
     setWindowFont(newFont);
@@ -1117,12 +1224,12 @@ void MessageWindow::setCaption()
 {
   bool ok = false;
 
-  QString captionText = 
-    QInputDialog::getText("ShowEQ Message Window Caption",
-			  "Enter caption for this Message Window:",
-			  QLineEdit::Normal, caption(),
-			  &ok, this);
-  
+  QString captionText =
+    QInputDialog::getText(this, "ShowEQ Message Window Caption",
+            "Enter caption for this Message Window:",
+            QLineEdit::Normal, windowTitle(),
+            &ok);
+
   // if the user entered a caption and clicked ok, set the windows caption
   if (ok)
     SEQWindow::setCaption(captionText);
@@ -1140,10 +1247,27 @@ void MessageWindow::restoreFont()
 
 void MessageWindow::removedFilter(uint32_t mask, uint8_t filter)
 {
-  // remove the user filter menu item
-  m_showUserFilterMenu->removeItem(filter);
-  m_hideUserFilterMenu->removeItem(filter);
-  
+  // remove the show user filter menu item
+  foreach(QAction* action, m_showUserFilterMenu->actions())
+  {
+      if (action->data().value<int>() == filter)
+      {
+          m_showUserFilterMenu->removeAction(action);
+          break;
+      }
+  }
+
+  // remove the hide user filter menu item
+  foreach(QAction* action, m_hideUserFilterMenu->actions())
+  {
+      if (action->data().value<int>() == filter)
+      {
+          m_hideUserFilterMenu->removeAction(action);
+          break;
+      }
+  }
+
+
   // if all filters are enabled, don't unselect it
   if (m_enabledShowUserFilters != 0xFFFFFFFF)
   {
@@ -1170,11 +1294,16 @@ void MessageWindow::removedFilter(uint32_t mask, uint8_t filter)
 void MessageWindow::addedFilter(uint32_t mask, uint8_t filterid, 
 				const MessageFilter& filter)
 {
+  QAction* action;
   // insert a user filter menu item for the new filter
-  m_showUserFilterMenu->insertItem(filter.name(), filterid);
+  action = m_showUserFilterMenu->addAction(filter.name());
+  action->setCheckable(true);
+  action->setData(filterid);
 
   // insert a user filter menu item for the new filter
-  m_hideUserFilterMenu->insertItem(filter.name(), filterid);
+  action = m_hideUserFilterMenu->addAction(filter.name());
+  action->setCheckable(true);
+  action->setData(filterid);
 }
 
 #ifndef QMAKEBUILD

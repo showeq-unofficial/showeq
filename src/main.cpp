@@ -1,10 +1,23 @@
 /*
- * main.cpp
+ *  main.cpp
+ *  Copyright 2000-2012, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sourceforge.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2005 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /* main.cpp is the entrypoint to ShowEQ, it parses the commandline
@@ -22,12 +35,10 @@
 
 #include <sys/utsname.h>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
-#include <qapplication.h>
 #include <sys/stat.h>
-#include <qwindowsstyle.h>
 #ifdef __GNU_LIBRARY__
 #include <getopt.h>            // for long GNU-style options
 #else
@@ -36,9 +47,10 @@
 #undef __GNU_LIBRARY__
 #endif
 
-#include <qaccel.h>
+#include <QApplication>
+#include <QWindowsStyle>
 #if 1 // ZBTEMP
-#include <qdir.h>
+#include <QDir>
 #endif
 
 #include "interface.h"
@@ -199,6 +211,9 @@ int main (int argc, char **argv)
    // create the data location manager (with user data under ~/.showeq
    DataLocationMgr dataLocMgr(".showeq");
 
+   // setup the user directory
+   dataLocMgr.setupUserDirectory();
+
    /* Initialize the parameters with default values */
    QFileInfo configFileDefInfo = dataLocMgr.findExistingFile(".", "seqdef.xml",
 							     true, false);
@@ -211,7 +226,7 @@ int main (int argc, char **argv)
      exit(-1);
    }
 
-   QString configFileDef = configFileDefInfo.absFilePath();
+   QString configFileDef = configFileDefInfo.absoluteFilePath();
 
    QFileInfo configFileInfo = dataLocMgr.findWriteFile(".", "showeq.xml",
 						       true, true);
@@ -219,10 +234,10 @@ int main (int argc, char **argv)
    // deal with funky border case since we may be running setuid
    QString configFile;
    if (configFileInfo.dir() != QDir::root())
-     configFile = configFileInfo.absFilePath();
+     configFile = configFileInfo.absoluteFilePath();
    else
-     configFile = QFileInfo(dataLocMgr.userDataDir(".").absPath(),
-			    "showeq.xml").absFilePath();
+     configFile = QFileInfo(dataLocMgr.userDataDir(".").absolutePath(),
+			    "showeq.xml").absoluteFilePath();
 
    // scan command line arguments for a specified config file
    int i = 1;
@@ -235,7 +250,7 @@ int main (int argc, char **argv)
    }
 
    /* NOTE: See preferencefile.cpp for info on how to use prefrences class */
-   printf("Using config file '%s'\n", (const char*)configFile);
+   printf("Using config file '%s'\n", configFile.toAscii().data());
    pSEQPrefs = new XMLPreferences(configFileDef, configFile);
 
    showeq_params = new ShowEQParams;
@@ -275,7 +290,7 @@ int main (int argc, char **argv)
    showeq_params->restorePlayerState = false;
    showeq_params->restoreZoneState = false;
    showeq_params->restoreSpawns = false;
-   showeq_params->saveRestoreBaseFilename = dataLocMgr.findWriteFile("tmp", pSEQPrefs->getPrefString("BaseFilename", section, "last")).absFilePath();
+   showeq_params->saveRestoreBaseFilename = dataLocMgr.findWriteFile("tmp", pSEQPrefs->getPrefString("BaseFilename", section, "last")).absoluteFilePath();
    showeq_params->filterZoneDataLog = 0;
 
    /* Parse the commandline for commandline parameters */
@@ -731,8 +746,7 @@ int main (int argc, char **argv)
    {
      /* The main interface widget */
      EQInterface intf(&dataLocMgr, 0, "interface");
-     qapp.setMainWidget (&intf);
-   
+
      /* Start the main loop */
      ret = qapp.exec ();
    }
@@ -750,7 +764,7 @@ void displayVersion(void)
 {
    printf ("ShowEQ %s, released under the GPL.\n", VERSION);
    printf ("  SINS 0.5, released under the GPL.\n");
-   printf ("All ShowEQ source code is Copyright (C) 2000-2010 by the respective ShowEQ Developers\n");
+   printf ("All ShowEQ source code is Copyright (C) 2000-2019 by the respective ShowEQ Developers\n");
   
   printf ("ShowEQ comes with NO WARRANTY.\n\n");
   

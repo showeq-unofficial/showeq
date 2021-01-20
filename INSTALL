@@ -2,7 +2,8 @@ Version: $Id$ $Name$
 
 Copyright (C) 1994, 1995, 1996, 1999, 2000, 2001, 2002 Free Software Foundation 
 gives unlimited permissino to copy distribute and modify it.
-Portions Copyright 2003, 2004 Zaphod (dohpaz@users.sourceforge.net).
+Portions Copyright 2002, 2003, 2004, 2005, 2007 Zaphod (dohpaz@users.sourceforge.net).
+Portions Copyright 2019 ShowEq Developers
 
 Overview
 ========
@@ -18,8 +19,9 @@ compile ShowEQ:
 
    Name:      Minimum:  Suggested:         Source:
    --------------------------------------------------------------------------
-   *** 3rd party libraries ***                        
-   qt         3.2   Compiled with -thread) http://www.trolltech.com)
+   *** 3rd party libraries ***
+   qt         4.8 (4.3 may work, but       http://www.trolltech.com)
+                    hasn't been tested)
    libpcap    0.62                         http://www.tcpdump.org/
 
    *** C++ Compilation ***

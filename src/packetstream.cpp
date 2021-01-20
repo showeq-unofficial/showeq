@@ -1,11 +1,24 @@
 /*
- * packetstream.cpp
+ *  packetstream.cpp
+ *  Copyright 2000-2005, 2007-2008, 2012, 2019 by the respective ShowEQ Developers
+ *  Portions Copyright 2001-2003,2007 Zaphod (dohpaz@users.sourceforge.net).
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2003 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2003,2007 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /* Implementation of EQPacketStream class */
@@ -14,7 +27,8 @@
 #include "packetinfo.h"
 #include "diagnosticmessages.h"
 
-#include <stdio.h>
+#include <cstdio>
+#include <QString>
 
 //----------------------------------------------------------------------
 // Macros
@@ -63,9 +77,9 @@ EQPacketStream::EQPacketStream(EQStreamID streamid, uint8_t dir,
 			       uint16_t arqSeqGiveUp,
 			       EQPacketOPCodeDB& opcodeDB, 
 			       QObject* parent, const char* name)
-  : QObject(parent, name),
+  : QObject(parent),
     m_opcodeDB(opcodeDB),
-    m_dispatchers(61),  // prime number that should be plenty large
+    m_dispatchers(),
     m_streamid(streamid),
     m_dir(dir),
     m_packetCount(0),
@@ -82,7 +96,7 @@ EQPacketStream::EQPacketStream(EQStreamID streamid, uint8_t dir,
     m_decodeKey(0),
     m_validKey(true)
 {
-  m_dispatchers.setAutoDelete(true);
+    setObjectName(name);
 }
 
 ////////////////////////////////////////////////////
@@ -90,6 +104,8 @@ EQPacketStream::EQPacketStream(EQStreamID streamid, uint8_t dir,
 EQPacketStream::~EQPacketStream()
 {
   reset();
+  qDeleteAll(m_dispatchers);
+  m_dispatchers.clear();
 }
 
 ////////////////////////////////////////////////////
@@ -102,9 +118,10 @@ bool EQPacketStream::connect2(const QString& opcodeName,
   if (!opcode)
   {
     seqDebug("connect2: Unknown opcode '%s' with payload type '%s'",
-	     (const char*)opcodeName, payloadType);
+            opcodeName.toAscii().data(), payloadType);
     seqDebug("\tfor receiver '%s' of type '%s' to member '%s'",
-	     receiver->name(), receiver->className(), member);
+            receiver->objectName().toAscii().data(),
+            receiver->metaObject()->className(), member);
     return false;
   }
 
@@ -112,45 +129,47 @@ bool EQPacketStream::connect2(const QString& opcodeName,
 
   // try to find a matching payload for this opcode
   EQPayloadListIterator pit(*opcode);
-  while ((payload = pit.current()) != 0)
+  while (pit.hasNext())
   {
+    payload = pit.next();
+    if (!payload)
+        break;
     // if all the parameters match, then use this payload
     if ((payload->dir() & m_dir) && 
 	(payload->typeName() == payloadType) && 
 	(payload->sizeCheckType() == szt))
       break;
-
-    ++pit;
   }
 
   // if no payload found, create one and issue a warning
   if (!payload)
   {
     seqDebug("connect2: Warning! opcode '%s' has no matching payload.",
-	     (const char*)opcodeName);
+            opcodeName.toAscii().data());
     seqDebug("\tdir '%d' payload '%s' szt '%d'",
-	    m_dir, payloadType, szt);
+            m_dir, payloadType, szt);
     seqDebug("\tfor receiver '%s' of type '%s' to member '%s'",
-	    receiver->name(), receiver->className(), member);
+            receiver->objectName().toAscii().data(),
+            receiver->metaObject()->className(), member);
 
     return false;
   }
 
   // attempt to find an existing dispatch
-  EQPacketDispatch* dispatch = m_dispatchers.find((void*)payload);
+  EQPacketDispatch* dispatch = m_dispatchers.value((void*)payload, nullptr);
 
   // if no existing dispatch was found, create one
   if (!dispatch)
   {
     // construct a name for the dispatch
-    QCString dispatchName(256);
+    QString dispatchName(256, '\0');
     dispatchName.sprintf("PacketDispatch:%s:%s:%d:%s:%d",
-			 (const char*)name(), (const char*)opcodeName,
-			 payload->dir(), (const char*)payload->typeName(), 
-			 payload->sizeCheckType());
+            objectName().toAscii().data(), opcodeName.toAscii().data(),
+            payload->dir(), payload->typeName().toAscii().data(),
+            payload->sizeCheckType());
 
     // create new dispatch object
-    dispatch = new EQPacketDispatch(this, dispatchName);
+    dispatch = new EQPacketDispatch(this, dispatchName.toAscii().data());
 
     // insert dispatcher into dispatcher dictionary
     m_dispatchers.insert((void*)payload, dispatch);
@@ -409,8 +428,11 @@ void EQPacketStream::dispatchPacket(const uint8_t* data, size_t len,
     // iterate over the payloads in the opcode entry, and dispatch matches
     EQPayloadListIterator pit(*opcodeEntry);
     bool found = false;
-    while ((payload = pit.current()) != 0)
+    while (pit.hasNext())
     {
+      payload = pit.next();
+      if (!payload)
+          break;
       // see if this packet matches
       if (payload->match(data, len, m_dir))
       {
@@ -424,7 +446,7 @@ void EQPacketStream::dispatchPacket(const uint8_t* data, size_t len,
 #endif
 
 	// find the dispather for the payload
-	dispatch = m_dispatchers.find((void*)payload);
+	dispatch = m_dispatchers.value((void*)payload, nullptr);
 	
 	// if found, dispatch
 	if (dispatch)
@@ -435,23 +457,23 @@ void EQPacketStream::dispatchPacket(const uint8_t* data, size_t len,
 	  dispatch->activate(data, len, m_dir);
 	}
       }
-
-      // go to next possible payload
-      ++pit;
     }
 
  #ifdef PACKET_PAYLOAD_SIZE_DIAG
     if (!found && !opcodeEntry->isEmpty())
     {
       QString tempStr;
-      tempStr.sprintf("%s  (%#04x) (dataLen: %u) doesn't match:",
-		      (const char*)opcodeEntry->name(), opcodeEntry->opcode(), 
-		      len);
-      
-      for (payload = pit.toFirst(); 
-	   payload != 0; 
-	   payload = ++pit)
+      tempStr.sprintf("%s  (%#04x) (dataLen: %lu) doesn't match:",
+              opcodeEntry->name().toAscii().data(),
+              opcodeEntry->opcode(), len);
+
+      pit.toFront();
+      while (pit.hasNext())
       {
+          payload = pit.next();
+          if (!payload)
+              break;
+
 	if (payload->dir() & m_dir)
         {
 	  if (payload->sizeCheckType() == SZC_Match)
@@ -461,9 +483,9 @@ void EQPacketStream::dispatchPacket(const uint8_t* data, size_t len,
 	    tempStr += QString(" modulus of sizeof(%1):%2")
 	      .arg(payload->typeName()).arg(payload->typeSize());
 	}
-      }      
+      }
 
-      seqWarn(tempStr);
+      seqWarn(tempStr.toAscii().data());
     }
 #endif // PACKET_PAYLOAD_SIZE_DIAG
   }

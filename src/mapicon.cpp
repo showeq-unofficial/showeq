@@ -1,11 +1,24 @@
 /*
- * mapicon.cpp
+ *  mapicon.cpp
+ *  Portions Copyright 2003-2007 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2005-2009, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sourceforge.net/
- * 
- * Portions Copyright 2003-2007 Zaphod (dohpaz@users.sourceforge.net). 
- * 
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "mapicon.h"
@@ -15,9 +28,11 @@
 #include "player.h"
 #include "main.h"
 
-#include <qpainter.h>
-#include <qpoint.h>
-#include <qtimer.h>
+#include <QPainter>
+#include <QPoint>
+#include <QTimer>
+#include <QTextStream>
+#include <QPolygon>
 
 //----------------------------------------------------------------------
 // constants
@@ -496,7 +511,7 @@ void MapIcon::paintX(QPainter&p, const QPoint& point, int size, int sizeWH)
 void MapIcon::paintUpTriangle(QPainter&p, const QPoint& point, 
 			      int size, int sizeWH)
 {
-  QPointArray atri(3);
+  QPolygon atri(3);
   atri.setPoint(0, point.x(), point.y() - size);
   atri.setPoint(1, point.x() + size, point.y() + size);
   atri.setPoint(2, point.x() - size, point.y() + size);
@@ -506,7 +521,7 @@ void MapIcon::paintUpTriangle(QPainter&p, const QPoint& point,
 void MapIcon::paintRightTriangle(QPainter&p, const QPoint& point,
 				 int size, int sizeWH)
 {
-  QPointArray atri(3);
+  QPolygon atri(3);
   atri.setPoint(0, point.x() + size, point.y());
   atri.setPoint(1, point.x() - size,  point.y() + size);
   atri.setPoint(2, point.x() - size,  point.y() - size);
@@ -516,7 +531,7 @@ void MapIcon::paintRightTriangle(QPainter&p, const QPoint& point,
 void MapIcon::paintDownTriangle(QPainter&p, const QPoint& point, 
 				int size, int sizeWH)
 {
-  QPointArray atri(3);
+  QPolygon atri(3);
   atri.setPoint(0, point.x(), point.y() + size);
   atri.setPoint(1, point.x() + size, point.y() - size);
   atri.setPoint(2, point.x() - size, point.y() - size);
@@ -526,7 +541,7 @@ void MapIcon::paintDownTriangle(QPainter&p, const QPoint& point,
 void MapIcon::paintLeftTriangle(QPainter&p, const QPoint& point, 
 				int size, int sizeWH)
 {
-  QPointArray atri(3);
+  QPolygon atri(3);
   atri.setPoint(0, point.x() - size, point.y());
   atri.setPoint(1, point.x() + size, point.y() + size);
   atri.setPoint(2, point.x() + size, point.y() - size);
@@ -546,7 +561,7 @@ void MapIcon::paintStar(QPainter&p, const QPoint& point, int size, int sizeWH)
 void MapIcon::paintDiamond(QPainter&p, const QPoint& point, 
 			   int size, int sizeWH)
 {
-  QPointArray diamond(4);
+  QPolygon diamond(4);
   diamond.setPoint(0, point.x(), point.y() +  size);
   diamond.setPoint(1, point.x() + size, point.y());
   diamond.setPoint(2, point.x(), point.y() - size);
@@ -558,25 +573,26 @@ void MapIcon::paintDiamond(QPainter&p, const QPoint& point,
 // MapIcons
 MapIcons::MapIcons(Player* player, const QString& preferenceName,
 		   QObject* parent, const char* name)
-  : QObject(parent, name),
+  : QObject(parent),
     m_player(player),
     m_preferenceName(preferenceName),
     m_flash(false)
 {
+  setObjectName(name);
   // Setup the map icons with default icon type characteristics
-  PenCapStyle cap = SquareCap;
-  PenJoinStyle join = BevelJoin;
+  Qt::PenCapStyle cap = Qt::SquareCap;
+  Qt::PenJoinStyle join = Qt::BevelJoin;
 
   m_mapIcons[tIconTypeUnknown]
-    .setImage(QBrush(), QPen(gray, 1, SolidLine, cap, join),
+    .setImage(QBrush(), QPen(Qt::gray, 1, Qt::SolidLine, cap, join),
 	      tIconStyleCircle, tIconSizeSmall,
 	      true, false, true, false);
   m_mapIcons[tIconTypeDrop]
-    .setImage(QBrush(), QPen(yellow, 1, SolidLine, cap, join),
+    .setImage(QBrush(), QPen(Qt::yellow, 1, Qt::SolidLine, cap, join),
 	      tIconStyleX, tIconSizeRegular,
 	      true, false, false, false);
   m_mapIcons[tIconTypeDoor]
-    .setImage(QBrush(NoBrush), QPen(QColor(110, 60, 0)),
+    .setImage(QBrush(Qt::NoBrush), QPen(QColor(110, 60, 0)),
 	      tIconStyleSquare, tIconSizeTiny,
 	      true, false, false, false);
   m_mapIcons[tIconTypeZoneDoor]
@@ -584,152 +600,152 @@ MapIcons::MapIcons(Player* player, const QString& preferenceName,
 	      tIconStyleDiamond, tIconSizeSmall,
 	      true, false, false, false);
   m_mapIcons[tIconTypeSpawnNPC]
-    .setImage(QBrush(SolidPattern), QPen(black, 0, SolidLine, cap, join), 
+    .setImage(QBrush(Qt::SolidPattern), QPen(Qt::black, 0, Qt::SolidLine, cap, join), 
 	      tIconStyleCircle, tIconSizeRegular,
 	      true, false, true, false);
   m_mapIcons[tIconTypeSpawnNPCCorpse]
-    .setImage(QBrush(SolidPattern), QPen(cyan, 1, SolidLine, cap, join),
+    .setImage(QBrush(Qt::SolidPattern), QPen(Qt::cyan, 1, Qt::SolidLine, cap, join),
 	      tIconStylePlus, tIconSizeRegular,
 	      true, false, false, false);
   m_mapIcons[tIconTypeSpawnPlayer]
-    .setImage(QBrush(SolidPattern), QPen(magenta, 1, SolidLine, cap, join),
+    .setImage(QBrush(Qt::SolidPattern), QPen(Qt::magenta, 1, Qt::SolidLine, cap, join),
 	      tIconStyleSquare, tIconSizeRegular,
 	      true, false, true, false);
   m_mapIcons[tIconTypeSpawnPlayerCorpse]
-    .setImage(QBrush(), QPen(yellow, 2, SolidLine, cap, join), 
+    .setImage(QBrush(), QPen(Qt::yellow, 2, Qt::SolidLine, cap, join), 
 	      tIconStyleSquare, tIconSizeRegular,
 	      true, false, false, false);
   m_mapIcons[tIconTypeSpawnUnknown]
-    .setImage(QBrush(gray), QPen(NoPen, 1, SolidLine, cap, join), 
+    .setImage(QBrush(Qt::gray), QPen(Qt::NoBrush, 1, Qt::SolidLine, cap, join), 
 	      tIconStyleCircle, tIconSizeRegular,
 	      true, false, false, false);
   m_mapIcons[tIconTypeSpawnConsidered]
-    .setHighlight(QBrush(NoBrush), QPen(red, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::red, 1, Qt::SolidLine, cap, join),
 		  tIconStyleSquare, tIconSizeLarge,
 		  true, false, false, false);
   m_mapIcons[tIconTypeSpawnPlayerPvPEnabled]
-    .setHighlight(QBrush(NoBrush), QPen(red, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::red, 1, Qt::SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeXLarge,
 		  true, false, false, true);
   m_mapIcons[tIconTypeSpawnPlayerPvPEnabled]
-    .setImage(QBrush(SolidPattern), QPen(magenta, 1, SolidLine, cap, join), 
+    .setImage(QBrush(Qt::SolidPattern), QPen(Qt::magenta, 1, Qt::SolidLine, cap, join), 
 	      tIconStyleUpTriangle, tIconSizeRegular,
 	      true, false, true, false);
   m_mapIcons[tIconTypeSpawnPetPvPEnabled]
-    .setHighlight(QBrush(NoBrush), QPen(red, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::red, 1, Qt::SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeXLarge,
 		  true, false, false, true);
   m_mapIcons[tIconTypeSpawnPlayerTeam1]
-    .setImage(QBrush(SolidPattern), QPen(magenta, 1, SolidLine, cap, join), 
+    .setImage(QBrush(Qt::SolidPattern), QPen(Qt::magenta, 1, Qt::SolidLine, cap, join), 
 	      tIconStyleUpTriangle, tIconSizeRegular,
 	      true, false, true, false);
   m_mapIcons[tIconTypeSpawnPlayerTeam2]
-    .setImage(QBrush(SolidPattern), QPen(magenta, 1, SolidLine, cap, join), 
+    .setImage(QBrush(Qt::SolidPattern), QPen(Qt::magenta, 1, Qt::SolidLine, cap, join), 
 	      tIconStyleRightTriangle, tIconSizeRegular,
 	      true, false, true, false);
   m_mapIcons[tIconTypeSpawnPlayerTeam3]
-    .setImage(QBrush(SolidPattern), QPen(magenta, 1, SolidLine, cap, join), 
+    .setImage(QBrush(Qt::SolidPattern), QPen(Qt::magenta, 1, Qt::SolidLine, cap, join), 
 	      tIconStyleDownTriangle, tIconSizeRegular,
 	      true, false, true, false);
   m_mapIcons[tIconTypeSpawnPlayerTeam4]
-    .setImage(QBrush(SolidPattern), QPen(magenta, 1, SolidLine, cap, join), 
+    .setImage(QBrush(Qt::SolidPattern), QPen(Qt::magenta, 1, Qt::SolidLine, cap, join), 
 	      tIconStyleLeftTriangle, tIconSizeRegular,
 	      true, false, true, false);
   m_mapIcons[tIconTypeSpawnPlayerTeam5]
-    .setImage(QBrush(SolidPattern), QPen(magenta, 1, SolidLine, cap, join), 
+    .setImage(QBrush(Qt::SolidPattern), QPen(Qt::magenta, 1, Qt::SolidLine, cap, join), 
 	      tIconStyleSquare, tIconSizeRegular,
 	      true, false, true, false);
   m_mapIcons[tIconTypeSpawnPlayerTeamOtherRace]
-    .setHighlight(QBrush(NoBrush), QPen(gray, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::gray, 1, Qt::SolidLine, cap, join),
 		  tIconStyleSquare, tIconSizeXLarge,
 		  true, false, false, true);
   m_mapIcons[tIconTypeSpawnPlayerTeamOtherDeity]
-    .setHighlight(QBrush(NoBrush), QPen(SolidLine, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::SolidPattern, 1, Qt::SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeXLarge,
 		  true, false, false, true);
   m_mapIcons[tIconTypeSpawnPlayerTeamOtherRacePet]
-    .setHighlight(QBrush(NoBrush), QPen(SolidLine, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::SolidPattern, 1, Qt::SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeXLarge,
 		  true, true, false, true);
   m_mapIcons[tIconTypeSpawnPlayerTeamOtherDeityPet]
-    .setImage(QBrush(NoBrush), QPen(SolidLine, 1, SolidLine, cap, join),
+    .setImage(QBrush(Qt::NoBrush), QPen(Qt::SolidPattern, 1, Qt::SolidLine, cap, join),
 	      tIconStyleCircle, tIconSizeXLarge,
 	      true, true, false, true);
   m_mapIcons[tIconTypeSpawnPlayerOld]
-    .setImage(QBrush(), QPen(magenta, 1, SolidLine, cap, join), 
+    .setImage(QBrush(), QPen(Qt::magenta, 1, Qt::SolidLine, cap, join), 
 	      tIconStylePlus, tIconSizeRegular,
 	      true, false, false, false);
   m_mapIcons[tIconTypeItemSelected]
-    .setHighlight(QBrush(NoBrush), QPen(magenta, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::magenta, 1, Qt::SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeXXLarge,
 		  true, false, false, false);
-  m_mapIcons[tIconTypeItemSelected].setLine0(true, QPen(magenta));
+  m_mapIcons[tIconTypeItemSelected].setLine0(true, QPen(Qt::magenta));
   m_mapIcons[tIconTypeItemSelected].setShowWalkPath(true);
   m_mapIcons[tIconTypeFilterFlagHunt]
-    .setHighlight(QBrush(NoBrush), QPen(gray, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::gray, 1, Qt::SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeLarge,
 		  true, false, false, true);
   m_mapIcons[tIconTypeFilterFlagCaution]
-    .setHighlight(QBrush(NoBrush), QPen(yellow, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::yellow, 1, Qt::SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeLarge,
 		  true, false, false, true);
   m_mapIcons[tIconTypeFilterFlagCaution]
-    .setLine1(500, QPen(yellow, 1, SolidLine, cap, join));
+    .setLine1(500, QPen(Qt::yellow, 1, Qt::SolidLine, cap, join));
   m_mapIcons[tIconTypeFilterFlagDanger]
-    .setHighlight(QBrush(NoBrush), QPen(red, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::red, 1, Qt::SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeLarge,
 		  true, false, false, true);
   m_mapIcons[tIconTypeFilterFlagDanger]
-    .setLine1(500, QPen(red, 1, SolidLine, cap, join));
+    .setLine1(500, QPen(Qt::red, 1, Qt::SolidLine, cap, join));
   m_mapIcons[tIconTypeFilterFlagDanger]
-    .setLine2(1000, QPen(yellow, 1, SolidLine, cap, join));
+    .setLine2(1000, QPen(Qt::yellow, 1, Qt::SolidLine, cap, join));
   m_mapIcons[tIconTypeFilterFlagLocate]
-    .setHighlight(QBrush(NoBrush), QPen(white, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::white, 1, Qt::SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeLarge,
 		  true, false, false, true);
   m_mapIcons[tIconTypeFilterFlagLocate]
-    .setLine0(true, QPen(white, 1, SolidLine, cap, join));
+    .setLine0(true, QPen(Qt::white, 1, Qt::SolidLine, cap, join));
   m_mapIcons[tIconTypeFilterFlagAlert]
-    .setHighlight(QBrush(NoBrush), QPen(),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(),
 		  tIconStyleCircle, tIconSizeLarge,
 		  true, false, false, true);
   m_mapIcons[tIconTypeFilterFlagFiltered]
-    .setImage(QBrush(Dense2Pattern), QPen(gray, 0, SolidLine, cap, join), 
+    .setImage(QBrush(Qt::Dense2Pattern), QPen(Qt::gray, 0, Qt::SolidLine, cap, join), 
 	          tIconStyleCircle, tIconSizeSmall,
 	          true, false, true, false);
   m_mapIcons[tIconTypeFilterFlagTracer]
-    .setHighlight(QBrush(NoBrush), QPen(yellow, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::yellow, 1, Qt::SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeLarge,
 		  true, false, false, false);
   m_mapIcons[tIconTypeRuntimeFiltered]
-    .setHighlight(QBrush(NoBrush), QPen(white, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::white, 1, Qt::SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeLarge,
 		  true, false, false, true);
   m_mapIcons[tIconTypeSpawnPoint]
-    .setImage(QBrush(SolidPattern), QPen(darkGray, 1, SolidLine, cap, join),
+    .setImage(QBrush(Qt::SolidPattern), QPen(Qt::darkGray, 1, Qt::SolidLine, cap, join),
 	          tIconStylePlus, tIconSizeRegular,
 	          true, true, false, false);
   m_mapIcons[tIconTypeSpawnPointSelected]
-    .setHighlight(QBrush(NoBrush), QPen(blue, 1, SolidLine, cap, join),
+    .setHighlight(QBrush(Qt::NoBrush), QPen(Qt::blue, 1, Qt::SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeTiny,
 		  true, false, false, false);
   m_mapIcons[tIconTypeSpawnPointSelected]
-    .setLine0(true, QPen(blue));
+    .setLine0(true, QPen(Qt::blue));
   m_mapIcons[tIconTypeZoneSafePoint]
-    .setImage(QBrush(), QPen(green, 1, SolidLine, cap, join),
+    .setImage(QBrush(), QPen(Qt::green, 1, Qt::SolidLine, cap, join),
 	          tIconStyleX, tIconSizeSmall,
 	          true, false, false, false);
   m_mapIcons[tIconTypeZoneSafePoint].setShowName(true);
   m_mapIcons[tIconTypeSpawnPlayerNoUpdate]
-      .setImage(QBrush(gray), QPen(darkGray, 1, SolidLine, cap, join),
+      .setImage(QBrush(Qt::gray), QPen(Qt::darkGray, 1, Qt::SolidLine, cap, join),
                   tIconStyleSquare, tIconSizeRegular,
                   true, false, false, false);
   m_mapIcons[tIconTypeSpawnNPCNoUpdate]
-      .setImage(QBrush(gray), QPen(NoPen, 1, SolidLine, cap, join), 
+      .setImage(QBrush(Qt::gray), QPen(Qt::NoBrush, 1, Qt::SolidLine, cap, join), 
                   tIconStyleCircle, tIconSizeRegular,
                   true, false, false, false);
   m_mapIcons[tIconTypeDynamicZoneLocation]
-      .setImage(QBrush(magenta), QPen(magenta, 1, SolidLine, cap, join), 
+      .setImage(QBrush(Qt::magenta), QPen(Qt::magenta, 1, Qt::SolidLine, cap, join), 
                 tIconStyleX, tIconSizeLarge,
                   true, false, false, false);
   m_mapIcons[tIconTypeDynamicZoneLocation].setShowName(true);
@@ -753,7 +769,7 @@ MapIcons::MapIcons(Player* player, const QString& preferenceName,
   // setup the flash timer
   m_flashTimer = new QTimer(this);
   connect(m_flashTimer, SIGNAL(timeout()), this, SLOT(flashTick()));
-  m_flashTimer->start(200, false);
+  m_flashTimer->start(200);
 }
 
 MapIcons::~MapIcons()
@@ -954,7 +970,7 @@ void MapIcons::paintIcon(MapParameters& param,
   {
     QFontMetrics fm(param.font());
     int width = fm.width(itemName);
-    p.setPen(gray);
+    p.setPen(Qt::gray);
     p.drawText(point.x() - (width / 2),
 	       point.y() + fm.height() + 1, itemName);
   }
@@ -1009,22 +1025,37 @@ void MapIcons::paintSpawnIcon(MapParameters& param,
   {
     SpawnTrackListIterator trackIt(spawn->trackList());
     
-    const SpawnTrackPoint* trackPoint = trackIt.current();
+    const SpawnTrackPoint* trackPoint = trackIt.next();
     if (trackPoint)
     {
       if (!mapIcon.useWalkPathPen())
-	p.setPen(blue);
+	p.setPen(Qt::blue);
       else
 	p.setPen(mapIcon.walkPathPen());
 
-      p.moveTo (param.calcXOffsetI(trackPoint->x()), 
-		param.calcYOffsetI(trackPoint->y()));
-      
-      while ((trackPoint = ++trackIt) != NULL)
-	p.lineTo (param.calcXOffsetI (trackPoint->x()), 
-		  param.calcYOffsetI (trackPoint->y()));
-      
-      p.lineTo (point.x(), point.y());
+      int16_t x_1, y_1, x_2, y_2;
+
+      x_1 = trackPoint->x();
+      y_1 = trackPoint->y();
+
+      while (trackIt.hasNext())
+      {
+          trackPoint = trackIt.next();
+          if (!trackPoint)
+              break;
+
+          x_2 = trackPoint->x();
+          y_2 = trackPoint->y();
+
+          p.drawLine (param.calcXOffsetI(x_1),
+                      param.calcYOffsetI(y_1),
+                      param.calcXOffsetI(x_2),
+                      param.calcYOffsetI(y_2));
+          x_1 = x_2;
+          y_1 = y_2;
+      }
+
+      p.drawLine (x_2, y_2, point.x(), point.y());
     }
   }
 
@@ -1069,14 +1100,14 @@ void MapIcons::paintSpawnIcon(MapParameters& param,
       (m_showSpawnNames && (distance < m_fovDistance)))
   {
     QString spawnNameText;
-    
+
     spawnNameText.sprintf("%2d: %s",
-			  spawn->level(),
-			  (const char*)spawn->name());
-    
+            spawn->level(),
+            spawn->name().toAscii().data());
+
     QFontMetrics fm(param.font());
     int width = fm.width(spawnNameText);
-    p.setPen(gray);
+    p.setPen(Qt::gray);
     p.drawText(point.x() - (width / 2),
 	       point.y() + fm.height() + 1, spawnNameText);
   }
@@ -1183,15 +1214,15 @@ void MapIcons::paintSpawnPointIcon(MapParameters& param,
   if (mapIcon.showName())
   {
     QString spawnNameText;
-    
+
     spawnNameText.sprintf("sp:%s %s (%d)",
-			  (const char*)sp->name(),
-			  (const char*)sp->last(),
-			  sp->count());
-    
+            sp->name().toAscii().data(),
+            sp->last().toAscii().data(),
+            sp->count());
+
     QFontMetrics fm(param.font());
     int width = fm.width(spawnNameText);
-    p.setPen(gray);
+    p.setPen(Qt::gray);
     p.drawText(point.x() - (width / 2),
 	       point.y() + fm.height() + 1, spawnNameText);
   }
@@ -1271,12 +1302,12 @@ QColor MapIcons::pickSpawnPointColor(const SpawnPoint* sp,
   unsigned char age = sp->age();
   
   if ( age == 255 )
-    return darkRed;
+    return Qt::darkRed;
 
   if ( age > 220 )
   {
     if (m_flash)
-      return red;
+      return Qt::red;
   }
   else
     color = QColor(age, age, 0);

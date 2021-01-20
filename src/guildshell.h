@@ -1,22 +1,36 @@
 /*
- * guildshell.h
+ *  guildshell.h
+ *  Copyright 2004 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2005-2006, 2014, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2004 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef _GUILDSHELL_H_
 #define _GUILDSHELL_H_
 
-#include <stdint.h>
-#include <time.h>
+#include <cstdint>
+#include <ctime>
 
-#include <qstring.h>
-#include <qobject.h>
-#include <qdict.h>
+#include <QString>
+#include <QObject>
+#include <QHash>
+#include <QTextStream>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -74,8 +88,8 @@ class GuildMember
 
 //----------------------------------------------------------------------
 // GuildMemberDict
-typedef QDict<GuildMember> GuildMemberDict;
-typedef QDictIterator<GuildMember> GuildMemberDictIterator;
+typedef QHash<QString, GuildMember*> GuildMemberDict;
+typedef QHashIterator<QString, GuildMember*> GuildMemberDictIterator;
 
 //----------------------------------------------------------------------
 // GuildShell

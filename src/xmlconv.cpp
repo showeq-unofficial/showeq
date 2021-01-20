@@ -1,33 +1,47 @@
 /*
- * xmlconv.cpp
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  xmlconv.cpp
+ *  Copyright 2002-2003 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Copyright 2002-2005, 2019 by the respective ShowEQ Developers
  *
- * Copyright 2002-2003 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net)
+ *  for use under the terms of the GNU General Public License,
+ *  incorporated herein by reference.
  *
- * Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
- * for use under the terms of the GNU General Public License, 
- * incorporated herein by reference.
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #define __STDC_LIMIT_MACROS
-#include <stdint.h>
+#include <cstdint>
 
 #include "xmlconv.h"
 
-#include <qcolor.h>
-#include <qpen.h>
-#include <qbrush.h>
-#include <qfont.h>
-#include <qpoint.h>
-#include <qrect.h>
-#include <qsize.h>
-#include <qsizepolicy.h>
-#include <qaccel.h>
-#include <qcursor.h>
-#include <qstringlist.h>
+#include <QColor>
+#include <QPen>
+#include <QBrush>
+#include <QFont>
+#include <QPoint>
+#include <QRect>
+#include <QSize>
+#include <QSizePolicy>
+#include <QKeySequence>
+#include <QCursor>
+#include <QStringList>
+#include <QDomElement>
 
 // borrowed with mods from Qt 3.2
 static bool ok_in_hex( QChar c)
@@ -54,46 +68,46 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
       ok = true;
     }
     else
-      qWarning("%s element without value!", (const char*)e.tagName());
+      qWarning("%s element without value!", e.tagName().toAscii().data());
   }
   else if (e.tagName() == "int")
   {
-    int base = getBase(e); 
+    int base = getBase(e);
 
     if (e.hasAttribute("value"))
       v = QVariant(e.attribute("value").toInt(&ok, base));
     else
-      qWarning("%s element without value!", (const char*)e.tagName());
+      qWarning("%s element without value!", e.tagName().toAscii().data());
   }
   else if (e.tagName() == "uint")
   {
-    int base = getBase(e); 
+    int base = getBase(e);
 
     if (e.hasAttribute("value"))
       v = QVariant(e.attribute("value").toUInt(&ok, base));
     else
-      qWarning("%s element without value!", (const char*)e.tagName());
+      qWarning("%s element without value!", e.tagName().toAscii().data());
   }
   else if (e.tagName() == "double")
   {
     if (e.hasAttribute("value"))
       v = QVariant(e.attribute("value").toDouble(&ok));
     else
-      qWarning("%s element without value!", (const char*)e.tagName());
+      qWarning("%s element without value!", e.tagName().toAscii().data());
   }
   else if (e.tagName() == "bool")
   {
     if (e.hasAttribute("value"))
     {
       QString val = e.attribute("value");
-      v = QVariant(getBoolFromString(val, ok), 0);
-      
+      v = QVariant(getBoolFromString(val, ok));
+
       if (!ok)
-	qWarning("%s element with bogus value '%s'!",
-		 (const char*)e.tagName(), (const char*)val);
+          qWarning("%s element with bogus value '%s'!",
+                  e.tagName().toAscii().data(), val.toAscii().data());
     }
     else
-      qWarning("%s element without value!", (const char*)e.tagName());
+      qWarning("%s element without value!", e.tagName().toAscii().data());
   }
   else if (e.tagName() == "color")
   {
@@ -104,7 +118,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     v = color;
 
     if (!ok)
-      qWarning("%s element without valid value!", (const char*)e.tagName());
+      qWarning("%s element without value!", e.tagName().toAscii().data());
   }
   else if (e.tagName() == "pen")
   {
@@ -127,7 +141,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     v = QPen(color, w, s, c, j);
 
     if (!ok)
-      qWarning("%s element without valid value!", (const char*)e.tagName());
+      qWarning("%s element without valid value!", e.tagName().toAscii().data());
   }
   else if (e.tagName() == "brush")
   {
@@ -142,7 +156,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     v = QBrush(color, s);
 
     if (!ok)
-      qWarning("%s element without valid value!", (const char*)e.tagName());
+      qWarning("%s element without valid value!", e.tagName().toAscii().data());
   }
   else if (e.tagName() == "point")
   {
@@ -197,16 +211,12 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
   }
   else if (e.tagName() == "key")
   {
-    int key;
     if (e.hasAttribute("sequence"))
     {
-      key = QAccel::stringToKey(e.attribute("sequence"));
+        QKeySequence key(e.attribute("sequence"));
 
-      // fix the key code (deal with Qt brain death)
-      key &= ~Qt::UNICODE_ACCEL;
-
-      v = QVariant(QKeySequence(key));
-      ok = true;
+        v = QVariant::fromValue<QKeySequence>(key);
+        ok = true;
     }
   }
   else if (e.tagName() == "font")
@@ -233,13 +243,13 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     QSizePolicy sp;
     
     if (e.hasAttribute("hsizetype"))
-      sp.setHorData((QSizePolicy::SizeType)e.attribute("hsizetype").toInt());
+      sp.setHorizontalPolicy((QSizePolicy::Policy)e.attribute("hsizetype").toInt());
     if (e.hasAttribute("vsizetype"))
-      sp.setVerData((QSizePolicy::SizeType)e.attribute("vsizetype").toInt());
+      sp.setVerticalPolicy((QSizePolicy::Policy)e.attribute("vsizetype").toInt());
     if (e.hasAttribute("horstretch"))
-      sp.setHorStretch(e.attribute("horstretch").toInt());
+      sp.setHorizontalStretch(e.attribute("horstretch").toInt());
     if (e.hasAttribute("verstretch"))
-      sp.setHorStretch(e.attribute("verstretch").toInt());
+      sp.setVerticalStretch(e.attribute("verstretch").toInt());
     v = QVariant(sp);
     ok = true;
   }
@@ -248,7 +258,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     if (e.hasAttribute("shape"))
       v = QVariant(QCursor(e.attribute("shape").toInt(&ok, 10)));
     else
-      qWarning("%s element without value!", (const char*)e.tagName());
+      qWarning("%s element without value!", e.tagName().toAscii().data());
   }
   else if (e.tagName() == "stringlist")
   {
@@ -261,10 +271,10 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
       stringElement = stringNodeList.item(i).toElement();
       if (!stringElement.hasAttribute("value"))
       {
-	qWarning("%s element in %s without value! Ignoring!",
-		 (const char*)stringElement.tagName(),
-		 (const char*)e.tagName());
-	continue;
+          qWarning("%s element in %s without value! Ignoring!",
+                  stringElement.tagName().toAscii().data(),
+                  e.tagName().toAscii().data());
+          continue;
       }
 
       stringList.append(e.attribute("value"));
@@ -286,7 +296,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
 
     if (!p)
     {
-      qWarning("Invalid value for tag: %s", (const char*)e.tagName());
+      qWarning("Invalid value for tag: %s", e.tagName().toAscii().data());
       return false;
     }
 
@@ -308,9 +318,9 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
       else 
       {
 	if ( *p >= 'a' && *p <= 'f' )
-	  dv = *p - 'a' + 10;
+	  dv = p->toAscii() - 'a' + 10;
 	else
-	  dv = *p - 'A' + 10;
+	  dv = p->toAscii() - 'A' + 10;
       }
       if ( val > max_mult || (val == max_mult && dv > UINT64_MAX % 16) )
 	return false;
@@ -318,23 +328,25 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
       p++;
     }
 
-    QByteArray ba;
-    ba.duplicate((const char*)&val, sizeof(uint64_t));
+    //fromRawData() creates a reference to the existing data
+    QByteArray ba_ref = QByteArray::fromRawData((const char*)&val, sizeof(uint64_t));
+    //so we make a (deep) copy
+    QByteArray ba = ba_ref;
 
     v = ba;
     ok = true;
   }
   else if (e.tagName() == "list")
   {
-    qWarning("Unimplemented tag: %s", (const char*)e.tagName());
+    qWarning("Unimplemented tag: %s", e.tagName().toAscii().data());
   }
   else if (e.tagName() == "map")
   {
-    qWarning("Unimplemented tag: %s", (const char*)e.tagName());
+    qWarning("Unimplemented tag: %s", e.tagName().toAscii().data());
   }
   else
   {
-    qWarning("Unknown tag: %s", (const char*)e.tagName());
+    qWarning("Unknown tag: %s", e.tagName().toAscii().data());
   }
 
   return ok;
@@ -350,11 +362,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
   {
   case QVariant::String:
     e.setTagName("string");
-    e.setAttribute("value", v.toString().utf8());
-    break;
-  case QVariant::CString:
-    e.setTagName("string");
-    e.setAttribute("value", v.toCString());
+    e.setAttribute("value", v.toString().toUtf8().data());
     break;
   case QVariant::Int:
     e.setTagName("int");
@@ -375,7 +383,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
   case QVariant::Color:
     {
       e.setTagName("color");
-      QColor color = v.toColor();
+      QColor color = v.value<QColor>();
       e.setAttribute("red", color.red());
       e.setAttribute("green", color.green());
       e.setAttribute("blue", color.blue());
@@ -384,7 +392,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
   case QVariant::Pen:
     {
       e.setTagName("pen");
-      QPen pen = v.toPen();
+      QPen pen = v.value<QPen>();
       e.setAttribute("red", pen.color().red());
       e.setAttribute("green", pen.color().green());
       e.setAttribute("blue", pen.color().blue());
@@ -396,7 +404,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
   case QVariant::Brush:
     {
       e.setTagName("brush");
-      QBrush brush = v.toBrush();
+      QBrush brush = v.value<QBrush>();
       e.setAttribute("red", brush.color().red());
       e.setAttribute("green", brush.color().green());
       e.setAttribute("blue", brush.color().blue());
@@ -432,7 +440,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
   case QVariant::Font:
     {
       e.setTagName("font");
-      QFont f(v.toFont());
+      QFont f(v.value<QFont>());
       e.setAttribute("family", f.family());
       e.setAttribute("pointsize", f.pointSize());
       e.setAttribute("bold", boolString(f.bold()));
@@ -444,16 +452,16 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
   case QVariant::SizePolicy:
     {
       e.setTagName("sizepolicy");
-      QSizePolicy sp(v.toSizePolicy());
-      e.setAttribute("hsizetype", sp.horData());
-      e.setAttribute("vsizetype", sp.verData());
-      e.setAttribute("horstretch", sp.horStretch());
-      e.setAttribute("verstretch", sp.verStretch());
+      QSizePolicy sp(v.value<QSizePolicy>());
+      e.setAttribute("hsizetype", sp.horizontalPolicy());
+      e.setAttribute("vsizetype", sp.verticalPolicy());
+      e.setAttribute("horstretch", sp.horizontalStretch());
+      e.setAttribute("verstretch", sp.verticalStretch());
     }
     break;
   case QVariant::Cursor:
     e.setTagName("cursor");
-    e.setAttribute("shape", v.toCursor().shape());
+    e.setAttribute("shape", v.value<QCursor>().shape());
     break;
 
   case QVariant::StringList:
@@ -509,7 +517,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
 
   case QVariant::KeySequence:
     e.setTagName("key");
-    e.setAttribute("sequence", (QString)v.toKeySequence());
+    e.setAttribute("sequence", (QString)v.value<QKeySequence>());
     break;
 
   case QVariant::ByteArray: // this is only for [u]int64_t

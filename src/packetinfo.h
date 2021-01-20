@@ -1,28 +1,39 @@
 /*
- * packetinfo.h
+ *  packetinfo.h
+ *  Copyright 2003 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2003-2005, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
 
 #ifndef _PACKETINFO_H_
 #define _PACKETINFO_H_
 
-#include <stdint.h>
+#include <cstdint>
 
-#include <qobject.h>
-#include <qptrdict.h>
-#include <qptrlist.h>
-#include <qasciidict.h>
-#include <qintdict.h>
-#include <qcstring.h>
-#include <qstrlist.h>
-#include <qstringlist.h>
-#include <qdict.h>
-#include <qtextstream.h>
+#include <QObject>
+#include <QList>
+#include <QHash>
+#include <QByteArray>
+#include <QString>
+#include <QStringList>
+#include <QTextStream>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -57,7 +68,7 @@ class EQPacketTypeDB
  protected:
   void addStruct(const char* typeName, size_t);
 
-  QAsciiDict<size_t> m_typeSizeDict;
+  QHash<QByteArray, size_t> m_typeSizeDict;
 };
 
 //----------------------------------------------------------------------
@@ -91,8 +102,8 @@ class EQPacketPayload
  public:
   EQPacketPayload();
   ~EQPacketPayload();
-  
-  const QCString& typeName() const;
+
+  const QString& typeName() const;
   bool setType(const EQPacketTypeDB& db, const char* typeName);
   size_t typeSize() const;
   EQSizeCheckType sizeCheckType() const;
@@ -103,17 +114,17 @@ class EQPacketPayload
   bool match(const uint8_t* data, size_t size, uint8_t dir) const;
 
  protected:
-  QCString m_typeName;
+  QString m_typeName;
   size_t m_typeSize;
   EQSizeCheckType m_sizeCheckType;
   uint8_t m_dir;
 };
 
 // Payload list typedef
-typedef QPtrList<EQPacketPayload> EQPayloadList;
-typedef QPtrListIterator<EQPacketPayload> EQPayloadListIterator;
+typedef QList<EQPacketPayload*> EQPayloadList;
+typedef QListIterator<EQPacketPayload*> EQPayloadListIterator;
 
-inline const QCString& EQPacketPayload::typeName() const
+inline const QString& EQPacketPayload::typeName() const
 {
   return m_typeName;
 }
@@ -224,13 +235,13 @@ inline void EQPacketOPCode::addComment(const QString& comment)
 inline bool EQPacketOPCode::removeComment(const QString& comment)
 {
   // find the comment
-  QStringList::iterator it = m_comments.find(comment);
+  int index = m_comments.indexOf(comment);
 
   // was the comment found?
-  if (it != m_comments.end())
+  if (index != -1)
   {
     // yes, remove it and return success
-    m_comments.remove(it);
+    m_comments.removeAt(index);
     return true;
   }
 
@@ -255,7 +266,7 @@ inline const QStringList& EQPacketOPCode::comments() const
 class EQPacketOPCodeDB
 {
  public:
-  EQPacketOPCodeDB(int size);
+  EQPacketOPCodeDB();
   ~EQPacketOPCodeDB();
 
   bool load(const EQPacketTypeDB& typeDB, const QString& filename);
@@ -271,11 +282,11 @@ class EQPacketOPCodeDB
   bool move(const QString& oldOPCodeName, const QString& newOPCodeName);
   const EQPacketOPCode* find(uint16_t opcode) const;
   const EQPacketOPCode* find(const QString& opcodeName) const;
-  const QIntDict<EQPacketOPCode> opcodes() const;
+  const QHash<int, EQPacketOPCode*> opcodes() const;
 
  protected:
-  QIntDict<EQPacketOPCode> m_opcodes;
-  QDict<EQPacketOPCode> m_opcodesByName;
+  QHash<int, EQPacketOPCode*> m_opcodes;
+  QHash<QString, EQPacketOPCode*> m_opcodesByName;
 };
 
 inline void EQPacketOPCodeDB::clear(void)
@@ -287,28 +298,28 @@ inline void EQPacketOPCodeDB::clear(void)
 inline EQPacketOPCode* EQPacketOPCodeDB::edit(uint16_t opcode)
 {
   // attempt to find the opcode object
-  return m_opcodes.find(opcode);
+  return m_opcodes.value(opcode, nullptr);
 }
 
 inline EQPacketOPCode* EQPacketOPCodeDB::edit(const QString& name)
 {
   // attempt to find the opcode object
-  return m_opcodesByName.find(name);
+  return m_opcodesByName.value(name, nullptr);
 }
 
 inline const EQPacketOPCode* EQPacketOPCodeDB::find(uint16_t opcode) const
 {
   // attempt to find the opcode object
-  return m_opcodes.find(opcode);
+  return m_opcodes.value(opcode, nullptr);
 }
 
 inline const EQPacketOPCode* EQPacketOPCodeDB::find(const QString& opcode) const
 {
   // attempt to find the opcode object
-  return m_opcodesByName.find(opcode);
+  return m_opcodesByName.value(opcode, nullptr);
 }
 
-inline const QIntDict<EQPacketOPCode> EQPacketOPCodeDB::opcodes() const
+inline const QHash<int, EQPacketOPCode*> EQPacketOPCodeDB::opcodes() const
 {
   return m_opcodes;
 }

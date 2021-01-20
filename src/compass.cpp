@@ -1,10 +1,23 @@
 /*
- * compass.cpp
+ *  compass.cpp
+ *  Copyright 2001-2007, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sf.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 //
@@ -13,19 +26,21 @@
 // dependencies will be migrated out.
 //
 #include "compass.h"
-#include <qpainter.h>
-#include <qpixmap.h>
-#include <qfont.h>
+#include <QPainter>
+#include <QPixmap>
+#include <QFont>
+#include <QPaintEvent>
 
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdlib>
+#include <cstdio>
 
 Compass::Compass (QWidget *parent, const char *name)
-  : QWidget ( parent, name )
+  : QWidget ( parent )
 {
    m_ang = 0;
    m_dSpawnAngle = -1;
+   setObjectName(name);
 }
 
 const QRect compass_rect(-3, 0, 40, 6);
@@ -61,7 +76,7 @@ void Compass::calcTargetHeading()
 
    m_dSpawnAngle = quadDegs;
 
-   repaint ( compassRect(), FALSE);
+   repaint (compassRect());
 }
 
 QRect Compass::compassRect() const
@@ -76,7 +91,7 @@ void Compass::setHeading(int32_t degrees)
    if (m_ang == ((360-degrees)+90))
      return;
    m_ang = (360-degrees)+90;
-   repaint ( compassRect(), FALSE);
+   repaint (compassRect());
    emit angleChanged(m_ang);
 }
 
@@ -117,9 +132,9 @@ void Compass::paintCompass ( QPainter *p )
    tmp.begin (&pix);
 
    tmp.setBrush(QColor(64, 64, 64));
-   tmp.setPen(darkGray);
+   tmp.setPen(Qt::darkGray);
    tmp.drawEllipse(0,0,pix.width(), pix.height());
-   tmp.setPen(gray);
+   tmp.setPen(Qt::gray);
    tmp.drawLine(0,phd2, pix.width(), phd2);
    tmp.drawLine(pwd2,0, pwd2, pix.height());
    tmp.drawLine(pwd4, phd4, 
@@ -129,28 +144,28 @@ void Compass::paintCompass ( QPainter *p )
    tmp.translate(pwd2, phd2);
 
    tmp.rotate (-m_ang);
-   tmp.setBrush(blue);
-   tmp.setPen(blue);
+   tmp.setBrush(Qt::blue);
+   tmp.setPen(Qt::blue);
    tmp.drawLine(0-pwd4, 0, pwd2, 0);
    tmp.drawLine(0,0-phd4, 0, phd4);
-   tmp.setBrush(red);
-   tmp.setPen(red);
+   tmp.setBrush(Qt::red);
+   tmp.setPen(Qt::red);
    tmp.drawLine(0, 1, pwd2, 1);
    tmp.drawLine(0, -1, pwd4, -1);
-   tmp.setBrush(blue);
-   tmp.setPen(red);
+   tmp.setBrush(Qt::blue);
+   tmp.setPen(Qt::red);
    tmp.drawEllipse (0-5, 0-5, 10, 10);
-   tmp.setBrush(red);
-   tmp.setPen(red);
+   tmp.setBrush(Qt::red);
+   tmp.setPen(Qt::red);
    tmp.drawEllipse ((pwd2) -2, -2, 4, 4);
 
    if (m_dSpawnAngle > 0)
    {
-      tmp.resetXForm();
+      tmp.resetMatrix();
       tmp.translate(pwd2, phd2);
       tmp.rotate(-m_dSpawnAngle);
-      tmp.setPen(green);
-      tmp.setBrush(green);
+      tmp.setPen(Qt::green);
+      tmp.setBrush(Qt::green);
       tmp.drawEllipse(pwd2 -2, -2, 4, 4);
    }
 

@@ -1,14 +1,30 @@
 #!/usr/bin/perl
 
-# spells_en2spellsh.pl
-# ShowEQ Distributed under GPL
-# http://seq.sourceforge.net/
+#  spells_en2spellsh.pl
+#  Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net)
+#  Copyright 2002-2005, 2019 by the respective ShowEQ Developers
 #
-# Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net)
+#  Contributed to ShowEQ by Zaphod (dophaZ@users.sourceforge.net)
+#  for use under the terms of the GNU General Public Licence,
+#  incorporated herein by reference.
 #
-# Contributed to ShowEQ by Zaphod (dophaZ@users.sourceforge.net)
-# for use under the terms of the GNU General Public Licence,
-# incorporated herein by reference.
+#  This file is part of ShowEQ.
+#  http://www.sourceforge.net/projects/seq
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
 #
 
 # This is just a quicky little Perl 5 script to create a spells.h file from

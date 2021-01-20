@@ -1,8 +1,24 @@
 /*
- * spawn.h
+ *  spawn.h
+ *  Copyright 2001 Crazy Joe Divola (cjd1@users.sourceforge.net)
+ *  Copyright 2001-2010, 2013, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://sourceforge.net/projects/seq/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /*
@@ -20,14 +36,14 @@
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #else
-#include <stdint.h>
+#include <cstdint>
 #endif
-#include <math.h>
-#include <time.h>
+#include <cmath>
+#include <ctime>
 
-#include <qlist.h>
-#include <qdatetime.h>
-#include <qdatastream.h>
+#include <QList>
+#include <QDateTime>
+#include <QDataStream>
 
 #include "everquest.h"
 #include "point.h"
@@ -97,8 +113,8 @@ enum changeType
 // type definitions
 typedef Point3D<int16_t> EQPoint;
 typedef EQPoint SpawnTrackPoint;
-typedef QList<SpawnTrackPoint> SpawnTrackList;
-typedef QListIterator<SpawnTrackPoint> SpawnTrackListIterator;
+typedef QList<SpawnTrackPoint*> SpawnTrackList;
+typedef QListIterator<SpawnTrackPoint*> SpawnTrackListIterator;
 
 //----------------------------------------------------------------------
 // constants

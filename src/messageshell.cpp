@@ -1,11 +1,24 @@
 /*
- * messageshell.cpp
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  messageshell.cpp
+ *  Copyright 2002-2003, 2007 Zaphod (dohpaz@users.sourceforge.net)
+ *  Copyright 2005-2009, 2012, 2016, 2019 by the respective ShowEQ Developers
  *
- * Copyright 2002-2003,2007 Zaphod (dohpaz@users.sourceforge.net)
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "messageshell.h"
@@ -27,7 +40,7 @@ MessageShell::MessageShell(Messages* messages, EQStr* eqStrings,
 			   Spells* spells, ZoneMgr* zoneMgr, 
 			   SpawnShell* spawnShell, Player* player, 
                            QObject* parent, const char* name)
-  : QObject(parent, name),
+  : QObject(parent),
     m_messages(messages),
     m_eqStrings(eqStrings),
     m_spells(spells),
@@ -35,6 +48,7 @@ MessageShell::MessageShell(Messages* messages, EQStr* eqStrings,
     m_spawnShell(spawnShell),
     m_player(player)
 {
+    setObjectName(name);
 }
 
 void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
@@ -49,12 +63,12 @@ void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
    qTmp = netStream.readText(); // sender
 
    if(qTmp.length())
-      strcpy(cmsg->sender, qTmp.latin1());
+      strcpy(cmsg->sender, qTmp.toLatin1().data());
 
    qTmp = netStream.readText(); // target
 
    if(qTmp.length())
-      strcpy(cmsg->target, qTmp.latin1());
+      strcpy(cmsg->target, qTmp.toLatin1().data());
 
    netStream.skipBytes(8); // Unknown
 
@@ -69,7 +83,7 @@ void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
 
    qTmp = netStream.readText(); // message
    if(qTmp.length())
-      strcpy(cmsg->message, qTmp.latin1());
+      strcpy(cmsg->message, qTmp.toLatin1().data());
 
 //-----------------------------------------------------------------------------
 
@@ -96,7 +110,7 @@ void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
 		       cmsg->sender,
 		       cmsg->target,
 		       cmsg->message,
-		       (const char*)language_name(cmsg->language)
+		       language_name(cmsg->language).toAscii().data()
 		       );
     }
     else
@@ -104,7 +118,7 @@ void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
       tempStr.sprintf( "'%s' - %s {%s}",
 		       cmsg->sender,
 		       cmsg->message,
-		       (const char*)language_name(cmsg->language)
+		       language_name(cmsg->language).toAscii().data()
 		       );
     }
   }
@@ -533,10 +547,10 @@ void MessageShell::handleSpell(const uint8_t* data, size_t, uint8_t dir)
       spellName = spell_name(mem->spellId);
 
     if (mem->param1 != 4)
-      tempStr.sprintf("%s%s', slot %d.", 
-		      tempStr.ascii(), 
-		      (const char*)spellName, 
-		      mem->slotId);
+      tempStr.sprintf("%s%s', slot %d.",
+              tempStr.toAscii().data(),
+              spellName.toAscii().data(),
+              mem->slotId);
 
     else 
     {
@@ -581,11 +595,11 @@ void MessageShell::beginCast(const uint8_t* data)
     spellName = spell->name();
   else
     spellName = spell_name(bcast->spellId);
-  
-  tempStr.sprintf( "%s%s' - Casting time is %g Second%s", 
-		   tempStr.ascii(),
-		   (const char*)spellName, casttime,
-		   casttime == 1 ? "" : "s");
+
+  tempStr.sprintf( "%s%s' - Casting time is %g Second%s",
+          tempStr.toAscii().data(),
+          spellName.toAscii().data(), casttime,
+          casttime == 1 ? "" : "s");
 
   m_messages->addMessage(MT_Spell, tempStr);
 }
@@ -610,11 +624,11 @@ void MessageShell::interruptSpellCast(const uint8_t* data)
 
   QString tempStr;
   if (item != NULL)
-    tempStr.sprintf("%s(%d): %s", 
-		    (const char*)item->name(), icast->spawnId, icast->message);
+    tempStr.sprintf("%s(%d): %s",
+            item->name().toAscii().data(), icast->spawnId, icast->message);
   else
-    tempStr.sprintf("spawn(%d): %s", 
-		    icast->spawnId, icast->message);
+    tempStr.sprintf("spawn(%d): %s",
+            icast->spawnId, icast->message);
 
   m_messages->addMessage(MT_Spell, tempStr);
 }
@@ -641,9 +655,9 @@ void MessageShell::startCast(const uint8_t* data)
 
   QString tempStr;
 
-  tempStr.sprintf("You begin casting %s.  Current Target is %s(%d)", 
-		  (const char*)spellName, (const char*)targetName, 
-		  cast->targetId);
+  tempStr.sprintf("You begin casting %s.  Current Target is %s(%d)",
+          spellName.toAscii().data(), targetName.toAscii().data(),
+          cast->targetId);
 
   m_messages->addMessage(MT_Spell, tempStr);
 }
@@ -727,7 +741,7 @@ void MessageShell::groupFollow(const uint8_t* data)
   const groupFollowStruct* gFollow = (const groupFollowStruct*)data;
   QString tempStr;
 
-  if(!strcmp(gFollow->invitee, m_player->name()))
+  if(!strcmp(gFollow->invitee, m_player->name().toAscii().data()))
      tempStr = "Follow: You have joined the group";
   else
      tempStr.sprintf("Follow: %s has joined the group", gFollow->invitee);
@@ -829,10 +843,11 @@ void MessageShell::player(const charProfileStruct* player)
          spellName = spell_name(player->profile.buffs[buffnumber].spellid);
 
       if(player->profile.buffs[buffnumber].duration == -1)
-        message.sprintf("You have buff %s (permanent).", spellName.latin1());
+        message.sprintf("You have buff %s (permanent).", spellName.toLatin1().data());
       else
-        message.sprintf("You have buff %s duration left is %d in ticks.", spellName.latin1(), player->profile.buffs[buffnumber].duration);
-      
+        message.sprintf("You have buff %s duration left is %d in ticks.",
+                spellName.toLatin1().data(), player->profile.buffs[buffnumber].duration);
+
       m_messages->addMessage(MT_Player, message);
     }
   }
@@ -856,8 +871,8 @@ void MessageShell::increaseSkill(const uint8_t* data)
   const skillIncStruct* skilli = (const skillIncStruct*)data;
   QString tempStr;
   tempStr.sprintf("Skill: %s has increased (%d)",
-		  (const char*)skill_name(skilli->skillId),
-		  skilli->value);
+          skill_name(skilli->skillId).toAscii().data(),
+          skilli->value);
   m_messages->addMessage(MT_Player, tempStr);
 }
 

@@ -1,20 +1,35 @@
 /*
- * packetinfo.cpp
+ *  packetinfo.cpp
+ *  Copyright 2003-2004,2007 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2005-2007, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2004,2007 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
 
-#include <stdio.h>
+#include <cstdio>
 
-#include <qobject.h>
-#include <qmetaobject.h>
-#include <qstrlist.h>
-#include <qfile.h>
-#include <qxml.h>
+#include <QObject>
+#include <QMetaObject>
+#include <QFile>
+#include <QXmlAttributes>
+#include <QTextStream>
+#include <QByteArray>
 
 #include <map>
 
@@ -62,10 +77,8 @@ protected:
 //----------------------------------------------------------------------
 // EQPacketTypeDB
 EQPacketTypeDB::EQPacketTypeDB()
-  : m_typeSizeDict(127) // increase this number if we ever get >= 97 types
+  : m_typeSizeDict()
 {
-  m_typeSizeDict.setAutoDelete(true);
-
   // define the convenience macro used in the generated file
 #define AddStruct(typeName) addStruct(#typeName, sizeof(typeName))
 
@@ -89,20 +102,15 @@ EQPacketTypeDB::~EQPacketTypeDB()
 size_t EQPacketTypeDB::size(const char* typeName) const
 {
   // attempt to find the item in the type size dictionary
-  size_t *size = m_typeSizeDict.find(typeName);
+  size_t size = m_typeSizeDict.value(typeName, 0);
 
-  // if it was found, return its size
-  if (size)
-    return *size;
-
-  // return 0
-  return 0;
+  return size;
 }
 
 bool EQPacketTypeDB::valid(const char* typeName) const
 {
   // attempt to find the item in the type size dictionary
-  size_t *size = m_typeSizeDict.find(typeName);
+  size_t size = m_typeSizeDict.value(typeName, 0);
 
   return (size != 0);
 }
@@ -112,25 +120,26 @@ void EQPacketTypeDB::list(void) const
   seqInfo("EQPacketTypeDB contains %d types (in %d buckets)",
 	  m_typeSizeDict.count(), m_typeSizeDict.size());
 
-  QAsciiDictIterator<size_t> it(m_typeSizeDict);
+  QHashIterator<QByteArray, size_t> it(m_typeSizeDict);
 
-  while (it.current())
+  while (it.hasNext())
   {
-    seqInfo("\t%s = %d", it.currentKey(), *(it.current()));
-    ++it;
+    it.next();
+    seqInfo("\t%s = %d", it.key().data(), it.value());
   }
 }
 
 void EQPacketTypeDB::addStruct(const char* typeName, size_t size)
 {
-  m_typeSizeDict.insert(typeName, new size_t(size));
+  m_typeSizeDict.insert(typeName, size);
 }
 
 //----------------------------------------------------------------------
 // EQPacketDispatch
 EQPacketDispatch::EQPacketDispatch(QObject* parent, const char* name)
-  : QObject(parent, name)
+  : QObject(parent)
 {
+    setObjectName(name);
 }
 
 EQPacketDispatch::~EQPacketDispatch()
@@ -218,7 +227,6 @@ EQPacketOPCode::EQPacketOPCode()
   : m_opcode(0),
     m_implicitLen(0)
 {
-  setAutoDelete(true);
 }
 
 EQPacketOPCode::EQPacketOPCode(uint16_t opcode, const QString& name)
@@ -226,7 +234,6 @@ EQPacketOPCode::EQPacketOPCode(uint16_t opcode, const QString& name)
     m_implicitLen(0),
     m_name(name)
 {
-  setAutoDelete(true);
 }
 
 EQPacketOPCode::EQPacketOPCode(const EQPacketOPCode& opcode)
@@ -235,11 +242,12 @@ EQPacketOPCode::EQPacketOPCode(const EQPacketOPCode& opcode)
     m_name(opcode.m_name),
     m_updated(opcode.m_updated)
 {
-  setAutoDelete(true);
 }
 
 EQPacketOPCode::~EQPacketOPCode()
 {
+    qDeleteAll(*this);
+    clear();
 }
 
 EQPacketPayload* EQPacketOPCode::find(const uint8_t* data, size_t size, uint8_t dir) const
@@ -248,14 +256,14 @@ EQPacketPayload* EQPacketOPCode::find(const uint8_t* data, size_t size, uint8_t 
 
   // iterate over the payloads until a matching one is found
   EQPayloadListIterator it(*this);
-  while ((payload = it.current()) != 0)
+  while (it.hasNext())
   {
+    payload = it.next();
+    if (!payload)
+        break;
     // if a match is found, return it.
     if (payload->match(data, size, dir))
       return payload;
-
-    // iterate to the next payload
-    ++it;
   }
 
   // no matches, return 0
@@ -265,15 +273,16 @@ EQPacketPayload* EQPacketOPCode::find(const uint8_t* data, size_t size, uint8_t 
 
 //----------------------------------------------------------------------
 // EQPacketOPCodeDB
-EQPacketOPCodeDB::EQPacketOPCodeDB(int size)
-  : m_opcodes(size) 
+EQPacketOPCodeDB::EQPacketOPCodeDB()
+  : m_opcodes()
 {
-  m_opcodes.setAutoDelete(true);
-  m_opcodesByName.setAutoDelete(false);
 }
 
 EQPacketOPCodeDB::~EQPacketOPCodeDB()
 {
+    while(!m_opcodesByName.isEmpty()) {
+        remove(m_opcodesByName.begin().key());
+    }
 }
 
 bool EQPacketOPCodeDB::load(const EQPacketTypeDB& typeDB, 
@@ -306,17 +315,18 @@ bool EQPacketOPCodeDB::save(const QString& filename)
   QFile file(filename);
 
   // open the file for write only
-  if (!file.open(IO_WriteOnly))
+  if (!file.open(QIODevice::WriteOnly))
     return false;
 
   // create a QTextStream object on the QFile object
   QTextStream out(&file);
-  
+
   // set the output encoding to be UTF8
-  out.setEncoding(QTextStream::UnicodeUTF8);
+  out.setCodec("UTF-8");
 
   // set the number output to be left justified decimal
-  out.setf(QTextStream::dec | QTextStream::left);
+  out.setIntegerBase(10);
+  out.setFieldAlignment(QTextStream::AlignLeft);
 
   // print document header
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl
@@ -333,19 +343,21 @@ bool EQPacketOPCodeDB::save(const QString& filename)
   OrderedMap orderedOPCodes;
 
   // iterate over all the opcodes, inserting them into the ordered map
-  QIntDictIterator<EQPacketOPCode> it(m_opcodes);
-  while ((currentOPCode = it.current()) != NULL)
+  QHashIterator<int, EQPacketOPCode*> it(m_opcodes);
+  while (it.hasNext())
   {
+    it.next();
+    if (!it.value())
+        break;
+    currentOPCode = it.value();
     // insert into the ordered opcode map
     orderedOPCodes.insert(OrderedMap::value_type(currentOPCode->opcode(), 
 						 currentOPCode));
 
-    // get next opcode
-    ++it;
   }
 
   OrderedMap::iterator oit;
-  QCString opcodeString(256);
+  QString opcodeString;
   static const char* dirStrs[] = { "client", "server", "both", };
   static const char* sztStrs[] = { "none", "match", "modulus", };
 
@@ -373,21 +385,23 @@ bool EQPacketOPCodeDB::save(const QString& filename)
 	 cit != comments.end(); ++cit)
       out << indent << "<comment>" << *cit << "</comment>" << endl;
 
-    QCString dirStr;
-    QCString sztStr;
+    QByteArray dirStr;
+    QByteArray sztStr;
 
     // iterate over the payloads
-    QPtrListIterator<EQPacketPayload> pit(*currentOPCode);
-    while ((currentPayload = pit.current()) != 0)
+    QListIterator<EQPacketPayload*> pit(*currentOPCode);
+    while (pit.hasNext())
     {
+      currentPayload = pit.next();
+      if (!currentPayload)
+          break;
+
       // output the payload
       out << indent << "<payload dir=\"" << dirStrs[currentPayload->dir()-1]
 	  << "\" typename=\"" << currentPayload->typeName() 
 	  << "\" sizechecktype=\""
 	  << sztStrs[currentPayload->sizeCheckType()]
 	  << "\"/>" << endl;
-
-      ++pit;
     }
 
     // decrease the indent
@@ -420,8 +434,6 @@ EQPacketOPCode* EQPacketOPCodeDB::add(uint16_t opcode, const QString& name)
 
 void EQPacketOPCodeDB::list(void) const
 {
-  m_opcodes.statistics();
-
   seqInfo("EQPacketOPCodeDB contains %d opcodes (in %d buckets)",
 	  m_opcodes.count(), m_opcodes.size());
 
@@ -429,43 +441,47 @@ void EQPacketOPCodeDB::list(void) const
   EQPacketPayload* currentPayload;
 
   // iterate over all the opcodes
-  QIntDictIterator<EQPacketOPCode> it(m_opcodes);
-  while ((current = it.current()) != NULL)
+  QHashIterator<int, EQPacketOPCode*> it(m_opcodes);
+  while (it.hasNext())
   {
-    fprintf(stderr, "\tkey=%04lx opcode=%04x",
-	    it.currentKey(), current->opcode());
+    it.next();
+    if (!it.value())
+        break;
+    current = it.value();
+    fprintf(stderr, "\tkey=%04x opcode=%04x",
+	    it.key(), current->opcode());
     if (!current->name().isNull())
-      fprintf(stderr, " name='%s'", current->name().latin1());
+      fprintf(stderr, " name='%s'", current->name().toLatin1().data());
 
     if (current->implicitLen())
       fprintf(stderr, " implicitlen='%d'", current->implicitLen());
-    
+
     if (!current->updated().isNull())
-      fprintf(stderr, " updated='%s'", current->updated().latin1());
+      fprintf(stderr, " updated='%s'", current->updated().toLatin1().data());
 
     fputc('\n', stderr);
 
     QStringList comments = current->comments();
-    
+
     fprintf(stderr, "\t\t%d comment(s)\n", comments.count());
 
-    for (QStringList::Iterator cit = comments.begin(); 
-	 cit != comments.end(); ++cit)
-      fprintf(stderr, "\t\t\t'%s'\n", (*cit).latin1());
-    
+    for (QStringList::Iterator cit = comments.begin();
+            cit != comments.end(); ++cit)
+      fprintf(stderr, "\t\t\t'%s'\n", (*cit).toLatin1().data());
+
     fprintf(stderr, "\t\t%d payload(s)\n", current->count());
-    
-    QPtrListIterator<EQPacketPayload> pit(*current);
-    while ((currentPayload = pit.current()) != 0)
+
+    QListIterator<EQPacketPayload*> pit(*current);
+    while (pit.hasNext())
     {
+      currentPayload = pit.next();
+      if (!currentPayload)
+          break;
+
       seqInfo("\t\t\tdir=%d typename=%s size=%d sizechecktype=%d",
-	      currentPayload->dir(), (const char*)currentPayload->typeName(),
+	      currentPayload->dir(), currentPayload->typeName().toAscii().data(),
 	      currentPayload->typeSize(), currentPayload->sizeCheckType());
-
-      ++pit;
     }
-
-    ++it;
   }
 }
 
@@ -588,7 +604,7 @@ bool OPCodeXmlContentHandler::startElement(const QString&, const QString&,
     if (!ok)
     {
       seqWarn("OPCodeXmlContentHandler::startElement(): opcode '%s' failed to convert to uint16_t (result: %#04x)",
-	      attr.value(index).latin1(), opcode);
+	      attr.value(index).toLatin1().data(), opcode);
 
       return false; // this is an error
     }
@@ -675,9 +691,9 @@ bool OPCodeXmlContentHandler::startElement(const QString&, const QString&,
       
       if (!value.isEmpty())
       {
-	if (!m_currentPayload->setType(m_typeDB, value))
-	  seqWarn("Unknown payload typename '%s' for opcode '%04x'",
-		  value.latin1(), m_currentOPCode->opcode());
+          if (!m_currentPayload->setType(m_typeDB, value.toAscii().data()))
+              seqWarn("Unknown payload typename '%s' for opcode '%04x'",
+                      value.toLatin1().data(), m_currentOPCode->opcode());
       }
     }
 

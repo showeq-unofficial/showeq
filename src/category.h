@@ -1,8 +1,23 @@
 /*
- * category.h
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  category.h
+ *  Copyright 2001-2002, 2019 by the respective ShowEQ Developers
+ *
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 // Author: Zaphod (dohpaz@users.sourceforge.net)
@@ -20,19 +35,17 @@
 #include <sys/types.h>
 #include <regex.h>
 
-#include <qstring.h>
-#include <qcolor.h>
-#include <qlist.h>
+#include <QString>
+#include <QColor>
+#include <QList>
 
 // stuff needed for CategoryDlg
-#include <qdialog.h>
-#include <qlineedit.h>
-#include <qcombobox.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qhbox.h>
-#include <qvbox.h>
-#include <qpushbutton.h>
+#include <QDialog>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QLabel>
+#include <QLayout>
+#include <QPushButton>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -85,12 +98,12 @@ class CategoryDlg : public QDialog
   QLineEdit* m_Name;
   QLineEdit* m_Filter;
   QLineEdit* m_FilterOut;
-  QButton* m_Color;
+  QPushButton* m_Color;
 };
 
-typedef QList<Category> CategoryList;
-typedef QListIterator<Category> CategoryListIterator;
-typedef QListIterator<const Category> CategoryListConstIterator;
+typedef QList<Category*> CategoryList;
+typedef QListIterator<Category*> CategoryListIterator;
+typedef QListIterator<const Category*> CategoryListConstIterator;
 
 // ------------------------------------------------------
 // CategoryMgr

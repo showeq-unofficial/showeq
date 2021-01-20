@@ -1,14 +1,25 @@
 /*
- * spellshell.cpp
+ *  spellshell.cpp
+ *  Copyright 2001 Crazy Joe Divola (cjd1@users.sourceforge.net)
+ *  Portions Copyright 2003-2007 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2001-2007, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- * Crazy Joe Divola (cjd1@users.sourceforge.net)
- * September 5, 2001
- * 
- * Portions Copyright 2003-2007 Zaphod (dohpaz@users.sourceforge.net). 
- * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "spellshell.h"
@@ -19,6 +30,7 @@
 #include "packetcommon.h"
 #include "spawn.h"
 #include "diagnosticmessages.h"
+#include <QList>
 
 //#define DIAG_SPELLSHELL 1 
 
@@ -106,12 +118,13 @@ void SpellItem::update(uint16_t spellId, const Spell* spell, int duration,
 
 
 SpellShell::SpellShell(Player* player, SpawnShell* spawnshell, Spells* spells)
-: QObject(NULL, "spellshell"),
-  m_player(player), 
+: QObject(NULL),
+  m_player(player),
   m_spawnShell(spawnshell),
   m_spells(spells),
   m_lastPlayerSpell(0)
 {
+   setObjectName("spellshell");
    m_timer = new QTimer(this);
    m_spellList.clear();
    connect(m_timer, SIGNAL(timeout()), SLOT(timeout()));
@@ -125,7 +138,7 @@ SpellShell::~SpellShell()
 SpellItem* SpellShell::findSpell(uint16_t spellId, 
 				 uint16_t targetId, const QString& targetName)
 {
-  for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+  for(QList<SpellItem*>::Iterator it = m_spellList.begin();
       it != m_spellList.end(); 
       it++) 
   {
@@ -143,7 +156,7 @@ SpellItem* SpellShell::findSpell(uint16_t spellId,
 
 SpellItem* SpellShell::findSpell(int spell_id)
 {
-  for(QValueList<SpellItem*>::Iterator it = m_spellList.begin(); 
+  for(QList<SpellItem*>::Iterator it = m_spellList.begin(); 
       it != m_spellList.end(); 
       it++)
   {      
@@ -161,7 +174,7 @@ void SpellShell::clear()
    emit clearSpells();
 
    m_lastPlayerSpell = 0;
-   for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+   for(QList<SpellItem*>::Iterator it = m_spellList.begin();
          it != m_spellList.end(); it++)
       delete (*it);
 
@@ -177,11 +190,11 @@ void SpellShell::deleteSpell(const SpellItem* item)
 
 void SpellShell::deleteSpell(SpellItem *item)
 {
-   if (item) 
+   if (item)
    {
       if (m_lastPlayerSpell == item)
-	m_lastPlayerSpell = 0;
-      m_spellList.remove(item);
+          m_lastPlayerSpell = 0;
+      m_spellList.removeAt(m_spellList.indexOf(item));
       if (m_spellList.count() == 0)
          m_timer->stop();
       emit delSpell(item);
@@ -426,22 +439,22 @@ void SpellShell::spellMessage(QString &str)
    // Your xxx has worn off.
    // Your target resisted the xxx spell.
    // Your spell fizzles.
-   seqInfo("*** spellMessage *** %s", spell.latin1());
+   seqInfo("*** spellMessage *** %s", spell.toLatin1().data());
    if (spell.left(25) == QString("Your target resisted the ")) {
       spell = spell.right(spell.length() - 25);
       spell = spell.left(spell.length() - 7);
-      seqInfo("RESIST: '%s'", spell.latin1());
+      seqInfo("RESIST: '%s'", spell.toLatin1().data());
       b = true;
    } else if (spell.right(20) == QString(" spell has worn off.")) {
       spell = spell.right(spell.length() - 5);
       spell = spell.left(spell.length() - 20);
-      seqInfo("WORE OFF: '%s'", spell.latin1());
+      seqInfo("WORE OFF: '%s'", spell.toLatin1().data());
       b = true;
    }
 
    if (b) {
       // Can't really tell which spell/target, so just delete the last one
-      for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+      for(QList<SpellItem*>::Iterator it = m_spellList.begin();
          it != m_spellList.end(); it++) {
          if ((*it)->spellName() == spell) {
             (*it)->setDuration(0);
@@ -455,7 +468,7 @@ void SpellShell::zoneChanged(void)
 {
   m_lastPlayerSpell = 0;
   SpellItem* spell;
-  for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+  for(QList<SpellItem*>::Iterator it = m_spellList.begin();
       it != m_spellList.end(); it++) 
   {
     spell = *it;
@@ -484,13 +497,13 @@ void SpellShell::killSpawn(const Item* deceased)
             m_lastPlayerSpell = 0;
         }
 
-        QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+        QList<SpellItem*>::Iterator it = m_spellList.begin();
         while(it != m_spellList.end())
         {
             spell = *it;
             if (spell->targetId() == id)
             {
-                it = m_spellList.remove(it);
+                it = m_spellList.erase(it);
                 emit delSpell(spell);
                 delete spell;
             }
@@ -512,26 +525,26 @@ void SpellShell::timeout()
 {
   SpellItem* spell;
 
-  QValueList<SpellItem*>::Iterator it = m_spellList.begin();
-  while (it != m_spellList.end()) 
+  QList<SpellItem*>::Iterator it = m_spellList.begin();
+  while (it != m_spellList.end())
   {
     spell = *it;
 
     int d = spell->duration() -
       pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6);
-    if (d > -6) 
+    if (d > -6)
     {
       spell->setDuration(d);
       emit changeSpell(spell);
       it++;
-    } 
-    else 
+    }
+    else
     {
-      seqInfo("SpellItem '%s' finished.", (*it)->spellName().latin1());
+      seqInfo("SpellItem '%s' finished.", (*it)->spellName().toLatin1().data());
       if (m_lastPlayerSpell == spell)
-	m_lastPlayerSpell = 0;
+          m_lastPlayerSpell = 0;
       emit delSpell(spell);
-      it = m_spellList.remove(it);
+      it = m_spellList.erase(it);
       delete spell;
     }
    }

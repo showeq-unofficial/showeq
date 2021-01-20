@@ -1,22 +1,35 @@
 /*
- * cgiconv.h
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  cgiconv.h
+ *  Copyright 2001 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Copyright 2019 by the respective ShowEQ Developers
  *
- * Copyright 2001 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net)
+ *  for use under the terms of the GNU General Public License,
+ *  incorporated herein by reference.
  *
- * Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
- * for use under the terms of the GNU General Public License, 
- * incorporated herein by reference.
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef CGICONV_H
 #define CGICONV_H
 
-#include <qstring.h>
-#include <qlist.h>
+#include <QString>
+#include <QList>
 
 // class for handling POST action CGI forms
 class CGI
@@ -91,7 +104,7 @@ class CGI
     QString value;
   };
 
-  typedef QList<CGIParam> CGIParamList;
+  typedef QList<CGIParam*> CGIParamList;
 
   // unescape the URL (decodes x-www-form-urlencoded)
   QString unescapeURL(QString url);

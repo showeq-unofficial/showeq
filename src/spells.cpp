@@ -1,34 +1,50 @@
 /*
- * spells.h
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  spells.cpp
+ *  Copyright 2003 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Copyright 2003-2006, 2019 by the respective ShowEQ Developers
  *
- * Copyright 2003 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net)
+ *  for use under the terms of the GNU General Public License,
+ *  incorporated herein by reference.
  *
- * Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
- * for use under the terms of the GNU General Public License, 
- * incorporated herein by reference.
- * 
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "spells.h"
 #include "util.h"
 #include "diagnosticmessages.h"
 
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 
-#include <qdatetime.h>
-#include <qstring.h>
-#include <qstringlist.h>
-#include <qfile.h>
-#include <qptrqueue.h>
-#include <qregexp.h>
+#include <QDateTime>
+#include <QString>
+#include <QStringList>
+#include <QFile>
+#include <QQueue>
+#include <QRegExp>
+#include <QByteArray>
 
 static inline int16_t min(const int16_t& __a,  const int16_t& __b)
 {
-  if (__b < __a) return __b; return __a;
+  if (__b < __a)
+      return __b;
+  return __a;
 }
 
 // Spell item ^ delmited fields
@@ -152,7 +168,7 @@ Spell::Spell(const QString& spells_enLine)
   : m_spell(0)
 {
   // split the ^ delimited spell entry into a QStringList
-  QStringList spellInfo = QStringList::split("^", spells_enLine, true);
+  QStringList spellInfo = spells_enLine.split("^");
 
   // I'll add support for the rest of the fields later
   m_spell = spellInfo[0].toUShort();
@@ -242,17 +258,16 @@ void Spells::loadSpells(const QString& spellsFileName)
   QFile spellsFile(spellsFileName);
 
   // open the spell file if possible
-  if (spellsFile.open(IO_ReadOnly))
+  if (spellsFile.open(QIODevice::ReadOnly))
   {
-    // QPtrQueue to temporarily store our Spells until we know the maxSpell
-    QPtrQueue<Spell> spellQueue;
-    spellQueue.setAutoDelete(false);
-    
-    // allocate memory in a QCString to hold the entire file contents
-    QCString textData(spellsFile.size() + 1);
+    // Queue to temporarily store our Spells until we know the maxSpell
+    QQueue<Spell*> spellQueue;
+
+    // allocate memory in a QByteArray to hold the entire file contents
+    QByteArray textData(spellsFile.size() + 1, '\0');
 
     // read the file as one big chunk
-    spellsFile.readBlock(textData.data(), textData.size());
+    spellsFile.read(textData.data(), textData.size());
 
     // construct a regex to deal with either style line termination
     QRegExp lineTerm("[\r\n]{1,2}");
@@ -263,11 +278,10 @@ void Spells::loadSpells(const QString& spellsFileName)
     if ((unicodeIndicator != 0xfffe) && (unicodeIndicator != 0xfeff))
       text = textData;
     else
-      text = QString::fromUcs2((uint16_t*)textData.data());
+      text = QString::fromUtf16((uint16_t*)textData.data());
 
     // split the file into at the line termination
-    QStringList lines = QStringList::split(lineTerm,
-					   text, false);
+    QStringList lines = text.split(lineTerm, QString::SkipEmptyParts);
 
     Spell* newSpell;
 
@@ -285,7 +299,7 @@ void Spells::loadSpells(const QString& spellsFileName)
     }
 
     seqInfo("Loaded %d spells from '%s' maxSpell=%#.04x",
-	    spellQueue.count(), spellsFileName.latin1(), m_maxSpell);
+            spellQueue.count(), spellsFileName.toLatin1().data(), m_maxSpell);
 
     // allocate the spell array 
     // Notes:  Yeah, it is slightly sparse, but as of this writing there are 
@@ -311,7 +325,7 @@ void Spells::loadSpells(const QString& spellsFileName)
   }
   else
     seqWarn("Spells: Failed to open: '%s'",
-	    spellsFileName.latin1());
+            spellsFileName.toLatin1().data());
 }
 
 void Spells::unloadSpells(void)

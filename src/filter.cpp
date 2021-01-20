@@ -1,10 +1,23 @@
 /*
- * filter.cpp
+ *  filter.cpp - regex filter module
+ *  Copyright 2001-2005, 2012, 2019 by the respective ShowEQ Developers
  *
- * regex filter module
- *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /* Implementation of filter class */
@@ -13,11 +26,13 @@
 #include "everquest.h"
 
 #include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdint>
+#include <climits>
 
-#include <qfile.h>
+#include <QFile>
+#include <QTextStream>
 
 #define MAXLEN   5000
 
@@ -64,7 +79,7 @@ FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive)
   QString regexString = workString;
 
   // find the semi-colon that seperates the regex from the level info
-  int breakPoint = workString.find(';');
+  int breakPoint = workString.indexOf(';');
 
   // if no semi-colon, then it's all a regex
   if (breakPoint == -1)
@@ -84,7 +99,7 @@ FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive)
 #endif
 
     // see if the level string is a range
-    breakPoint = levelString.find('-');
+    breakPoint = levelString.indexOf('-');
 
     bool ok;
     int level;
@@ -160,23 +175,23 @@ void FilterItem::init(const QString& regexString, bool caseSensitive,
 	 (const char*)regexString, minLevel, maxLevel);
 #endif
 
-  m_regexp.setWildcard(false);
-  m_regexp.setCaseSensitive(caseSensitive);
+  m_regexp.setPatternSyntax(QRegExp::RegExp);
+  m_regexp.setCaseSensitivity(caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
 
   // For the pattern, save off the original. This is what will be saved
   // during save operations. But the actual regexp we filter with will
   // mark the # in spawn names as optional to aid in filter writing.
-  m_regexpOriginalPattern = QString(regexString.ascii());
+  m_regexpOriginalPattern = QString(regexString.toAscii().data());
 
   QString fixedFilterPattern = regexString;
-  fixedFilterPattern.replace("Name:", "Name:#?", false);
+  fixedFilterPattern.replace("Name:", "Name:#?", Qt::CaseInsensitive);
   m_regexp.setPattern(fixedFilterPattern);
 
   if (!m_regexp.isValid())
   {
     seqWarn("Filter Error: '%s' - %s",
-	    (const char*)m_regexp.pattern(), 
-	    (const char*)m_regexp.errorString());
+            m_regexp.pattern().toAscii().data(),
+            m_regexp.errorString().toAscii().data());
   }
 }
 
@@ -188,8 +203,8 @@ FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive,
   if (!m_regexp.isValid())
   {
     seqWarn("Filter Error: '%s' - %s",
-	    (const char*)m_regexp.pattern(), 
-	    (const char*)m_regexp.errorString());
+            m_regexp.pattern().toAscii().data(),
+            m_regexp.errorString().toAscii().data());
   }
 }
 
@@ -222,7 +237,7 @@ bool FilterItem::save(QString& indent, QTextStream& out)
 bool FilterItem::isFiltered(const QString& filterString, uint8_t level) const
 {
   // check the main filter string
-  if (m_regexp.search(filterString) != -1)
+  if (m_regexp.indexIn(filterString) != -1)
   {
     // is there is a level range component to this filter
     if ((m_minLevel > 0) || (m_maxLevel > 0))
@@ -275,8 +290,12 @@ bool Filter::isFiltered(const QString& filterString, uint8_t level)
 
   // iterate over the filters checking for a match
   FilterListIterator it(m_filterItems);
-  for (re = it.toFirst(); re != NULL; re = ++it)
+  while(it.hasNext())
   {
+    re = it.next();
+    if (!re)
+        break;
+
     if (re->isFiltered(filterString, level))
       return true;
   }
@@ -300,8 +319,14 @@ bool Filter::save(QString& indent, QTextStream& out)
   FilterListIterator it(m_filterItems);
 
   // iterate over the filter items, saving them as we go along.
-  for (re = it.toFirst(); re != NULL; re = ++it)
-    re->save(indent, out);
+  while(it.hasNext())
+  {
+      re = it.next();
+      if (!re)
+          break;
+
+      re->save(indent, out);
+  }
 
   // decrease indent
   indent.remove(0, 4);
@@ -321,12 +346,16 @@ Filter::remFilter(const QString& filterPattern)
    // Find a match in the list and the one previous to it
    //while(re)
    FilterListIterator it(m_filterItems);
-   for (re = it.toFirst(); re != NULL; re = ++it)
+   while (it.hasNext())
    {
+     re = it.next();
+     if (!re)
+         break;
+
      if (re->name() == filterPattern) // if match
      {
        // remove the filter
-       m_filterItems.remove(re);
+       delete m_filterItems.takeAt(m_filterItems.indexOf(re));
 
 #ifdef DEBUG_FILTER
        seqDebug("Removed '%s' from List", (const char*)filterPattern);
@@ -396,9 +425,15 @@ Filter::findFilter(const QString& filterPattern)
   FilterItem* re;
 
   FilterListIterator it(m_filterItems);
-  for (re = it.toFirst(); re != NULL; re = ++it)
+  while(it.hasNext())
+  {
+    re = it.next();
+    if (!re)
+        break;
+
     if (re->name() ==  filterPattern)
       return re;
+  }
 
   return NULL;
 }
@@ -413,13 +448,17 @@ Filter::listFilters(void)
 #endif
 
   FilterListIterator it(m_filterItems);
-  for (re = it.toFirst(); re != NULL; re = ++it)
+  while(it.hasNext())
   {
+    re = it.next();
+    if (!re)
+        break;
+
     if (re->minLevel() || re->maxLevel())
-      seqInfo("\t'%s' (%d, %d)", 
-	     (const char*)re->name().utf8(), re->minLevel(), re->maxLevel());
+      seqInfo("\t'%s' (%d, %d)",
+              re->name().toUtf8().data(), re->minLevel(), re->maxLevel());
     else
-      seqInfo("\t'%s'", (const char*)re->name().utf8());
+      seqInfo("\t'%s'", re->name().toUtf8().data());
   }
 }
 
@@ -449,6 +488,9 @@ bool Filters::clear(void)
     delete filter;
   }
   m_filters.clear ();
+
+  // empty the container
+  m_filters.clear();
 
   return true;
 }
@@ -510,17 +552,18 @@ bool Filters::save(const QString& filename) const
   QFile file(filename);
 
   // open the file for write only
-  if (!file.open(IO_WriteOnly))
+  if (!file.open(QIODevice::WriteOnly))
     return false;
 
   // create a QTextStream object on the QFile object
   QTextStream out(&file);
-  
+
   // set the output encoding to be UTF8
-  out.setEncoding(QTextStream::UnicodeUTF8);
+  out.setCodec("UTF-8");
 
   // set the number output to be left justified decimal
-  out.setf(QTextStream::dec | QTextStream::left);
+  out.setIntegerBase(10);
+  out.setFieldAlignment(QTextStream::AlignLeft);
 
   // print document header
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl
@@ -562,13 +605,13 @@ void Filters::list(void) const
   FilterMap::const_iterator it;
 
   seqInfo("Filters from file '%s':",
-	 (const char*)m_file);
+          m_file.toAscii().data());
   // iterate over the filters
   for (it = m_filters.begin(); it != m_filters.end(); it++)
   {
     // print the header
-    seqInfo("Filter Type '%s':", 
-	   (const char*)m_types.name(it->first));
+    seqInfo("Filter Type '%s':",
+            m_types.name(it->first).toAscii().data());
 
     // list off the actual filters
     it->second->listFilters();
@@ -630,7 +673,7 @@ bool Filters::addFilter(uint8_t type, const QString& filterPattern,
     filter = it->second;
 
   if (filter)
-    filter->addFilter(filterPattern, minLevel, maxLevel);
+    return filter->addFilter(filterPattern, minLevel, maxLevel);
 
   return false;
 }

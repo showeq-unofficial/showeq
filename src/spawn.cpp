@@ -1,8 +1,24 @@
 /*
- * spawn.cpp
+ *  spawn.cpp
+ *  Copyright 2001 Crazy Joe Divola (cjd1@users.sourceforge.net)
+ *  Copyright 2001-2010, 2012-2013, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://sourceforge.net/projects/seq/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /*
@@ -18,10 +34,10 @@
 #include <sys/types.h>
 #endif
 
-#include <limits.h>
-#include <math.h>
+#include <climits>
+#include <cmath>
 
-#include <qregexp.h>
+#include <QRegExp>
 
 #include "spawnshell.h"
 #include "fixpt.h"
@@ -43,7 +59,7 @@ const float animationCoefficient = 0.0013;
 const int animationCoefficientFixPt = 
    fixPtToFixed<int, float>(animationCoefficient, qFormat);
 
-const EquipStruct SlotEmpty = { 0, 0, 0 };
+const EquipStruct SlotEmpty = { 0, 0, 0, 0, 0 };
 
 //----------------------------------------------------------------------
 // Handy utility functions
@@ -233,10 +249,10 @@ QString Item::filterString() const
 {
   QString buff;
   buff.sprintf("Name:%s:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d",
-	       (const char*)transformedName().utf8(),
-	       (const char*)raceString(),
-	       (const char*)classString(),
-	       NPC(), x(), y(), z());
+          transformedName().toUtf8().data(),
+          raceString().toUtf8().data(),
+          classString().toUtf8().data(),
+          NPC(), x(), y(), z());
   return buff;
 }
 
@@ -301,9 +317,6 @@ Spawn::Spawn()
 Spawn::Spawn(const spawnStruct* s)
   : Item(tSpawn, s->spawnId)
 {
-  // turn on auto delete for the track list
-  m_spawnTrackList.setAutoDelete(true);
-
   // have update initialize everything
   update(s);
 }
@@ -344,9 +357,6 @@ Spawn::Spawn(uint16_t id,
   setGM(0);
   setConsidered(false);
 
-  // turn on auto delete for the track list
-  m_spawnTrackList.setAutoDelete(true);
-
   // Finally, note when this update ocurred
   updateLast();
 }
@@ -355,10 +365,10 @@ Spawn::Spawn(QDataStream& d, uint16_t id)
   : Item(tSpawn, id)
 {
   // restore Spawn info
-  d.readRawBytes((char*)this, sizeof(EQPoint));
-  d.readRawBytes((char*)&m_lastUpdate, 
+  d.readRawData((char*)this, sizeof(EQPoint));
+  d.readRawData((char*)&m_lastUpdate, 
 		 ((char*)this + sizeof(Item)) - (char*)&m_lastUpdate);
-  d.readRawBytes((char*)&m_petOwnerID,
+  d.readRawData((char*)&m_petOwnerID,
 		 ((char*)this + sizeof(Spawn)) - (char*)&m_petOwnerID);
   d >> m_name;
   d >> m_lastName;
@@ -400,17 +410,12 @@ Spawn::Spawn(Spawn* s, uint16_t id) : Item(tSpawn, id)
     setDeltas(s->deltaX(), s->deltaY(), s->deltaZ());
     setHeading(s->heading(), s->deltaHeading());
     setConsidered(s->considered());
-
-    // the new copy will own the spawn track list
-    m_spawnTrackList.setAutoDelete(false);
-    m_spawnTrackList = s->m_spawnTrackList;
-    s->m_spawnTrackList.setAutoDelete(false);
-    m_spawnTrackList.setAutoDelete(true);
 }
 
 Spawn::~Spawn()
 {
   // clear out the spawn track list
+  qDeleteAll(m_spawnTrackList);
   m_spawnTrackList.clear();
 }
 
@@ -572,13 +577,13 @@ void Spawn::setPos(int16_t x, int16_t y, int16_t z,
 
     // only insert if the change includes either an x or y change, not just z
     if ((count == 0) ||
-	((m_spawnTrackList.getLast()->x() != x) ||
-	 (m_spawnTrackList.getLast()->y() != y)))
+	((m_spawnTrackList.last()->x() != x) ||
+	 (m_spawnTrackList.last()->y() != y)))
     {
       // if the walk path length is limited, make sure not to exceed the limit
       if ((walkpathlength > 0) && 
-	  (count > 2) && (count > walkpathlength))
-	m_spawnTrackList.removeFirst();
+              (count > 2) && (count > walkpathlength))
+          delete m_spawnTrackList.takeFirst();
 
       // append the new entry to the end of the list
       m_spawnTrackList.append(new SpawnTrackPoint(x, y, z));
@@ -855,7 +860,7 @@ QString Spawn::info() const
  // Worn weapons
   for (i = tFirstWeapon; i <= tLastWeapon; i++)
     if (equipment(i).itemId != SlotEmpty.itemId)
-      temp += QString(locs[i]) + ":" +  + print_item(equipment(i).itemId) + " ";
+      temp += QString(locs[i]) + ":" + print_item(equipment(i).itemId) + " ";
 
   // Worn stuff -- Current best quess is that this may be material?
   i = tUnknown1;
@@ -889,20 +894,20 @@ QString Spawn::filterString() const
 
   QString buff;
   buff.sprintf("Name:%s:Level:%d:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:"
-	       "Light:%s:Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:",
-	       (const char*)name.utf8(),
-	       level(),
-	       (const char*)raceString(),
-	       (const char*)classString(),
-	       ((NPC() == 10) ? 0 : NPC()), 
-	       x(), y(), z(),
-	       (const char*)lightName(),
-	       (const char*)deityName(),
-	       raceTeam(), 
-	       deityTeam(),
-	       (const char*)typeString(),
-	       (const char*)lastName().utf8(),
-               (const char*)guildTag().utf8());
+          "Light:%s:Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:",
+          name.toUtf8().data(),
+          level(),
+          raceString().toUtf8().data(),
+          classString().toUtf8().data(),
+          ((NPC() == 10) ? 0 : NPC()),
+          x(), y(), z(),
+          lightName().toUtf8().data(),
+          deityName().toUtf8().data(),
+          raceTeam(),
+          deityTeam(),
+          typeString().toUtf8().data(),
+          lastName().toUtf8().data(),
+          guildTag().toUtf8().data());
 
   if (gm())
     buff += QString("GM:") + QString::number(gm()) + ":";
@@ -972,11 +977,11 @@ void Spawn::saveSpawn(QDataStream& d)
   // write out the raw spawn structure, skipping over the QStrings,
   // and SpawnTrackList (which can't be persisted in this fashion),
   // and the data we don't wan't copied over (heading/delta info).
-  d.writeRawBytes((const char*)this, sizeof(EQPoint));
-  d.writeRawBytes((const char*)&m_lastUpdate, 
+  d.writeRawData((const char*)this, sizeof(EQPoint));
+  d.writeRawData((const char*)&m_lastUpdate, 
 		  ((char*)this + sizeof(Item)) 
 		  - (char*)&m_lastUpdate);
-  d.writeRawBytes((const char*)&m_petOwnerID,
+  d.writeRawData((const char*)&m_petOwnerID,
 		  ((char*)this + sizeof(Spawn)) - (char*)&m_petOwnerID);
   d << m_name;
   d << m_lastName;

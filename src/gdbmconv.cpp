@@ -1,15 +1,28 @@
 /*
- * gdbmconv.cpp
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  gdbmconv.cpp
+ *  Copyright 2001 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Copyright 2019 by the respective ShowEQ Developers
  *
- * Copyright 2001 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net)
+ *  for use under the terms of the GNU General Public License,
+ *  incorporated herein by reference.
  *
- * Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
- * for use under the terms of the GNU General Public License, 
- * incorporated herein by reference.
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 //
@@ -18,10 +31,10 @@
 // dependencies will be migrated out.
 //
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cerrno>
+#include <cstring>
 
 #include "gdbmconv.h"
 #include "util.h"
@@ -62,7 +75,7 @@ bool GDBMConvenience::Insert(QString dbName, Datum& key, Datum& data,
   dbName += ".dbm";
 
   // attempt to open the database for write
-  if ((dbf = gdbm_open((char*)(const char*)dbName, 0, GDBM_WRCREAT, 0644, 0))
+  if ((dbf = gdbm_open(dbName.toAscii().data(), 0, GDBM_WRCREAT, 0644, 0))
       != NULL)
   {
     // if successful, then attempt to insert or replace data under key
@@ -70,10 +83,10 @@ bool GDBMConvenience::Insert(QString dbName, Datum& key, Datum& data,
       {
       case 0:
       case 1:
-	success = true;
-	break;
+          success = true;
+          break;
       default:
-	displayGDBMError("Insert: gdbm_store", (const char*)dbName);
+    displayGDBMError("Insert: gdbm_store", dbName.toAscii().data());
       }
 
     // close the database
@@ -82,8 +95,8 @@ bool GDBMConvenience::Insert(QString dbName, Datum& key, Datum& data,
   else
   {
     // display GDBM Error
-    displayGDBMError("Insert: gdbm_open", (const char*)dbName);
-    
+    displayGDBMError("Insert: gdbm_open", dbName.toAscii().data());
+
     // attempt to diagnose the open for write failure
     diagFileWriteFail(dbName);
   }
@@ -103,14 +116,14 @@ bool GDBMConvenience::Delete(QString dbName, Datum& key)
   dbName += ".dbm";
 
   // attempt to open the database for write
-  if ((dbf = gdbm_open((char*)(const char*)dbName, 0, GDBM_WRITER, 0644, 0))
+  if ((dbf = gdbm_open(dbName.toAscii().data(), 0, GDBM_WRITER, 0644, 0))
       != NULL)
   {
     // if successful, then attempt to insert or replace data under key
     if (gdbm_delete(dbf, key_) == 0)
       success = true;
     else
-      displayGDBMError("Delete: gdbm_delete", (const char*)dbName);
+      displayGDBMError("Delete: gdbm_delete", dbName.toAscii().data());
 
     // close the database
     gdbm_close(dbf);
@@ -118,8 +131,8 @@ bool GDBMConvenience::Delete(QString dbName, Datum& key)
   else
   {
     // display GDBM Error
-    displayGDBMError("Delete: gdbm_open", (const char*)dbName);
-    
+    displayGDBMError("Delete: gdbm_open", dbName.toAscii().data());
+
     // attempt to diagnose the open for write failure
     diagFileWriteFail(dbName);
   }
@@ -140,7 +153,7 @@ bool GDBMConvenience::IsEntryExist(QString dbName, Datum& key)
   dbName += ".dbm";
 
   // attempt to open the database for read
-  if ((dbf = gdbm_open((char*)(const char*)dbName, 0, GDBM_READER,
+  if ((dbf = gdbm_open(dbName.toAscii().data(), 0, GDBM_READER,
                        0644, 0)) != NULL)
   {
     // attempt to retrieve the entry from the database
@@ -175,7 +188,7 @@ bool GDBMConvenience::GetEntry(QString dbName, Datum& key, Datum& data)
   dbName += ".dbm";
 
   // attmpet to open the database for read
-  if ((dbf = gdbm_open((char*)(const char*)dbName, 0, GDBM_READER,
+  if ((dbf = gdbm_open(dbName.toAscii().data(), 0, GDBM_READER,
                        0644, 0)) != NULL)
   {
     // attempt to retrieve the entry from the database
@@ -195,7 +208,7 @@ bool GDBMConvenience::GetEntry(QString dbName, Datum& key, Datum& data)
   else
   {
     // display the notice (this isn't necessarily bad)
-    displayGDBMError("GetEntry: gdbm_open", (const char*)dbName, "Notice");
+    displayGDBMError("GetEntry: gdbm_open", dbName.toAscii().data(), "Notice");
 
     // attempt to diagnose the open for read failure
     diagFileReadFail(dbName);
@@ -214,14 +227,14 @@ bool GDBMConvenience::Reorganize(QString dbName)
   dbName += ".dbm";
 
   // attempt to open the database for write
-  if ((dbf = gdbm_open((char*)(const char*)dbName, 0, GDBM_WRITER, 0644, 0))
+  if ((dbf = gdbm_open(dbName.toAscii().data(), 0, GDBM_WRITER, 0644, 0))
       != NULL)
   {
     // if successful, then attempt to insert or replace data under key
     if (gdbm_reorganize(dbf) == 0)
       success = true;
     else
-      displayGDBMError("Reorganize: gdbm_reorganize", (const char*)dbName);
+      displayGDBMError("Reorganize: gdbm_reorganize", dbName.toAscii().data());
 
     // close the database
     gdbm_close(dbf);
@@ -229,7 +242,7 @@ bool GDBMConvenience::Reorganize(QString dbName)
   else
   {
     // display GDBM Error
-    displayGDBMError("Reorganize: gdbm_open", (const char*)dbName);
+    displayGDBMError("Reorganize: gdbm_open", dbName.toAscii().data());
     
     // attempt to diagnose the open for write failure
     diagFileWriteFail(dbName);
@@ -298,13 +311,13 @@ bool GDBMIterator::GetFirstKey(QString dbName, Datum& key)
   dbName += ".dbm";
 
   // open the specified DB file for reading
-  m_dbf = gdbm_open((char*)(const char*)dbName, 0, GDBM_READER,
+  m_dbf = gdbm_open(dbName.toAscii().data(), 0, GDBM_READER,
                     0644, 0);
 
   // if failed, then nothing to read
   if (m_dbf == NULL)
   {
-    displayGDBMError("GetFirstKey: gdbm_open", (const char*)dbName);
+    displayGDBMError("GetFirstKey: gdbm_open", dbName.toAscii().data());
 
     // attempt to diagnose the open for read failure
     diagFileReadFail(dbName);

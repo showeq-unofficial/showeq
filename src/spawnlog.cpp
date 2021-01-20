@@ -1,11 +1,24 @@
 /*
- * spawnlog.cpp
+ *  spawnlog.cpp
+ *  Copyright 2001-2007, 2018-2019 by the respective ShowEQ Developers
+ *  Portions Copyright 2001-2003,2007 Zaphod (dohpaz@users.sourceforge.net).
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2001-2003 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2003,2007 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "spawn.h"
@@ -35,7 +48,7 @@ SpawnLog::logSpawnInfo(const char *type, const char *name, int id, int level,
                           const char *killedBy, int kid, int guildid)
 {
   const QDateTime& eqDate = m_dateTimeMgr->updatedDateTime();
-  const QTime& time = QTime::currentTime(Qt::LocalTime);
+  const QTime& time = QTime::currentTime();
 
   logSpawnInfo(type, name, id, level, x, y, z, 
 	       eqDate, time, 
@@ -50,30 +63,30 @@ SpawnLog::logSpawnInfo(const char *type, const char *name, int id, int level,
 {
   if (!open())
       return;
-  
+
   const QDate& eqDateDate = eqDate.date();
   const QTime& eqDateTime = eqDate.time();
-  
+
   outputf("%s:%s(%d):%d:%d,%d,%d:%02d.%02d.%02d:%d:%s:%02d.%02d.%02d.%02d.%04d:%s(%d):%d\n",
-	  type,
-	  name,
-	  id,
-	  level,
-	  x,
-	  y,
-	  z,
-	  time.hour(), time.minute(), time.second(),
-	  version,
-	  (const char*)zoneShortName,
-	  eqDateTime.hour(),
-	  eqDateTime.minute(),
-	  eqDateDate.month(),
-	  eqDateDate.day(),
-	  eqDateDate.year(),
-	  killedBy,
-	  kid,
-	  guildid);
-  
+          type,
+          name,
+          id,
+          level,
+          x,
+          y,
+          z,
+          time.hour(), time.minute(), time.second(),
+          version,
+          zoneShortName.toAscii().data(),
+          eqDateTime.hour(),
+          eqDateTime.minute(),
+          eqDateDate.month(),
+          eqDateDate.day(),
+          eqDateDate.year(),
+          killedBy,
+          kid,
+          guildid);
+
   flush();
 }
 
@@ -82,10 +95,10 @@ SpawnLog::logZoneSpawns(const uint8_t* data, size_t len)
 {
   const spawnStruct* zspawns = (const spawnStruct*)data;
   int spawndatasize = len / sizeof(spawnStruct);
-  
+
   const QDateTime& eqDate = m_dateTimeMgr->updatedDateTime();
-  const QTime& time = QTime::currentTime(Qt::LocalTime);
-  
+  const QTime& time = QTime::currentTime();
+
   for (int i = 0; i < spawndatasize; i++)
   {
     const spawnStruct& spawn = zspawns[i];
@@ -109,11 +122,11 @@ SpawnLog::logNewSpawn(const Item *item)
 {
   if (item->type() != tSpawn)
     return;
-  
+
   const Spawn* spawn = (const Spawn*)item;
-  
-  logSpawnInfo("+",(const char *)spawn->name(),spawn->id(),spawn->level(),
-	       spawn->x(), spawn->y(), spawn->z(), "",0, spawn->guildID());
+
+  logSpawnInfo("+", spawn->name().toAscii().data() , spawn->id(), spawn->level(),
+          spawn->x(), spawn->y(), spawn->z(), "",0, spawn->guildID());
 }
 
 void
@@ -121,14 +134,14 @@ SpawnLog::logKilledSpawn(const Item *item, const Item* kitem, uint16_t kid)
 {
   if (item == NULL)
     return;
-  
+
   const Spawn* spawn = (const Spawn*)item;
   const Spawn* killer = (const Spawn*)kitem;
-  
-  logSpawnInfo("x",(const char *) spawn->name(),spawn->id(), spawn->level(), 
-	       spawn->x(), spawn->y(), spawn->z(), 
-	       killer ? (const char*)killer->name() : "unknown",
-	       kid, spawn->guildID());
+
+  logSpawnInfo("x", spawn->name().toAscii().data(), spawn->id(), spawn->level(),
+          spawn->x(), spawn->y(), spawn->z(),
+          killer ? killer->name().toAscii().data() : "unknown",
+          kid, spawn->guildID());
 }
 
 void
@@ -136,11 +149,11 @@ SpawnLog::logDeleteSpawn(const Item *item)
 {
   if (item->type() != tSpawn)
     return;
-  
+
   const Spawn* spawn = (const Spawn*)item;
-  
-  logSpawnInfo("-",(const char *)spawn->name(),spawn->id(),spawn->level(),
-	       spawn->x(), spawn->y(), spawn->z(), "",0, spawn->guildID());
+
+  logSpawnInfo("-", spawn->name().toAscii().data(), spawn->id(), spawn->level(),
+          spawn->x(), spawn->y(), spawn->z(), "",0, spawn->guildID());
 }
 
 void
@@ -149,7 +162,7 @@ SpawnLog::logNewZone(const QString& zonename)
   if (!open())
       return;
 
-  outputf("----------\nNEW ZONE: %s\n----------\n", (const char*)zonename);
+  outputf("----------\nNEW ZONE: %s\n----------\n", zonename.toAscii().data());
   outputf(" :name(spawnID):Level:Xpos:Ypos:Zpos:H.m.s:Ver:Zone:eqHour.eqMinute.eqMonth.eqDay.eqYear:killedBy(spawnID)\n");
   flush();
   zoneShortName = zonename;

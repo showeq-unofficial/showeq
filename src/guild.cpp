@@ -1,17 +1,28 @@
 /*
- * group.cpp
+ *  guild.cpp
+ *  Copyright 2001 Fee (fee@users.sourceforge.net). All Rights Reserved.
+ *  Portions Copyright 2001-2007, 2009, 2016, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  Contributed to ShowEQ by fee (fee@users.sourceforge.net)
+ *  for use under the terms of the GNU General Public License,
+ *  incorporated herein by reference.
  *
- * Copyright 2001 Fee (fee@users.sourceforge.net). All Rights Reserved.
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- * Portions Copyright 2001-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- * Contributed to ShowEQ by fee (fee@users.sourceforge.net)
- * for use under the terms of the GNU General Public License,
- * incorporated herein by reference.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "guild.h"
@@ -19,13 +30,14 @@
 #include "diagnosticmessages.h"
 #include "netstream.h"
 
-#include <qfile.h>
-#include <qdatastream.h>
-#include <qtextstream.h>
+#include <QFile>
+#include <QDataStream>
+#include <QTextStream>
 
 GuildMgr::GuildMgr(QString fn, QObject* parent, const char* name)
-  : QObject(parent, name)
+  : QObject(parent)
 {
+  setObjectName(name);
   guildsFileName = fn;
 
   readGuildList();
@@ -55,14 +67,14 @@ void GuildMgr::writeGuildList(const uint8_t* data, size_t len)
   if (guildsfile.exists()) {
      if (!guildsfile.remove()) {
        seqWarn("GuildMgr: Could not remove old %s, unable to replace with server data!",
-                guildsFileName.latin1());
+                guildsFileName.toLatin1().data());
         return;
      }
   }
 
-  if(!guildsfile.open(IO_WriteOnly))
+  if(!guildsfile.open(QIODevice::WriteOnly))
     seqWarn("GuildMgr: Could not open %s for writing, unable to replace with server data!",
-             guildsFileName.latin1());
+             guildsFileName.toLatin1().data());
 
   QDataStream guildDataStream(&guildsfile);
 
@@ -111,9 +123,9 @@ void GuildMgr::writeGuildList(const uint8_t* data, size_t len)
   {
      char szGuildName[64] = {0};
 
-     strcpy(szGuildName, it->second.latin1());
+     strcpy(szGuildName, it->second.toLatin1().data());
      //seqDebug("GuildMgr::writeGuildList - add guild '%s' (%d)", szGuildName, it->first);
-     guildDataStream.writeRawBytes(szGuildName, sizeof(szGuildName));
+     guildDataStream.writeRawData(szGuildName, sizeof(szGuildName));
   }
 
   guildsfile.close();
@@ -125,13 +137,13 @@ void GuildMgr::readGuildList()
   QFile guildsfile(guildsFileName);
 
   m_guildMap.clear();
-  if (guildsfile.open(IO_ReadOnly))
+  if (guildsfile.open(QIODevice::ReadOnly))
   {
      while (!guildsfile.atEnd())
      {
         char szGuildName[64] = {0};
 
-        guildsfile.readBlock(szGuildName, sizeof(szGuildName));
+        guildsfile.read(szGuildName, sizeof(szGuildName));
         //seqDebug("GuildMgr::readGuildList - read guild '%s'", szGuildName);
         m_guildMap.push_back(QString::fromUtf8(szGuildName));
      }
@@ -140,7 +152,7 @@ void GuildMgr::readGuildList()
     seqInfo("GuildMgr: Guildsfile loaded");
   }
   else
-    seqWarn("GuildMgr: Could not load guildsfile, %s", (const char*)guildsFileName);
+    seqWarn("GuildMgr: Could not load guildsfile, %s", guildsFileName.toAscii().data());
 }
 
 void GuildMgr::guildList2text(QString fn)
@@ -151,20 +163,20 @@ void GuildMgr::guildList2text(QString fn)
     if (guildsfile.exists()) {
          if (!guildsfile.remove()) {
              seqWarn("GuildMgr: Could not remove old %s, unable to process request!",
-                   fn.latin1());
+                   fn.toLatin1().data());
            return;
         }
    }
 
-   if (!guildsfile.open(IO_WriteOnly)) {
+   if (!guildsfile.open(QIODevice::WriteOnly)) {
      seqWarn("GuildMgr: Could not open %s for writing, unable to process request!",
-              fn.latin1());
+              fn.toLatin1().data());
       return;
    }
 
    for (unsigned int i =0 ; i < m_guildMap.size(); i++) 
    {
-       if (m_guildMap[i])
+       if (!m_guildMap[i].isNull())
           guildtext << i << "\t" << m_guildMap[i] << endl;
    }
 
@@ -176,10 +188,10 @@ void GuildMgr::guildList2text(QString fn)
 
 void GuildMgr::listGuildInfo()
 {
-   for (unsigned int i = 0; i < m_guildMap.size(); i++) 
+   for (unsigned int i = 0; i < m_guildMap.size(); i++)
    {
-     if (m_guildMap[i])
-       seqInfo("%d\t%s", i, (const char*)m_guildMap[i]);
+     if (!m_guildMap[i].isNull())
+       seqInfo("%d\t%s", i, m_guildMap[i].toAscii().data());
    }
 }
 

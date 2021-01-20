@@ -1,10 +1,23 @@
 /*
- * filtermgr.cpp
+ *  filtermgr.cpp
+ *  Copyright 2001-2007, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sourceforge.net
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 //
@@ -17,11 +30,11 @@
 #include "datalocationmgr.h"
 #include "diagnosticmessages.h"
 
-#include <errno.h>
+#include <cerrno>
 
-#include <qregexp.h>
-#include <qstring.h>
-#include <qfileinfo.h>
+#include <QRegExp>
+#include <QString>
+#include <QFileInfo>
 
 //
 // ZBTEMP: predefined filters and filter mask will be migrated out
@@ -31,12 +44,13 @@
 
 //----------------------------------------------------------------------
 // FilterMgr
-FilterMgr::FilterMgr(const DataLocationMgr* dataLocMgr, 
+FilterMgr::FilterMgr(const DataLocationMgr* dataLocMgr,
 		     const QString filterFile, bool spawnfilter_case)
-  : QObject(NULL, "filtermgr"),
+  : QObject(NULL),
     m_dataLocMgr(dataLocMgr),
     m_caseSensitive(spawnfilter_case)
 {
+  setObjectName("filtermgr");
   // Initialize filters
 
   // allocate general filter types object
@@ -112,7 +126,7 @@ QString FilterMgr::filterString(uint32_t mask) const
 
 QString FilterMgr::filterName(uint8_t filter) const
 {
-  return m_types->names(filter);
+  return m_types->name(filter);
 }
 
 void FilterMgr::loadFilters(void)
@@ -122,9 +136,9 @@ void FilterMgr::loadFilters(void)
   fileInfo = 
     m_dataLocMgr->findExistingFile("filters", fileInfo.fileName(), false);
 
-  m_filterFile = fileInfo.absFilePath();
+  m_filterFile = fileInfo.absoluteFilePath();
 
-  seqInfo("Loading Filters from '%s'", (const char*)m_filterFile);
+  seqInfo("Loading Filters from '%s'", m_filterFile.toAscii().data());
 
   m_filters->load(m_filterFile);
 
@@ -136,9 +150,9 @@ void FilterMgr::loadFilters(const QString& fileName)
   QFileInfo fileInfo = 
     m_dataLocMgr->findExistingFile("filters", fileName, false);
 
-  m_filterFile = fileInfo.absFilePath();
+  m_filterFile = fileInfo.absoluteFilePath();
 
-  seqInfo("Loading Filters from '%s'", (const char*)m_filterFile);
+  seqInfo("Loading Filters from '%s'", m_filterFile.toAscii().data());
   
   m_filters->load(m_filterFile);
 
@@ -152,9 +166,9 @@ void FilterMgr::saveFilters(void)
   
   fileInfo = m_dataLocMgr->findWriteFile("filters", fileInfo.fileName(), true);
 
-  m_filterFile = fileInfo.absFilePath();
+  m_filterFile = fileInfo.absoluteFilePath();
 
-  seqInfo("Saving filters to %s", (const char*)m_filterFile);
+  seqInfo("Saving filters to %s", m_filterFile.toAscii().data());
 
   m_filters->save(m_filterFile);
 }
@@ -227,9 +241,9 @@ void FilterMgr::loadZone(const QString& shortZoneName)
   QFileInfo fileInfo = 
     m_dataLocMgr->findExistingFile("filters", fileName, false);
 
-  m_zoneFilterFile = fileInfo.absFilePath();
+  m_zoneFilterFile = fileInfo.absoluteFilePath();
 
-  seqInfo("Loading Zone Filter File: %s", (const char*)m_zoneFilterFile);
+  seqInfo("Loading Zone Filter File: %s", m_zoneFilterFile.toAscii().data());
 
   m_zoneFilters->load(m_zoneFilterFile);
 
@@ -243,9 +257,9 @@ void FilterMgr::loadZoneFilters(void)
   fileInfo = m_dataLocMgr->findExistingFile("filters", fileInfo.fileName(),
 					    false);
 
-  m_zoneFilterFile = fileInfo.absFilePath();
+  m_zoneFilterFile = fileInfo.absoluteFilePath();
 
-  seqInfo("Loading Zone Filter File: %s", (const char*)m_zoneFilterFile);
+  seqInfo("Loading Zone Filter File: %s", m_zoneFilterFile.toAscii().data());
 
   m_zoneFilters->load(m_zoneFilterFile);
   
@@ -265,9 +279,9 @@ void FilterMgr::saveZoneFilters(void)
   
   fileInfo = m_dataLocMgr->findWriteFile("filters", fileInfo.fileName(), true);
 
-  m_zoneFilterFile = fileInfo.absFilePath();
+  m_zoneFilterFile = fileInfo.absoluteFilePath();
 
-  seqInfo("Saving filters to %s", (const char*)m_zoneFilterFile);
+  seqInfo("Saving filters to %s", m_zoneFilterFile.toAscii().data());
 
   if (! m_zoneFilters->save(m_zoneFilterFile))
   {

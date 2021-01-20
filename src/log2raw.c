@@ -1,22 +1,44 @@
-/* log2raw.c
-   This converts a file created using logData() (in packet.cpp) to a raw
-   stream of bytes.  Each separate packet logged in the input file (stdin)
-   will go to a separate output file.
+/*
+ *  log2raw.c
+ *  Copyright 2000-2002, 2019 by the respective ShowEQ Developers
+ *
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
-   The output file "base" name is specified on the command line
+/*
+ *  This converts a file created using logData() (in packet.cpp) to a raw
+ *  stream of bytes.  Each separate packet logged in the input file (stdin)
+ *  will go to a separate output file.
+ *
+ *  The output file "base" name is specified on the command line
+ *
+ *  i.e. log2raw output_base < inputfile.log
+ *
+ *  Created by cpphack
+ *  Dec 2 2000
+ *
+ *  Modifications and improvements are encouraged.
+ */
 
-   i.e. log2raw output_base < inputfile.log
-
-   Created by cpphack
-   Dec 2 2000
-
-   Modifications and improvements are encouraged.
-*/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cerrno>
 #include <unistd.h>
 
 #define MAX_LINE_LEN 200

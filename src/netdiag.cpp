@@ -1,16 +1,29 @@
 /*
- * netdiag.h
+ *  netdiag.cpp
+ *  Copyright 2002-2007, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sourceforge.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <qpushbutton.h>
-#include <qlcdnumber.h>
-#include <qaccel.h>
+#include <QPushButton>
+#include <QShortcut>
+#include <QGridLayout>
+#include <QLabel>
 
 #include "main.h"
 #include "netdiag.h"
@@ -22,15 +35,19 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
     m_packet(packet),
     m_playbackSpeed(NULL)
 {
+
+  QWidget* mainWidget = new QWidget();
+  setWidget(mainWidget);
+
   //  setResizeEnabled(false);
   // get preferences
-  QGridLayout* tmpGrid = new QGridLayout(boxLayout(), 26, 9);
-  tmpGrid->addColSpacing(3, 5);
-  tmpGrid->addColSpacing(6, 5);
-  tmpGrid->addRowSpacing(1, 5);
-  tmpGrid->addRowSpacing(3, 5);
-  tmpGrid->addRowSpacing(6, 5);
-  tmpGrid->addRowSpacing(8, 5);
+  QGridLayout* tmpGrid = new QGridLayout(mainWidget);
+  tmpGrid->addItem(new QSpacerItem(5, 0), 0, 3);
+  tmpGrid->addItem(new QSpacerItem(5, 0), 0, 6);
+  tmpGrid->addItem(new QSpacerItem(0, 5), 1, 0);
+  tmpGrid->addItem(new QSpacerItem(0, 5), 3, 0);
+  tmpGrid->addItem(new QSpacerItem(0, 5), 6, 0);
+  tmpGrid->addItem(new QSpacerItem(0, 5), 8, 0);
 
   int row = 0;
   int col = 0;
@@ -81,8 +98,8 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   tmpGrid->addWidget(new QLabel("Filter: ", this), row, col++);
   m_filterLabel = new QLabel(this);
   m_filterLabel->setText(m_packet->pcapFilter());
-  tmpGrid->addMultiCellWidget(m_filterLabel, row, row, col, col+5);
-  
+  tmpGrid->addWidget(m_filterLabel, row, col, 1, 5);
+
   // stream specific statistics
   row++; row++; col = 0;
 
@@ -92,7 +109,7 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   {
      tmpGrid->addWidget(new QLabel(eqStreams[a], this), row, col++);
      tmpGrid->addWidget(new QLabel("Max Length:", this), row, col++);
-     m_maxLength[a] = new QLabel(this, "unknown");
+     m_maxLength[a] = new QLabel("unknown", this);
      m_maxLength[a]->setNum((int)m_packet->currentMaxLength(a));
      tmpGrid->addWidget(m_maxLength[a], row, col++);
      col++;
@@ -102,15 +119,15 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
      // packet throughput
      tmpGrid->addWidget(new QLabel("Packets ", this), row, col++);
      tmpGrid->addWidget(new QLabel("Total: ", this), row, col++);
-     m_packetTotal[a] = new QLabel(this, "count");
+     m_packetTotal[a] = new QLabel("count", this);
      tmpGrid->addWidget(m_packetTotal[a], row, col++);
      col++;
      tmpGrid->addWidget(new QLabel("Recent: ", this), row, col++);
-     m_packetRecent[a] = new QLabel(this, "recent");
+     m_packetRecent[a] = new QLabel("recent", this);
      tmpGrid->addWidget(m_packetRecent[a], row, col++);
      col++;
      tmpGrid->addWidget(new QLabel("Rate: ", this), row, col++);
-     m_packetAvg[a] = new QLabel(this, "avg");
+     m_packetAvg[a] = new QLabel("avg", this);
      tmpGrid->addWidget(m_packetAvg[a], row, col++);
      resetPacket(m_packet->packetCount(a), a);
 
@@ -119,19 +136,19 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
      // network status
      tmpGrid->addWidget(new QLabel("Status ", this), row, col++);
      tmpGrid->addWidget(new QLabel("Cached: ", this), row, col++);
-     m_cache[a] = new QLabel(this, "cached");
+     m_cache[a] = new QLabel("cached", this);
      m_cache[a]->setNum((int)m_packet->currentCacheSize(a));
      tmpGrid->addWidget(m_cache[a], row, col++);
      col++;
      tmpGrid->addWidget(new QLabel("SeqExp: ", this), row, col++);
-     m_seqExp[a] = new QLabel(this, "seqexp");
+     m_seqExp[a] = new QLabel("seqexp", this);
      tmpGrid->addWidget(m_seqExp[a], row, col++);
      col++;
      tmpGrid->addWidget(new QLabel("SeqCur: ", this), row, col++);
-     m_seqCur[a] = new QLabel(this, "seqcur");
+     m_seqCur[a] = new QLabel("seqcur", this);
      tmpGrid->addWidget(m_seqCur[a], row, col++);
      row++; row++; col = 0;
-     seqExpect(m_packet->serverSeqExp(a), a); 
+     seqExpect(m_packet->serverSeqExp(a), a);
      m_seqCur[a]->setText("????");
   }
 
@@ -139,22 +156,29 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   {
     tmpGrid->addWidget(new QLabel("Playback ", this), row, col++);
     tmpGrid->addWidget(new QLabel("Rate: ", this), row, col++);
-    m_playbackSpeed = new QSpinBox(-1, 9, 1, this, "speed");
+    m_playbackSpeed = new QSpinBox(this);
+    m_playbackSpeed->setObjectName("speed");
+    m_playbackSpeed->setMinimum(-1);
+    m_playbackSpeed->setMaximum(9);
+    m_playbackSpeed->setSingleStep(1);
     m_playbackSpeed->setSuffix("x");
-    m_playbackSpeed->setSpecialValueText("Puase");
+    m_playbackSpeed->setSpecialValueText("Pause");
     m_playbackSpeed->setWrapping(true);
     tmpGrid->addWidget(m_playbackSpeed, row, col++, Qt::AlignLeft);
 
     m_playbackSpeed->setValue(m_packet->playbackSpeed());
 
-    QAccel* accel = new QAccel(this);
-    int key;
+    QKeySequence key;
+
     key = pSEQPrefs->getPrefKey("IncPlaybackSpeedKey", preferenceName(), "Ctrl+X");
-    accel->connectItem(accel->insertItem(key), m_packet, SLOT(incPlayback()));
+    QShortcut *incPlayback_shortcut = new QShortcut(key, this);
+    connect (incPlayback_shortcut, SIGNAL(activated()), m_packet, SLOT(incPlayback()));
+
     key = pSEQPrefs->getPrefKey("IncPlaybackSpeedKey", preferenceName(), "Ctrl+Z");
-    accel->connectItem(accel->insertItem(key), m_packet, SLOT(decPlayback()));
+    QShortcut *decPlayback_shortcut = new QShortcut(key, this);
+    connect (decPlayback_shortcut, SIGNAL(activated()), m_packet, SLOT(decPlayback()));
   }
-  
+
   // supply the LCD's with signals
   connect (m_packet, SIGNAL(cacheSize(int, int)), 
 	   this, SLOT(cacheSize(int, int)));
@@ -324,7 +348,7 @@ void NetDiag::maxLength(int len, int streamId)
 QString NetDiag::print_addr(in_addr_t  addr)
 {
 #ifdef DEBUG_PACKET
-   debug ("print_addr()");
+   qDebug ("print_addr()");
 #endif /* DEBUG_PACKET */
   QString paddr;
 

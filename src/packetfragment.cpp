@@ -1,11 +1,24 @@
 /*
- * packetfragment.cpp
+ *  packetfragment.cpp
+ *  Copyright 2000-2005, 2019 by the respective ShowEQ Developers
+ *  Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net).
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2003 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /* Implementation of EQPacketFragmentSequence class */
@@ -58,7 +71,7 @@ EQPacketFragmentSequence::~EQPacketFragmentSequence()
 void EQPacketFragmentSequence::reset()
 {
 #ifdef PACKET_PROCESS_FRAG_DIAG
-   debug ("EQPacketFragmentSequence::reset() stream %d (complete fragment? %s)",
+   qDebug ("EQPacketFragmentSequence::reset() stream %d (complete fragment? %s)",
      m_streamid, (isComplete() ? "yes" : "no"));
 #endif
   m_dataSize = 0;
@@ -70,7 +83,7 @@ void EQPacketFragmentSequence::reset()
 void EQPacketFragmentSequence::addFragment(EQProtocolPacket& packet)
 {
 #ifdef PACKET_PROCESS_FRAG_DIAG
-   debug ("EQPacketFragmentSequence::addFragment() stream %d seq %04x", 
+   qDebug ("EQPacketFragmentSequence::addFragment() stream %d seq %04x", 
      m_streamid, packet.arqSeq());
 #endif
    

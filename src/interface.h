@@ -1,38 +1,48 @@
 /*
- * interface.h
+ *  interface.h
+ *  Copyright 2003-2009, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sourceforge.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef EQINT_H
 #define EQINT_H
 
-#include <qwidget.h>
-#include <qpushbutton.h>
-#include <qlcdnumber.h>
-#include <qframe.h>
-#include <qlabel.h>
-#include <qlistview.h>
-#include <qlayout.h>
-#include <qmenubar.h>
-#include <qpopupmenu.h>
-#include <qmainwindow.h>
-#include <qhbox.h>
-#include <qvbox.h>
-#include <qsplitter.h>
-#include <qvaluelist.h>
-#include <qtimer.h>
-#include <qptrlist.h>
-#include <qmessagebox.h>
-#include <qtabdialog.h>
-#include <qspinbox.h>
-#include <qintdict.h>
-#include <qptrdict.h>
+#include <QWidget>
+#include <QPushButton>
+#include <QLabel>
+#include <QLayout>
+#include <QMenuBar>
+#include <QMenu>
+#include <QMainWindow>
+#include <QSplitter>
+#include <QList>
+#include <QTimer>
+#include <QMessageBox>
+#include <QSpinBox>
+#include <QHash>
+#include <QTextStream>
 #include "everquest.h"
 #include "spawnlist.h"
 #include "spawnshell.h"
 #include "packetlog.h"
+#include "message.h"
+#include "messagefilter.h"
 
 //--------------------------------------------------
 // forward declarations
@@ -82,7 +92,7 @@ class BazaarLog;
 
 //--------------------------------------------------
 // typedefs
-typedef QValueList<int> MenuIDList;
+typedef QList<QAction*> MenuActionList;
 
 //--------------------------------------------------
 // constants
@@ -159,7 +169,6 @@ class EQInterface:public QMainWindow
    void updateSelectedSpawnStatus(const Item* item);
 
    void savePrefs(void);
-   void saveDockAreaPrefs(QDockArea* a, Dock edge);
 
    void addCategory(void);
    void reloadCategories(void);
@@ -190,26 +199,26 @@ class EQInterface:public QMainWindow
    void dumpGuild(void);
    void launch_editor_filters(void);
    void launch_editor_zoneFilters(void);
-   void toggleAutoDetectPlayerSettings(int id);
-   void SetDefaultCharacterClass(int id);
-   void SetDefaultCharacterRace(int id);
-   void SetDefaultCharacterLevel (int id);
-   void toggle_view_StatWin(int id);
-   void toggle_view_SkillWin(int id);
-   void toggle_view_SpawnListCol( int id );
-   void toggle_view_DockedWin( int id );
-   void toggle_view_DockableWin( int id );
+   void toggleAutoDetectPlayerSettings(bool enable);
+   void SetDefaultCharacterClass(QAction*);
+   void SetDefaultCharacterRace(QAction*);
+   void SetDefaultCharacterLevel(int id);
+   void toggle_view_StatWin(QAction* stat);
+   void toggle_view_SkillWin(QAction* skill);
+   void toggle_view_SpawnListCol(QAction* col);
+   void toggle_view_DockedWin(QAction* win);
+   void toggle_view_DockableWin(QAction* win);
    void toggle_log_Filter_ZoneData_Client();
    void toggle_log_Filter_ZoneData_Server();
    
-   void selectTheme(int id);
-   void toggle_opcode_monitoring (int id);
+   void selectTheme(QAction*);
+   void toggle_opcode_monitoring ();
    void set_opcode_monitored_list (void);
-   void toggle_opcode_view(int id);
-   void toggle_opcode_log(int id);
+   void toggle_opcode_view();
+   void toggle_opcode_log();
    void select_opcode_file(void);
-   void toggle_net_session_tracking(void);
-   void toggle_net_real_time_thread(int id);
+   void toggle_net_session_tracking(bool enable);
+   void toggle_net_real_time_thread(bool realtime);
    void set_net_monitor_next_client();
    void set_net_client_IP_address();
    void set_net_client_MAC_address();
@@ -237,7 +246,7 @@ class EQInterface:public QMainWindow
  private slots:
    void toggle_opt_Fast();
    void toggle_view_UnknownData();
-   void toggle_view_ChannelMsgs(int id);
+   void toggle_view_ChannelMsgs(QAction* msgwin);
    void toggle_view_ExpWindow();
    void toggle_view_CombatWindow();
    void toggle_opt_ConSelect();
@@ -246,12 +255,12 @@ class EQInterface:public QMainWindow
    void toggle_opt_LogSpawns();
    void toggle_opt_PvPTeams();
    void toggle_opt_PvPDeity();
-   void toggle_opt_CreateUnknownSpawns(int);
-   void toggle_opt_WalkPathRecord(int);
+   void toggle_opt_CreateUnknownSpawns(bool enable);
+   void toggle_opt_WalkPathRecord(bool enable);
    void set_opt_WalkPathLength(int);
-   void toggle_opt_RetardedCoords(int);
-   void toggle_opt_SystimeSpawntime(int);
-   void select_opt_conColorBase(int);
+   void toggle_opt_RetardedCoords(bool enable);
+   void toggle_opt_SystimeSpawntime(bool enable);
+   void select_opt_conColorBase(QAction* con);
    void toggle_view_SpawnList();
    void toggle_view_SpawnList2();
    void toggle_view_SpawnPointList();
@@ -259,50 +268,52 @@ class EQInterface:public QMainWindow
    void toggle_view_PlayerStats();
    void toggle_view_Compass();
    void toggle_view_PlayerSkills();
-   void toggle_view_Map(int id);
+   void toggle_view_Map(QAction* map);
    void toggle_view_NetDiag();
    void toggle_view_GuildList();
    void resetMaxMana();
    void select_filter_file();
-   void toggle_filter_Case(int id);
-   void toggle_filter_AlertInfo(int id);
-   void toggle_filter_UseSystemBeep(int id);
-   void toggle_filter_UseCommands(int id);
-   void toggle_filter_Log(int id);
-   void set_filter_AudioCommand(int id);
+   void toggle_filter_Case(bool cs);
+   void toggle_filter_AlertInfo(bool enable);
+   void toggle_filter_UseSystemBeep(bool enable);
+   void toggle_filter_UseCommands(bool enable);
+   void toggle_filter_Log(QAction*);
+   void set_filter_AudioCommand(QAction* type);
    void toggle_view_menubar();
    void toggle_view_statusbar();
-   void set_main_WindowCaption(int id);
-   void set_main_WindowFont(int id);
-   void set_main_Font(int id);
-   void select_main_FormatFile(int id);
-   void select_main_SpellsFile(int id);
-   void toggle_main_statusbar_Window(int id);
-   void set_main_statusbar_Font(int id);
-   void toggle_main_SavePosition(int id);
-   void toggle_main_UseWindowPos(int id);
-   void toggle_opt_save_PlayerState(int id);
-   void toggle_opt_save_ZoneState(int id);
-   void toggle_opt_save_Spawns(int id);
+   void set_main_WindowCaption(QAction*);
+   void set_main_WindowFont(QAction*);
+   void set_main_Font();
+   void select_main_FormatFile();
+   void select_main_SpellsFile();
+   void toggle_main_statusbar_Window(QAction*);
+   void set_main_statusbar_Font();
+   void toggle_main_SavePosition(bool enable);
+   void toggle_main_UseWindowPos(bool enable);
+   void toggle_opt_save_PlayerState(bool enable);
+   void toggle_opt_save_ZoneState(bool enable);
+   void toggle_opt_save_Spawns(bool enable);
    void set_opt_save_SpawnFrequency(int frequency);
    void set_opt_save_BaseFilename();
-   void opt_clearChannelMsgs(int id);
+   void opt_clearChannelMsgs();
    void init_view_menu();
    void toggle_opt_UseUpdateRadius();
 
-   void toggleTypeFilter(int);
+   void toggleTypeFilter(QAction* type);
    void disableAllTypeFilters();
    void enableAllTypeFilters();
-   void toggleShowUserFilter(int);
+   void toggleShowUserFilter(QAction* filter);
    void disableAllShowUserFilters();
    void enableAllShowUserFilters();
-   void toggleHideUserFilter(int);
+   void toggleHideUserFilter(QAction* filter);
    void disableAllHideUserFilters();
    void enableAllHideUserFilters();
-   void toggleDisplayType(int);
-   void toggleDisplayTime(int);
-   void toggleEQDisplayTime(int);
-   void toggleUseColor(int);
+   void addUserFilterMenuEntry(uint32_t mask, uint8_t filterid, const MessageFilter& filter);
+   void removeUserFilterMenuEntry(uint32_t mask, uint8_t filterid);
+   void toggleDisplayType(bool enable);
+   void toggleDisplayTime(bool enable);
+   void toggleEQDisplayTime(bool enable);
+   void toggleUseColor(bool enable);
 
  protected:
    bool getMonitorOpCodeList(const QString& title, QString& opcodeList);
@@ -329,7 +340,7 @@ class EQInterface:public QMainWindow
    void createOPCodeMonitorLog(const QString&);
    void insertWindowMenu(SEQWindow* window);
    void removeWindowMenu(SEQWindow* window);
-   void setDockEnabled(QDockWindow* dw, bool enable);
+   void setDockEnabled(QDockWidget* dw, bool enable);
 
  public:
    Player* m_player;
@@ -373,27 +384,27 @@ class EQInterface:public QMainWindow
    OPCodeMonitorPacketLog* m_opcodeMonitorLog;
 
    const Item* m_selectedSpawn;
-   
-   QPopupMenu* m_netMenu;
-   QPopupMenu* m_decoderMenu;
-   QPopupMenu* m_statWinMenu;
-   QPopupMenu* m_skillWinMenu;
-   QPopupMenu* m_spawnListMenu;
-   QPopupMenu* m_dockedWinMenu;
-   QPopupMenu* m_dockableWinMenu;
-   QPopupMenu* m_windowCaptionMenu;
-   QPopupMenu* m_charMenu;
-   QPopupMenu* m_charLevelMenu;
+
+   QMenu* m_netMenu;
+   QMenu* m_decoderMenu;
+   QMenu* m_statWinMenu;
+   QMenu* m_skillWinMenu;
+   QMenu* m_spawnListMenu;
+   QMenu* m_dockedWinMenu;
+   QMenu* m_dockableWinMenu;
+   QMenu* m_windowCaptionMenu;
+   QMenu* m_charMenu;
+   QMenu* m_charLevelMenu;
    QSpinBox* m_levelSpinBox;
-   QPopupMenu* m_charClassMenu;
-   QPopupMenu* m_charRaceMenu;
-   QPopupMenu* m_terminalMenu;
-   QPopupMenu* m_terminalTypeFilterMenu;
-   QPopupMenu* m_terminalShowUserFilterMenu;
-   QPopupMenu* m_terminalHideUserFilterMenu;
-   QPopupMenu* m_windowMenu;
-   QPtrDict<int> m_windowsMenus;
-   QPopupMenu* m_filterZoneDataMenu;
+   QMenu* m_charClassMenu;
+   QMenu* m_charRaceMenu;
+   QMenu* m_terminalMenu;
+   QMenu* m_terminalTypeFilterMenu;
+   QMenu* m_terminalShowUserFilterMenu;
+   QMenu* m_terminalHideUserFilterMenu;
+   QMenu* m_windowMenu;
+   QHash<void*, QAction*> m_windowsMenus;
+   QMenu* m_filterZoneDataMenu;
 
    CompassFrame* m_compass;
    MessageWindow* m_messageWindow[maxNumMessageWindows];
@@ -417,57 +428,63 @@ class EQInterface:public QMainWindow
    QLabel* m_stsbarZEM;
 
    QString ipstr[5];
-   QString macstr[5];   
-   
-   QIntDict<QString> m_formattedMessageStrings;
+   QString macstr[5];
 
-   int char_ClassID[PLAYER_CLASSES];
-   int char_RaceID[PLAYER_RACES];
-   int  m_id_log_AllPackets;
-   int  m_id_log_WorldData;
-   int  m_id_log_ZoneData;
-   int  m_id_log_UnknownData;
-   int  m_id_log_RawData;
-   int  m_id_log_Items;
-   int  m_id_log_ItemPackets;
-   int  m_id_opt_BazaarData;
-   int  m_id_opt_OptionsDlg;
-   int  m_id_opt_Fast;
-   int  m_id_opt_ResetMana;
-   int  m_id_view_UnknownData;
-   int  m_id_view_ExpWindow;
-   int  m_id_view_CombatWindow;
-   int  m_id_view_SpawnList;
-   int  m_id_view_SpawnList2;
-   int  m_id_view_SpawnPointList;
-   int  m_id_view_PlayerStats;
-   int  m_id_view_PlayerSkills;
-   int  m_id_view_Compass;
-   int  m_id_view_Map[maxNumMaps];
-   int  m_id_view_MessageWindow[maxNumMessageWindows];
-   int  m_id_view_NetDiag;
-   int  m_id_view_GuildListWindow;
-   int  m_id_view_SpellList;
-   int  m_id_view_PlayerStats_Options;
-   int  m_id_view_PlayerStats_Stats[LIST_MAXLIST];
-   int  m_id_view_PlayerSkills_Options;
-   int  m_id_view_PlayerSkills_Languages;
-   int  m_id_view_SpawnList_Options;
-   int  m_id_view_SpawnList_Cols[tSpawnColMaxCols];
-   int  m_id_opt_ConSelect;
-   int  m_id_opt_TarSelect;
-   int  m_id_opt_KeepSelectedVisible;
-   int  m_id_opt_LogSpawns;
-   int  m_id_opt_PvPTeams;
-   int  m_id_opt_PvPDeity;
-   int  m_id_net_sessiontrack;
+   QHash<QString, QString> m_formattedMessageStrings;
+
+   QAction* m_action_character_Class[PLAYER_CLASSES];
+   QAction* m_action_character_Race[PLAYER_RACES];
+   QAction* m_action_log_AllPackets;
+   QAction* m_action_log_WorldData;
+   QAction* m_action_log_ZoneData;
+   QAction* m_action_log_UnknownData;
+   QAction* m_action_log_RawData;
+   int m_id_log_Items;
+   int m_id_log_ItemPackets;
+   QAction* m_action_opt_BazaarData;
+   QAction* m_action_opt_OptionsDlg;
+   QAction* m_action_opt_Fast;
+   QAction* m_action_opt_ResetMana;
+   QAction* m_action_view_UnknownData;
+   QAction* m_action_view_ExpWindow;
+   QAction* m_action_view_CombatWindow;
+   QAction* m_action_view_SpawnList;
+   QAction* m_action_view_SpawnList2;
+   QAction* m_action_view_SpawnPointList;
+   QAction* m_action_view_PlayerStats;
+   QAction* m_action_view_PlayerSkills;
+   QAction* m_action_view_Compass;
+   QAction* m_action_view_Map[maxNumMaps];
+   QAction* m_action_view_MessageWindow[maxNumMessageWindows];
+   QAction* m_action_view_NetDiag;
+   QAction* m_action_view_GuildListWindow;
+   QAction* m_action_view_SpellList;
+   QAction* m_action_view_PlayerStats_Options;
+   QAction* m_action_view_PlayerStats_Stats[LIST_MAXLIST];
+   QAction* m_action_view_PlayerSkills_Options;
+   QAction* m_action_view_PlayerSkills_Languages;
+   QAction* m_action_view_SpawnList_Options;
+   QAction* m_action_view_SpawnList_Cols[tSpawnColMaxCols];
+   QAction* m_action_opt_ConSelect;
+   QAction* m_action_opt_TarSelect;
+   QAction* m_action_opt_KeepSelectedVisible;
+   QAction* m_action_opt_LogSpawns;
+   QAction* m_action_opt_PvPTeams;
+   QAction* m_action_opt_PvPDeity;
+   QAction* m_action_net_sessiontrack;
+   QAction* m_action_opcode_monitor;
+   QAction* m_action_opcode_log;
+   QAction* m_action_opcode_view;
    int  m_packetStartTime;
    int  m_initialcount;
-   int  m_id_opt_useUpdateRadius;
-   int  m_id_log_Filter_ZoneData_Client;
-   int  m_id_log_Filter_ZoneData_Server;
+   QAction* m_action_opt_UseUpdateRadius;
+   QAction* m_action_log_Filter_ZoneData_Client;
+   QAction* m_action_log_Filter_ZoneData_Server;
+   QAction* m_action_term_MessageTypeFilters[MT_Max+1];
+   QAction* m_action_term_ShowUserFilters[maxMessageFilters+1];
+   QAction* m_action_term_HideUserFilters[maxMessageFilters+1];
 
-   MenuIDList IDList_StyleMenu;
+   MenuActionList ActionList_StyleMenu;
 
    QStringList m_StringList;
    QDialog *dialogbox;

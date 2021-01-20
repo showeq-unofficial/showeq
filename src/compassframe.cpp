@@ -1,14 +1,29 @@
 /*
- * compassframe.cpp
+ *  compassframe.cpp
+ *  Copyright 2001-2007, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sf.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <qfont.h>
-#include <qlayout.h>
+#include <QFont>
+#include <QLayout>
+#include <QVBoxLayout>
+#include <QLabel>
 
 #include "main.h"
 #include "compassframe.h"
@@ -16,10 +31,17 @@
 CompassFrame::CompassFrame(Player* player, QWidget* parent, const char* name)
   : SEQWindow("Compass", "ShowEQ - Compass", parent, name)
 {
-  QVBoxLayout* layout = new QVBoxLayout(boxLayout());
+
+  QWidget* mainWidget = new QWidget();
+  setWidget(mainWidget);
+
+  QVBoxLayout* layout = new QVBoxLayout(mainWidget);
+  layout->setContentsMargins(0, 0, 0, 0);
+
   m_compass = new Compass (this, "compass");
   layout->addWidget(m_compass);
-  QHBox* coordsbox = new QHBox(this);
+  QWidget* coordsbox = new QWidget(this);
+  QHBoxLayout* coordsboxLayout = new QHBoxLayout(coordsbox);
   layout->addWidget(coordsbox);
   m_compass->setFixedWidth(120);
   m_compass->setFixedHeight(120);
@@ -30,39 +52,45 @@ CompassFrame::CompassFrame(Player* player, QWidget* parent, const char* name)
     {
       // Create the x: label
       QLabel *labelx = new QLabel(showeq_params->retarded_coords?"E/W:":"X:",
-				  coordsbox);
+              this);
       labelx->setFixedHeight(labelx->sizeHint().height());
-      labelx->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
-      
+      labelx->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+      coordsboxLayout->addWidget(labelx);
+
       // Create the xpos label
-      m_x = new QLabel("----",coordsbox);
+      m_x = new QLabel("----", this);
       m_x->setFixedHeight(m_x->sizeHint().height());
-      m_x->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
-    } 
-    else 
+      m_x->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+      coordsboxLayout->addWidget(m_x);
+    }
+    else
     {
       // Create the y: label
       QLabel *labely = new QLabel(showeq_params->retarded_coords?"N/S:":"Y:",
-				  coordsbox);
+              this);
       labely->setFixedHeight(labely->sizeHint().height());
-      labely->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
-      
+      labely->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+      coordsboxLayout->addWidget(labely);
+
       // Create the ypos label
-      m_y = new QLabel("----",coordsbox);
+      m_y = new QLabel("----", this);
       m_y->setFixedHeight(m_y->sizeHint().height());
-      m_y->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
+      m_y->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+      coordsboxLayout->addWidget(m_y);
     }
    }
-  
+
   // Create the z: label
-  QLabel *labelz = new QLabel("Z:",coordsbox);
+  QLabel *labelz = new QLabel("Z:", this);
   labelz->setFixedHeight(labelz->sizeHint().height());
-  labelz->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
-  
+  labelz->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+  coordsboxLayout->addWidget(labelz);
+
   // Create the zpos label
-  m_z = new QLabel("----",coordsbox);
-  m_z->setFixedHeight(m_z->sizeHint().height());      
-  m_z->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
+  m_z = new QLabel("----", this);
+  m_z->setFixedHeight(m_z->sizeHint().height());
+  m_z->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+  coordsboxLayout->addWidget(m_z);
 
   // connect
   connect(player, SIGNAL(posChanged(int16_t,int16_t,int16_t,

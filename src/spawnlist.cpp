@@ -1,10 +1,24 @@
 /*
- * spawnlist.cpp
+ *  spawnlist.cpp
+ *  Copyright 2000 Maerlyn (MaerlynTheWiz@yahoo.com)
+ *  Copyright 2001-2007, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /*
@@ -29,12 +43,13 @@
 #include "player.h"
 #include "diagnosticmessages.h"
 
-#include <stddef.h>
+#include <cstddef>
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #endif
-#include <math.h>
+#include <cmath>
 #include <regex.h>
+#include <QMenu>
 
 // ------------------------------------------------------
 SpawnList::SpawnList(Player* player, 
@@ -78,14 +93,17 @@ SpawnList::SpawnList(Player* player,
    restoreColumns();
 
    // connect a QListView signal to ourselves
-   connect(this, SIGNAL(selectionChanged(QListViewItem*)),
-	   this, SLOT(selChanged(QListViewItem*)));
+   connect(this, SIGNAL(itemSelectionChanged()),
+	   this, SLOT(selChanged()));
 
-   connect (this, SIGNAL(mouseButtonPressed(int, QListViewItem*, const QPoint&, int)),
-            this, SLOT(mousePressEvent(int, QListViewItem*, const QPoint&, int)));
+   connect (this, SIGNAL(itemPressed(QTreeWidgetItem*, int)),
+            this, SLOT(listItemPressed(QTreeWidgetItem*, int)));
 
-   connect (this, SIGNAL(doubleClicked(QListViewItem*)),
-            this, SLOT(mouseDoubleClickEvent(QListViewItem*)));
+   connect (this, SIGNAL(mouseRightButtonPressed(QMouseEvent*)),
+            this, SLOT(listMouseRightButtonPressed(QMouseEvent*)));
+
+   connect (this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
+            this, SLOT(listItemDoubleClicked(QTreeWidgetItem*, int)));
 
    // connect SpawnList slots to SpawnShell signals
    connect(m_spawnShell, SIGNAL(addItem(const Item *)),
@@ -128,36 +146,38 @@ void SpawnList::setPlayer(int16_t x, int16_t y, int16_t z,
 			   int32_t degrees)
 {
 //   seqDebug("SpawnList::setPlayer()");
-   char buff[200];  
-
-   SpawnListItem *i = (SpawnListItem*)firstChild();
-//   if (i) seqDebug("============= firstChild, name=%s type=%s", i->item()->name().data(), i->type());
+   SEQListViewItemIterator it(this);
+   SpawnListItem* litem;
+   QString buff;
 
    // is this a fast machine?
    if (!showeq_params->fast_machine)
    {
      // no, cheat using integer distance calculation ignoring Z dimension
-     while (i != NULL) 
-     {   
-       if (i->type() != tUnknown) 
+     while (*it)
+     {
+       litem = (SpawnListItem*)*it;
+
+       if (litem->type() != tUnknown)
        {
-	 sprintf(buff, "%5d", i->item()->calcDist2DInt(x, y));
-	 i->setText(tSpawnColDist, buff);
+           buff.sprintf("%5d", litem->item()->calcDist2DInt(x, y));
+           litem->setText(tSpawnColDist, buff);
        }
-       i = (SpawnListItem*)i->nextSibling();
+       ++it;
      }
    }
    else
    {
      // fast machine so calculate the correct floating point 3D distance
-     while (i != NULL) 
-     {   
-       if (i->type() != tUnknown) 
+     while (*it)
+     {
+       litem = (SpawnListItem*)*it;
+       if (litem->type() != tUnknown)
        {
-	 sprintf(buff, "%5.1f", i->item()->calcDist(x, y, z));
-	 i->setText(tSpawnColDist, buff);
+           buff.sprintf("%5.1f", litem->item()->calcDist(x, y, z));
+           litem->setText(tSpawnColDist, buff);
        }
-       i = (SpawnListItem*)i->nextSibling();
+       ++it;
      }
    }
 }
@@ -167,39 +187,39 @@ void SpawnList::changeItem(const Item* item, uint32_t changeItem)
   if (item == NULL)
     return;
 
-  QListViewItemIterator it(this);
+  SEQListViewItemIterator it(this);
   SpawnListItem *i = Find(it, item);
-  while (i) 
+  while (i)
   {
     // reinsert only if level, NPC or filterFlags changes
     if (!(changeItem & (tSpawnChangedLevel |
-			tSpawnChangedNPC | 
-			tSpawnChangedFilter | 
-			tSpawnChangedRuntimeFilter)))
+                    tSpawnChangedNPC |
+                    tSpawnChangedFilter |
+                    tSpawnChangedRuntimeFilter)))
       i->update(m_player, changeItem);
-    else 
+    else
     {
       bool select = false;
-      
+
       // check if this is the selected item.
       if (Selected() == i)
-	select = true;
-      
+          select = true;
+
       // delete ALL SpawnListItems that relate to item
       delItem(item);
-      
+
       // reinsert ALL the SpawnListItems that relate to item
       addItem(item);
-      
+
       // reset the selected item, if it was this item.
       if (select)
-	selectSpawn(item);
-      
+          selectSpawn(item);
+
       // Delete item deleted everything, addItem re-inserted everything
       // nothing more to be done.
-      break;  
+      break;
     }
-    
+
     // keep searching/updating...
     i = Find(it, item);
   } // while i
@@ -210,28 +230,28 @@ void SpawnList::killSpawn(const Item* item)
   if (item == NULL)
     return;
 
-   QListViewItemIterator it(this);
+   SEQListViewItemIterator it(this);
    const SpawnListItem *i = Find(it, item);
    // was this spawn in the list
-   if (i) 
+   if (i)
    {
      // yes, remove and re-add it.
      bool select = false;
-       
+
      // check if this is the selected item.
      if (Selected() == i)
        select = true;
-     
+
      // delete ALL SpawnListItems that relate to item
      delItem(item);
-     
+
      // reinsert ALL the SpawnListItems that relate to item
      addItem(item);
-     
+
      // reset the selected item, if it was this item.
      if (select)
        selectSpawn(item);
-     
+
      // Delete item deleted everything, addItem re-inserted everything
      // nothing more to be done.
    }
@@ -239,21 +259,21 @@ void SpawnList::killSpawn(const Item* item)
      addItem(item);
 }
 
-SpawnListItem* SpawnList::Find(QListViewItemIterator& it, 
-				const Item* item, 
-				bool first)
+SpawnListItem* SpawnList::Find(SEQListViewItemIterator& it,
+                               const Item* item,
+                               bool first)
 {
-  if (first) 
-    it = QListViewItemIterator(this); // reset iterator to the beginning
+  if (first)
+    it = SEQListViewItemIterator(this); // reset iterator to the beginning
   else
     it++; // increment past the current item
 
   SpawnListItem *i;
   // while there are still items, increment forward
-  while(it.current())
+  while(*it)
   {
     // get the current item
-    i = (SpawnListItem*)it.current();
+    i = (SpawnListItem*)*it;
 
     // is it the one we're looking for?
     if (i->item() == item)
@@ -276,7 +296,7 @@ void SpawnList::addItem(const Item* item)
   // ZB: Need to figure out how to derive flags
   int flags = 0;
 
-  QListViewItemIterator it(this);
+  SEQListViewItemIterator it(this);
   const Item* i;
   SpawnListItem* j = NULL;
 
@@ -292,8 +312,8 @@ void SpawnList::addItem(const Item* item)
 
   // check if the ID is already in the list
   j = Find(it, item);
-  
-  if (j) 
+
+  if (j)
   {
     // yes, check if it's a major modification, or can get by with just
     // an update
@@ -301,25 +321,25 @@ void SpawnList::addItem(const Item* item)
 
     // reinsert only if name, level, NPC, or filterFlags changes
     if ((l == level) &&
-	(j->m_npc == item->NPC()) &&
-	(j->text(tSpawnColName) == item->name()))
+            (j->m_npc == item->NPC()) &&
+            (j->text(tSpawnColName) == item->name()))
     {
       // it matches, just update all of it's instances
 
       // loop through all instances relating to item
       while (j != NULL)
       {
-	// update the SpawnListItem
-	j->update(m_player, tSpawnChangedALL);
+          // update the SpawnListItem
+          j->update(m_player, tSpawnChangedALL);
 
-	// find the next one
-	j = Find(it, item);
+          // find the next one
+          j = Find(it, item);
       }
-      
+
       // return the first one so the caller has the option of selecting it
       return;
-    } 
-    else 
+    }
+    else
     {
       // major change, delete all instances relating to item
       delItem(item);
@@ -339,18 +359,18 @@ void SpawnList::addItem(const Item* item)
       j = Find(it, i, true);
 
       // loop until we run out of pets
-      while (j) 
+      while (j)
       {
-	// create a new SpawnListItem 
-	SpawnListItem *k = new SpawnListItem(j);
-	
-	// set the item
-	k->setShellItem(item);
-	k->pickTextColor(item, m_player);
-	k->update(m_player, tSpawnChangedALL);
-	
-	// find the next item
-	j = Find(it, i);
+          // create a new SpawnListItem
+          SpawnListItem *k = new SpawnListItem(j);
+
+          // set the item
+          k->setShellItem(item);
+          k->pickTextColor(item, m_player);
+          k->update(m_player, tSpawnChangedALL);
+
+          // find the next item
+          j = Find(it, i);
       }
     }
   } // if petOwnerId
@@ -366,48 +386,53 @@ void SpawnList::addItem(const Item* item)
     SpawnListItem* catlitem;
 
     // iterate over all the categories
-    for(cat = cit.toFirst(); cat != NULL; cat = ++cit)
-    { 
-      // skip filtered spawns, if this isn't a filtered filter category
+    while(cit.hasNext())
+    {
+        cat = cit.next();
+        if (!cat)
+            break;
+
       if ((item->filterFlags() & FILTER_FLAG_FILTERED) &&
-	  !cat->isFilteredFilter())
+              !cat->isFilteredFilter())
       {
-	continue;
+          continue;
       }
 
       if (cat->isFiltered(filterStr, level))
       {
-	// retrieve the list item associated with the category
-	catlitem = m_categoryListItems.find((void*)cat);
+          // retrieve the list item associated with the category
+          catlitem = m_categoryListItems.value((void*)cat, nullptr);
+          if (!catlitem)
+              continue;
 
-	// We have a good category, add spawn as it's child
-	j = new SpawnListItem(catlitem);
+          // We have a good category, add spawn as it's child
+          j = new SpawnListItem(catlitem);
 #if 0
-	seqDebug("`-- Adding to %s (%d)", 
-	       (const char*)cat->name(), catlitem->childCount());
+          seqDebug("`-- Adding to %s (%d)",
+                  (const char*)cat->name(), catlitem->childCount());
 #endif
-	j->setShellItem(item);
-	j->update(m_player, tSpawnChangedALL);
+          j->setShellItem(item);
+          j->update(m_player, tSpawnChangedALL);
 
-	// color spawn
-	j->pickTextColor(item, m_player, cat->color());
-	
-	// update childcount in header
-	catlitem->updateTitle(cat->name());
+          // color spawn
+          j->pickTextColor(item, m_player, cat->color());
+
+          // update childcount in header
+          catlitem->updateTitle(cat->name());
       } // end if spawn should be in this category
     }
    } // end if categories
-   else 
+   else
    {
      // just create a new SpawnListItem
      j = new SpawnListItem(this);
      j->setShellItem(item);
-     
+
      // color spawn
      j->pickTextColor(item, m_player);
      j->update(m_player, tSpawnChangedALL);
    } // else
-   
+
    return;
 } // end addItem
 
@@ -420,70 +445,57 @@ void SpawnList::delItem(const Item* item)
    SpawnListItem *j = NULL;
 
    // create a list of items to be deleted
-   QList<QListViewItem>* delList = new QList<QListViewItem>();
-
-   // set the list to automatically delete the items placed in it when it is
-   // cleared/deleted...
-   delList->setAutoDelete(true);
+   QList<SEQListViewItem*> delList;
 
    // create a list of categories to be updated
-   QList<const Category> catUpdateList;
-
-   // make sure it doesn't attempt to delete the category
-   catUpdateList.setAutoDelete(false);
+   QList<const Category*> catUpdateList;
 
    const Category* cat;
 
    // start at the top of the list
-   QListViewItemIterator it(this);
-   
-   do 
+   SEQListViewItemIterator it(this);
+
+   do
    {
      // find the next item in the list
      j = Find(it, item);
 
      // if there was an item, delete it and all it's children
-     if (j) 
+     if (j)
      {
-       //       seqDebug("  Deleting...");
-       // delete children
-       QListViewItem* child = j->firstChild();
-       QListViewItem* next;
-       while(child) 
+       if (j == currentItem())
        {
-	 // get the next child
-	 next = (SpawnListItem *) child->nextSibling();
-
-	 // add to the list of items to delete
-	 delList->append(child);
-
-	 // the next child is now the current child
-	 child = next;
+           selectionModel()->setCurrentIndex(QModelIndex(), QItemSelectionModel::NoUpdate);
+           clearSelection();
        }
+       delList += j->takeChildren();
 
        // get the category that the item SpawnListItem belongs to
        cat = getCategory(j);
 
        // add to the list of items to delete
-       delList->append(j);
+       delList.append(j);
 
        // if there's a category, add it to the list to be updated
        if (cat != NULL)
-	 catUpdateList.append(cat);
+           catUpdateList.append(cat);
      } // if j
 
      // not done until out of items
    } while (j);
 
-   // delete the list of items to be deleted, which auto-deletes the items
-   delete delList;
+   // delete the list of items to be deleted
+   qDeleteAll(delList);
+   delList.clear();
 
    // now iterate over the updated categories and update them
-   for (cat = catUpdateList.first(); cat != 0; cat = catUpdateList.next())
+   QList<const Category*>::iterator cit;
+   for (cit = catUpdateList.begin(); cit != catUpdateList.end() && *cit != NULL; ++cit)
    {
+     cat = *cit;
      // retrieve the category list item
-     SpawnListItem* catlitem = m_categoryListItems.find((void*)cat);
-     
+     SpawnListItem* catlitem = m_categoryListItems.value((void*)cat, nullptr);
+
      // update the list items title
      catlitem->updateTitle(cat->name());
    }
@@ -496,55 +508,55 @@ void SpawnList::selectSpawn(const Item *item)
     return;
 
   // start iterator at the beginning of this QListView
-  QListViewItemIterator it(this);
+  SEQListViewItemIterator it(this);
 
   SpawnListItem *j = NULL;
 
   // attempt to find a match on an item that is not collapsed (open)
-  do 
+  do
   {
     // attempt to find the item
     j = Find(it, item);
 
     // if it's found, see if it's parent is open, and if so, select it
-    if (j) 
+    if (j)
     {
       // get the parent
-      QListViewItem* litem = (SpawnListItem*) j->parent();
+      SEQListViewItem* litem = (SpawnListItem*) j->parent();
       bool bOpen = true;
 
       // make sure the parent and all it's parents are open
-      while (litem) 
+      while (litem)
       {
-	// is it open
-	if (!litem->isOpen()) 
-	{
-	  // nope, stop looking at the parents, next item
-	  bOpen = false;
-	  break;
-	} 
-	
-	// get this parents parent
-	litem = (SpawnListItem*) litem->parent();
+          // is it open
+          if (!isItemExpanded(litem))
+          {
+              // nope, stop looking at the parents, next item
+              bOpen = false;
+              break;
+          }
+
+          // get this parents parent
+          litem = (SpawnListItem*) litem->parent();
       }
 
       // yes, this one should be opened, finished
       if (bOpen)
-	break;
+          break;
     }
 
     // continue until out of items
   } while (j);
-  
+
   // if an item was found, select it
-  if (j) 
+  if (j)
   {
     // select the item
     setSelectedQuiet(j, true);
-    
+
     // if configured to do so, make sure it's visible
     if (showeq_params->keep_selected_visible)
-      ensureItemVisible(j);
+      scrollToItem(j);
   }
   else // try again forcing open
   {
@@ -559,19 +571,19 @@ void SpawnList::selectSpawn(const Item *item)
 
 SpawnListItem* SpawnList::Selected()
 {
-   return ((SpawnListItem*) selectedItem());
+   return ((SpawnListItem*) currentItem());
 }
 
 
 void SpawnList::selectAndOpen(SpawnListItem *i)
 {
   // get the item
-  QListViewItem* item = i;
-  
+  SEQListViewItem* item = i;
+
   // loop over it's parents, opening all of them
-  while (item) 
+  while (item)
   {
-    item->setOpen(true);
+    expandItem(item);
     item = (SpawnListItem*) item->parent();
   }
 
@@ -580,17 +592,17 @@ void SpawnList::selectAndOpen(SpawnListItem *i)
 
   // if configured to do so, make sure it's visible
   if (showeq_params->keep_selected_visible)
-    ensureItemVisible(i);
+    scrollToItem(i);
 }
 
-void SpawnList::setSelectedQuiet(QListViewItem* item, bool selected)
+void SpawnList::setSelectedQuiet(SEQListViewItem* item, bool selected)
 {
-  if (!item || (item->isSelected() == selected) ||
-      !item->isSelectable())
+  if (!item || (item->isSelected() == selected ) ||
+          !(item->flags() & Qt::ItemIsSelectable))
     return;
 
   // get the old selection
-  QListViewItem *oldItem = selectedItem();
+  SEQListViewItem *oldItem = currentItem();
 
   // unselect the old selected item if any
   if ((oldItem != item) && (oldItem != NULL) && (oldItem->isSelected()))
@@ -603,12 +615,7 @@ void SpawnList::setSelectedQuiet(QListViewItem* item, bool selected)
   // notifications since the selection state is already changed).
   setCurrentItem(item);
 
-  // repaint the old item
-  if (oldItem != NULL)
-    repaintItem(oldItem);
-
-  // repaint the selected item
-  repaintItem(item);
+  update();
 }
 
 // Select next item of the same type and id as currently selected item
@@ -619,14 +626,14 @@ void SpawnList::selectNext(void)
   const Item* item;
 
   // retrieve the currently selected item
-  i = (SpawnListItem *) selectedItem();
+  i = (SpawnListItem *) currentItem();
 
   // nothing selected, nothing to do
   if (!i)
     return;
 
   // start the iterator at the current item
-  QListViewItemIterator it(i);
+  SEQListViewItemIterator it(i);
 
   // get the Item from the SpawnListItem
   item = i->item();
@@ -637,11 +644,11 @@ void SpawnList::selectNext(void)
   i = Find(it, item);
 
   // there are no more with item, wrap around to beginning
-  if (!i)  
+  if (!i)
     i = Find(it, item, true);
 
   // if it's found, select it, and make sure it's parents are open
-  if (i) 
+  if (i)
   {
     //seqDebug("SelectNext(): Next selection '%s'", i->text(0).latin1());
     selectAndOpen(i);
@@ -656,14 +663,14 @@ void SpawnList::selectPrev(void)
   const Item* item;
 
   // start at the current item
-  i = cur = (SpawnListItem *) selectedItem();
+  i = cur = (SpawnListItem *) currentItem();
 
   // nothing selected, nothing to do
   if (!i)
     return;
 
   // start the iterator at the current item
-  QListViewItemIterator it(i);
+  SEQListViewItemIterator it(i);
 
   // get the SpawnShellitem from the SpawnListItem
   item = i->item();
@@ -674,7 +681,7 @@ void SpawnList::selectPrev(void)
 //seqDebug("SelectPrev(): Current selection '%s'", i->text(0).ascii());
 
   // search backwards, wrapping around, until we hit the current item
-  do 
+  do
   {
     // the current item becomes the last item
     last = i;
@@ -683,8 +690,8 @@ void SpawnList::selectPrev(void)
     i = Find(it, item);
 
     // if no more found, then wrap to the beginning
-    if (!i) 
-    { 
+    if (!i)
+    {
       // Start searching again from the beginning
       i = Find(it, item, true);
     }
@@ -693,7 +700,7 @@ void SpawnList::selectPrev(void)
   } while (i != cur);
 
   // if there is a last item, select and open it.
-  if (last) 
+  if (last)
   {
     //seqDebug("SelectPrev(): Prev selection '%s'", i->text(0).ascii());
     selectAndOpen(last);
@@ -703,18 +710,22 @@ void SpawnList::selectPrev(void)
 void SpawnList::clear(void)
 {
 //seqDebug("SpawnList::clear()");
-  QListView::clear();
+  SEQListView::clear();
   m_categoryListItems.clear();
 
   // rebuild headers
   CategoryListIterator it(m_categoryMgr->getCategories());
   SpawnListItem* litem;
   const Category* cat;
-  for (cat = it.toFirst(); cat != NULL; cat = ++it)
+  while (it.hasNext())
   {
+      cat = it.next();
+      if (!cat)
+          break;
+
     // create the spawn list item
     litem = new SpawnListItem(this);
-    
+
     // insert the category and it's respective list item
     m_categoryListItems.insert((void*)cat, litem);
 
@@ -736,7 +747,7 @@ void SpawnList::addCategory(const Category* cat)
 
   // set color
   litem->setTextColor(cat->color());
-  
+
   // update count
   litem->updateTitle(cat->name());
 
@@ -747,46 +758,30 @@ void SpawnList::addCategory(const Category* cat)
 void SpawnList::delCategory(const Category* cat)
 {
   // retrieve the list item associated with the category
-  SpawnListItem* litem = m_categoryListItems.find((void*)cat);
+  SpawnListItem* litem = m_categoryListItems.value((void*)cat, nullptr);
 
   // if there's a list item associated with this category, clean it out
   if (litem != NULL)
   {
-    SpawnListItem *next;
-    SpawnListItem *child;
 
     // remove all children from list
-    // start with the first child
-    child = (SpawnListItem *) litem->firstChild();
-    
-    // iterate until the category is out of children
-    while (child) 
-    {
-      // get the next child
-      next = (SpawnListItem *) child->nextSibling();
-      
-      // delete the current child
-      delete child;
-      
-      // the next child is now the current child
-      child = next;
-    }
+    QList<SEQListViewItem*> children = litem->takeChildren();
+    qDeleteAll(children);
+    children.clear();
 
     // remove the item from the category list
-    m_categoryListItems.remove((void*)cat);
-
-    // delete the list item
-    delete litem;
+    delete m_categoryListItems.take((void*)cat);
   }
 }
 
 void SpawnList::clearedCategories(void)
 {
   // clear out the list of category list items
+  qDeleteAll(m_categoryListItems);
   m_categoryListItems.clear();
 
   // clear out the list
-  QListView::clear();
+  SEQListView::clear();
 }
 
 void SpawnList::loadedCategories(void)
@@ -823,37 +818,38 @@ void SpawnList::rebuildSpawnList()
 
 void SpawnList::playerLevelChanged(uint8_t)
 {
-  QListViewItemIterator it(this);
+  SEQListViewItemIterator it(this);
   SpawnListItem* slitem = NULL;
   const Category* cat = NULL;
   const Item* item = NULL;
-  
+
   // iterate until we are out of items
-  while (it.current())
+  while (*it)
   {
     // get the current SpawnListItem
-    slitem = (SpawnListItem*)it.current();
+    slitem = (SpawnListItem*)*it;
 
     // if this is a top level item, see if it's a category item, and if so
     // get the category.
     if (slitem->parent() == NULL)
     {
       cat = NULL;
-      QPtrDictIterator<SpawnListItem> it(m_categoryListItems);
-      
-      for (it.toFirst(); it.current() != NULL; ++it)
+      QHash<void*, SpawnListItem*>::iterator it;
+
+      for (it = m_categoryListItems.begin();
+              it != m_categoryListItems.end() && *it != NULL; ++it)
       {
-	if (slitem == it.current())
-	{
-	  cat = (const Category*)it.currentKey();
-	  break;
-	}
+          if (slitem == *it)
+          {
+              cat = (const Category*)it.key();
+              break;
+          }
       }
     }
 
     // get the item associated with the list item
     item = slitem->item();
-    
+
     // set the color
     if (cat != NULL)
       slitem->pickTextColor(item, m_player, cat->color());
@@ -880,8 +876,8 @@ void SpawnList::populateCategory(const Category* cat)
   ItemConstIterator it(itemMap);
   const Item* item;
   SpawnListItem* litem;
-  SpawnListItem* catlitem = m_categoryListItems.find((void*)cat);
-  
+  SpawnListItem* catlitem = m_categoryListItems.value((void*)cat, nullptr);
+
   // iterate over all spawn types
   for (uint8_t i = 0; i < (sizeof(types) / sizeof(spawnItemType)); i++)
   {
@@ -890,32 +886,36 @@ void SpawnList::populateCategory(const Category* cat)
     uint8_t level = 0;
 
     // iterate over all spawns in of the current type
-    for (; it.current(); ++it)
+    while (it.hasNext())
     {
+      it.next();
+
       // get the item from the list
-      item = it.current();
+      item = it.value();
+      if (!item)
+          break;
 
       // skip filtered spawns
       if ((item->filterFlags() & FILTER_FLAG_FILTERED) &&
-	  !cat->isFilteredFilter())
-	continue;
+              !cat->isFilteredFilter())
+          continue;
 
       // if item is a spawn, get its level
       if ((item->type() == tSpawn) || (item->type() == tPlayer))
-	level = ((Spawn*)item)->level();
+          level = ((Spawn*)item)->level();
 
       // does this spawn match the category
       if (cat->isFiltered(filterString(item, flags), level))
       {
-	// yes, add it
-	litem = new SpawnListItem(catlitem);
+          // yes, add it
+          litem = new SpawnListItem(catlitem);
 
-	// set up the list item
-	litem->setShellItem(item);
-	litem->update(m_player, tSpawnChangedALL);
+          // set up the list item
+          litem->setShellItem(item);
+          litem->update(m_player, tSpawnChangedALL);
 
-	// color the spawn
-	litem->pickTextColor(item, m_player, cat->color());
+          // color the spawn
+          litem->pickTextColor(item, m_player, cat->color());
       }
     }
   }
@@ -946,61 +946,72 @@ void SpawnList::populateSpawns(void)
     const Category* cat;
     QString filterStr;
     CategoryListIterator cit(m_categoryMgr->getCategories());
-   
+
     // iterate over all spawn types
     for (uint8_t i = 0; i < (sizeof(types) / sizeof(spawnItemType)); i++)
     {
       const ItemMap& itemMap = m_spawnShell->getConstMap(types[i]);
       ItemConstIterator it(itemMap);
       uint8_t level = 0;
-      
+
       // iterate over all spawns in of the current type
-      for (; it.current(); ++it)
+      while (it.hasNext())
       {
-	// get the item from the list
-	item = it.current();
+        it.next();
+        // get the item from the list
+        item = it.value();
+        if (!item)
+            break;
 
-	// retrieve the filter string
-	filterStr = filterString(item, flags);
+        // retrieve the filter string
+        filterStr = filterString(item, flags);
 
-	// iterate over all the categories
-	for(cat = cit.toFirst(); cat != NULL; cat = ++cit)
-	{ 
-	  // skip filtered spawns
-	  if ((item->filterFlags() & FILTER_FLAG_FILTERED) &&
-	      !cat->isFilteredFilter())
-	    continue;
+        // iterate over all the categories
+        while (cit.hasNext())
+        {
+            cat = cit.next();
+            if (!cat)
+                break;
 
-	  // if item is a spawn, get its level
-	  if ((item->type() == tSpawn) || (item->type() == tPlayer))
-	    level = ((Spawn*)item)->level();
+            // skip filtered spawns
+            if ((item->filterFlags() & FILTER_FLAG_FILTERED) &&
+                    !cat->isFilteredFilter())
+                continue;
 
-	  // does this spawn match the category
-	  if (cat->isFiltered(filterStr, level))
-	  {
-	    // retrieve the category list item
-	    catlitem = m_categoryListItems.find((void*)cat);
+            // if item is a spawn, get its level
+            if ((item->type() == tSpawn) || (item->type() == tPlayer))
+                level = ((Spawn*)item)->level();
 
-	    // yes, add it
-	    litem = new SpawnListItem(catlitem);
+            // does this spawn match the category
+            if (cat->isFiltered(filterStr, level))
+            {
+                // retrieve the category list item
+                catlitem = m_categoryListItems.value((void*)cat, nullptr);
 
-	    // set up the list item
-	    litem->setShellItem(item);
-	    litem->update(m_player, tSpawnChangedALL);
-	    
-	    // color the spawn
-	    litem->pickTextColor(item, m_player, cat->color());
-	  }
-	}
+                // yes, add it
+                litem = new SpawnListItem(catlitem);
+
+                // set up the list item
+                litem->setShellItem(item);
+                litem->update(m_player, tSpawnChangedALL);
+
+                // color the spawn
+                litem->pickTextColor(item, m_player, cat->color());
+            }
+        }
       }
     }
 
     // done adding items, now iterate over all the categories and 
     // update the counts
-    for(cat = cit.toFirst(); cat != NULL; cat = ++cit)
+    while (cit.hasNext())
     {
-      catlitem =  m_categoryListItems.find((void*)cat);
-      catlitem->updateTitle(cat->name());
+        cat = cit.next();
+        if (!cat)
+            break;
+
+        catlitem =  m_categoryListItems.value((void*)cat, nullptr);
+        catlitem->updateTitle(cat->name());
     }
   }
   else
@@ -1012,30 +1023,37 @@ void SpawnList::populateSpawns(void)
     {
       const ItemMap& itemMap = m_spawnShell->getConstMap(types[i]);
       ItemConstIterator it(itemMap);
-      
-      // iterate over all spawns in of the current type
-      for (; it.current(); ++it)
-      {
-	// get the item from the list
-	item = it.current();
 
-	// just create a new SpawnListItem
-	litem = new SpawnListItem(this);
-	litem->setShellItem(item);
-	
-	// color spawn
-	litem->pickTextColor(item, m_player);
-	litem->update(m_player, tSpawnChangedALL);
+      // iterate over all spawns in of the current type
+      while (it.hasNext())
+      {
+        it.next();
+        // get the item from the list
+        item = it.value();
+        if (!item)
+            break;
+
+        // just create a new SpawnListItem
+        litem = new SpawnListItem(this);
+        litem->setShellItem(item);
+
+        // color spawn
+        litem->pickTextColor(item, m_player);
+        litem->update(m_player, tSpawnChangedALL);
       }
     }
   }
 }
 
-void SpawnList::selChanged(QListViewItem* litem)
+void SpawnList::selChanged()
 {
-  if (litem == NULL)
-    return;
-  
+  QList<QTreeWidgetItem*> selected = selectedItems();
+  if (!selected.count()) return;
+
+  // the list is limited to one selection at a time, so we can take the first
+  SEQListViewItem* litem = selected.first();
+  if (litem == NULL) return;
+
   const Item* item = ((SpawnListItem*)litem)->item();
 
   // it might have been a category title selected, only select if it's an item
@@ -1043,39 +1061,40 @@ void SpawnList::selChanged(QListViewItem* litem)
     emit spawnSelected(item);
 }
 
-void SpawnList::mousePressEvent(int button, QListViewItem* litem,
-		                   const QPoint &point, int col)
+void SpawnList::listItemPressed(QTreeWidgetItem* litem, int col)
 {
-  // Left Mouse Button Events
-  if (button  == LeftButton && litem != NULL)
-  {
-      setSelected(litem, TRUE);
-  }
+  SEQListViewItem* lvitem = dynamic_cast<SEQListViewItem*>(litem);
+  if (!lvitem) return;
 
-  // Right Mouse Button Events
-  if (button == RightButton)
-  {
-    SpawnListItem* slitem = (SpawnListItem*)litem;
-    const Item* item = NULL;
-    if (slitem != NULL)
+  setCurrentItem(lvitem);
+
+  SpawnListItem* slitem = (SpawnListItem*)lvitem;
+  const Item* item = NULL;
+  if (slitem != NULL)
       item = slitem->item();
-    SpawnListMenu* spawnMenu = menu();
-    spawnMenu->setCurrentItem(item);
-    spawnMenu->setCurrentCategory(getCategory(slitem));
-    spawnMenu->popup(point);
-  }
+  m_menu->setCurrentItem(item);
+  m_menu->setCurrentCategory(getCategory(slitem));
 }
 
-void SpawnList::mouseDoubleClickEvent(QListViewItem* litem)
+void SpawnList::listMouseRightButtonPressed(QMouseEvent* event)
 {
-   //print spawn info to console
-  if (litem == NULL)
-    return;
+    if (event->button() == Qt::RightButton)
+    {
+        SpawnListMenu* spawnMenu = menu();
+        spawnMenu->popup(event->globalPos());
+    }
+}
 
-  const Item* item = ((SpawnListItem*)litem)->item();
+void SpawnList::listItemDoubleClicked(QTreeWidgetItem* litem, int col)
+{
+  SEQListViewItem* lvitem = dynamic_cast<SEQListViewItem*>(litem);
+  if (!lvitem) return;
+
+   //print spawn info to console
+  const Item* item = ((SpawnListItem*)lvitem)->item();
   if (item != NULL)
   {
-    seqInfo("%s",(const char*)item->filterString());
+    seqInfo("%s", item->filterString().toAscii().data());
   }
 }
 
@@ -1083,12 +1102,12 @@ QString SpawnList::filterString(const Item* item, int flags)
 {
    if (item == NULL)
      return "";
-   
+
    QString text = ":";
 
    // get the filter flags
    text += m_spawnShell->filterMgr()->filterString(item->filterFlags());
- 
+
    // get runtime filter flags
    text += m_spawnShell->filterMgr()->runtimeFilterString(item->runtimeFilterFlags());
 
@@ -1102,29 +1121,30 @@ QString SpawnList::filterString(const Item* item, int flags)
 
 const Category* SpawnList::getCategory(SpawnListItem *item)
 {
-  if (item) 
+  if (item)
   {
     // find the topmost parent
     SpawnListItem *j = item;
-    while (j) 
+    while (j)
     {
       if (j->parent() == NULL)
-	break;
+          break;
       j = (SpawnListItem *)j->parent();
     }
     // find that in m_categoryList
-    if (j) 
+    if (j)
     {
-      QPtrDictIterator<SpawnListItem> it(m_categoryListItems);
-      
-      for (it.toFirst(); it.current() != NULL; ++it)
+        QHash<void*, SpawnListItem*>::iterator it;
+
+      for (it = m_categoryListItems.begin();
+              it != m_categoryListItems.end() && *it != NULL; ++it)
       {
-	if (j == it.current())
-	  return (const Category*)it.currentKey();
+          if (j == *it)
+              return (const Category*)it.key();
       }
     }
   }
-  
+
   return NULL;
 }
 
@@ -1132,9 +1152,9 @@ SpawnListMenu* SpawnList::menu()
 {
   if (m_menu != NULL)
     return m_menu;
-  
+
   m_menu = new SpawnListMenu(this, (SEQWindow*)parent(), m_spawnShell->filterMgr(),
-				 m_categoryMgr, this, "spawnlist menu");
+          m_categoryMgr, this, "spawnlist menu");
 
   return m_menu;
 }
@@ -1155,7 +1175,7 @@ SpawnListWindow::~SpawnListWindow()
   delete m_spawnList;
 }
 
-QPopupMenu* SpawnListWindow::menu()
+QMenu* SpawnListWindow::menu()
 {
   // retrieve the menu
   SpawnListMenu* spawnMenu = m_spawnList->menu();

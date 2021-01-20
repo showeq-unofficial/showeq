@@ -21,6 +21,20 @@ http://www.debian.com
 http://www.gentoo.org
 
 
+----------------------
+Debian and Derivatives
+----------------------
+
+If you wish to build and install on a Debian-based system, including Debian,
+Ubuntu, or Mint, etc., you will need to install the following packages in
+addition to your chosen Desktop Environment:
+
+build-essential
+libpcap0.8-dev
+zlib1g-dev
+libqt4-dev
+
+
 ------------------
 Fedora Core 2 install
 ------------------
@@ -236,6 +250,10 @@ Code:
 --------------
 
 5. Version History of this document:
+
+Version 6.0.0.0
+- added section about Debian and derivatives
+  Need to update Fedora info.
 
 Version 5.0.0.15
 - moved to Fedora Core 2, removed references to Qt, CVS, and Makefile.dist.

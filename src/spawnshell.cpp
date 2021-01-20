@@ -1,11 +1,25 @@
 /*
- * spawnshell.cpp
+ *  spawnshell.cpp
+ *  Copyright 2001 Crazy Joe Divola (cjd1@users.sourceforge.net)
+ *  Portions Copyright 2001-2003,2007 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2001-2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
- * 
- * Portions Copyright 2001-2003,2007 Zaphod (dohpaz@users.sourceforge.net). 
- * 
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /*
@@ -23,14 +37,15 @@
 #include "diagnosticmessages.h"
 #include "netstream.h"
 
-#include <qfile.h>
-#include <qdatastream.h>
+#include <QFile>
+#include <QDataStream>
+#include <QTextStream>
 
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #endif
-#include <limits.h>
-#include <math.h>
+#include <climits>
+#include <cmath>
 
 //----------------------------------------------------------------------
 // useful macro definitions
@@ -88,28 +103,21 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
 		       ZoneMgr* zoneMgr, 
 		       Player* player,
                        GuildMgr* guildMgr)
-  : QObject(NULL, "spawnshell"),
+  : QObject(NULL),
     m_zoneMgr(zoneMgr),
     m_player(player),
     m_filterMgr(filterMgr),
     m_guildMgr(guildMgr),
-    m_spawns(701),
-    m_drops(211),
-    m_doors(307),
-    m_players(2)
+    m_spawns(),
+    m_drops(),
+    m_doors(),
+    m_players()
 {
+   setObjectName("spawnshell");
    m_cntDeadSpawnIDs = 0;
    m_posDeadSpawnIDs = 0;
    for (int i = 0; i < MAX_DEAD_SPAWNIDS; i++)
      m_deadSpawnID[i] = 0;
-
-   // these should auto delete
-   m_spawns.setAutoDelete(true);
-   m_drops.setAutoDelete(true);
-   m_doors.setAutoDelete(true);
-
-   // we don't want this one to auto-delete
-   m_players.setAutoDelete(false); 
 
    // bogus list
    m_players.insert(0, m_player);
@@ -148,7 +156,15 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
    // start the timer (changed to oneshot to help prevent a backlog on slower
    // machines)
    if (showeq_params->saveSpawns)
-     m_timer->start(showeq_params->saveSpawnsFrequency, true);
+   {
+     m_timer->setSingleShot(true);
+     m_timer->start(showeq_params->saveSpawnsFrequency);
+   }
+}
+
+SpawnShell::~SpawnShell()
+{
+    clear();
 }
 
 void SpawnShell::clear(void)
@@ -159,8 +175,13 @@ void SpawnShell::clear(void)
 
    emit clearItems();
 
+   qDeleteAll(m_spawns);
    m_spawns.clear();
+
+   qDeleteAll(m_doors);
    m_doors.clear();
+
+   qDeleteAll(m_drops);
    m_drops.clear();
 
    // clear the players list, reinsert the player
@@ -184,7 +205,7 @@ const Item* SpawnShell::findID(spawnItemType type, int id)
     return (const Item*)m_player;
 
   if (type != tPlayer)
-    item = getMap(type).find(id);
+    item = getMap(type).value(id, nullptr);
 
   return item;
 }
@@ -202,11 +223,15 @@ const Item* SpawnShell::findClosestItem(spawnItemType type,
    // find closest spawn
 
    // iterate over all the items in the map
-   for (; it.current(); ++it)
+   while (it.hasNext())
    {
+     it.next();
+
      // get the item
-     item = it.current();
-     
+     item = it.value();
+     if (!item)
+         break;
+
      // calculate the distance from the specified point
      distance = item->calcDist(x, y);
 
@@ -228,10 +253,14 @@ Spawn* SpawnShell::findSpawnByName(const QString& name)
   ItemIterator it(m_spawns);
   Spawn* spawn;
 
-  for (; it.current(); ++it)
+  while (it.hasNext())
   {
+    it.next();
+
     // the item and coerce it to the Spawn type
-    spawn = (Spawn*)it.current();
+    spawn = (Spawn*)it.value();
+    if (!spawn)
+        break;
 
     if (name == spawn->name())
       return spawn;
@@ -250,7 +279,7 @@ void SpawnShell::deleteItem(spawnItemType type, int id)
 #endif
    ItemMap& theMap = getMap(type);
 
-   Item* item = theMap.find(id);
+   Item* item = theMap.value(id, nullptr);
 
    if (item != NULL)
    {
@@ -314,8 +343,14 @@ void SpawnShell::dumpSpawns(spawnItemType type, QTextStream& out)
 {
    ItemIterator it(getMap(type));
 
-   for (; it.current(); ++it)
-     out << it.current()->dumpString() << endl;
+   while (it.hasNext())
+   {
+       it.next();
+       if (!it.value())
+           break;
+
+       out << it.value()->dumpString() << endl;
+   }
 }
 
 // same-name slots, connecting to Packet signals
@@ -345,8 +380,8 @@ void SpawnShell::newGroundItem(const uint8_t* data, size_t len, uint8_t dir)
    name = netStream.readText();
    if(name.length())
    {
-      strcpy(ds.idFile, name.latin1());
-      name.setLength(0);
+      strcpy(ds.idFile, name.toLatin1().data());
+      name.resize(0);
    }
 
    // read past zone id
@@ -387,7 +422,7 @@ void SpawnShell::newGroundItem(const uint8_t* data, size_t len, uint8_t dir)
    seqDebug("SpawnShell::newGroundItem(makeDropStruct *)");
 #endif
 
-  Drop* item = (Drop*)m_drops.find(ds.dropId);
+  Drop* item = (Drop*)m_drops.value(ds.dropId, nullptr);
   if (item != NULL)
   {
     item->update(&ds, name);
@@ -444,7 +479,7 @@ void SpawnShell::newDoorSpawn(const doorStruct& d, size_t len, uint8_t dir)
 #ifdef SPAWNSHELL_DIAG
    seqDebug("SpawnShell::newDoorSpawn(doorStruct*)");
 #endif
-   Item* item = m_doors.find(d.doorId);
+   Item* item = m_doors.value(d.doorId, nullptr);
    if (item != NULL)
    {
      Door* door = (Door*)item;
@@ -551,7 +586,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    QString name = netStream.readText();
 
    if(name.length())
-      strcpy(spawn->name, name.latin1());
+      strcpy(spawn->name, name.toLatin1().data());
 
 #ifdef FILLSPAWNSTRUCT_DIAG
    seqDebug("SpawnShell::fillSpawnStruct ---- %s", name.latin1());
@@ -672,7 +707,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
 
    if(name.length() > 0 && name.length() < sizeof(spawn->lastName))
    {
-      strcpy(spawn->lastName, name.latin1());
+      strcpy(spawn->lastName, name.toLatin1().data());
    }
 
    netStream.skipBytes(6);
@@ -721,17 +756,17 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->posData[2] = netStream.readUInt32NC();
    spawn->posData[3] = netStream.readUInt32NC();
    spawn->posData[4] = netStream.readUInt32NC();
-   
+
    if(spawn->hasTitle)
    {
       name = netStream.readText();
-      strcpy(spawn->title, name.latin1());
+      strcpy(spawn->title, name.toLatin1().data());
    }
 
    if(spawn->hasSuffix)
    {
       name = netStream.readText();
-      strcpy(spawn->suffix, name.latin1());
+      strcpy(spawn->suffix, name.toLatin1().data());
    }
 
    // unknowns
@@ -770,7 +805,7 @@ void SpawnShell::zoneEntry(const uint8_t* data, size_t len)
 
   Item *item;
 
-  if(!strcmp(spawn->name,m_player->realName()))
+  if(!strcmp(spawn->name,m_player->realName().toAscii().data()))
   {
     // Multiple zoneEntry packets are received for your spawn after you zone
     m_player->update(spawn);
@@ -778,7 +813,7 @@ void SpawnShell::zoneEntry(const uint8_t* data, size_t len)
   }
   else
   {
-    if((item=m_spawns.find(spawn->spawnId)))
+    if((item=m_spawns.value(spawn->spawnId, nullptr)))
     {
         // Update existing spawn
       Spawn *s=(Spawn*)item;
@@ -835,7 +870,7 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      }
    }
 
-   Item* item = m_spawns.find(s.spawnId);
+   Item* item = m_spawns.value(s.spawnId, nullptr);
    if (item != NULL)
    {
      Spawn* spawn = (Spawn*)item;
@@ -1088,7 +1123,7 @@ void SpawnShell::updateSpawn(uint16_t id,
     }
     else
     {
-        item = m_spawns.find(id);
+        item = m_spawns.value(id, nullptr);
     }
 
     if (item != NULL)
@@ -1169,7 +1204,7 @@ void SpawnShell::updateSpawnInfo(const uint8_t* data)
 	  su->spawnId, su->subcommand, su->arg1, su->arg2);
 #endif
 
-   Item* item = m_spawns.find(su->spawnId);
+   Item* item = m_spawns.value(su->spawnId, nullptr);
    if (item != NULL)
    {
      Spawn* spawn = (Spawn*)item;
@@ -1220,9 +1255,9 @@ void SpawnShell::illusionSpawn(const uint8_t* data)
     seqDebug("SpawnShell::illusionSpawn(id=%d, name=%s, new race=%d)",
              illusion->spawnId, illusion->name, illusion->race);
 #endif
-    
-    Item* item = m_spawns.find(illusion->spawnId);
-   
+
+    Item* item = m_spawns.value(illusion->spawnId, nullptr);
+
     if (item != NULL)
     {
         Spawn* spawn = (Spawn*) item;
@@ -1293,7 +1328,7 @@ void SpawnShell::updateSpawnAppearance(const uint8_t* data)
              app->spawnId, app->type, app->parameter);
 #endif
 
-   Item* item = m_spawns.find(app->spawnId);
+   Item* item = m_spawns.value(app->spawnId, nullptr);
 
    if (item != NULL)
    {
@@ -1339,7 +1374,7 @@ void SpawnShell::updateNpcHP(const uint8_t* data)
    seqDebug("SpawnShell::updateNpcHP(id=%d, maxhp=%d hp=%d)", 
 	  hpupdate->spawnId, hpupdate->maxHP, hpupdate->curHP);
 #endif
-   Item* item = m_spawns.find(hpupdate->spawnId);
+   Item* item = m_spawns.value(hpupdate->spawnId, nullptr);
    if (item != NULL)
    {
      Spawn* spawn = (Spawn*)item;
@@ -1353,7 +1388,7 @@ void SpawnShell::updateNpcHP(const uint8_t* data)
 void SpawnShell::spawnWearingUpdate(const uint8_t* data)
 {
   const wearChangeStruct *wearing = (const wearChangeStruct *)data;
-  Item* item = m_spawns.find(wearing->spawnId);
+  Item* item = m_spawns.value(wearing->spawnId, nullptr);
   if (item != NULL)
   {
     // ZBTEMP: Find newItemID
@@ -1379,7 +1414,7 @@ void SpawnShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
   {
     if (con->playerid != con->targetid) 
     {
-      item = m_spawns.find(con->targetid);
+      item = m_spawns.value(con->targetid, nullptr);
       if (item != NULL)
       {
 	spawn = (Spawn*)item;
@@ -1397,8 +1432,8 @@ void SpawnShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
   if (con->playerid != con->targetid) 
   {
     // find the spawn if it exists
-    item = m_spawns.find(con->targetid);
-    
+    item = m_spawns.value(con->targetid, nullptr);
+
     // has the spawn been seen before?
     if (item != NULL)
     {
@@ -1441,7 +1476,7 @@ void SpawnShell::removeSpawn(const uint8_t* data, size_t len, uint8_t dir)
       else
       {
         // Set flag to change its icon
-        if((item=m_spawns.find(rmSpawn->spawnId)))
+        if((item=m_spawns.value(rmSpawn->spawnId, nullptr)))
         {
           Spawn *s=(Spawn*)item;
           s->setNotUpdated(true);
@@ -1486,7 +1521,7 @@ void SpawnShell::killSpawn(const uint8_t* data)
 
    if (deadspawn->spawnId != m_player->id())
    {
-       item = m_spawns.find(deadspawn->spawnId);
+       item = m_spawns.value(deadspawn->spawnId, nullptr);
    }
    else
    {
@@ -1513,7 +1548,7 @@ void SpawnShell::killSpawn(const uint8_t* data)
      spawn->setName(spawn->realName() + Spawn_Corpse_Designator);
 
      Item* killer;
-     killer = m_spawns.find(deadspawn->killerId);
+     killer = m_spawns.value(deadspawn->killerId, nullptr);
      emit killSpawn(item, killer, deadspawn->killerId);
    }
 }
@@ -1560,7 +1595,7 @@ void SpawnShell::respawnFromHover(const uint8_t* data, size_t len, uint8_t dir)
 void SpawnShell::corpseLoc(const uint8_t* data)
 {
   const corpseLocStruct* corpseLoc = (const corpseLocStruct*)data;
-  Item* item = m_spawns.find(corpseLoc->spawnId);
+  Item* item = m_spawns.value(corpseLoc->spawnId, nullptr);
   if (item != NULL)
   {
     Spawn* spawn = (Spawn*)item;
@@ -1595,7 +1630,8 @@ void SpawnShell::playerChangedID(uint16_t playerID)
   m_players.take(0);
 
   // re-insert the player into the list
-  m_players.replace(playerID, m_player);
+  delete m_players.take(playerID);
+  m_players.insert(playerID, m_player);
 
   emit changeItem(m_player, tSpawnChangedALL);
 }
@@ -1616,11 +1652,15 @@ void SpawnShell::refilterSpawns(spawnItemType type)
    {
      Spawn* spawn;
      // iterate over all the items in the map
-     for (; it.current(); ++it)
+     while (it.hasNext())
      {
+       it.next();
+
        // get the item
-       spawn = (Spawn*)it.current();
-       
+       spawn = (Spawn*)it.value();
+       if (!spawn)
+           break;
+
        // update the flags, if they changed, send a notification
        if (updateFilterFlags(spawn))
        {
@@ -1633,11 +1673,15 @@ void SpawnShell::refilterSpawns(spawnItemType type)
    {
      Item* item;
      // iterate over all the items in the map
-     for (; it.current(); ++it)
+     while (it.hasNext())
      {
+       it.next();
+
        // get the item
-       item = it.current();
-       
+       item = it.value();
+       if (!item)
+           break;
+
        // update the flags, if they changed, send a notification
        if (updateFilterFlags(item))
        {
@@ -1663,11 +1707,15 @@ void SpawnShell::refilterSpawnsRuntime(spawnItemType type)
    {
      Spawn* spawn;
      // iterate over all the items in the map
-     for (; it.current(); ++it)
+     while (it.hasNext())
      {
+       it.next();
+
        // get the item
-       spawn = (Spawn*)it.current();
-       
+       spawn = (Spawn*)it.value();
+       if (!spawn)
+           break;
+
        // update the flags, if they changed, send a notification
        if (updateRuntimeFilterFlags(spawn))
        {
@@ -1680,11 +1728,15 @@ void SpawnShell::refilterSpawnsRuntime(spawnItemType type)
    {
      Item* item;
      // iterate over all the items in the map
-     for (; it.current(); ++it)
+     while (it.hasNext())
      {
+       it.next();
+
        // get the item
-       item = it.current();
-       
+       item = it.value();
+       if (!item)
+           break;
+
        // update the flags, if they changed, send a notification
        if (updateRuntimeFilterFlags(item))
        {
@@ -1698,7 +1750,7 @@ void SpawnShell::refilterSpawnsRuntime(spawnItemType type)
 void SpawnShell::saveSpawns(void)
 {
   QFile keyFile(showeq_params->saveRestoreBaseFilename + "Spawns.dat");
-  if (keyFile.open(IO_WriteOnly))
+  if (keyFile.open(QIODevice::WriteOnly))
   {
     QDataStream d(&keyFile);
 
@@ -1706,11 +1758,11 @@ void SpawnShell::saveSpawns(void)
     d << *magic;
 
     // write a test value at the top of the file for a validity check
-    size_t testVal = sizeof(spawnStruct);
+    uint32_t testVal = sizeof(spawnStruct);
     d << testVal;
 
     // save the name of the current zone
-    d << m_zoneMgr->shortZoneName().lower();
+    d << m_zoneMgr->shortZoneName().toLower();
 
     // save the spawns
     ItemMap& theMap = getMap(tSpawn);
@@ -1723,10 +1775,14 @@ void SpawnShell::saveSpawns(void)
     Spawn* spawn;
 
     // iterate over all the items in the map
-    for (; it.current(); ++it)
+    while (it.hasNext())
     {
+      it.next();
+
       // get the spawn
-      spawn = (Spawn*)it.current();
+      spawn = (Spawn*)it.value();
+      if (!spawn)
+          break;
 
       // save the spawn id
       d << spawn->id();
@@ -1738,17 +1794,20 @@ void SpawnShell::saveSpawns(void)
 
    // re-start the timer
    if (showeq_params->saveSpawns)
-     m_timer->start(showeq_params->saveSpawnsFrequency, true);
+   {
+     m_timer->setSingleShot(true);
+     m_timer->start(showeq_params->saveSpawnsFrequency);
+   }
 }
 
 void SpawnShell::restoreSpawns(void)
 {
   QString fileName = showeq_params->saveRestoreBaseFilename + "Spawns.dat";
   QFile keyFile(fileName);
-  if (keyFile.open(IO_ReadOnly))
+  if (keyFile.open(QIODevice::ReadOnly))
   {
     size_t i;
-    size_t testVal;
+    uint32_t testVal;
     uint16_t id;
     Spawn* item;
 
@@ -1761,7 +1820,7 @@ void SpawnShell::restoreSpawns(void)
     if (magicTest != *magic)
     {
       seqWarn("Failure loading %s: Bad magic string!",
-	      (const char*)fileName);
+              fileName.toAscii().data());
       return;
     }
 
@@ -1770,18 +1829,18 @@ void SpawnShell::restoreSpawns(void)
     if (testVal != sizeof(spawnStruct))
     {
       seqWarn("Failure loading %s: Bad spawnStruct size!",
-	      (const char*)fileName);
+              fileName.toAscii().data());
       return;
     }
 
     // attempt to validate that the info is from the current zone
     QString zoneShortName;
     d >> zoneShortName;
-    if (zoneShortName != m_zoneMgr->shortZoneName().lower())
+    if (zoneShortName != m_zoneMgr->shortZoneName().toLower())
     {
       seqWarn("\aWARNING: Restoring spawns for potentially incorrect zone (%s != %s)!",
-	      (const char*)zoneShortName, 
-	      (const char*)m_zoneMgr->shortZoneName().lower());
+              zoneShortName.toAscii().data(),
+              m_zoneMgr->shortZoneName().toLower().toAscii().data());
     }
 
     // read the expected number of elements
@@ -1806,12 +1865,12 @@ void SpawnShell::restoreSpawns(void)
     emit numSpawns(m_spawns.count());
 
     seqInfo("Restored SPAWNS: count=%d!",
-	    m_spawns.count());
+            m_spawns.count());
   }
   else
   {
     seqWarn("Failure loading %s: Unable to open!",
-	    (const char*)fileName);
+            fileName.toAscii().data());
   }
 }
 

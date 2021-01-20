@@ -1,23 +1,37 @@
 /*
- * drawmap.cpp
+ *  drawmap.cpp
+ *  Copyright 2001-2003, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sf.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 extern "C" {
 #include <gd.h>
 #include <gdfonts.h>
 }
 
-#include <qstring.h>
-#include <qdir.h>
-#include <qtextstream.h>
-#include <qregexp.h>
+#include <QString>
+#include <QDir>
+#include <QTextStream>
+#include <QRegExp>
 
 #include "cgiconv.h"
 #include "util.h"
@@ -191,8 +205,8 @@ int lookupColor(const QString colorname)
     "yellow",
     "gray"
   };
-  
-  QString lcolorname = colorname.lower();
+
+  QString lcolorname = colorname.toLower();
 
   for (uint32_t i = 0; i < sizeof(colornames)/sizeof(const char*); i++)
   {
@@ -382,11 +396,11 @@ void loadFileMap (const char *filename)
 	break;
       }
     }
-    
+
     fclose (fh);
-    char message[128];
+    char message[258];
     sprintf (message, "%s [%s]", zoneLong, zoneShort);
-    
+
     reAdjust ();
   }
 #ifdef ZBTEMP
@@ -510,10 +524,10 @@ void paintMap ()
 	tmpcolor = mapcolors[locationColor[n]];
       }
    
-     gdImageString (im, gdFontSmall, 
-		    calcXOffset (locationX[n]) - 2, 
-		    calcYOffset (locationY[n]) - 2,
-		    (unsigned char*)(const char *)locationName[n], tmpcolor);
+     gdImageString (im, gdFontSmall,
+             calcXOffset (locationX[n]) - 2,
+             calcYOffset (locationY[n]) - 2,
+             (unsigned char*)locationName[n].toAscii().data(), tmpcolor);
    }
 
   /* Print the http header */
@@ -569,16 +583,17 @@ int main (int argc, char *argv[])
     mapName.replace(slashExp, "_");
 
     mapName.prepend(PKGDATADIR "maps/");
-    loadFileMap ((const char*)mapName);
+    loadFileMap (mapName.toAscii().data());
     paintMap();
   }
   else
   {
     // open the output data stream
-    QTextStream out(stdout, IO_WriteOnly);
-    out.setEncoding(QTextStream::Latin1);
-    out.flags(QTextStream::showbase | QTextStream::dec);
-    
+    QTextStream out(stdout, QIODevice::WriteOnly);
+    out.setCodec("latin1");
+    out.setIntegerBase(10);
+    out.setNumberFlags(QTextStream::ShowBase);
+
     const char* header =
       "Content-type: text/html; charset=iso-8859-1\n\n"
       "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
@@ -633,23 +648,21 @@ int main (int argc, char *argv[])
     out << "<TD><SELECT name=\"map\" size=\"1\">\n";
 
     // create a file info list
-    const QFileInfoList *list = mapDir.entryInfoList();
+    const QFileInfoList list = mapDir.entryInfoList();
 
     // create an iterator over the list
-    QFileInfoListIterator it( *list );
-    
-    // pointer to the file info for the current file
-    QFileInfo *fi;
+    QListIterator<QFileInfo> it( list );
 
-    while ( (fi=it.current()) ) 
+    // pointer to the file info for the current file
+    QFileInfo fi;
+
+    while (it.hasNext())
     {
-      out << "<OPTION value=\"" << fi->fileName() << "\"";
-      if (mapName == fi->fileName())
-	out << " selected";
-      out << ">" << fi->baseName() << "</OPTION>\n";
-      
-      // goto next element from list
-      ++it;
+      fi = it.next();
+      out << "<OPTION value=\"" << fi.fileName() << "\"";
+      if (mapName == fi.fileName())
+          out << " selected";
+      out << ">" << fi.baseName() << "</OPTION>\n";
     }
 
     out << "</SELECT></TD>\n";

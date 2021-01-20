@@ -1,8 +1,23 @@
 /*
- * point.h
+ *  point.h
+ *  Copyright 2001-2005, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sf.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 // Original Author: Zaphod (dohpaz@users.sourceforge.net)
@@ -20,12 +35,12 @@
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #else
-#include <stdint.h>
+#include <cstdint>
 #endif
-#include <math.h>
-#include <stdarg.h>
+#include <cmath>
+#include <cstdarg>
 
-#include <qpoint.h>
+#include <QPoint>
 
 template <class _T>
 class Point3D 
@@ -79,8 +94,8 @@ class Point3D
   QPoint qpoint() const { return QPoint(x(), y()); }
   
   // retrieve offset point
-  QPoint& offsetPoint(const QPoint& centerPoint, double ratio);
-  QPoint& inverseOffsetPoint(const QPoint& centerPoint, double ratio);
+  QPoint offsetPoint(const QPoint& centerPoint, double ratio);
+  QPoint inverseOffsetPoint(const QPoint& centerPoint, double ratio);
 
   // Calculate distance in 2 space ignoring Z dimension
   uint32_t calcDist2DInt(_T x, _T y) const;
@@ -242,14 +257,14 @@ void Point3D<_T>::addPoint(_T x, _T y, _T z)
 }
 
 template <class _T> inline
-QPoint& Point3D<_T>::offsetPoint(const QPoint& centerPoint, double ratio)
+QPoint Point3D<_T>::offsetPoint(const QPoint& centerPoint, double ratio)
 { 
   return QPoint((centerPoint.x() - (int)(x() / ratio)),
 		(centerPoint.y() - (int)(y() / ratio)));
 }
 
 template <class _T> inline
-QPoint& Point3D<_T>::inverseOffsetPoint(const QPoint& centerPoint, double ratio)
+QPoint Point3D<_T>::inverseOffsetPoint(const QPoint& centerPoint, double ratio)
 {
   return QPoint(int(rint((centerPoint.x() - x()) * ratio)),
 		int(rint((centerPoint.y() - y()) * ratio)));

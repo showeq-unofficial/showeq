@@ -1,13 +1,26 @@
 /*
- * skilllist.cpp
+ *  skilllist.cpp
+ *  Copyright 2000-2007, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sourceforge.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <qlayout.h>
+#include <QLayout>
 
 #include "player.h"
 #include "statlist.h"
@@ -21,8 +34,8 @@ static const char* statNames[] =
 };
 
 StatList::StatList(Player* player,
-                       QWidget* parent, 
-                       const char* name)
+                   QWidget* parent,
+                   const char* name)
   : SEQListView("StatList", parent, name),
     m_player(player)
 {
@@ -310,10 +323,9 @@ void StatList::updateStat(uint8_t stat)
       percentStr += " %";
 
       // create the statistic item
-      m_statList[stat] = new QListViewItem(this,
-					   statNames[stat] , 
-					   valStr, maxStr, percentStr);
-      
+      QStringList item_values;
+      item_values << statNames[stat] << valStr << maxStr << percentStr;
+      m_statList[stat] = new SEQListViewItem(this, item_values);
 
     }
   }

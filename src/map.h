@@ -1,11 +1,24 @@
 /*
- * map.h
+ *  map.h
+ *  Portions Copyright 2001-2007 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2001-2009, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sourceforge.net/
- * 
- * Portions Copyright 2001-2007 Zaphod (dohpaz@users.sourceforge.net). 
- * 
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef _EQMAP_H_
@@ -16,33 +29,38 @@
 #define UINT32_MAX UINT_MAX
 #endif
 
-#include <qwidget.h>
-#include <qpixmap.h>
-#include <qsize.h>
-#include <qmap.h>
-#include <qdialog.h>
-#include <qcombobox.h>
-#include <qlineedit.h>
-#include <qlabel.h>
-#include <qtooltip.h>
-#include <qregexp.h>
-#include <qintdict.h>
-#include <qtextstream.h>
-#include <qdatetime.h>
-#include <qpen.h>
-#include <qbrush.h>
+#include <QWidget>
+#include <QPixmap>
+#include <QSize>
+#include <QMap>
+#include <QDialog>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QLabel>
+#include <QToolTip>
+#include <QRegExp>
+#include <QHash>
+#include <QTextStream>
+#include <QDateTime>
+#include <QPen>
+#include <QBrush>
 
 // includes required for MapMenu
-#include <qpopupmenu.h>
+#include <QMenu>
 
 // includes required for MapFrame
-#include <qlayout.h>
-#include <qvbox.h>
-#include <qhbox.h>
-#include <qspinbox.h>
-#include <qlist.h>
+#include <QLayout>
+#include <QSpinBox>
+#include <QList>
 
-#include <time.h>
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <QEvent>
+#include <QVBoxLayout>
+#include <QFrame>
+#include <QPaintEvent>
+
+#include <ctime>
 #include <sys/time.h>
 #include <unistd.h>
 
@@ -196,8 +214,8 @@ class MapMgr : public QObject
   QWidget* m_dialogParent;
   CLineDlg *m_dlgLineProps;
   MapData m_mapData;
-  QIntDict<uint16_t> m_spawnAggroRange;
-   
+  QHash<int, uint16_t> m_spawnAggroRange;
+
   QString m_curLineColor;
   QString m_curLineName;
   QString m_curLocationColor;
@@ -205,7 +223,7 @@ class MapMgr : public QObject
 
 //----------------------------------------------------------------------
 // MapMenu
-class MapMenu : public QPopupMenu
+class MapMenu : public QMenu
 {
   Q_OBJECT
 
@@ -217,47 +235,47 @@ class MapMenu : public QPopupMenu
   void init_Menu(void);
   void init_fovMenu(void);
 
-  void select_follow(int itemId);
-  void select_mapLine(int itemId);
+  void select_follow(QAction* item);
+  void select_mapLine(QAction* item);
 
-  void toggle_spawnDepthFilter(int itemId);
-  void toggle_tooltip(int itemId);
-  void toggle_filtered(int itemId);
-  void toggle_map(int itemId);
-  void toggle_velocity(int itemId);
-  void toggle_animate(int itemId);
-  void toggle_player(int itemId);
-  void toggle_playerBackground(int itemId);
-  void toggle_playerView(int itemId);
-  void toggle_gridLines(int itemId);
-  void toggle_gridTicks(int itemId);
-  void toggle_locations(int itemId);
-  void toggle_spawns(int itemId);
-  void toggle_spawnPnts(int itemId);
-  void toggle_unknownSpawns(int itemId);
-  void toggle_drops(int itemId);
-  void toggle_doors(int itemId);
-  void toggle_highlightConsideredSpawns(int itemId);
-  void toggle_spawnNames(int itemId);
-  void toggle_mapImage(int itemId);
-  void toggle_pvp(int itemId);
-  void toggle_deityPvP(int itemId);
-  void toggle_racePvP(int itemId);
-  void toggle_walkPath(int itemId);
-  void toggle_npcWalkPaths(int itemId);
-  void toggle_debugInfo(int itemId);
+  void toggle_spawnDepthFilter();
+  void toggle_tooltip();
+  void toggle_filtered();
+  void toggle_map();
+  void toggle_velocity();
+  void toggle_animate();
+  void toggle_player();
+  void toggle_playerBackground();
+  void toggle_playerView();
+  void toggle_gridLines();
+  void toggle_gridTicks();
+  void toggle_locations();
+  void toggle_spawns();
+  void toggle_spawnPnts();
+  void toggle_unknownSpawns();
+  void toggle_drops();
+  void toggle_doors();
+  void toggle_highlightConsideredSpawns();
+  void toggle_spawnNames();
+  void toggle_mapImage();
+  void toggle_pvp();
+  void toggle_deityPvP();
+  void toggle_racePvP();
+  void toggle_walkPath();
+  void toggle_npcWalkPaths();
+  void toggle_debugInfo();
   void toggle_cacheAlwaysRepaint();
   void toggle_cacheChanges();
-  void toggle_zoneSafePoint(int itemId);
-  void toggle_instanceLocationMarker(int itemId);
-  void select_mapOptimization(int itemId);
-  void select_gridTickColor(int itemId);
-  void select_gridLineColor(int itemId);
-  void select_backgroundColor(int itemId);
-  void select_font(int itemId);
-  void select_fovColor(int itemId);
-  void select_fovStyle(int itemId);
-  void select_fovMode(int itemId);
+  void toggle_zoneSafePoint();
+  void toggle_instanceLocationMarker();
+  //void select_mapOptimization(int itemId);
+  void select_gridTickColor();
+  void select_gridLineColor();
+  void select_backgroundColor();
+  void select_font();
+  void select_fovColor();
+  void select_fovStyle(QAction* item);
+  void select_fovMode(QAction* item);
 
  protected:
   // pointer to the Map this menu controls
@@ -268,86 +286,81 @@ class MapMenu : public QPopupMenu
   QSpinBox* m_fovSpinBox;
   QSpinBox* m_drawSizeSpinBox;
   QSpinBox* m_zoomDefaultSpinBox;
-  int m_id_followMenu;
-  int m_id_followMenu_Player;
-  int m_id_followMenu_Spawn;
-  int m_id_followMenu_None;
-  int m_id_addLocation;
-  int m_id_startLine;
-  int m_id_addLinePoint;
-  int m_id_delLinePoint;
-  int m_id_showLineDlg;
-  int m_id_editMap;
-  int m_id_mapLineStyle;
-  int m_id_mapLineStyle_Normal;
-  int m_id_mapLineStyle_DepthFiltered;
-  int m_id_mapLineStyle_FadedFloors;
-  int m_id_spawnDepthFilter;
-  int m_id_tooltip;
-  int m_id_filtered;
-  int m_id_map;
-  int m_id_velocity;
-  int m_id_animate;
-  int m_id_player;
-  int m_id_playerBackground;
-  int m_id_playerView;
-  int m_id_gridLines;
-  int m_id_gridTicks;
-  int m_id_locations;
-  int m_id_spawns;
-  int m_id_spawnPoints;
-  int m_id_unknownSpawns;
-  int m_id_drops;
-  int m_id_doors;
-  int m_id_spawnNames;
-  int m_id_highlightConsideredSpawns;
-  int m_id_walkPath;
-  int m_id_npcWalkPaths;
-  int m_id_mapImage;
-  int m_id_deityPvP;
-  int m_id_pvp;
-  int m_id_racePvP;
-  int m_id_zoneSafePoint;
-  int m_id_instanceLocation;
+  QAction* m_action_followMenu_Player;
+  QAction* m_action_followMenu_Spawn;
+  QAction* m_action_followMenu_None;
+  QAction* m_action_addLocation;
+  QAction* m_action_startLine;
+  QAction* m_action_addLinePoint;
+  QAction* m_action_delLinePoint;
+  QAction* m_action_showLineDlg;
+  QAction* m_action_mapLineStyle_Normal;
+  QAction* m_action_mapLineStyle_DepthFiltered;
+  QAction* m_action_mapLineStyle_FadedFloors;
+  QAction* m_action_spawnDepthFilter;
+  QAction* m_action_tooltip;
+  QAction* m_action_filtered;
+  QAction* m_action_map;
+  QAction* m_action_velocity;
+  QAction* m_action_animate;
+  QAction* m_action_player;
+  QAction* m_action_playerBackground;
+  QAction* m_action_playerView;
+  QAction* m_action_gridLines;
+  QAction* m_action_gridTicks;
+  QAction* m_action_locations;
+  QAction* m_action_spawns;
+  QAction* m_action_spawnPoints;
+  QAction* m_action_unknownSpawns;
+  QAction* m_action_drops;
+  QAction* m_action_doors;
+  QAction* m_action_spawnNames;
+  QAction* m_action_highlightConsideredSpawns;
+  QAction* m_action_walkPath;
+  QAction* m_action_npcWalkPaths;
+  QAction* m_action_mapImage;
+  QAction* m_action_deityPvP;
+  QAction* m_action_pvp;
+  QAction* m_action_racePvP;
+  QAction* m_action_zoneSafePoint;
+  QAction* m_action_instanceLocation;
 #ifdef DEBUG
-  int m_id_debugInfo;
+  QAction* m_action_debugInfo;
 #endif
-  int m_id_showSub;
+  /*
   int m_id_mapOptimization;
   int m_id_mapOptimization_Memory;
   int m_id_mapOptimization_Normal;
   int m_id_mapOptimization_Best;
-  int m_id_gridTickColor;
-  int m_id_gridLineColor;
-  int m_id_backgroundColor;
-  int m_id_font;
-  int m_id_drawSize;
-  int m_id_drawSizeMenu;
-  int m_id_FOV;
-  int m_id_FOVDistance;
-  int m_id_FOVColor;
-  int m_id_FOVNoBrush;
-  int m_id_FOVSolidPattern;
-  int m_id_FOVDense1Pattern;
-  int m_id_FOVDense2Pattern;
-  int m_id_FOVDense3Pattern;
-  int m_id_FOVDense4Pattern;
-  int m_id_FOVDense5Pattern;
-  int m_id_FOVDense6Pattern;
-  int m_id_FOVDense7Pattern;
-  int m_id_FOVHorPattern;
-  int m_id_FOVVerPattern;
-  int m_id_FOVCrossPattern;
-  int m_id_FOVBDiagPattern;
-  int m_id_FOVFDiagPattern;
-  int m_id_FOVDiagCrossPattern;
-  int m_id_FOVDistanceBased;
-  int m_id_FOVScaledClassic;
-  int m_id_FOVClassic;
-  int m_id_zoomDefault;
-  int m_id_zoomDefaultMenu;
-  int m_id_cacheAlwaysRepaint;
-  int m_id_cacheChanges;
+  */
+  QAction* m_action_gridTickColor;
+  QAction* m_action_gridLineColor;
+  QAction* m_action_backgroundColor;
+  QAction* m_action_font;
+  QAction* m_action_drawSizeMenu;
+  QAction* m_action_FOV;
+  QAction* m_action_FOVColor;
+  QAction* m_action_FOVNoBrush;
+  QAction* m_action_FOVSolidPattern;
+  QAction* m_action_FOVDense1Pattern;
+  QAction* m_action_FOVDense2Pattern;
+  QAction* m_action_FOVDense3Pattern;
+  QAction* m_action_FOVDense4Pattern;
+  QAction* m_action_FOVDense5Pattern;
+  QAction* m_action_FOVDense6Pattern;
+  QAction* m_action_FOVDense7Pattern;
+  QAction* m_action_FOVHorPattern;
+  QAction* m_action_FOVVerPattern;
+  QAction* m_action_FOVCrossPattern;
+  QAction* m_action_FOVBDiagPattern;
+  QAction* m_action_FOVFDiagPattern;
+  QAction* m_action_FOVDiagCrossPattern;
+  QAction* m_action_FOVDistanceBased;
+  QAction* m_action_FOVScaledClassic;
+  QAction* m_action_FOVClassic;
+  QAction* m_action_zoomDefaultMenu;
+  QAction* m_action_cacheAlwaysRepaint;
+  QAction* m_action_cacheChanges;
 };
 
 //----------------------------------------------------------------------
@@ -377,8 +390,10 @@ class Map :public QWidget
   void          setZEM (unsigned char newZEM);
   
   // old methods
+  /*
   MapOptimizationMethod getMapOptimization(void) 
     { return m_param.mapOptimizationMethod(); }
+  */
   
   MapMenu* menu();
   
@@ -417,7 +432,7 @@ class Map :public QWidget
   bool showInstanceLocationMarker() const { return m_showInstanceLocationMarker; }
 
   MapLineStyle mapLineStyle() { return m_param.mapLineStyle(); }
-  MapOptimizationMethod mapOptimization() { return m_param.mapOptimizationMethod(); }
+  //MapOptimizationMethod mapOptimization() { return m_param.mapOptimizationMethod(); }
   int zoom() const { return m_param.zoom(); }
   int zoomDefault() const { return m_param.zoomDefault(); }
   int panOffsetX() const { return m_param.panOffsetX(); }
@@ -460,8 +475,8 @@ class Map :public QWidget
   void delLinePoint(void);
   void addPathPoint();
   void showLineDlg(void);
-  void scaleDownZ(int);
-  void scaleUpZ(int);
+  void scaleDownZ(QAction* item);
+  void scaleUpZ(QAction* item);
   
   // assorted
   void zoomIn();
@@ -513,7 +528,7 @@ class Map :public QWidget
   void setRacePvP(bool val);
   
   void setMapLineStyle(MapLineStyle style);
-  void setMapOptimization(MapOptimizationMethod method);
+  //void setMapOptimization(MapOptimizationMethod method);
   void setZoom(int val);
   void setZoomDefault(int val);
   void setPanOffsetX(int val);
@@ -573,8 +588,8 @@ protected:
 				   const QTime& drawTime);
    void paintSelectedSpawnPointSpecials(MapParameters& param, QPainter& p,
 					const QTime& drawTime);
-   const QColor& raceTeamHighlightColor(const Spawn* spawn) const;
-   const QColor& deityTeamHighlightColor(const Spawn* spawn) const;
+   const QColor raceTeamHighlightColor(const Spawn* spawn) const;
+   const QColor deityTeamHighlightColor(const Spawn* spawn) const;
    void paintSpawns(MapParameters& param, QPainter& p, 
 		    const QTime& drawTime);
    void paintSpawnPoints(MapParameters& param, QPainter& p);
@@ -662,7 +677,7 @@ class MapFilterLineEdit : public QLineEdit
 {
  public:
   MapFilterLineEdit(QWidget* parent = 0, const char* name = 0)
-    : QLineEdit(parent, name) {}
+    : QLineEdit(parent) {}
   ~MapFilterLineEdit() {} ;
 
  protected:
@@ -688,7 +703,7 @@ class MapFrame : public SEQWindow
 	    QWidget* parent = 0, const char* name = "mapframe");
    virtual ~MapFrame();
 
-   virtual QPopupMenu* menu();
+   virtual QMenu* menu();
 
    Map* map() { return m_map; }
    const QString& mapPreferenceName() { return m_mapPreferenceName; }
@@ -708,16 +723,16 @@ class MapFrame : public SEQWindow
  protected slots:
    void init_Menu(void);
 
-   void toggle_top_controls(int id);
-   void toggle_bottom_controls(int id);
-   void toggle_zoom(int id);
-   void toggle_playerLocation(int id);
-   void toggle_mouseLocation(int id);
-   void toggle_filter(int id);
-   void toggle_frameRate(int id);
-   void toggle_pan(int id);
-   void toggle_depthControls(int id);
-   void set_font(int id);
+   void toggle_top_controls();
+   void toggle_bottom_controls();
+   void toggle_zoom();
+   void toggle_playerLocation();
+   void toggle_mouseLocation();
+   void toggle_filter();
+   void toggle_frameRate();
+   void toggle_pan();
+   void toggle_depthControls();
+   void set_font();
 
  private:
 
@@ -732,38 +747,38 @@ class MapFrame : public SEQWindow
    QString m_mapPreferenceName;
 
    QVBoxLayout* m_vertical;
-   QHBox* m_topControlBox;
-   QHBox* m_zoomBox;
+   QWidget* m_topControlBox;
+   QWidget* m_zoomBox;
    QSpinBox* m_zoom;
-   QHBox* m_playerLocationBox;
+   QWidget* m_playerLocationBox;
    QLabel* m_playerLocation;
-   QHBox* m_mouseLocationBox;
+   QWidget* m_mouseLocationBox;
    QLabel* m_mouseLocation;
-   QHBox* m_filterBox;
+   QWidget* m_filterBox;
    MapFilterLineEdit* m_filter;
 
-   QHBox* m_bottomControlBox;
-   QHBox* m_frameRateBox;
+   QWidget* m_bottomControlBox;
+   QWidget* m_frameRateBox;
    QSpinBox* m_frameRate;
-   QHBox* m_panBox;
+   QWidget* m_panBox;
    QSpinBox* m_panX;
    QSpinBox* m_panY;
-   QHBox* m_depthControlBox;
+   QWidget* m_depthControlBox;
    QSpinBox* m_head;
    QSpinBox* m_floor;
-   QList<QWidget> m_statusWidgets;
-   
-   int m_id_topControl;
-   int m_id_bottomControl;
-   int m_id_zoom;
-   int m_id_playerLocation;
-   int m_id_mouseLocation;
-   int m_id_filter;
-   int m_id_topControl_Options;
-   int m_id_frameRate;
-   int m_id_pan;
-   int m_id_depthControlRoom;
-   int m_id_bottomControl_Options;
+   QList<QWidget*> m_statusWidgets;
+
+   QAction* m_action_topControl;
+   QAction* m_action_bottomControl;
+   QAction* m_action_zoom;
+   QAction* m_action_playerLocation;
+   QAction* m_action_mouseLocation;
+   QAction* m_action_filter;
+   QAction* m_action_topControl_Options;
+   QAction* m_action_frameRate;
+   QAction* m_action_pan;
+   QAction* m_action_depthControlRoom;
+   QAction* m_action_bottomControl_Options;
 };
 
 #endif // _EQMAP_H_

@@ -1,10 +1,23 @@
 /*
- * spawnlist2.cpp
+ *  spawnlist2.cpp
+ *  Copyright 2000-2007, 2012, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "spawnlist2.h"
 #include "category.h"
@@ -14,10 +27,15 @@
 #include "diagnosticmessages.h"
 #include "main.h"
 
-#include <qcombobox.h>
-#include <qspinbox.h>
-#include <qtimer.h>
-#include <qlayout.h>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QTimer>
+#include <QLayout>
+#include <QHBoxLayout>
+#include <QBoxLayout>
+#include <QMenu>
+#include <QVBoxLayout>
+#include <QHeaderView>
 
 SpawnListWindow2::SpawnListWindow2(Player* player, 
 				   SpawnShell* spawnShell,
@@ -30,11 +48,9 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
     m_currentCategory(NULL),
     m_selectedItem(NULL),
     m_menu(NULL),
-    m_spawnListItemDict(709),
+    m_spawnListItemDict(),
     m_immediateUpdate(true)
 {
-  m_spawnListItemDict.setAutoDelete(false);
-
   // get whether to keep the list sorted or not
   m_keepSorted = pSEQPrefs->getPrefBool("KeepSorted", preferenceName(), false);
 
@@ -50,29 +66,40 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
   int fpm = pSEQPrefs->getPrefInt("FPM", preferenceName(), 10);
   m_delay = 60000L / fpm;
 
-  QBoxLayout* vLayout = new QVBoxLayout(boxLayout());
-  QHBoxLayout* hLayout= new QHBoxLayout(vLayout);
+  QWidget* mainWidget = new QWidget();
+  setWidget(mainWidget);
+
+  QBoxLayout* vLayout = new QVBoxLayout(mainWidget);
+  vLayout->setContentsMargins(0, 0, 0, 0);
+  QHBoxLayout* hLayout= new QHBoxLayout();
+  vLayout->addLayout(hLayout);
 
   // create the spawn list combo box
-  m_categoryCombo = new QComboBox(false, this, "spawnlistcombo");
+  m_categoryCombo = new QComboBox(this);
+  m_categoryCombo->setObjectName("spawnlistcombo");
+  m_categoryCombo->setEditable(false);
   m_categoryCombo->setDuplicatesEnabled(false);
-  hLayout->addWidget(m_categoryCombo, 0, AlignLeft);
+  hLayout->addWidget(m_categoryCombo, 0, Qt::AlignLeft);
   connect(m_categoryCombo, SIGNAL(activated(int)),
 	  this, SLOT(categorySelected(int)));
 
   // Create the Spawn Counter
   m_totalSpawns = new QLineEdit(this);
   m_totalSpawns->setReadOnly(TRUE);
-  m_totalSpawns->setAlignment(AlignCenter);
+  m_totalSpawns->setAlignment(Qt::AlignCenter);
   m_totalSpawns->setMinimumWidth(5);
   m_totalSpawns->setMaximumWidth(50);
-  hLayout->addWidget(m_totalSpawns, 0, AlignCenter);  
+  hLayout->addWidget(m_totalSpawns, 0, Qt::AlignCenter);
 
   // setup spinbox to control frame rate (FPM)
-  m_fpmSpinBox = new QSpinBox(5, 60, 1, this, "fpmSpinBox");
+  m_fpmSpinBox = new QSpinBox(this);
+  m_fpmSpinBox->setObjectName("fpmSpinBox");
+  m_fpmSpinBox->setMinimum(5);
+  m_fpmSpinBox->setMaximum(60);
+  m_fpmSpinBox->setSingleStep(1);
   m_fpmSpinBox->setValue(fpm);
   m_fpmSpinBox->setSuffix("FPM");
-  hLayout->addWidget(m_fpmSpinBox, 0, AlignRight);
+  hLayout->addWidget(m_fpmSpinBox, 0, Qt::AlignRight);
   connect(m_fpmSpinBox, SIGNAL(valueChanged(int)),
 	  this, SLOT(setFPM(int)));
 
@@ -113,15 +140,18 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
   m_spawnList->restoreColumns();
 
   // setup timer for refreshing the spawn list
-  m_timer = new QTimer(this, "spawnlist2timer");
+  m_timer = new QTimer(this);
+  m_timer->setObjectName("spawnlist2timer");
 
   // connect a QListView signal to ourselves
-  connect(m_spawnList, SIGNAL(selectionChanged(QListViewItem*)),
-	  this, SLOT(selChanged(QListViewItem*)));
-  connect (m_spawnList, SIGNAL(mouseButtonPressed(int, QListViewItem*, const QPoint&, int)),
-	   this, SLOT(mousePressEvent(int, QListViewItem*, const QPoint&, int)));
-  connect (m_spawnList, SIGNAL(doubleClicked(QListViewItem*)),
-	   this, SLOT(mouseDoubleClickEvent(QListViewItem*)));
+  connect(m_spawnList, SIGNAL(itemSelectionChanged()),
+	  this, SLOT(selChanged()));
+  connect (m_spawnList, SIGNAL(itemPressed(QTreeWidgetItem*, int)),
+	   this, SLOT(listItemPressed(QTreeWidgetItem*, int)));
+  connect (m_spawnList, SIGNAL(mouseRightButtonPressed(QMouseEvent*)),
+	   this, SLOT(listMouseRightButtonPressed(QMouseEvent*)));
+  connect (m_spawnList, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
+	   this, SLOT(listItemDoubleClicked(QTreeWidgetItem*, int)));
 
   // connect SpawnList slots to SpawnShell signals
   connect(m_spawnShell, SIGNAL(addItem(const Item *)),
@@ -176,12 +206,12 @@ SpawnListWindow2::~SpawnListWindow2()
 
 SpawnListItem* SpawnListWindow2::selected()
 {
-   return ((SpawnListItem*) m_spawnList->selectedItem());
+  return ((SpawnListItem*) m_spawnList->currentItem());
 }
 
 SpawnListItem* SpawnListWindow2::find(const Item* item)
 {
-  return m_spawnListItemDict.find((void*)item);
+  return m_spawnListItemDict.value((void*)item, nullptr);
 }
 
 QString SpawnListWindow2::filterString(const Item* item)
@@ -204,7 +234,7 @@ QString SpawnListWindow2::filterString(const Item* item)
    return text;
 }
 
-QPopupMenu* SpawnListWindow2::menu()
+QMenu* SpawnListWindow2::menu()
 {
   if (m_menu != NULL)
   {
@@ -215,18 +245,25 @@ QPopupMenu* SpawnListWindow2::menu()
   }
 
   m_menu = new SpawnListMenu(m_spawnList, this, m_spawnShell->filterMgr(),
-			     m_categoryMgr, this, "spawnlist menu");
-  m_menu->insertSeparator(-1);
-  int x;
-  x = m_menu->insertItem("Immediate Update", 
-			 this, SLOT(toggle_immediateUpdate(int)));
-  m_menu->setItemChecked(x, m_immediateUpdate);
-  x = m_menu->insertItem("Keep Sorted", 
-			 this, SLOT(toggle_keepSorted(int)));
-  m_menu->setItemChecked(x, m_keepSorted);
-  x = m_menu->insertItem("Keep Selected Visible", 
-			 this, SLOT(toggle_keepSelectedVisible(int)));
-  m_menu->setItemChecked(x, m_keepSelectedVisible);
+          m_categoryMgr, this, "spawnlist menu");
+  m_menu->addSeparator();
+
+  QAction* tmpAction;
+
+  tmpAction = m_menu->addAction("Immediate Update",
+          this, SLOT(toggle_immediateUpdate(bool)));
+  tmpAction->setCheckable(true);
+  tmpAction->setChecked(m_immediateUpdate);
+
+  tmpAction = m_menu->addAction("Keep Sorted",
+          this, SLOT(toggle_keepSorted(bool)));
+  tmpAction->setCheckable(true);
+  tmpAction->setChecked(m_keepSorted);
+
+  tmpAction = m_menu->addAction("Keep Selected Visible",
+          this, SLOT(toggle_keepSelectedVisible(bool)));
+  tmpAction->setCheckable(true);
+  tmpAction->setChecked(m_keepSelectedVisible);
 
   m_menu->setCurrentCategory(m_currentCategory);
 
@@ -235,7 +272,7 @@ QPopupMenu* SpawnListWindow2::menu()
 
 void SpawnListWindow2::updateCount()
 {
-  m_totalSpawns->setText(QString::number(m_spawnList->childCount()));
+  m_totalSpawns->setText(QString::number(m_spawnList->topLevelItemCount()));
 }
 
 void SpawnListWindow2::addItem(const Item* item)
@@ -252,18 +289,21 @@ void SpawnListWindow2::delItem(const Item* item)
   // find the list item
   SpawnListItem* litem = find(item);
 
+  if (item == m_selectedItem)
+  {
+      m_selectedItem = NULL;
+      m_spawnList->selectionModel()->setCurrentIndex(QModelIndex(), QItemSelectionModel::NoUpdate);
+      m_spawnList->clearSelection();
+  }
+
   // delete the list item
   if (litem != NULL)
   {
-    m_spawnListItemDict.remove((void*)item);
-
-    delete litem;
+    delete m_spawnListItemDict.take((void*)item);
 
     updateCount();
   }
 
-  if (item == m_selectedItem)
-    m_selectedItem = NULL;
 }
 
 void SpawnListWindow2::changeItem(const Item* item, uint32_t changeItem)
@@ -309,9 +349,7 @@ void SpawnListWindow2::changeItem(const Item* item, uint32_t changeItem)
     // delete the item (if it already existed)
     if (litem != NULL)
     {
-      m_spawnListItemDict.remove((void*)item);
-      
-      delete litem;
+      delete m_spawnListItemDict.take((void*)item);
 
       // update the displayed count
       updateCount();
@@ -327,9 +365,7 @@ void SpawnListWindow2::changeItem(const Item* item, uint32_t changeItem)
     // delete the item (if it already existed)
     if (litem != NULL)
     {
-      m_spawnListItemDict.remove((void*)item);
-      
-      delete litem;
+      delete m_spawnListItemDict.take((void*)item);
 
       // update the displayed count
       updateCount();
@@ -346,10 +382,11 @@ void SpawnListWindow2::changeItem(const Item* item, uint32_t changeItem)
     // something that we just changed.
     litem->update(m_player, changeItem);
     litem->pickTextColor(item, m_player, m_currentCategory->color());
-    
+
     // make sure it's sorted into the proper place
     if (m_keepSorted)
-      m_spawnList->sort();
+      m_spawnList->sortByColumn(m_spawnList->sortColumn(),
+              m_spawnList->header()->sortIndicatorOrder());
 
     // nothing more to do
     return;
@@ -396,13 +433,14 @@ void SpawnListWindow2::selectSpawn(const Item *item)
 
     // make sure item is visible if configured to do so
     if (m_keepSelectedVisible)
-      m_spawnList->ensureItemVisible(litem);
-  }  
+      m_spawnList->scrollToItem(litem);
+  }
 }
 
 void SpawnListWindow2::clear(void)
 {
   // clear out the spawn list item dictionary
+  qDeleteAll(m_spawnListItemDict);
   m_spawnListItemDict.clear();
 
   // clear the spawn list contents
@@ -412,10 +450,10 @@ void SpawnListWindow2::clear(void)
 void SpawnListWindow2::addCategory(const Category* cat)
 {
   // add the new category to the combo box
-  m_categoryCombo->insertItem(cat->name());
+  m_categoryCombo->insertItem(m_categoryCombo->count(), cat->name());
 
   // set it to be the current item
-  m_categoryCombo->setCurrentItem(m_categoryCombo->count() - 1);
+  m_categoryCombo->setCurrentIndex(m_categoryCombo->count() - 1);
 }
 
 void SpawnListWindow2::delCategory(const Category* cat)
@@ -424,7 +462,7 @@ void SpawnListWindow2::delCategory(const Category* cat)
   int i;
   for (i = 0; i < count; i++)
   {
-    if (m_categoryCombo->text(i) == cat->name())
+    if (m_categoryCombo->itemText(i) == cat->name())
       break;
   }
 
@@ -433,10 +471,10 @@ void SpawnListWindow2::delCategory(const Category* cat)
     // remove the item from the combo box
     m_categoryCombo->removeItem(i);
 
-    // if the category being removed was the current category, 
+    // if the category being removed was the current category,
     // set the selected category to the new selected category (if any).
     if (cat == m_currentCategory)
-      categorySelected(m_categoryCombo->currentItem());
+      categorySelected(m_categoryCombo->currentIndex());
   }
 }
 
@@ -460,12 +498,18 @@ void SpawnListWindow2::loadedCategories(void)
   // fill in the category combo box
   CategoryListIterator it(m_categoryMgr->getCategories());
   const Category* cat;
-  for (cat = it.toFirst(); cat != NULL; cat = ++it)
-    m_categoryCombo->insertItem(cat->name());
+  while(it.hasNext())
+  {
+      cat = it.next();
+      if (!cat)
+          break;
+
+    m_categoryCombo->insertItem(m_categoryCombo->count(), cat->name());
+  }
 
   int n = pSEQPrefs->getPrefInt("CurrentCategory", preferenceName(), 0);
-  m_categoryCombo->setCurrentItem(n);
-  categorySelected(m_categoryCombo->currentItem());
+  m_categoryCombo->setCurrentIndex(n);
+  categorySelected(m_categoryCombo->currentIndex());
 
   // clear the spawn list
   clear();
@@ -483,19 +527,19 @@ void SpawnListWindow2::playerLevelChanged(uint8_t)
   if (m_currentCategory == NULL)
     return;
 
-  QListViewItemIterator it(m_spawnList);
+  SEQListViewItemIterator it(m_spawnList);
   SpawnListItem* slitem = NULL;
   const Item* item;
 
   // iterate until we are out of items
-  while (it.current())
+  while (*it)
   {
     // get the current SpawnListItem
-    slitem = (SpawnListItem*)it.current();
+    slitem = (SpawnListItem*)*it;
 
     // get the item associated with the list item
     item = slitem->item();
-    
+
     // set the color
     slitem->pickTextColor(item, m_player, m_currentCategory->color());
 
@@ -507,22 +551,22 @@ void SpawnListWindow2::setPlayer(int16_t x, int16_t y, int16_t z,
 			   int16_t deltaX, int16_t deltaY, int16_t deltaZ, 
 			   int32_t degrees)
 {
-  QListViewItemIterator it(m_spawnList);
+  SEQListViewItemIterator it(m_spawnList);
   SpawnListItem* litem;
   QString buff;
 
   if (!showeq_params->fast_machine)
   {
     // no, cheat using integer distance calculation ignoring Z dimension
-    while (it.current())
+    while (*it)
     {
       // get the current item
-      litem = (SpawnListItem*)it.current();
-      
-       if (litem->type() != tUnknown) 
+      litem = (SpawnListItem*)*it;
+
+      if (litem->type() != tUnknown) 
        {
-	 buff.sprintf("%5d", litem->item()->calcDist2DInt(x, y));
-	 litem->setText(tSpawnColDist, buff);
+           buff.sprintf("%5d", litem->item()->calcDist2DInt(x, y));
+           litem->setText(tSpawnColDist, buff);
        }
 
       // keep iterating
@@ -532,15 +576,15 @@ void SpawnListWindow2::setPlayer(int16_t x, int16_t y, int16_t z,
   else
   {
     // fast machine so calculate the correct floating point 3D distance
-    while (it.current())
+    while (*it)
     {
       // get the current item
-      litem = (SpawnListItem*)it.current();
-      
-       if (litem->type() != tUnknown) 
+     litem = (SpawnListItem*)*it;
+
+       if (litem->type() != tUnknown)
        {
-	 buff.sprintf("%5.1f", litem->item()->calcDist(x, y, z));
-	 litem->setText(tSpawnColDist, buff);
+           buff.sprintf("%5.1f", litem->item()->calcDist(x, y, z));
+           litem->setText(tSpawnColDist, buff);
        }
 
       // keep iterating
@@ -592,10 +636,13 @@ void SpawnListWindow2::refresh(void)
     ItemConstIterator it(itemMap);
 
     // iterate over all spawns in of the current type
-    for (; it.current(); ++it)
+    while (it.hasNext())
     {
+      it.next();
       // get the item from the list
-      item = it.current();
+      item = it.value();
+      if (!item)
+          break;
 
       // if item hasn't changed since last update, then nothing to do, next...
       if (item->lastChanged() <= m_lastUpdate)
@@ -611,9 +658,7 @@ void SpawnListWindow2::refresh(void)
 	// delete the item (if it already existed)
 	if (litem != NULL)
 	{
-	  m_spawnListItemDict.remove((void*)item);
-	  
-	  delete litem;
+	  delete m_spawnListItemDict.take((void*)item);
 	}
 
 	// nothing more to do for this item
@@ -631,9 +676,7 @@ void SpawnListWindow2::refresh(void)
 	// delete the item (if it already existed)
 	if (litem != NULL)
 	{
-	  m_spawnListItemDict.remove((void*)item);
-	  
-	  delete litem;
+	  delete m_spawnListItemDict.take((void*)item);
 	}
     
 	// nothing more to do for this item
@@ -673,7 +716,8 @@ void SpawnListWindow2::refresh(void)
 
   // make sure the spawnlist is sorted
   if (m_keepSorted)
-    m_spawnList->sort();
+      m_spawnList->sortByColumn(m_spawnList->sortColumn(),
+              m_spawnList->header()->sortIndicatorOrder());
 
   // make sure the selected item is selected
   if (m_selectedItem)
@@ -692,21 +736,24 @@ void SpawnListWindow2::refresh(void)
 
 #if 0 // ZBTEMP
   seqDebug("* elapsed (post-paint): %d", test.elapsed());
-#endif 
+#endif
 
   if (!m_immediateUpdate)
-    m_timer->start(m_delay, true);
+  {
+    m_timer->setSingleShot(true);
+    m_timer->start(m_delay);
+  }
 }
 
 void SpawnListWindow2::savePrefs(void)
 {
   // save the current category
-  pSEQPrefs->setPrefInt("CurrentCategory", preferenceName(), 
-			m_categoryCombo->currentItem());
+  pSEQPrefs->setPrefInt("CurrentCategory", preferenceName(),
+          m_categoryCombo->currentIndex());
 
   // save the underlying SEQWindows prefs
   SEQWindow::savePrefs();
-  
+
   // save the SEQListViews prefs
   m_spawnList->savePrefs();
 }
@@ -714,14 +761,13 @@ void SpawnListWindow2::savePrefs(void)
 
 void SpawnListWindow2::categorySelected(int index)
 {
-  CategoryListIterator it(m_categoryMgr->getCategories());
-  Category* cat = it.toFirst();
-  int i = 0;
-  while ((cat != NULL) && (i < index))
-  {
-    cat = ++it;
-    ++i;
-  }
+  const CategoryList categories = m_categoryMgr->getCategories();
+  Category* cat = nullptr;
+
+  if (index >= categories.count()) return;
+
+  cat = categories.at(index);
+  if (!cat) return;
 
   // set the current category
   m_currentCategory = cat;
@@ -733,49 +779,53 @@ void SpawnListWindow2::categorySelected(int index)
   populateSpawns();
 }
 
-void SpawnListWindow2::selChanged(QListViewItem* litem)
+void SpawnListWindow2::selChanged()
 {
-  if (litem == NULL)
-    return;
-  
-  m_selectedItem = ((SpawnListItem*)litem)->item();
+    QList<QTreeWidgetItem*> selected = m_spawnList->selectedItems();
+    if (!selected.count()) return;
 
-  // it might have been a category title selected, only select if it's an item
-  if (m_selectedItem != NULL)
-    emit spawnSelected(m_selectedItem);
+    // the list is limited to one selection at a time, so we can take the first
+    SEQListViewItem* litem = selected.first();
+    if (litem == NULL) return;
+
+    m_selectedItem = ((SpawnListItem*)litem)->item();
+
+    // it might have been a category title selected, only select if it's an item
+    if (m_selectedItem != NULL)
+        emit spawnSelected(m_selectedItem);
 }
 
-void SpawnListWindow2::mousePressEvent(int button, QListViewItem* litem,
-				       const QPoint &point, int col)
-{
-  // Left Mouse Button Events
-  if (button  == LeftButton && litem != NULL)
-  {
-    m_spawnList->setSelected(litem, true);
-  } // Right Mouse Button Events
-  else if (button == RightButton)
-  {
-    const Item* item = NULL;
-    if (litem != NULL)
+void SpawnListWindow2::listMouseRightButtonPressed(QMouseEvent* event) {
+    if (event->button() == Qt::RightButton)
     {
-      SpawnListItem* slitem = (SpawnListItem*)litem;
-      item = slitem->item();
+        SpawnListMenu* spawnMenu = (SpawnListMenu*)menu();
+        spawnMenu->popup(event->globalPos());
     }
-    SpawnListMenu* spawnMenu = (SpawnListMenu*)menu();
-    spawnMenu->setCurrentItem(item);
-    spawnMenu->popup(point);
-  }
 }
 
-void SpawnListWindow2::mouseDoubleClickEvent(QListViewItem* litem)
-{
-   //print spawn info to console
-  if (litem == NULL)
-    return;
 
-  const Item* item = ((SpawnListItem*)litem)->item();
-  if (item != NULL)
-    seqInfo("%s",(const char*)filterString(item));
+void SpawnListWindow2::listItemPressed(QTreeWidgetItem* litem, int col)
+{
+    SEQListViewItem* lvitem = dynamic_cast<SEQListViewItem*>(litem);
+    if (!lvitem) return;
+
+    m_spawnList->setCurrentItem(lvitem);
+
+    const Item* item = ((SpawnListItem*)lvitem)->item();
+    if (item != NULL)
+        m_menu->setCurrentItem(item);
+}
+
+void SpawnListWindow2::listItemDoubleClicked(QTreeWidgetItem* litem, int col)
+{
+
+    SEQListViewItem* lvitem = dynamic_cast<SEQListViewItem*>(litem);
+    if (!lvitem) return;
+
+    //print spawn info to console
+    const Item* item = ((SpawnListItem*)lvitem)->item();
+    if (item != NULL)
+        seqInfo("%s", filterString(item).toAscii().data());
 }
 
 
@@ -784,16 +834,18 @@ void SpawnListWindow2::setFPM(int rate)
   pSEQPrefs->setPrefInt("FPM", preferenceName(), rate);
   m_delay = 60000L / rate;
   if (m_timer->isActive())
-    m_timer->start(m_delay, true);
+  {
+    m_timer->setSingleShot(true);
+    m_timer->start(m_delay);
+  }
 }
 
-void SpawnListWindow2::toggle_immediateUpdate(int id)
+void SpawnListWindow2::toggle_immediateUpdate(bool enable)
 {
   // toggle immediate update value
-  m_immediateUpdate = !m_immediateUpdate;
-  menu()->setItemChecked(id, m_immediateUpdate);
-  pSEQPrefs->setPrefBool("ImmediateUpdate", preferenceName(), 
-			 m_immediateUpdate);
+  m_immediateUpdate = enable;
+  pSEQPrefs->setPrefBool("ImmediateUpdate", preferenceName(),
+          m_immediateUpdate);
 
   // connect/disconnect item change notification and stop/start the timer
   // as appropriate for the new immediate update setting
@@ -801,12 +853,12 @@ void SpawnListWindow2::toggle_immediateUpdate(int id)
   {
     m_timer->stop();
     connect(m_spawnShell, SIGNAL(changeItem(const Item *, uint32_t)),
-	    this, SLOT(changeItem(const Item *, uint32_t)));
+            this, SLOT(changeItem(const Item *, uint32_t)));
   }
   else
   {
     disconnect(m_spawnShell, SIGNAL(changeItem(const Item *, uint32_t)),
-	       this, SLOT(changeItem(const Item *, uint32_t)));
+            this, SLOT(changeItem(const Item *, uint32_t)));
     m_timer->start(m_delay);
   }
 
@@ -814,32 +866,33 @@ void SpawnListWindow2::toggle_immediateUpdate(int id)
   m_fpmSpinBox->setEnabled(!m_immediateUpdate);
 }
 
-void SpawnListWindow2::toggle_keepSorted(int id)
+void SpawnListWindow2::toggle_keepSorted(bool enable)
 {
   // toggle immediate update value
-  m_keepSorted = !m_keepSorted;
-  menu()->setItemChecked(id, m_keepSorted);
-  pSEQPrefs->setPrefBool("KeepSorted", preferenceName(), 
-			 m_keepSorted);
+  m_keepSorted = enable;
+  pSEQPrefs->setPrefBool("KeepSorted", preferenceName(),
+          m_keepSorted);
+  m_spawnList->setSortingEnabled(enable);
+  if (m_keepSorted)
+      m_spawnList->sortByColumn(m_spawnList->sortColumn(),
+              m_spawnList->header()->sortIndicatorOrder());
 }
 
-void SpawnListWindow2::toggle_keepSelectedVisible(int id)
+void SpawnListWindow2::toggle_keepSelectedVisible(bool enable)
 {
   // toggle immediate update value
-  m_keepSelectedVisible = !m_keepSelectedVisible;
-  menu()->setItemChecked(id, m_keepSelectedVisible);
-  pSEQPrefs->setPrefBool("KeepSelectedVisible", preferenceName(), 
-			 m_keepSelectedVisible);
+  m_keepSelectedVisible = enable;
+  pSEQPrefs->setPrefBool("KeepSelectedVisible", preferenceName(),
+          m_keepSelectedVisible);
 }
 
-void SpawnListWindow2::setSelectedQuiet(QListViewItem* item, bool selected)
+void SpawnListWindow2::setSelectedQuiet(SEQListViewItem* item, bool selected)
 {
-  if (!item || (item->isSelected() == selected) ||
-      !item->isSelectable())
+  if (!item || (item->isSelected() == selected) )
     return;
 
   // get the old selection
-  QListViewItem *oldItem = m_spawnList->selectedItem();
+  SEQListViewItem *oldItem = m_spawnList->currentItem();
 
   // unselect the old selected item if any
   if ((oldItem != item) && (oldItem != NULL) && (oldItem->isSelected()))
@@ -852,12 +905,8 @@ void SpawnListWindow2::setSelectedQuiet(QListViewItem* item, bool selected)
   // notifications since the selection state is already changed).
   m_spawnList->setCurrentItem(item);
 
-  // repaint the old item
-  if (oldItem != NULL)
-    m_spawnList->repaintItem(oldItem);
-
-  // repaint the selected item
-  m_spawnList->repaintItem(item);
+  //repaint
+  update();
 }
 
 void SpawnListWindow2::populateSpawns(void)
@@ -892,10 +941,13 @@ void SpawnListWindow2::populateSpawns(void)
     uint8_t level = 0;
 
     // iterate over all spawns in of the current type
-    for (; it.current(); ++it)
+    while (it.hasNext())
     {
+      it.next();
       // get the item from the list
-      item = it.current();
+      item = it.value();
+      if (!item)
+          break;
 
       // skip filtered spawns
       if ((item->filterFlags() & FILTER_FLAG_FILTERED) &&
@@ -934,7 +986,8 @@ void SpawnListWindow2::populateSpawns(void)
 
   // make sure the spawnlist is sorted
   if (m_keepSorted)
-    m_spawnList->sort();
+      m_spawnList->sortByColumn(m_spawnList->sortColumn(),
+              m_spawnList->header()->sortIndicatorOrder());
 
   // update the count display
   updateCount();

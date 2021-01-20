@@ -1,17 +1,29 @@
 /*
- * zonemgr.h
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  zonemgr.h
+ *  Copyright 2001,2007 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Copyright 2002-2012, 2012-2019 by the respective ShowEQ Developers
+ *  Portions Copyright 2003 Fee (fee@users.sourceforge.net)
  *
- * Copyright 2001,2007 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ *  Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net)
+ *  for use under the terms of the GNU General Public License,
+ *  incorporated herein by reference.
  *
- * Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
- * for use under the terms of the GNU General Public License, 
- * incorporated herein by reference.
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- * modified by Fee (fee@users.sourceforge.net)
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "zonemgr.h"
@@ -21,9 +33,9 @@
 #include "diagnosticmessages.h"
 #include "netstream.h"
 
-#include <qfile.h>
-#include <qdatastream.h>
-#include <qregexp.h>
+#include <QFile>
+#include <QDataStream>
+#include <QRegExp>
 
 //----------------------------------------------------------------------
 // constants
@@ -48,12 +60,13 @@ const float defaultZoneExperienceMultiplier = 0.75;
 // zoneNew(newZoneStruct)                zoneEnd(shortName, longName)  false
 //
 ZoneMgr::ZoneMgr(QObject* parent, const char* name)
-  : QObject(parent, name),
+  : QObject(parent),
     m_zoning(false),
     m_zone_exp_multiplier(defaultZoneExperienceMultiplier),
     m_zonePointCount(0),
     m_zonePoints(0)
 {
+  setObjectName(name);
   m_shortZoneName = "unknown";
   m_longZoneName = "unknown";
   m_zoning = false;
@@ -125,7 +138,7 @@ const zonePointStruct* ZoneMgr::zonePoint(uint32_t zoneTrigger)
 void ZoneMgr::saveZoneState(void)
 {
   QFile keyFile(showeq_params->saveRestoreBaseFilename + "Zone.dat");
-  if (keyFile.open(IO_WriteOnly))
+  if (keyFile.open(QIODevice::WriteOnly))
   {
     QDataStream d(&keyFile);
     // write the magic string
@@ -140,7 +153,7 @@ void ZoneMgr::restoreZoneState(void)
 {
   QString fileName = showeq_params->saveRestoreBaseFilename + "Zone.dat";
   QFile keyFile(fileName);
-  if (keyFile.open(IO_ReadOnly))
+  if (keyFile.open(QIODevice::ReadOnly))
   {
     QDataStream d(&keyFile);
 
@@ -151,7 +164,7 @@ void ZoneMgr::restoreZoneState(void)
     if (magicTest != *magic)
     {
       seqWarn("Failure loading %s: Bad magic string!",
-	      (const char*)fileName);
+              fileName.toAscii().data());
       return;
     }
 
@@ -159,13 +172,13 @@ void ZoneMgr::restoreZoneState(void)
     d >> m_shortZoneName;
 
     seqInfo("Restored Zone: %s (%s)!",
-	    (const char*)m_shortZoneName,
-	    (const char*)m_longZoneName);
+            m_shortZoneName.toAscii().data(),
+            m_longZoneName.toAscii().data());
   }
   else
   {
-    seqWarn("Failure loading %s: Unable to open!", 
-	    (const char*)fileName);
+    seqWarn("Failure loading %s: Unable to open!",
+            fileName.toAscii().data());
   }
 }
 
@@ -374,13 +387,13 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   for (int i = 0; i < bandolierCount; i++) {
     name = netStream.readText();
     if(name.length()) {
-      strncpy(player->profile.bandoliers[i].bandolierName, name.latin1(), 32);
+      strncpy(player->profile.bandoliers[i].bandolierName, name.toLatin1().data(), 32);
     }
 
     // Mainhand
     name = netStream.readText();
     if(name.length()) {
-      strncpy(player->profile.bandoliers[i].mainHand.itemName, name.latin1(), 64);
+      strncpy(player->profile.bandoliers[i].mainHand.itemName, name.toLatin1().data(), 64);
     }
     player->profile.bandoliers[i].mainHand.itemId = netStream.readUInt32NC();
     player->profile.bandoliers[i].mainHand.icon = netStream.readUInt32NC();
@@ -388,7 +401,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     // Offhand
     name = netStream.readText();
     if(name.length()) {
-      strncpy(player->profile.bandoliers[i].offHand.itemName, name.latin1(), 64);
+      strncpy(player->profile.bandoliers[i].offHand.itemName, name.toLatin1().data(), 64);
     }
     player->profile.bandoliers[i].offHand.itemId = netStream.readUInt32NC();
     player->profile.bandoliers[i].offHand.icon = netStream.readUInt32NC();
@@ -396,7 +409,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     // Range
     name = netStream.readText();
     if(name.length()) {
-      strncpy(player->profile.bandoliers[i].range.itemName, name.latin1(), 64);
+      strncpy(player->profile.bandoliers[i].range.itemName, name.toLatin1().data(), 64);
     }
     player->profile.bandoliers[i].range.itemId = netStream.readUInt32NC();
     player->profile.bandoliers[i].range.icon = netStream.readUInt32NC();
@@ -404,7 +417,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     // Ammo
     name = netStream.readText();
     if(name.length()) {
-      strncpy(player->profile.bandoliers[i].ammo.itemName, name.latin1(), 64);
+      strncpy(player->profile.bandoliers[i].ammo.itemName, name.toLatin1().data(), 64);
     }
     player->profile.bandoliers[i].ammo.itemId = netStream.readUInt32NC();
     player->profile.bandoliers[i].ammo.icon = netStream.readUInt32NC();

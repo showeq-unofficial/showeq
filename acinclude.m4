@@ -1,8 +1,11 @@
 ##   -*- autoconf -*-
 
-dnl    This file is part of the KDE libraries/packages
+# serial 2 qt4 update
+
+dnl    This file is part of ShowEQ and is based on the file from KDE.
 dnl    Copyright (C) 1997 Janos Farkas (chexum@shadow.banki.hu)
 dnl              (C) 1997,98,99 Stephan Kulow (coolo@kde.org)
+dnl              (C) 2001-2003,2005,2008,2019 ShowEQ Developers
 
 dnl    This file is free software; you can redistribute it and/or
 dnl    modify it under the terms of the GNU Library General Public
@@ -95,47 +98,72 @@ AC_DEFUN([AC_PATH_QT_MOC],
 [
   if [[ -n "$ac_qt_includes" ]]; then
    
-     AC_MSG_CHECKING([for Qt MOC]);
-     AC_FIND_FILE(moc, [ $ac_qt_bindir              \
+     AC_MSG_CHECKING([for Qt4 MOC]);
+     AC_FIND_FILE(moc-qt4, [ $ac_qt_bindir          \
                          $QTDIR/bin                 \
                          $QTDIR/src/moc             \
-                         /usr/local/qt3/bin	    \
-                         /usr/local/qt/bin          \
-                         /usr/local/qt2/bin         \
-	                 /usr/local/qt-2.3.2/lib    \
+                         /usr/local/qt4/bin         \
+                         /usr/lib/${host_cpu}-${host_vendor}-${host_os}/qt4/bin    \
+                         /usr/lib/${host_cpu}-${host_os}/qt4/bin    \
+                         /usr/lib/arm-linux-gnueabihf/qt4/bin \
+                         /usr/lib/*/qt4/bin         \
+                         /usr/lib/qt4/bin           \
+                         /usr/X11R6/bin/qt4         \
+                         /usr/X11R6/bin/qt4/bin     \
+                         /usr/X11R6/bin/X11/qt4     \
+                         /usr/X11R6/bin/X11/qt4/bin \
                          /usr/local/qt*/bin         \
-	                 /usr/lib/qtgcc3-2.3.2/lib  \
-	                 /usr/lib/qtgcc3-*/lib  \
-	                 /opt/qt-gcc3-2.3.2/lib	    \
-	                 /opt/qt-gcc3-*/lib	    \
-	                 /opt/qt-2.3.2/lib          \
+                         /usr/lib/*/qt*/bin         \
+                         /usr/X11R6/bin/qt*         \
+                         /usr/X11R6/bin/qt*/bin     \
+                         /usr/X11R6/bin/X11/qt*     \
+                         /usr/X11R6/bin/X11/qt*/bin \
+                         /usr/lib/qt*/bin           \
                          /usr/bin                   \
                          /usr/X11R6/bin             \
-                         /usr/X11R6/bin/qt3	    \
-                         /usr/X11R6/bin/qt          \
-                         /usr/X11R6/bin/qt2         \
-                         /usr/X11R6/bin/qt*         \
-                         /usr/X11R6/bin/qt2/bin     \
-                         /usr/X11R6/bin/qt3/bin     \
-                         /usr/X11R6/bin/qt/bin      \
-                         /usr/X11R6/bin/qt*/bin     \
-                         /usr/X11R6/bin/X11/qt3     \
-                         /usr/X11R6/bin/X11/qt      \
-                         /usr/X11R6/bin/X11/qt2     \
-                         /usr/X11R6/bin/X11/qt*     \
-                         /usr/X11R6/bin/X11/qt3/bin \
-                         /usr/X11R6/bin/X11/qt/bin  \
-                         /usr/X11R6/bin/X11/qt2/bin \
-                         /usr/X11R6/bin/X11/qt*/bin \
-                         /usr/lib/qt3/bin	    \
-                         /usr/lib/qt/bin            \
-                         /usr/lib/qt2/bin           \
-                         /usr/lib/qt*/bin           \
                          /usr/src/qt-*/bin            ],
 
              MOC)
+     ac_qt_moc_bin=moc-qt4
 
-     MOC="$MOC/moc"
+dnl if we don't find it named "moc-qt4" then we should check for "moc"
+     if [[ -z "$MOC" ]]; then
+
+        AC_FIND_FILE(moc, [ $ac_qt_bindir              \
+                            $QTDIR/bin                 \
+                            $QTDIR/src/moc             \
+                            /usr/local/qt4/bin         \
+                            /usr/lib/${host_cpu}-${host_vendor}-${host_os}/qt4/bin    \
+                            /usr/lib/${host_cpu}-${host_os}/qt4/bin    \
+                            /usr/lib/arm-linux-gnueabihf/qt4/bin \
+                            /usr/lib/*/qt4/bin         \
+                            /usr/lib/qt4/bin           \
+                            /usr/X11R6/bin/qt4         \
+                            /usr/X11R6/bin/qt4/bin     \
+                            /usr/X11R6/bin/X11/qt4     \
+                            /usr/X11R6/bin/X11/qt4/bin \
+                            /usr/local/qt*/bin         \
+                            /usr/lib/*/qt*/bin         \
+                            /usr/X11R6/bin/qt*         \
+                            /usr/X11R6/bin/qt*/bin     \
+                            /usr/X11R6/bin/X11/qt*     \
+                            /usr/X11R6/bin/X11/qt*/bin \
+                            /usr/lib/qt*/bin           \
+                            /usr/bin                   \
+                            /usr/X11R6/bin             \
+                            /usr/src/qt-*/bin            ],
+
+                MOC)
+
+        ac_qt_moc_bin=moc
+
+     fi
+
+     if [[ -n "$ac_qt_moc_bin" ]]; then
+        MOC="$MOC/$ac_qt_moc_bin"
+     else
+        MOC="$MOC/moc"
+     fi
      ac_cv_path_moc="$MOC"
 
      if [[ -n "$ac_cv_path_moc" ]]; then
@@ -147,9 +175,9 @@ AC_DEFUN([AC_PATH_QT_MOC],
          MOC_ERROR_MESSAGE
        fi
 
-       output=`eval "$ac_cv_path_moc --help  2>&1 | sed -e '1q' | grep Qt"`
+       output=`eval "$ac_cv_path_moc -v  2>&1 | sed -e '1q' | grep Qt"`
 
-       echo "configure:__oline__: tried to call $ac_cv_path_moc --help 2>&1 | sed -e '1q' | grep Qt" >&AC_FD_CC
+       echo "configure:__oline__: tried to call $ac_cv_path_moc -v 2>&1 | sed -e '1q' | grep Qt" >&AC_FD_CC
        echo "configure:__oline__: moc output: $output" >&AC_FD_CC
 
        if [[ -z "$output" ]]; then
@@ -210,43 +238,34 @@ AC_DEFUN([AC_PATH_QT_UIC],
 [
   if [[ -n "$ac_qt_includes" ]]; then
    
-     AC_MSG_CHECKING([for Qt UIC]);
+     AC_MSG_CHECKING([for Qt4 UIC]);
      AC_FIND_FILE(uic, [ $ac_qt_bindir              \
-                         $QTDIR/bin                 \
-                         $QTDIR/src/uic             \
-                         /usr/local/qt3/bin	    \
-                         /usr/local/qt/bin          \
-                         /usr/local/qt2/bin         \
-	                 /usr/local/qt-2.3.2/lib    \
-                         /usr/local/qt*/bin         \
-	                 /usr/lib/qtgcc3-2.3.2/lib  \
-	                 /usr/lib/qtgcc3-*/lib  \
-	                 /opt/qt-gcc3-2.3.2/lib	    \
-	                 /opt/qt-gcc3-*/lib	    \
-	                 /opt/qt-2.3.2/lib          \
-                         /usr/bin                   \
-                         /usr/X11R6/bin             \
-                         /usr/X11R6/bin/qt3	    \
-                         /usr/X11R6/bin/qt          \
-                         /usr/X11R6/bin/qt2         \
-                         /usr/X11R6/bin/qt*         \
-                         /usr/X11R6/bin/qt2/bin     \
-                         /usr/X11R6/bin/qt3/bin     \
-                         /usr/X11R6/bin/qt/bin      \
-                         /usr/X11R6/bin/qt*/bin     \
-                         /usr/X11R6/bin/X11/qt3     \
-                         /usr/X11R6/bin/X11/qt      \
-                         /usr/X11R6/bin/X11/qt2     \
-                         /usr/X11R6/bin/X11/qt*     \
-                         /usr/X11R6/bin/X11/qt3/bin \
-                         /usr/X11R6/bin/X11/qt/bin  \
-                         /usr/X11R6/bin/X11/qt2/bin \
-                         /usr/X11R6/bin/X11/qt*/bin \
-                         /usr/lib/qt3/bin	    \
-                         /usr/lib/qt/bin            \
-                         /usr/lib/qt2/bin           \
-                         /usr/lib/qt*/bin           \
-                         /usr/src/qt-*/bin            ],
+                          $QTDIR/bin                 \
+                          $QTDIR/src/uic             \
+                          /usr/local/qt4/bin         \
+                          /usr/lib/${host_cpu}-${host_vendor}-${host_os}/qt4/bin    \
+                          /usr/lib/${host_cpu}-${host_os}/qt4/bin    \
+                          /usr/lib/arm-linux-gnueabihf/qt4/bin \
+                          /usr/lib/*/qt4/bin         \
+                          /usr/lib64/*/qt4/bin         \
+                          /usr/bin                   \
+                          /usr/X11R6/bin/qt4         \
+                          /usr/X11R6/bin/qt4/bin     \
+                          /usr/X11R6/bin/X11/qt4     \
+                          /usr/X11R6/bin/X11/qt4/bin \
+                          /usr/lib/qt4/bin           \
+                          /usr/lib64/qt4/bin           \
+                          /usr/local/qt*/bin         \
+                          /usr/X11R6/bin             \
+                          /usr/X11R6/bin/qt*         \
+                          /usr/X11R6/bin/qt*/bin     \
+                          /usr/X11R6/bin/X11/qt*     \
+                          /usr/X11R6/bin/X11/qt*/bin \
+                          /usr/lib/qt*/bin           \
+                          /usr/lib64/qt*/bin           \
+                          /usr/lib/*/qt*/bin         \
+                          /usr/lib64/*/qt*/bin         \
+                          /usr/src/qt-*/bin            ],
 
              UIC)
 
@@ -262,9 +281,9 @@ AC_DEFUN([AC_PATH_QT_UIC],
          UIC_ERROR_MESSAGE
        fi
 
-       output=`eval "$ac_cv_path_uic --help  2>&1 | grep -i 'Qt user interface'"`
+       output=`eval "$ac_cv_path_uic -v  2>&1 | grep -i 'Qt user interface'"`
 
-       echo "configure:__oline__: tried to call $ac_cv_path_uic --help 2>&1 | sed -e '1q' | grep Qt" >&AC_FD_CC
+       echo "configure:__oline__: tried to call $ac_cv_path_uic -v 2>&1 | sed -e '1q' | grep Qt" >&AC_FD_CC
        echo "configure:__oline__: uic output: $output" >&AC_FD_CC
 
        if [[ -z "$output" ]]; then
@@ -492,6 +511,7 @@ cat > conftest.$ac_ext <<EOF
 #include <qstringlist.h>
 #include <qstyle.h>
 #include <qthread.h>
+#include <qmutex.h>
 EOF
 
 echo "#if ! (QT_VERSION > 230)" >> conftest.$ac_ext
@@ -510,7 +530,7 @@ EOF
 AC_DEFUN([CHECK_QT_DIRECT],
 [
 AC_MSG_CHECKING([if Qt compiles without flags])
-AC_CACHE_VAL(cv_qt_direct,
+AC_CACHE_VAL(ac_cv_qt_direct,
 [
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
@@ -522,7 +542,7 @@ ac_libs_safe="$LIBS"
 
 CXXFLAGS="$CXXFLAGS -I$qt_includes"
 LDFLAGS="$X_LDFLAGS"
-LIBS="-lqt-mt -lXext -lX11 $LIBSOCKET"
+LIBS="-lQtCore -lXext -lX11 $LIBSOCKET"
 LD_LIBRARY_PATH=
 export LD_LIBRARY_PATH
 LIBRARY_PATH=
@@ -531,9 +551,9 @@ export LIBRARY_PATH
 PRINT_QT_PROGRAM
 
 if AC_TRY_EVAL(ac_link) && test -s conftest; then
-  cv_qt_direct="yes"
+  ac_cv_qt_direct="yes"
 else
-  cv_qt_direct="no"
+  ac_cv_qt_direct="no"
   echo "configure: failed program was:" >&AC_FD_CC
   cat conftest.$ac_ext >&AC_FD_CC
 fi
@@ -550,7 +570,7 @@ export LIBRARY_PATH
 AC_LANG_RESTORE
 ])
 
-if test "$cv_qt_direct" = "yes"; then
+if test "$ac_cv_qt_direct" = "yes"; then
   AC_MSG_RESULT(yes)
   $1
 else
@@ -565,15 +585,16 @@ dnl $(QT_LDFLAGS) will be -Lqtliblocation (if needed)
 dnl and $(QT_INCLUDES) will be -Iqthdrlocation (if needed)
 dnl ------------------------------------------------------------------------
 dnl
-AC_DEFUN([AC_PATH_QT_1_3],
+AC_DEFUN([AC_PATH_QT_4],
 [
 AC_REQUIRE([K_PATH_X])
-LIBQT="-lqt-mt"
+LIBQT="-lQtCore"
+
 
 AC_REQUIRE([AC_FIND_PNG])
 LIBQT="$LIBQT $LIBPNG"
 
-AC_MSG_CHECKING([for Qt])
+AC_MSG_CHECKING([for Qt4])
 
 LIBQT="$LIBQT $X_PRE_LIBS -lXext -lX11 $LIBSOCKET"
 
@@ -627,38 +648,31 @@ dnl  *******************************************
 
 qt_incdirs=" $QTDIR/include                     \
              $QTINC                             \
-	     /usr/local/qt3/include		\
-             /usr/local/qt/include              \
-             /usr/local/qt*/include             \
-	     /usr/qt/3/include			\
-	     /usr/qt/*/include			\
-	     /opt/qt-gcc3-*/include		\
-	     /usr/include/qt3			\
-             /usr/include/qt                    \
-             /usr/include/qt*                   \
              /usr/include                       \
-	     /usr/lib/qt3/include		\
-             /usr/lib/qt/include                \
+             /usr/local/qt4/include             \
+             /usr/qt/4/include                  \
+             /usr/include/qt4                   \
+             /usr/include/${host_cpu}-${host_vendor}-${host_os}/qt4    \
+             /usr/include/${host_cpu}-${host_os}/qt4    \
+             /usr/include/arm-linux-gnueabihf/qt4 \
+             /usr/include/*/qt4  \
+             /usr/lib/qt4/include               \
+             /usr/X11R6/include/X11/qt4         \
+             /usr/X11R6/include/X11/qt4/include \
+             /usr/X11R6/include/qt4             \
+             /usr/X11R6/include/qt4/include     \
+             /usr/local/qt*/include             \
+             /usr/qt/*/include                  \
+             /usr/include/qt*                   \
              /usr/lib/qt*/include               \
-	     /usr/lib/qtgcc3-*/include		\
-	     /usr/lib/qt3/include		\
-             /usr/lib/qt/include                \
              /usr/lib/qt*/include               \
-	     /usr/X11R6/include/X11/qt3		\
-             /usr/X11R6/include/X11/qt          \
              /usr/X11R6/include/X11/qt*         \
-	     /usr/X11R6/include/X11/qt3/include \
-             /usr/X11R6/include/X11/qt/include  \
              /usr/X11R6/include/X11/qt*/include \
-	     /usr/X11R6/include/qt3		\
-             /usr/X11R6/include/qt              \
              /usr/X11R6/include/qt*             \
- 	     /usr/X11R6/include/qt3/include	\
-             /usr/X11R6/include/qt/include      \
              /usr/X11R6/include/qt*/include     \
              /usr/src/qt-*/include              \
-             $x_includes			\
-	     $qt_incdirs"
+             $x_includes                        \
+             $qt_incdirs"
 
 [[ "$ac_qt_includes" != "NO" ]]   &&   \
 qt_incdirs="$ac_qt_includes $qt_incdirs"
@@ -666,8 +680,8 @@ qt_incdirs="$ac_qt_includes $qt_incdirs"
 qt_version_source="qglobal.h"
 
 
-AC_FIND_FILE("qstyle.h", $qt_incdirs, qt_incdir1)
-AC_FIND_FILE($qt_version_source, $qt_incdir1, qt_incdir)
+AC_FIND_FILE("Qt/qstyle.h", $qt_incdirs, qt_incdir1)
+AC_FIND_FILE("Qt/$qt_version_source", $qt_incdir1, qt_incdir)
 
 
 dnl  *************************************************
@@ -678,107 +692,116 @@ dnl  * This is necessary to ensure that we don't end *
 dnl  * up using the wrong Qt lib path when linking!! *
 dnl  *************************************************
 
-qt_version_string=`cat $qt_incdir/$qt_version_source 2> configure.dbg |\
-		   grep "#define QT_VERSION_STR"                      |\
-		   sed 's/QT_VERSION_STR//'                           |\
-                   sed 's/#define//g'                                 |\
-		   sed 's/ //g'                                       |\
-		   sed 's/	//g'		                      |\
-                   sed 's/"//g'`;
+qt_version_string=`cat $qt_incdir/Qt/$qt_version_source 2> configure.dbg |\
+                  grep "#define QT_VERSION_STR"                      |\
+                  sed 's/QT_VERSION_STR//'                           |\
+                  sed 's/#define//g'                                 |\
+                  sed 's/ //g'                                       |\
+                  sed 's/	//g'                                     |\
+                  sed 's/"//g'`;
 
-qt_version_number=`cat $qt_incdir/$qt_version_source 2> configure.dbg |\
+qt_version_number=`cat $qt_incdir/Qt/$qt_version_source 2> configure.dbg |\
                    grep "#define QT_VERSION[^_]"                      |\
                    sed 's/QT_VERSION//'                               |\
                    sed 's/#define//g'                                 |\
                    sed 's/ //g'                                       |\
-                   sed 's/	//g'                                  |\
+                   sed 's/	//g'                                      |\
                    sed 's/0x//'`;
 
- qt_major_version=`echo ${[qt_version_string%%.[0-9]*]}`
- qt_minor_version=`echo ${[qt_version_string#[0-9]*.]}`
- qt_minor_version=`echo ${[qt_minor_version%.[0-9]*]}`
-   qt_major_build=`echo ${[qt_version_string##[0-9]*.]}`
- qt_lib_major_ver="libqt-mt.so.$qt_major_version"
 
- qt_lib_minor_ver="libqt-mt.so.$qt_major_version.$qt_minor_version"
- qt_lib_major_bld="libqt-mt.so.$qt_major_version.$qt_minor_version.$qt_major_build"
+qt_major_version=`echo ${[qt_version_string%%.[0-9]*]}`
+qt_minor_version=`echo ${[qt_version_string#[0-9]*.]}`
+qt_minor_version=`echo ${[qt_minor_version%.[0-9]*]}`
+qt_major_build=`echo ${[qt_version_string##[0-9]*.]}`
+
 
 if [[ -n "$qt_version_string" ]]; then
   echo -e "yes\n>> Found version.:\t$qt_version_string"
-  echo -e ">>> Headers......:\t$qt_incdir/"
+  echo -e ">>> Headers......:\t$qt_incdir"
   ac_qt_includes="$qt_incdir"
 else
   echo -e "no\n>> Unable to locate your Qt includes..."
   AC_MSG_ERROR([Please verify your Qt devel install!]);
 fi;
 
-qt_target_version="3.2.0"
+qt_target_version="4.3.0"
 
-if test $qt_major_version -le 2 ; then
-  AC_MSG_ERROR([ShowEQ requires qt $qt_target_version or later, but does not support qt 4 yet. Please make sure qt $qt_target_version or later is installed!!!]); 
-elif test $qt_major_version -eq 3 ; then
-  if test $qt_minor_version -lt 2 ; then
-    AC_MSG_ERROR([ShowEQ requires qt $qt_target_version or later, but does not support qt 4 yet. Please make sure qt $qt_target_version or later is installed!!!]); 
-  fi;
-else
-  AC_MSG_ERROR([ShowEQ requires qt $qt_target_version or later, but does not support qt 4 yet. Please make sure qt $qt_target_version or later is installed!!!]); 
-fi;
+case $qt_major_version in
+    4)
+        if [[ $qt_minor_version -lt 3 ]]; then
+            AC_MSG_ERROR([ShowEQ requires qt $qt_target_version or later, but does not support qt 5 yet. Please make sure qt $qt_target_version or later is installed!!!]); 
+        fi
+        qt_lib=libQtCore
+        ;;
+#   5)
+#       qt_lib=libQt5Core
+#       ;;
+    *)
+        AC_MSG_ERROR([ShowEQ requires qt $qt_target_version or later, but does not support qt 5 yet. Please make sure qt $qt_target_version or later is installed!!!]); 
+        ;;
+esac
+
+qt_lib_major_ver="${qt_lib}.so.$qt_major_version"
+
+qt_lib_minor_ver="${qt_lib}.so.$qt_major_version.$qt_minor_version"
+qt_lib_major_bld="${qt_lib}.so.$qt_major_version.$qt_minor_version.$qt_major_build"
+
+if [[ -n $qt_incdir ]]; then
+    for dir in `ls -1 -d $qt_incdir/Qt*`; do
+        ac_qt_includes="$ac_qt_includes -I$dir"
+    done;
+fi
+
 
 dnl ************************************
 dnl * Build yet another search path... *
 dnl ************************************
 
-qt_libdirs=" $QTDIR/lib			\
-             $LD_LIBRARY_PATH		\
-             $QTLIB			\
-	     /usr/local/qt3/lib		\
-             /usr/local/qt/lib		\
-             /usr/local/qt*/lib		\
-	     /usr/qt/3/lib		\
-	     /usr/qt/*/lib		\
-	     /usr/lib/qt3/lib		\
-             /usr/lib/qt/lib		\
-	     /usr/lib/qt*/lib		\
-	     /usr/lib/qt3		\
-             /usr/lib/qt		\
-             /usr/lib/qt*		\
-             /usr/lib			\
-	     /usr/X11R6/lib/X11/qt3	\
-             /usr/X11R6/lib/X11/qt	\
-             /usr/X11R6/lib/X11/qt*	\
-	     /usr/X11R6/lib/X11/qt3/lib	\
-             /usr/X11R6/lib/X11/qt/lib	\
-             /usr/X11R6/lib/X11/qt*/lib	\
-	     /usr/X11R6/lib/qt3		\
-             /usr/X11R6/lib/qt		\
-             /usr/X11R6/lib/qt*		\
-	     /usr/X11R6/lib/qt3/lib	\
-             /usr/X11R6/lib/qt/lib	\
-	     /usr/X11R6/lib/qt*/lib	\
-             /usr/src/qt-*/lib		\
-             $x_libraries		\
+qt_libdirs=" $QTDIR/lib                     \
+             $LD_LIBRARY_PATH               \
+             $QTLIB                         \
+             /usr/lib                       \
+             /usr/lib/${host_cpu}-${host_vendor}-${host_os}    \
+             /usr/lib/${host_cpu}-${host_os}    \
+             /usr/lib/arm-linux-gnueabihf \
+             /usr/local/qt4/lib             \
+             /usr/qt/4/lib                  \
+             /usr/lib/qt4/lib               \
+             /usr/lib/qt4                   \
+             /usr/X11R6/lib/X11/qt4         \
+             /usr/X11R6/lib/X11/qt4/lib     \
+             /usr/X11R6/lib/qt4             \
+             /usr/X11R6/lib/qt4/lib         \
+             /usr/local/qt*/lib             \
+             /usr/qt/*/lib                  \
+             /usr/lib/qt*/lib               \
+             /usr/lib/qt*                   \
+             /usr/X11R6/lib/X11/qt*         \
+             /usr/X11R6/lib/X11/qt*/lib     \
+             /usr/X11R6/lib/qt*             \
+             /usr/X11R6/lib/qt*/lib         \
+             /usr/src/qt-*/lib              \
+             $x_libraries                   \
              $qt_libdirs"
 
 case $host_cpu in
 powerpc64 | s390x | sparc64 | x86_64)
-qt_libdirs=" $QTDIR/lib64			\
-             $QTLIB			\
-	     /usr/local/qt3/lib64	\
-             /usr/local/qt/lib64	\
-             /usr/local/qt*/lib64	\
-	     /usr/qt/3/lib64		\
-	     /usr/qt/*/lib64		\
-	     /usr/lib/qt3/lib64		\
-             /usr/lib/qt/lib64		\
-	     /usr/lib/qt*/lib64		\
-             /usr/lib64			\
-	     /usr/X11R6/lib/X11/qt3/lib64 \
-             /usr/X11R6/lib/X11/qt/lib64  \
-             /usr/X11R6/lib/X11/qt*/lib64 \
-	     /usr/X11R6/lib/qt3/lib64	\
-             /usr/X11R6/lib/qt/lib64	\
-	     /usr/X11R6/lib/qt*/lib64	\
-             /usr/src/qt-*/lib64	\
+qt_libdirs=" $QTDIR/lib64                   \
+             $QTLIB                         \
+             /usr/lib64                     \
+             /usr/lib/${host_cpu}-${host_vendor}-${host_os}    \
+             /usr/lib/${host_cpu}-${host_os}    \
+             /usr/lib/arm-linux-gnueabihf \
+             /usr/local/qt4/lib64           \
+             /usr/qt/4/lib64                \
+             /usr/lib/qt4/lib64             \
+             /usr/X11R6/lib/X11/qt4/lib64   \
+             /usr/local/qt*/lib64           \
+             /usr/qt/*/lib64                \
+             /usr/lib/qt*/lib64             \
+             /usr/X11R6/lib/X11/qt*/lib64   \
+             /usr/X11R6/lib/qt*/lib64       \
+             /usr/src/qt-*/lib64            \
              $qt_libdirs"
 ;;
 esac
@@ -816,27 +839,20 @@ ac_cxxflags_safe="$CXXFLAGS"
 ac_ldflags_safe="$LDFLAGS"
 ac_libs_safe="$LIBS"
 
-CXXFLAGS="$CXXFLAGS -I$qt_incdir $all_includes"
+CXXFLAGS="$CXXFLAGS -I$qt_incdir $all_includes -I$qt_incdir/Qt"
 LDFLAGS="-L$qt_libdir $all_libraries"
 LIBS="$LIBS $LIBQT"
 
 PRINT_QT_PROGRAM
 
-if [[ -e "$qt_libdir/libqt-mt.so.2" ]]; then
-  echo "DEBUG INFO for: $qt_libdir/libqt-mt.so.2" > libqt2.dbg;
-  ldd "$qt_libdir/libqt-mt.so.2" >> libqt2.dbg 2>&1;
-  echo -e "\nOther Qt libraries in this directory:" >> libqt2.dbg;
-  ls -lah "$qt_libdir/"libqt* >> libqt2.dbg;
+if [[ -e "$qt_libdir/libQtCore.so.4" ]]; then
+  echo "DEBUG INFO for: $qt_libdir/libQtCore.so.4" > libqt4.dbg;
+  ldd "$qt_libdir/libQtCore.so.4" >> libqt4.dbg 2>&1;
+  echo -e "\nOther Qt libraries in this directory:" >> libqt4.dbg;
+  ls -lah "$qt_libdir/"libQt* >> libqt4.dbg;
   ac_qt_libraries="$qt_libdir"
 fi
 
-if [[ -e "$qt_libdir/libqt-mt.so.3" ]]; then
-  echo "DEBUG INFO for: $qt_libdir/libqt-mt.so.3" > libqt3.dbg;
-  ldd "$qt_libdir/libqt-mt.so.3" >> libqt3.dbg 2>&1;
-  echo -e "\nOther Qt libraries in this directory:" >> libqt3.dbg;
-  ls -lah "$qt_libdir/"libqt* >> libqt3.dbg;
-  ac_qt_libraries="$qt_libdir"
-fi
 
 if [[ -n "$ac_qt_libraries" ]] && [[ "$ac_validate_qt" != "no" ]]; then
   if AC_TRY_EVAL(ac_link) && test -s conftest; then
@@ -859,33 +875,25 @@ dnl ************************************
 dnl * Build yet another search path... *
 dnl ************************************
 
-qt_docdirs=" $QTDIR/doc/html		     \
-	     $qt_incdir../doc/html     	     \
-             /usr/local/qt3/doc/html	     \
-             /usr/local/qt/doc/html	     \
-             /usr/local/qt*/doc/html	     \
-	     /usr/qt/3/doc/html	     	     \
-	     /usr/qt/*/doc/html	     	     \
-	     /usr/lib/qt3/doc/html	     \
-             /usr/lib/qt/doc/html	     \
-	     /usr/lib/qt*/doc/html	     \
-	     /usr/lib/doc/html	     	     \
-             /usr/lib/qt/doc/html	     \
-             /usr/lib/qt*/doc/html	     \
-	     /usr/X11R6/lib/X11/qt3/doc/html \
-             /usr/X11R6/lib/X11/qt/doc/html  \
-             /usr/X11R6/lib/X11/qt*/doc/html \
-	     /usr/X11R6/lib/X11/qt3/doc/html \
-             /usr/X11R6/lib/X11/qt/doc/html  \
-             /usr/X11R6/lib/X11/qt*/doc/html \
-	     /usr/X11R6/lib/qt3/doc/html     \
-             /usr/X11R6/lib/qt/doc/html	     \
-             /usr/X11R6/lib/qt*/doc/html     \
-	     /usr/X11R6/lib/qt3/doc/html     \
-             /usr/X11R6/lib/qt/doc/html	     \
-	     /usr/X11R6/lib/qt*/doc/html     \
-             /usr/src/qt-*/doc/html	     \
-             $qt_docdirs"
+qt_docdirs=" $QTDIR/doc/html                    \
+            $qt_incdir../doc/html               \
+            /usr/local/qt4/doc/html             \
+            /usr/local/qt*/doc/html             \
+            /usr/qt/4/doc/html                  \
+            /usr/qt/*/doc/html                  \
+            /usr/lib/qt4/doc/html               \
+            /usr/lib/qt*/doc/html               \
+            /usr/lib/doc/html                   \
+            /usr/lib/qt*/doc/html               \
+            /usr/share/qt4/doc/html             \
+            /usr/X11R6/lib/X11/qt4/doc/html     \
+            /usr/X11R6/lib/X11/qt*/doc/html     \
+            /usr/X11R6/lib/X11/qt4/doc/html     \
+            /usr/X11R6/lib/X11/qt*/doc/html     \
+            /usr/X11R6/lib/qt4/doc/html         \
+            /usr/X11R6/lib/qt*/doc/html         \
+            /usr/src/qt-*/doc/html              \
+            $qt_docdirs"
 
 [[ "$ac_qt_docs" != "NO" ]]   &&   \
 qt_docdirs="$ac_qt_docs $qt_docdirs"
@@ -941,16 +949,16 @@ if [[ $have_qt != "yes" ]]; then
     AC_MSG_ERROR([>>>>> Workable...:	-*{ NO! }*-]);
   fi
 
-elif [[ $qt_major_version -lt 3 ]]; then
+elif [[ $qt_major_version -lt 4 ]]; then
 
   MBY=`echo -en "\[\e[0;1m-*{ \e[0;33;1m???\e[0;1m }*-\e[0;0m" &&
        echo "]]]]]" > /dev/null 2>&1`;
 
   if [[ -n "$MBY" ]]; then
-    AC_MSG_RESULT([>>>>> NOTE.......:	ShowEQ is designed for Qt 3.1.0+, please upgrade
+    AC_MSG_RESULT([>>>>> NOTE.......:	ShowEQ is designed for Qt 4.3.0+, please upgrade
 >>>>>> Workable..:	$MBY]);
   else
-    AC_MSG_RESULT([>>>>> NOTE.......:	ShowEQ is designed for Qt 3.1.0+, please upgrade
+    AC_MSG_RESULT([>>>>> NOTE.......:	ShowEQ is designed for Qt 4.3.0+, please upgrade
 >>>>>> Workable..:  -*{ ??? }*-]);
   fi
 
@@ -1005,14 +1013,14 @@ AC_SUBST(QT_INCLUDES)
 AC_SUBST(QT_LDFLAGS)
 AC_SUBST(QT_DOCS)
 
-LIB_QT='-lqt-mt $(LIBPNG) -lXext $(LIB_X11) $(X_PRE_LIBS)'
+LIB_QT='-lQtCore $(LIBPNG) -lXext $(LIB_X11) $(X_PRE_LIBS)'
 AC_SUBST(LIB_QT)
 
 ])
 
 AC_DEFUN([AC_PATH_QT],
 [
-AC_PATH_QT_1_3
+AC_PATH_QT_4
 ])
 
 AC_DEFUN([KDE_CHECK_FINAL],
@@ -2056,7 +2064,6 @@ AC_DEFUN([AM_KDE_WITH_NLS],
 # Search path for a program which passes the given test.
 # Ulrich Drepper <drepper@cygnus.com>, 1996.
 
-# serial 1
 # Stephan Kulow: I appended a _KDE against name conflicts
 
 dnl AM_PATH_PROG_WITH_TEST_KDE(VARIABLE, PROG-TO-CHECK-FOR,
@@ -2101,7 +2108,6 @@ AC_SUBST($1)dnl
 # Check whether LC_MESSAGES is available in <locale.h>.
 # Ulrich Drepper <drepper@cygnus.com>, 1995.
 
-# serial 1
 
 AC_DEFUN([AM_LC_MESSAGES],
   [if test $ac_cv_header_locale_h = yes; then
@@ -2116,7 +2122,6 @@ AC_DEFUN([AM_LC_MESSAGES],
 # Macro to add for using GNU gettext.
 # Ulrich Drepper <drepper@cygnus.com>, 1995.
 
-# serial 1
 # Stephan Kulow: I put a KDE in it to avoid name conflicts
 
 AC_DEFUN([AM_KDE_GNU_GETTEXT],

@@ -1,23 +1,36 @@
 /*
- * map.cpp
+ *  map.cpp
+ *  Portions Copyright 2001-2007 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2001-2009, 2012, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sourceforge.net/
- * 
- * Portions Copyright 2001-2007 Zaphod (dohpaz@users.sourceforge.net). 
- * 
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #define __STDC_LIMIT_MACROS
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #else
-#include <stdint.h>
+#include <cstdint>
 #endif
 
 
 #include "map.h"
-#include "ui_mapicondialog.h"
+#include "mapicondialog.h"
 #include "util.h"
 #include "main.h"
 #include "filtermgr.h"
@@ -28,33 +41,46 @@
 #include "datalocationmgr.h"
 #include "diagnosticmessages.h"
 
-#include <math.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <qapplication.h>
-#include <qpainter.h>
-#include <qpixmap.h>
-#include <qfont.h>
-#include <qfiledialog.h>
-#include <qevent.h>
-#include <qpushbutton.h>
-#include <qlayout.h>
-#include <qtoolbar.h>
-#include <qaccel.h>
-#include <qcolordialog.h>
-#include <qfontdialog.h>
-#include <qtimer.h>
-#include <qstrlist.h>
-#include <qimage.h>
+#include <QApplication>
+#include <QPainter>
+#include <QPixmap>
+#include <QFont>
+#include <QFileDialog>
+#include <QEvent>
+#include <QPushButton>
+#include <QLayout>
+#include <QShortcut>
+#include <QColorDialog>
+#include <QFontDialog>
+#include <QTimer>
+#include <QStringList>
+#include <QImage>
+#include <QImageWriter>
+#include <QMenu>
+#include <QWidgetAction>
 
 #if 1 // ZBTEMP: Until we setup a better way to enter location name/color
-#include <qinputdialog.h>
+#include <QInputDialog>
 #endif
+
+#include <QBoxLayout>
+#include <QPaintEvent>
+#include <QVBoxLayout>
+#include <QPolygon>
+#include <QFrame>
+#include <QResizeEvent>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QTextStream>
+#include <QMouseEvent>
 
 //----------------------------------------------------------------------
 // Macros
@@ -72,87 +98,93 @@ const int panAmmt = 8;
 //----------------------------------------------------------------------
 // CLineDlg
 CLineDlg::CLineDlg(QWidget *parent, QString name, MapMgr *mapMgr) 
-  : QDialog(parent, name, FALSE)
+  : QDialog(parent)
 {
+  setObjectName(name);
 #ifdef DEBUGMAP
-  debug ("CLineDlg()");
+  qDebug ("CLineDlg()");
 #endif /* DEBUGMAP */
-   
+
   QFont labelFont;
   labelFont.setBold(true);
 
   QBoxLayout *topLayout = new QVBoxLayout(this);
-  QBoxLayout *row2Layout = new QHBoxLayout(topLayout);
-  QBoxLayout *row1Layout = new QHBoxLayout(topLayout);
-  
+  QBoxLayout *row2Layout = new QHBoxLayout();
+  QBoxLayout *row1Layout = new QHBoxLayout();
+  topLayout->addLayout(row2Layout);
+  topLayout->addLayout(row1Layout);
+
   QLabel *colorLabel = new QLabel ("Color", this);
   colorLabel->setFont(labelFont);
   colorLabel->setFixedHeight(colorLabel->sizeHint().height());
   colorLabel->setFixedWidth(colorLabel->sizeHint().width()+10);
-  colorLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+  colorLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
   row1Layout->addWidget(colorLabel);
-  
-  m_LineColor = new QComboBox(FALSE, this, "LineColor");
-  m_LineColor->insertItem("gray");
-  m_LineColor->insertItem("darkBlue");
-  m_LineColor->insertItem("darkGreen");
-  m_LineColor->insertItem("darkCyan");
-  m_LineColor->insertItem("darkRed");
-  m_LineColor->insertItem("darkMagenta");
-  m_LineColor->insertItem("darkGray");
-  m_LineColor->insertItem("white");
-  m_LineColor->insertItem("blue");
-  m_LineColor->insertItem("green");
-  m_LineColor->insertItem("cyan");
-  m_LineColor->insertItem("red");
-  m_LineColor->insertItem("magenta");
-  m_LineColor->insertItem("yellow");
-  m_LineColor->insertItem("white");
-  
+
+  m_LineColor = new QComboBox(this);
+  m_LineColor->setEditable(false);
+  m_LineColor->setObjectName("LineColor");
+  m_LineColor->insertItem(m_LineColor->count(), "gray");
+  m_LineColor->insertItem(m_LineColor->count(), "darkBlue");
+  m_LineColor->insertItem(m_LineColor->count(), "darkGreen");
+  m_LineColor->insertItem(m_LineColor->count(), "darkCyan");
+  m_LineColor->insertItem(m_LineColor->count(), "darkRed");
+  m_LineColor->insertItem(m_LineColor->count(), "darkMagenta");
+  m_LineColor->insertItem(m_LineColor->count(), "darkGray");
+  m_LineColor->insertItem(m_LineColor->count(), "white");
+  m_LineColor->insertItem(m_LineColor->count(), "blue");
+  m_LineColor->insertItem(m_LineColor->count(), "green");
+  m_LineColor->insertItem(m_LineColor->count(), "cyan");
+  m_LineColor->insertItem(m_LineColor->count(), "red");
+  m_LineColor->insertItem(m_LineColor->count(), "magenta");
+  m_LineColor->insertItem(m_LineColor->count(), "yellow");
+  m_LineColor->insertItem(m_LineColor->count(), "white");
+
   m_LineColor->setFont(labelFont);
   m_LineColor->setFixedHeight(m_LineColor->sizeHint().height());
   m_LineColor->setFixedWidth(m_LineColor->sizeHint().width());
-  row1Layout->addWidget(m_LineColor, 0, AlignLeft);
-  
+  row1Layout->addWidget(m_LineColor, 0, Qt::AlignLeft);
+
   m_ColorPreview = new QFrame(this);
   m_ColorPreview->setFrameStyle(QFrame::Box|QFrame::Raised);
   m_ColorPreview->setFixedWidth(50);
   m_ColorPreview->setFixedHeight(m_LineColor->sizeHint().height());
-  m_ColorPreview->setPalette(QPalette(QColor(gray)));
+  m_ColorPreview->setPalette(QPalette(QColor(Qt::gray)));
   row1Layout->addWidget(m_ColorPreview);
-  
+
   // Hook on when a color changes
   connect(m_LineColor, SIGNAL(activated(const QString &)), mapMgr, SLOT(setLineColor(const QString &)));
   connect(m_LineColor, SIGNAL(activated(const QString &)), SLOT(changeColor(const QString &)));
-  
+
   QLabel *nameLabel = new QLabel ("Name", this);
   nameLabel->setFont(labelFont);
   nameLabel->setFixedHeight(nameLabel->sizeHint().height());
   nameLabel->setFixedWidth(nameLabel->sizeHint().width()+5);
-  nameLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+  nameLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
   row2Layout->addWidget(nameLabel);
 
-  m_LineName  = new QLineEdit(this, "LineName");
+  m_LineName  = new QLineEdit(this);
+  m_LineName->setObjectName("LineName");
   m_LineName->setFont(labelFont);
   m_LineName->setFixedHeight(m_LineName->sizeHint().height());
   m_LineName->setFixedWidth(150);
   row2Layout->addWidget(m_LineName);
-  
+
   // Hook on when the line name changes
   connect(m_LineName, SIGNAL(textChanged(const QString &)), mapMgr, SLOT(setLineName(const QString &)));
-  
+
   QPushButton *ok = new QPushButton("OK", this);
   ok->setFixedWidth(30);
   ok->setFixedHeight(30);
-  topLayout->addWidget(ok, 0, AlignCenter);
-  
+  topLayout->addWidget(ok, 0, Qt::AlignCenter);
+
   // Hook on pressing the OK button
   connect(ok, SIGNAL(clicked()), SLOT(accept()));
-  
+
   for (int i=0; i < m_LineColor->count(); i++)
   {
-    if (m_LineColor->text(i) == mapMgr->curLineColor())
-      m_LineColor->setCurrentItem(i);
+    if (m_LineColor->itemText(i) == mapMgr->curLineColor())
+      m_LineColor->setCurrentIndex(i);
   }
 
   m_LineName->setText(mapMgr->curLineName());
@@ -161,7 +193,7 @@ CLineDlg::CLineDlg(QWidget *parent, QString name, MapMgr *mapMgr)
 void CLineDlg::changeColor(const QString &color)
 {
 #ifdef DEBUGMAP
-  debug ("changeColor()");
+  qDebug ("changeColor()");
 #endif /* DEBUGMAP */
   m_ColorPreview->setPalette(QPalette(QColor(color)));
 }
@@ -169,20 +201,20 @@ void CLineDlg::changeColor(const QString &color)
 //----------------------------------------------------------------------
 // MapLabel
 MapLabel::MapLabel( Map* map )
-  : QLabel(map, "mapLabel", 
-       WStyle_Customize + WStyle_NoBorderEx + WStyle_Tool + WType_TopLevel
-       + WStyle_Dialog + WX11BypassWM)
+  : QLabel(map,
+       Qt::FramelessWindowHint | Qt::Tool | Qt::Window
+       | Qt::Dialog | Qt::X11BypassWindowManagerHint)
 {
+  this->setObjectName("mapLabel");
   m_Map = map;
   setMargin( 1 );
   setIndent( 0 );
-  setAutoMask( false );
   setFrameStyle( QFrame::Plain | QFrame::Box );
   setLineWidth( 1 );
-  setAlignment( AlignLeft | AlignTop );
-  polish();
+  setAlignment( Qt::AlignLeft | Qt::AlignTop );
+  ensurePolished();
   setText( "" );
-  adjustSize();        
+  adjustSize();
 }
 
 void MapLabel::popup(const QPoint& pos)
@@ -193,7 +225,7 @@ void MapLabel::popup(const QPoint& pos)
   // borrowed from QPopupMenu::popup()
 
   // get info about the widget and its environment
-  QWidget *desktop = QApplication::desktop();
+  QWidget *desktop = (QWidget*)QApplication::desktop();
   int sw = desktop->width();                  // screen width
   int sh = desktop->height();                 // screen height
   int sx = desktop->x();                      // screen pos
@@ -229,12 +261,13 @@ void MapLabel::mousePressEvent(QMouseEvent*)
 MapMgr::MapMgr(const DataLocationMgr* dataLocMgr, 
            SpawnShell* spawnShell, Player* player, ZoneMgr* zoneMgr,
            QWidget* dialogParent, QObject* parent, const char* name)
-  : QObject(parent, name),
+  : QObject(parent),
     m_dataLocMgr(dataLocMgr),
     m_spawnShell(spawnShell),
     m_player(player),
     m_dialogParent(dialogParent)
 {
+  setObjectName(name);
   m_dlgLineProps = NULL;
   
   // get the preferences
@@ -273,16 +306,16 @@ MapMgr::~MapMgr()
 {
 }
 
-uint16_t MapMgr::spawnAggroRange(const Spawn* spawn) 
-{ 
-  uint16_t* range = m_spawnAggroRange.find(spawn->id()); 
-  return (!range) ? 0 : *range;
+uint16_t MapMgr::spawnAggroRange(const Spawn* spawn)
+{
+  uint16_t range = m_spawnAggroRange.value(spawn->id(), 0);
+  return range;
 }
 
 void MapMgr::zoneBegin(const QString& shortZoneName)
 {
 #ifdef DEBUGMAP
-  debug ("zoneBegin(%s)", 
+  qDebug ("zoneBegin(%s)", 
      shortZoneName);
 #endif /* DEBUGMAP */
   
@@ -299,7 +332,7 @@ void MapMgr::zoneBegin(const QString& shortZoneName)
 void MapMgr::zoneChanged(const QString& shortZoneName)
 {
 #ifdef DEBUGMAP
-  debug ("zoneChanged(%s)", 
+  qDebug ("zoneChanged(%s)", 
      (const char*)shortZoneName);
 #endif /* DEBUGMAP */
 
@@ -316,8 +349,8 @@ void MapMgr::zoneChanged(const QString& shortZoneName)
 void MapMgr::zoneEnd(const QString& shortZoneName, const QString& longZoneName)
 {
 #ifdef DEBUGMAP
-  debug ("zoneEnd(%s, %s)", 
-     (const char*)longZoneName, (const char*)shortZoneName);
+  qDebug ("zoneEnd(%s, %s)",
+     longZoneName.toAscii().data(), shortZoneName.toAscii().data());
 #endif /* DEBUGMAP */
 
   // atttempt to load the new map
@@ -343,39 +376,41 @@ void MapMgr::loadZoneMap(const QString& shortZoneName)
   if (fileInfo.exists())
   {
     // load the map if it's not already loaded
-    if (fileInfo.absFilePath() != m_mapData.fileName())
-      loadFileMap(fileInfo.absFilePath());
+    if (fileInfo.absoluteFilePath() != m_mapData.fileName())
+      loadFileMap(fileInfo.absoluteFilePath());
   }
   else 
   {
-    seqInfo("No Map found for zone '%s'!", (const char*)shortZoneName);
+    seqInfo("No Map found for zone '%s'!", shortZoneName.toAscii().data());
     seqInfo("    Checked for all variants of '%s.map', '%s.txt', and '%s_1.txt'",
-        (const char*)shortZoneName, 
-        (const char*)shortZoneName, (const char*)shortZoneName);
+        shortZoneName.toAscii().data(),
+        shortZoneName.toAscii().data(),
+        shortZoneName.toAscii().data());
     seqInfo("    in directories '%s' and '%s'!",
-        (const char*)m_dataLocMgr->userDataDir("maps").absPath(),
-        (const char*)m_dataLocMgr->pkgDataDir("maps").absPath());
+        m_dataLocMgr->userDataDir("maps").absolutePath().toAscii().data(),
+        m_dataLocMgr->pkgDataDir("maps").absolutePath().toAscii().data());
   }
 }
 
 void MapMgr::loadMap ()
 {
 #ifdef DEBUGMAP
-  debug ("loadMap()");
+  qDebug ("loadMap()");
 #endif /* DEBUGMAP */
 
   QString fileName = m_mapData.fileName();
 
   if (fileName.isEmpty())
-    fileName = m_dataLocMgr->findExistingFile("maps", fileName).absFilePath();
+    fileName = m_dataLocMgr->findExistingFile("maps", fileName).absoluteFilePath();
 
   // create a file dialog the defaults to the currently open map
-  fileName = QFileDialog::getOpenFileName(fileName, "*.map;*.txt");
+  fileName = QFileDialog::getOpenFileName(m_dialogParent, "Load Map", fileName,
+          "All maps (*.map *.txt);;SEQ maps (*.map);;EQ maps (*.txt)");
 
   if (fileName.isEmpty ())
     return;
 
-  seqInfo("Attempting to load map: %s", (const char*)fileName);
+  seqInfo("Attempting to load map: %s", fileName.toAscii().data());
 
   // load the map
   loadFileMap(fileName, false, true);
@@ -384,21 +419,22 @@ void MapMgr::loadMap ()
 void MapMgr::importMap ()
 {
 #ifdef DEBUGMAP
-  debug ("importMap()");
+  qDebug ("importMap()");
 #endif /* DEBUGMAP */
 
   QString fileName = m_mapData.fileName();
 
   if (fileName.isEmpty())
-    fileName = m_dataLocMgr->findExistingFile("maps", fileName).absFilePath();
+    fileName = m_dataLocMgr->findExistingFile("maps", fileName).absoluteFilePath();
 
   // create a file dialog the defaults to the currently open map
-  fileName = QFileDialog::getOpenFileName(fileName, "*.map;*.txt");
+  fileName = QFileDialog::getOpenFileName(m_dialogParent, "Import Map", fileName,
+          "All maps (*.map *.txt);;SEQ maps (*.map);;EQ maps (*.txt)");
 
   if (fileName.isEmpty ())
     return;
 
-  seqInfo("Attempting to import map: %s", (const char*)fileName);
+  seqInfo("Attempting to import map: %s", fileName.toAscii().data());
 
   // load the map
   loadFileMap(fileName, true, true);
@@ -408,7 +444,7 @@ void MapMgr::importMap ()
 void MapMgr::loadFileMap (const QString& fileName, bool import, bool force) 
 {
 #ifdef DEBUGMAP
-  debug ("loadFileMap()");
+  qDebug ("loadFileMap()");
 #endif /* DEBUGMAP */
 
   // if not a forced load, and the same map is already loaded, do nothing
@@ -429,24 +465,23 @@ void MapMgr::loadFileMap (const QString& fileName, bool import, bool force)
 
   // iterate over the exixsting spawns to adjust the map size and find 
   // ones with aggro information
-  for (; it.current(); ++it)
+  while (it.hasNext())
   {
+    it.next();
     // get the item from the list
-    item = it.current();
+    item = it.value();
+    if (!item)
+        break;
 
     // Adjust X and Y for spawns on map
     m_mapData.quickCheckPos(item->x(), item->y());
-    
+
     if (m_mapData.isAggro(item->transformedName(), &range))
     {
       // create a range to insert into the dictionary
-      uint16_t* newrange = new uint16_t;
-      
-      // save the range value
-      *newrange = range;
-      
+
       // insert the spawns ID and aggro range into the dictionary.
-      m_spawnAggroRange.insert(item->id(), newrange);
+      m_spawnAggroRange.insert(item->id(), range);
     }
   }
 
@@ -462,27 +497,27 @@ void MapMgr::loadFileMap (const QString& fileName, bool import, bool force)
 void MapMgr::saveMap ()
 {
 #ifdef DEBUGMAP
-  debug ("saveMap()");
+  qDebug ("saveMap()");
 #endif /* DEBUGMAP */
   QFileInfo fileInfo(m_mapData.fileName());
 
   fileInfo = m_dataLocMgr->findWriteFile("maps", fileInfo.baseName() + ".map", 
                      false);
 
-  m_mapData.saveMap(fileInfo.absFilePath());
+  m_mapData.saveMap(fileInfo.absoluteFilePath());
 }
 
 void MapMgr::saveSOEMap ()
 {
 #ifdef DEBUGMAP
-  debug ("saveMap()");
+  qDebug ("saveMap()");
 #endif /* DEBUGMAP */
   QFileInfo fileInfo(m_mapData.fileName());
 
   fileInfo = m_dataLocMgr->findWriteFile("maps", fileInfo.baseName() + "_2.txt", 
                      false);
 
-  m_mapData.saveSOEMap(fileInfo.absFilePath());
+  m_mapData.saveSOEMap(fileInfo.absoluteFilePath());
 }
 
 void MapMgr::addItem(const Item* item)
@@ -496,14 +531,8 @@ void MapMgr::addItem(const Item* item)
   uint16_t range;
   if (m_mapData.isAggro(item->transformedName(), &range))
   {
-    // create a range to insert into the dictionary
-    uint16_t* newrange = new uint16_t;
-    
-    // save the range value
-    *newrange = range;
-    
     // insert the spawns ID and aggro range into the dictionary.
-    m_spawnAggroRange.insert(item->id(), newrange);
+    m_spawnAggroRange.insert(item->id(), range);
   }
 
   // signal that the map has changed
@@ -563,10 +592,10 @@ void MapMgr::addLocation(QWidget* parent, const MapPoint& point)
 {
   // ZBTEMP: Should create a real dialog to enter location info
   bool ok;
-  QString name = QInputDialog::getText("Location Name",
+  QString name = QInputDialog::getText(parent, "Location Name",
                        "Please enter a location name",
                        QLineEdit::Normal,
-                       QString::null, &ok, parent);
+                       QString::null, &ok);
 
   // if the user clicked ok, and actually gave a name, add it
   if (ok && !name.isEmpty())
@@ -582,7 +611,7 @@ void MapMgr::addLocation(QWidget* parent, const MapPoint& point)
 void MapMgr::startLine(const MapPoint& point)
 {
 #ifdef DEBUGMAP
-  debug ("startLine()");
+  qDebug ("startLine()");
 #endif /* DEBUGMAP */
   // start the line
   m_mapData.startLine(m_curLineName, m_curLineColor, point);
@@ -594,7 +623,7 @@ void MapMgr::startLine(const MapPoint& point)
 void MapMgr::addLinePoint(const MapPoint& point) 
 {
 #ifdef DEBUGMAP
-  debug ("addLinePoint()");
+  qDebug ("addLinePoint()");
 #endif /* DEBUGMAP */
   // add a line point
   m_mapData.addLinePoint(point);
@@ -606,7 +635,7 @@ void MapMgr::addLinePoint(const MapPoint& point)
 void MapMgr::delLinePoint(void)
 {
 #ifdef DEBUGMAP
-  debug ("delLinePoint()");
+  qDebug ("delLinePoint()");
 #endif /* DEBUGMAP */
   m_mapData.delLinePoint();
 
@@ -702,243 +731,427 @@ void MapMgr::dumpInfo(QTextStream& out)
 //----------------------------------------------------------------------
 // MapMenu
 MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
-  : QPopupMenu(parent, name),
+  : QMenu(parent),
     m_map(map),
     m_mapIcons(map->mapIcons())
 {
+  this->setObjectName(name);
   QString preferenceName = m_map->preferenceName();
 
   // set the caption to be the preference name of the map
-  setCaption(preferenceName);
-  setCheckable(true);
+  setWindowTitle(preferenceName);
 
-  QPopupMenu* subMenu;
-  QPopupMenu* subSubMenu;
+  QMenu* subMenu;
+  QMenu* subSubMenu;
 
-  subMenu = new QPopupMenu;
-  subMenu->setCheckable(true);
-  m_id_followMenu_Player = subMenu->insertItem("Player");
-  subMenu->setItemParameter(m_id_followMenu_Player, tFollowPlayer);
-  m_id_followMenu_Spawn = subMenu->insertItem("Spawn");
-  subMenu->setItemParameter(m_id_followMenu_Spawn, tFollowSpawn);
-  m_id_followMenu_None = subMenu->insertItem("None");
-  subMenu->setItemParameter(m_id_followMenu_None, tFollowNone);
-  connect(subMenu, SIGNAL(activated(int)),
-      this, SLOT(select_follow(int)));
-  m_id_followMenu = insertItem("Follow", subMenu);
+  subMenu = new QMenu("Follow");
+  m_action_followMenu_Player = subMenu->addAction("Player");
+  m_action_followMenu_Player->setCheckable(true);
+  m_action_followMenu_Player->setData(tFollowPlayer);
 
-  subMenu = new QPopupMenu(m_map);
-  int key; 
+  m_action_followMenu_Spawn = subMenu->addAction("Spawn");
+  m_action_followMenu_Spawn->setCheckable(true);
+  m_action_followMenu_Spawn->setData(tFollowSpawn);
+
+  m_action_followMenu_None = subMenu->addAction("None");
+  m_action_followMenu_None->setCheckable(true);
+  m_action_followMenu_None->setData(tFollowNone);
+
+  connect(subMenu, SIGNAL(triggered(QAction*)), this,
+          SLOT(select_follow(QAction*)));
+  addMenu(subMenu);
+
+  subMenu = new QMenu("Edit", m_map);
+  QKeySequence key;
+  QShortcut *tmpShortcut = nullptr;
+
+  /* Since the map menus also get inserted into Window menu, simply adding
+   * a shortcut to the QAction gives "ambiguous shortcut" errors and causes
+   * the shortcuts not to work due to both menus trying to handle the shortcut.
+   *
+   * So as a hacky work-around, we don't define the shortcut on the QAction,
+   * but we do change the QAction's text to also show the shortcut, since
+   * otherwise it's not shown.  Then we define the shortcut and attach it to
+   * the map itself.
+   *
+   * This allows the map menu keyboard shortcuts to work if there is only one
+   * map window open.
+   *
+   * If there are multiple maps open, then the menu entries will continue to
+   * work, but the keyboard shortcuts will not, since Qt doesn't know which
+   * window should handle the action.  It's probably possible to deal with this
+   * by detecting which map has focus and giving it preference, but this
+   * behavior doesn't appear to be the default.  FIXME
+   *
+   * - cn187
+   */
 
   key = pSEQPrefs->getPrefKey("AddLocationKey", preferenceName, "Ctrl+O");
-  m_id_addLocation = subMenu->insertItem("Add Location...",
-                     m_map, SLOT(addLocation()), key);
+  m_action_addLocation = subMenu->addAction(
+          QString("Add Location...\t") + key.toString(), m_map, SLOT(addLocation()));
+  tmpShortcut = new QShortcut(key, m_map, SLOT(addLocation()));
+
   key = pSEQPrefs->getPrefKey("StartLineKey", preferenceName, "Ctrl+L");
-  m_id_startLine = subMenu->insertItem("Start Line",
-                       m_map, SLOT(startLine()), key);
+  m_action_startLine = subMenu->addAction(
+          QString("Start Line\t") + key.toString(), m_map, SLOT(startLine()));
+  tmpShortcut = new QShortcut(key, m_map, SLOT(startLine()));
+
   key = pSEQPrefs->getPrefKey("AddLinePointKey", preferenceName, "Ctrl+P");
-  m_id_addLinePoint = subMenu->insertItem("Add Line Point",
-                      m_map, SLOT(addLinePoint()), key);
+  m_action_addLinePoint = subMenu->addAction(
+          QString("Add Line Point\t") + key.toString(), m_map, SLOT(addLinePoint()));
+  tmpShortcut = new QShortcut(key, m_map, SLOT(addLinePoint()));
+
   key = pSEQPrefs->getPrefKey("DelLinePointKey", preferenceName, "Ctrl+D");
-  m_id_delLinePoint = subMenu->insertItem("Delete Line Point",
-                      m_map, SLOT(delLinePoint()), key);
-  m_id_showLineDlg = subMenu->insertItem("Show Line Dialog...",
-                     m_map, SLOT(showLineDlg()));
-  subSubMenu = new QPopupMenu(m_map);
-  int x;
-  x = subSubMenu->insertItem("Down 8", m_map, SLOT(scaleDownZ(int)));
-  subSubMenu->setItemParameter(x, 8);
-  x = subSubMenu->insertItem("Down 10", m_map, SLOT(scaleDownZ(int)));
-  subSubMenu->setItemParameter(x, 10);
-  x = subSubMenu->insertItem("Up 8", m_map, SLOT(scaleUpZ(int)));
-  subSubMenu->setItemParameter(x, 8);
-  x = subSubMenu->insertItem("Up 10", m_map, SLOT(scaleUpZ(int)));
-  subSubMenu->setItemParameter(x, 10);
+  m_action_delLinePoint = subMenu->addAction(
+          QString("Delete Line Point\t") + key.toString(), m_map, SLOT(delLinePoint()));
+  tmpShortcut = new QShortcut(key, m_map, SLOT(delLinePoint()));
 
-  subMenu->insertItem("Scale Map Z Coordinates", subSubMenu);
-  m_id_editMap = insertItem("Edit", subMenu);
+  m_action_showLineDlg = subMenu->addAction("Show Line Dialog...", m_map,
+          SLOT(showLineDlg()));
 
-  subMenu = new QPopupMenu(m_map);
-  subMenu->setCheckable(true);
-  m_id_mapLineStyle_Normal = subMenu->insertItem("Normal");
-  subMenu->setItemParameter(m_id_mapLineStyle_Normal, tMap_Normal);
+  subSubMenu = new QMenu("Scale Map Z Coordinates", m_map);
+  QAction* tmpAction;
+
+  QActionGroup* zDownGroup= new QActionGroup(subSubMenu);
+
+  tmpAction = subSubMenu->addAction("Down 8");
+  tmpAction->setData(8);
+  zDownGroup->addAction(tmpAction);
+
+  tmpAction = subSubMenu->addAction("Down 10");
+  tmpAction->setData(10);
+  zDownGroup->addAction(tmpAction);
+
+  connect(zDownGroup, SIGNAL(triggered(QAction*)), m_map, SLOT(scaleDownZ(QAction*)));
+
+  QActionGroup* zUpGroup= new QActionGroup(subSubMenu);
+
+  tmpAction = subSubMenu->addAction("Up 8");
+  tmpAction->setData(8);
+  zUpGroup->addAction(tmpAction);
+
+  tmpAction = subSubMenu->addAction("Up 10");
+  tmpAction->setData(10);
+  zUpGroup->addAction(tmpAction);
+
+  connect(zUpGroup, SIGNAL(triggered(QAction*)), m_map, SLOT(scaleUpZ(QAction*)));
+
+  subMenu->addMenu(subSubMenu);
+  addMenu(subMenu);
+
+  subMenu = new QMenu("Map Line Display", m_map);
+
+  /* NOTE: see the comments above for the Edit menu for an explanation of why
+   * the shortcuts are like this */
+
   key = pSEQPrefs->getPrefKey("MapLineNormalKey", preferenceName, "Alt+1");
-  subMenu->setAccel(key, m_id_mapLineStyle_Normal);
-  m_id_mapLineStyle_DepthFiltered = subMenu->insertItem("Depth Filtered");
-  subMenu->setItemParameter(m_id_mapLineStyle_DepthFiltered, tMap_DepthFiltered);
+  m_action_mapLineStyle_Normal = subMenu->addAction(QString("Normal\t") + key.toString());
+  m_action_mapLineStyle_Normal->setCheckable(true);
+  m_action_mapLineStyle_Normal->setData(tMap_Normal);
+  tmpShortcut = new QShortcut(key, m_map);
+  connect(tmpShortcut, SIGNAL(activated()), m_action_mapLineStyle_Normal, SLOT(trigger()));
+
   key = pSEQPrefs->getPrefKey("MapLineDepthFilteredKey", preferenceName, "Alt+2");
-  subMenu->setAccel(key, m_id_mapLineStyle_DepthFiltered);
-  m_id_mapLineStyle_FadedFloors = subMenu->insertItem("Faded Floors");
-  subMenu->setItemParameter(m_id_mapLineStyle_FadedFloors, tMap_FadedFloors);
+  m_action_mapLineStyle_DepthFiltered = subMenu->addAction(
+          QString("Depth Filtered\t") + key.toString());
+  m_action_mapLineStyle_DepthFiltered->setCheckable(true);
+  m_action_mapLineStyle_DepthFiltered->setData(tMap_DepthFiltered);
+  tmpShortcut = new QShortcut(key, m_map);
+  connect(tmpShortcut, SIGNAL(activated()), m_action_mapLineStyle_DepthFiltered, SLOT(trigger()));
+
   key = pSEQPrefs->getPrefKey("MapLineFadedFloorsKey", preferenceName, "Alt+3");
-  subMenu->setAccel(key, m_id_mapLineStyle_FadedFloors);
-  connect(subMenu, SIGNAL(activated(int)),
-      this, SLOT(select_mapLine(int)));
-  m_id_mapLineStyle = insertItem("Map Line Display", subMenu);
+  m_action_mapLineStyle_FadedFloors = subMenu->addAction(
+          QString("Faded Floors\t") + key.toString());
+  m_action_mapLineStyle_FadedFloors->setCheckable(true);
+  m_action_mapLineStyle_FadedFloors->setData(tMap_FadedFloors);
+  tmpShortcut = new QShortcut(key, m_map);
+  connect(tmpShortcut, SIGNAL(activated()), m_action_mapLineStyle_FadedFloors, SLOT(trigger()));
 
-  m_id_spawnDepthFilter = insertItem("Spawn Depth Filter", 
-                     this, SLOT(toggle_spawnDepthFilter(int)));
+  connect(subMenu, SIGNAL(triggered(QAction*)), this,
+          SLOT(select_mapLine(QAction*)));
+  addMenu(subMenu);
+
   key = pSEQPrefs->getPrefKey("SpawnDepthFilteredKey", preferenceName, "Alt+5");
-  setAccel(key, m_id_spawnDepthFilter);
+  m_action_spawnDepthFilter = addAction(QString("Spawn Depth Filter\t") + key.toString(),
+          this, SLOT(toggle_spawnDepthFilter()));
+  m_action_spawnDepthFilter->setCheckable(true);
+  tmpShortcut = new QShortcut(key, m_map);
+  connect(tmpShortcut, SIGNAL(activated()), m_action_spawnDepthFilter, SLOT(trigger()));
 
-  subMenu = new QPopupMenu(m_map);
-  subMenu->setCheckable(true);
-  
-  m_id_tooltip = subMenu->insertItem("Tooltips", this, SLOT(toggle_tooltip(int)));;
-  m_id_filtered = subMenu->insertItem("Filtered", this, SLOT(toggle_filtered(int)));
-  m_id_map = subMenu->insertItem("Map Lines", this, SLOT(toggle_map(int)));
-  m_id_velocity = subMenu->insertItem("Velocity Lines",    this, SLOT(toggle_velocity(int)));
-  m_id_animate = subMenu->insertItem("Animate Spawns", this, SLOT(toggle_animate(int)));
-  m_id_player = subMenu->insertItem("Player", this, SLOT(toggle_player(int)));
-  m_id_playerBackground = subMenu->insertItem("Player Background", this, SLOT(toggle_playerBackground(int)));
-  m_id_playerView = subMenu->insertItem("Player View", this, SLOT(toggle_playerView(int)));
-  m_id_gridLines = subMenu->insertItem("Grid Lines", this, SLOT(toggle_gridLines(int)));;
-  m_id_gridTicks = subMenu->insertItem("Grid Ticks", this, SLOT(toggle_gridTicks(int)));
-  m_id_locations = subMenu->insertItem("Locations", this, SLOT(toggle_locations(int)));
-  m_id_spawns = subMenu->insertItem("Spawns", this, SLOT(toggle_spawns(int)));
-  m_id_unknownSpawns = subMenu->insertItem("Unknown Spawns", 
-                       this, SLOT(toggle_unknownSpawns(int)));
-  m_id_spawnPoints = subMenu->insertItem("Spawn Points", this, SLOT( toggle_spawnPnts(int) ));
-  m_id_drops = subMenu->insertItem("Drops", this, SLOT(toggle_drops(int)));
-  m_id_doors = subMenu->insertItem("Doors", this, SLOT(toggle_doors(int)));
-  m_id_spawnNames = subMenu->insertItem("Spawn Names", this, SLOT(toggle_spawnNames(int)));
-  m_id_highlightConsideredSpawns =
-    subMenu->insertItem("Highlight Considered Spawns", this, SLOT(toggle_highlightConsideredSpawns(int)));
-  m_id_walkPath =
-    subMenu->insertItem("Selections Walk Path", this, SLOT(toggle_walkPath(int)));
-  m_id_npcWalkPaths =
-    subMenu->insertItem("NPC Walk Paths", this, SLOT(toggle_npcWalkPaths(int)));
-  m_id_mapImage =
-    subMenu->insertItem("Map Image", this, SLOT(toggle_mapImage(int)));
-  m_id_pvp = 
-    subMenu->insertItem("PvP", this, SLOT(toggle_pvp(int)));
-  m_id_deityPvP = 
-    subMenu->insertItem("Deity PvP", this, SLOT(toggle_deityPvP(int)));
-  m_id_racePvP = 
-    subMenu->insertItem("Race PvP", this, SLOT(toggle_racePvP(int)));
-  m_id_zoneSafePoint = 
-    subMenu->insertItem("Zone Safe Point", this, SLOT(toggle_zoneSafePoint(int)));
-  m_id_instanceLocation =
-    subMenu->insertItem("Instance Location Marker", this, SLOT(toggle_instanceLocationMarker(int)));
+  subMenu = new QMenu("Show", m_map);
+
+  m_action_tooltip = subMenu->addAction("Tooltips", this, SLOT(toggle_tooltip()));;
+  m_action_tooltip->setCheckable(true);
+
+  m_action_filtered = subMenu->addAction("Filtered", this, SLOT(toggle_filtered()));
+  m_action_filtered->setCheckable(true);
+
+  m_action_map = subMenu->addAction("Map Lines", this, SLOT(toggle_map()));
+  m_action_map->setCheckable(true);
+
+  m_action_velocity = subMenu->addAction("Velocity Lines", this,
+          SLOT(toggle_velocity()));
+  m_action_velocity->setCheckable(true);
+
+  m_action_animate = subMenu->addAction("Animate Spawns", this,
+          SLOT(toggle_animate()));
+  m_action_animate->setCheckable(true);
+
+  m_action_player = subMenu->addAction("Player", this, SLOT(toggle_player()));
+  m_action_player->setCheckable(true);
+
+  m_action_playerBackground = subMenu->addAction("Player Background", this,
+          SLOT(toggle_playerBackground()));
+  m_action_playerBackground->setCheckable(true);
+
+  m_action_playerView = subMenu->addAction("Player View", this, SLOT(toggle_playerView()));
+  m_action_playerView->setCheckable(true);
+
+  m_action_gridLines = subMenu->addAction("Grid Lines", this, SLOT(toggle_gridLines()));;
+  m_action_gridLines->setCheckable(true);
+
+  m_action_gridTicks = subMenu->addAction("Grid Ticks", this, SLOT(toggle_gridTicks()));
+  m_action_gridTicks->setCheckable(true);
+
+  m_action_locations = subMenu->addAction("Locations", this, SLOT(toggle_locations()));
+  m_action_locations->setCheckable(true);
+
+  m_action_spawns = subMenu->addAction("Spawns", this, SLOT(toggle_spawns()));
+  m_action_spawns->setCheckable(true);
+
+  m_action_unknownSpawns = subMenu->addAction("Unknown Spawns", this,
+          SLOT(toggle_unknownSpawns()));
+  m_action_unknownSpawns->setCheckable(true);
+
+  m_action_spawnPoints = subMenu->addAction("Spawn Points", this,
+          SLOT(toggle_spawnPnts()));
+  m_action_spawnPoints->setCheckable(true);
+
+  m_action_drops = subMenu->addAction("Drops", this, SLOT(toggle_drops()));
+  m_action_drops->setCheckable(true);
+
+  m_action_doors = subMenu->addAction("Doors", this, SLOT(toggle_doors()));
+  m_action_doors->setCheckable(true);
+
+  m_action_spawnNames = subMenu->addAction("Spawn Names", this,
+          SLOT(toggle_spawnNames()));
+  m_action_spawnNames->setCheckable(true);
+
+  m_action_highlightConsideredSpawns = subMenu->addAction("Highlight Considered Spawns",
+          this, SLOT(toggle_highlightConsideredSpawns()));
+  m_action_highlightConsideredSpawns->setCheckable(true);
+
+  m_action_walkPath = subMenu->addAction("Selections Walk Path", this,
+          SLOT(toggle_walkPath()));
+  m_action_walkPath->setCheckable(true);
+
+  m_action_npcWalkPaths = subMenu->addAction("NPC Walk Paths", this,
+          SLOT(toggle_npcWalkPaths()));
+  m_action_npcWalkPaths->setCheckable(true);
+
+  m_action_mapImage = subMenu->addAction("Map Image", this,
+          SLOT(toggle_mapImage()));
+  m_action_mapImage->setCheckable(true);
+
+  m_action_pvp = subMenu->addAction("PvP", this, SLOT(toggle_pvp()));
+  m_action_pvp->setCheckable(true);
+
+  m_action_deityPvP = subMenu->addAction("Deity PvP", this,
+          SLOT(toggle_deityPvP()));
+  m_action_deityPvP->setCheckable(true);
+
+  m_action_racePvP = subMenu->addAction("Race PvP", this, SLOT(toggle_racePvP()));
+  m_action_racePvP->setCheckable(true);
+
+  m_action_zoneSafePoint = subMenu->addAction("Zone Safe Point", this,
+          SLOT(toggle_zoneSafePoint()));
+  m_action_zoneSafePoint->setCheckable(true);
+
+  m_action_instanceLocation = subMenu->addAction("Instance Location Marker",
+          this, SLOT(toggle_instanceLocationMarker()));
+  m_action_instanceLocation->setCheckable(true);
+
 #ifdef DEBUG
-  m_id_debugInfo = subMenu->insertItem("Debug Info", this, SLOT(toggle_debugInfo(int)));
+  m_action_debugInfo = subMenu->addAction("Debug Info", this,
+          SLOT(toggle_debugInfo()));
+  m_action_debugInfo->setCheckable(true);
 #endif
-  m_id_showSub = insertItem("Show", subMenu);
-  
 
-  subMenu = new QPopupMenu;
+  addMenu(subMenu);
+
+
+  /*
+  subMenu = new QMenu;
   subMenu->setCheckable(true);
   m_id_mapOptimization_Memory = subMenu->insertItem("Memory");
   subMenu->setItemParameter(m_id_mapOptimization_Memory, tMap_MemoryOptim); 
- m_id_mapOptimization_Normal = subMenu->insertItem("Normal");
+  m_id_mapOptimization_Normal = subMenu->insertItem("Normal");
   subMenu->setItemParameter(m_id_mapOptimization_Normal, tMap_NormalOptim);
   m_id_mapOptimization_Best = subMenu->insertItem("Speed");
   subMenu->setItemParameter(m_id_mapOptimization_Best, tMap_BestOptim);
   connect(subMenu, SIGNAL(activated(int)),
       this, SLOT(select_mapOptimization(int)));
   m_id_mapOptimization = insertItem("Map Optimization", subMenu);
+  */
 
-  m_id_gridTickColor = insertItem("Grid Tick Color...",
-                  this, SLOT(select_gridTickColor(int)));
-  m_id_gridLineColor = insertItem("Grid Line Color...",
-                  this, SLOT(select_gridLineColor(int)));
-  m_id_backgroundColor = insertItem("Background Color...",
-                    this, SLOT(select_backgroundColor(int)));
-  m_id_font = insertItem("Font...",
-             this, SLOT(select_font(int)));
-  insertItem("Edit Map Icons...",
-         m_map, SLOT(showMapIconDialog()));
+  m_action_gridTickColor = addAction("Grid Tick Color...", this,
+          SLOT(select_gridTickColor()));
 
-  subMenu = new QPopupMenu;
-  m_drawSizeSpinBox = new QSpinBox(1, 6, 1, subMenu);
+  m_action_gridLineColor = addAction("Grid Line Color...", this,
+          SLOT(select_gridLineColor()));
+
+  m_action_backgroundColor = addAction("Background Color...", this,
+          SLOT(select_backgroundColor()));
+
+  m_action_font = addAction("Font...", this, SLOT(select_font()));
+
+  addAction("Edit Map Icons...", m_map, SLOT(showMapIconDialog()));
+
+  subMenu = new QMenu("Draw Size");
+  m_drawSizeSpinBox = new QSpinBox(subMenu);
+  m_drawSizeSpinBox->setMinimum(1);
+  m_drawSizeSpinBox->setMaximum(6);
+  m_drawSizeSpinBox->setSingleStep(1);
   m_drawSizeSpinBox->setValue(m_mapIcons->drawSize());
   connect(m_drawSizeSpinBox, SIGNAL(valueChanged(int)),
       m_mapIcons, SLOT(setDrawSize(int)));
-  m_id_drawSize = subMenu->insertItem(m_drawSizeSpinBox);
-  m_id_drawSizeMenu = insertItem("Draw Size", subMenu);
+  QWidgetAction* drawSizeSpinBoxAction = new QWidgetAction(subMenu);
+  drawSizeSpinBoxAction->setDefaultWidget(m_drawSizeSpinBox);
+  subMenu->addAction(drawSizeSpinBoxAction);
+  m_action_drawSizeMenu = addMenu(subMenu);
 
-  subMenu = new QPopupMenu;
-  QHBox* tmpHBox = new QHBox(subMenu);
+  subMenu = new QMenu("Player FOV");
+  QWidget* tmpHBox = new QWidget(subMenu);
+  QHBoxLayout* tmpHBoxLayout = new QHBoxLayout(tmpHBox);
+  tmpHBoxLayout->setContentsMargins(1, 1, 1, 1);
   m_fovSpinBoxLabel = new QLabel("Distance:", tmpHBox);
-  m_fovSpinBox = new QSpinBox(20, 1200, 20, tmpHBox, "FOV");
+  m_fovSpinBox = new QSpinBox(tmpHBox);
+  m_fovSpinBox->setObjectName("FOV");
+  m_fovSpinBox->setMinimum(20);
+  m_fovSpinBox->setMaximum(1200);
+  m_fovSpinBox->setSingleStep(20);
+  tmpHBoxLayout->addWidget(m_fovSpinBoxLabel);
+  tmpHBoxLayout->addWidget(m_fovSpinBox);
   m_fovSpinBox->setValue(m_mapIcons->fovDistance());
   connect(m_fovSpinBox, SIGNAL(valueChanged(int)),
       m_mapIcons, SLOT(setFOVDistance(int)));
-  m_id_FOVDistance = subMenu->insertItem(tmpHBox);
-  m_id_FOVColor = subMenu->insertItem("Color...",
-                      this, SLOT(select_fovColor(int)));
+  QWidgetAction* fovSpinBoxAction = new QWidgetAction(tmpHBox);
+  fovSpinBoxAction->setDefaultWidget(tmpHBox);
 
-  subSubMenu = new QPopupMenu;
-  subMenu->setCheckable(true);
-  m_id_FOVNoBrush = subSubMenu->insertItem("No Background");
-  subSubMenu->setItemParameter(m_id_FOVNoBrush, Qt::NoBrush); 
-  m_id_FOVSolidPattern = subSubMenu->insertItem("Solid");
-  subSubMenu->setItemParameter(m_id_FOVSolidPattern, Qt::SolidPattern); 
-  m_id_FOVDense1Pattern = subSubMenu->insertItem("94% fill");
-  subSubMenu->setItemParameter(m_id_FOVDense1Pattern, Qt::Dense1Pattern); 
-  m_id_FOVDense2Pattern = subSubMenu->insertItem("88% fill");
-  subSubMenu->setItemParameter(m_id_FOVDense2Pattern, Qt::Dense2Pattern); 
-  m_id_FOVDense3Pattern  = subSubMenu->insertItem("63% fill");
-  subSubMenu->setItemParameter(m_id_FOVDense3Pattern, Qt::Dense3Pattern); 
-  m_id_FOVDense4Pattern = subSubMenu->insertItem("50% fill");
-  subSubMenu->setItemParameter(m_id_FOVDense4Pattern, Qt::Dense4Pattern); 
-  m_id_FOVDense5Pattern = subSubMenu->insertItem("37% fill");
-  subSubMenu->setItemParameter(m_id_FOVDense5Pattern, Qt::Dense5Pattern); 
-  m_id_FOVDense6Pattern = subSubMenu->insertItem("12% fill");
-  subSubMenu->setItemParameter(m_id_FOVDense6Pattern, Qt::Dense6Pattern); 
-  m_id_FOVDense7Pattern = subSubMenu->insertItem("6% fill");
-  subSubMenu->setItemParameter(m_id_FOVDense7Pattern, Qt::Dense7Pattern); 
-  m_id_FOVHorPattern = subSubMenu->insertItem("Horizontal lines");
-  subSubMenu->setItemParameter(m_id_FOVHorPattern, Qt::HorPattern); 
-  m_id_FOVVerPattern = subSubMenu->insertItem("Vertical lines");
-  subSubMenu->setItemParameter(m_id_FOVVerPattern, Qt::VerPattern); 
-  m_id_FOVCrossPattern = subSubMenu->insertItem("Crossing lines");
-  subSubMenu->setItemParameter(m_id_FOVCrossPattern, Qt::CrossPattern); 
-  m_id_FOVBDiagPattern = subSubMenu->insertItem("Diagonal lines (directed /)");
-  subSubMenu->setItemParameter(m_id_FOVBDiagPattern, Qt::BDiagPattern); 
-  m_id_FOVFDiagPattern = subSubMenu->insertItem("Diagonal lines (directed \\)");
-  subSubMenu->setItemParameter(m_id_FOVFDiagPattern, Qt::FDiagPattern); 
-  m_id_FOVDiagCrossPattern = subSubMenu->insertItem("Diagonal crossing lines");
-  subSubMenu->setItemParameter(m_id_FOVDiagCrossPattern, Qt::DiagCrossPattern); 
-  connect(subSubMenu, SIGNAL(activated(int)),
-      this, SLOT(select_fovStyle(int)));
-  subMenu->insertItem("FOV Style", subSubMenu);
+  subMenu->addAction(fovSpinBoxAction);
+  m_action_FOVColor = subMenu->addAction("Color...",
+                      this, SLOT(select_fovColor()));
 
-  subSubMenu = new QPopupMenu;
-  subMenu->setCheckable(true);
-  m_id_FOVDistanceBased = subSubMenu->insertItem("Distance Based");
-  subSubMenu->setItemParameter(m_id_FOVDistanceBased, tFOVDistanceBased); 
-  m_id_FOVScaledClassic = subSubMenu->insertItem("Scaled Classic");
-  subSubMenu->setItemParameter(m_id_FOVScaledClassic, tFOVScaledClassic); 
-  m_id_FOVClassic = subSubMenu->insertItem("Classic");
-  subSubMenu->setItemParameter(m_id_FOVClassic, tFOVClassic); 
-  connect(subSubMenu, SIGNAL(activated(int)),
-      this, SLOT(select_fovMode(int)));
-  subMenu->insertItem("FOV Mode", subSubMenu);
+  subSubMenu = new QMenu("FOV Style");
 
-  m_id_FOV = insertItem("Player FOV", subMenu);
+  m_action_FOVNoBrush = subSubMenu->addAction("No Background");
+  m_action_FOVNoBrush->setCheckable(true);
+  m_action_FOVNoBrush->setData(Qt::NoBrush);
 
-  subMenu = new QPopupMenu;
-  m_zoomDefaultSpinBox = new QSpinBox(1, 32, 1, subMenu);
+  m_action_FOVSolidPattern = subSubMenu->addAction("Solid");
+  m_action_FOVSolidPattern->setCheckable(true);
+  m_action_FOVSolidPattern->setData(Qt::SolidPattern);
+
+  m_action_FOVDense1Pattern = subSubMenu->addAction("94% fill");
+  m_action_FOVDense1Pattern->setCheckable(true);
+  m_action_FOVDense1Pattern->setData(Qt::Dense1Pattern);
+
+  m_action_FOVDense2Pattern = subSubMenu->addAction("88% fill");
+  m_action_FOVDense2Pattern->setCheckable(true);
+  m_action_FOVDense2Pattern->setData(Qt::Dense2Pattern);
+
+  m_action_FOVDense3Pattern  = subSubMenu->addAction("63% fill");
+  m_action_FOVDense3Pattern ->setCheckable(true);
+  m_action_FOVDense3Pattern ->setData(Qt::Dense3Pattern);
+
+  m_action_FOVDense4Pattern = subSubMenu->addAction("50% fill");
+  m_action_FOVDense4Pattern->setCheckable(true);
+  m_action_FOVDense4Pattern->setData(Qt::Dense4Pattern);
+
+  m_action_FOVDense5Pattern = subSubMenu->addAction("37% fill");
+  m_action_FOVDense5Pattern->setCheckable(true);
+  m_action_FOVDense5Pattern->setData(Qt::Dense5Pattern);
+
+  m_action_FOVDense6Pattern = subSubMenu->addAction("12% fill");
+  m_action_FOVDense6Pattern->setCheckable(true);
+  m_action_FOVDense6Pattern->setData(Qt::Dense6Pattern);
+
+  m_action_FOVDense7Pattern = subSubMenu->addAction("6% fill");
+  m_action_FOVDense7Pattern->setCheckable(true);
+  m_action_FOVDense7Pattern->setData(Qt::Dense7Pattern);
+
+  m_action_FOVHorPattern = subSubMenu->addAction("Horizontal lines");
+  m_action_FOVHorPattern->setCheckable(true);
+  m_action_FOVHorPattern->setData(Qt::HorPattern);
+
+  m_action_FOVVerPattern = subSubMenu->addAction("Vertical lines");
+  m_action_FOVVerPattern->setCheckable(true);
+  m_action_FOVVerPattern->setData(Qt::VerPattern);
+
+  m_action_FOVCrossPattern = subSubMenu->addAction("Crossing lines");
+  m_action_FOVCrossPattern->setCheckable(true);
+  m_action_FOVCrossPattern->setData(Qt::CrossPattern);
+
+  m_action_FOVBDiagPattern = subSubMenu->addAction("Diagonal lines (directed /)");
+  m_action_FOVBDiagPattern->setCheckable(true);
+  m_action_FOVBDiagPattern->setData(Qt::BDiagPattern);
+
+  m_action_FOVFDiagPattern = subSubMenu->addAction("Diagonal lines (directed \\)");
+  m_action_FOVFDiagPattern->setCheckable(true);
+  m_action_FOVFDiagPattern->setData(Qt::FDiagPattern);
+
+  m_action_FOVDiagCrossPattern = subSubMenu->addAction("Diagonal crossing lines");
+  m_action_FOVDiagCrossPattern->setCheckable(true);
+  m_action_FOVDiagCrossPattern->setData(Qt::DiagCrossPattern);
+
+  connect(subSubMenu, SIGNAL(triggered(QAction*)), this,
+          SLOT(select_fovStyle(QAction*)));
+  subMenu->addMenu(subSubMenu);
+
+  subSubMenu = new QMenu("FOV Mode");
+
+  m_action_FOVDistanceBased = subSubMenu->addAction("Distance Based");
+  m_action_FOVDistanceBased->setCheckable(true);
+  m_action_FOVDistanceBased->setData(tFOVDistanceBased);
+
+  m_action_FOVScaledClassic = subSubMenu->addAction("Scaled Classic");
+  m_action_FOVScaledClassic->setCheckable(true);
+  m_action_FOVScaledClassic->setData(tFOVScaledClassic);
+
+  m_action_FOVClassic = subSubMenu->addAction("Classic");
+  m_action_FOVClassic->setCheckable(true);
+  m_action_FOVClassic->setData(tFOVClassic);
+
+  connect(subSubMenu, SIGNAL(triggered(QAction*)), this,
+          SLOT(select_fovMode(QAction*)));
+
+  subMenu->addMenu(subSubMenu);
+  m_action_FOV = addMenu(subMenu);
+
+  subMenu = new QMenu("Default Zoom");
+  m_zoomDefaultSpinBox = new QSpinBox(subMenu);
+  m_zoomDefaultSpinBox->setMinimum(1);
+  m_zoomDefaultSpinBox->setMaximum(32);
+  m_zoomDefaultSpinBox->setSingleStep(1);
   m_zoomDefaultSpinBox->setValue(m_mapIcons->drawSize());
   connect(m_zoomDefaultSpinBox, SIGNAL(valueChanged(int)),
       m_map, SLOT(setZoomDefault(int)));
-  m_id_zoomDefault = subMenu->insertItem(m_zoomDefaultSpinBox);
-  m_id_zoomDefaultMenu = insertItem("Default Zoom", subMenu);
+  QWidgetAction* zoomDefaultSpinBoxAction = new QWidgetAction(subMenu);
+  zoomDefaultSpinBoxAction->setDefaultWidget(m_zoomDefaultSpinBox);
+  subMenu->addAction(zoomDefaultSpinBoxAction);
+  m_action_zoomDefaultMenu = addMenu(subMenu);
 
-  m_id_cacheAlwaysRepaint = insertItem("Always Repaint Map Cache",
-                       this, 
-                       SLOT(toggle_cacheAlwaysRepaint()));
+  m_action_cacheAlwaysRepaint = addAction("Always Repaint Map Cache", this,
+          SLOT(toggle_cacheAlwaysRepaint()));
+  m_action_cacheAlwaysRepaint->setCheckable(true);
 
-  m_id_cacheChanges = insertItem("Cache Changes",
-                 this, 
-                 SLOT(toggle_cacheChanges()));
+  m_action_cacheChanges = addAction("Cache Changes", this,
+          SLOT(toggle_cacheChanges()));
+  m_action_cacheChanges->setCheckable(true);
 
-  insertItem("Save Map Image...",
-         m_map, SLOT(saveMapImage()));
+  addAction("Save Map Image...", m_map, SLOT(saveMapImage()));
 
-  connect(this, SIGNAL(aboutToShow()),
-      this, SLOT(init_Menu()));
+  connect(this, SIGNAL(aboutToShow()), this, SLOT(init_Menu()));
 }
 
 MapMenu::~MapMenu()
@@ -948,82 +1161,84 @@ MapMenu::~MapMenu()
 void MapMenu::init_Menu(void)
 {
   FollowMode mode = m_map->followMode();
-  setItemChecked(m_id_followMenu_Player, (mode == tFollowPlayer));
-  setItemChecked(m_id_followMenu_Spawn, (mode == tFollowSpawn));
-  setItemChecked(m_id_followMenu_None, (mode == tFollowNone));
+  m_action_followMenu_Player->setChecked(mode == tFollowPlayer);
+  m_action_followMenu_Spawn->setChecked(mode == tFollowSpawn);
+  m_action_followMenu_None->setChecked(mode == tFollowNone);
   
   const Item* selectedItem = m_map->selectedItem();
-  setItemEnabled(m_id_followMenu_Spawn, 
-         ((selectedItem != NULL) && (selectedItem->type() == tSpawn)));
+  m_action_followMenu_Spawn->setEnabled((selectedItem != NULL) &&
+          (selectedItem->type() == tSpawn));
 
   MapLineStyle style = m_map->mapLineStyle();
-  setItemChecked(m_id_mapLineStyle_Normal, (style == tMap_Normal));
-  setItemChecked(m_id_mapLineStyle_DepthFiltered, (style == tMap_DepthFiltered));
-  setItemChecked(m_id_mapLineStyle_FadedFloors, (style == tMap_FadedFloors));
-  setItemChecked(m_id_spawnDepthFilter, m_map->spawnDepthFilter());
-  setItemChecked(m_id_tooltip, m_map->showTooltips());
-  setItemChecked(m_id_filtered, m_map->showFiltered());
-  setItemChecked(m_id_map, m_map->showLines());
-  setItemChecked(m_id_velocity, m_map->showVelocityLines());
-  setItemChecked(m_id_animate, m_map->animate());
-  setItemChecked(m_id_player, m_map->showPlayer());
-  setItemChecked(m_id_playerBackground, m_map->showPlayerBackground());
-  setItemChecked(m_id_playerView, m_map->showPlayerView());
-  setItemChecked(m_id_gridLines, m_map->showGridLines());
-  setItemChecked(m_id_gridTicks, m_map->showGridTicks());
-  setItemChecked(m_id_locations, m_map->showLocations());
-  setItemChecked(m_id_spawns, m_map->showSpawns());
-  setItemChecked(m_id_spawnPoints, m_map->showSpawnPoints());
-  setItemChecked(m_id_unknownSpawns, m_map->showUnknownSpawns());
-  setItemChecked(m_id_drops, m_map->showDrops());
-  setItemChecked(m_id_doors, m_map->showDoors());
-  setItemChecked(m_id_spawnNames, m_mapIcons->showSpawnNames());
-  setItemChecked(m_id_highlightConsideredSpawns, 
+  m_action_mapLineStyle_Normal->setChecked(style == tMap_Normal);
+  m_action_mapLineStyle_DepthFiltered->setChecked(style == tMap_DepthFiltered);
+  m_action_mapLineStyle_FadedFloors->setChecked(style == tMap_FadedFloors);
+  m_action_spawnDepthFilter->setChecked(m_map->spawnDepthFilter());
+  m_action_tooltip->setChecked(m_map->showTooltips());
+  m_action_filtered->setChecked(m_map->showFiltered());
+  m_action_map->setChecked(m_map->showLines());
+  m_action_velocity->setChecked(m_map->showVelocityLines());
+  m_action_animate->setChecked(m_map->animate());
+  m_action_player->setChecked(m_map->showPlayer());
+  m_action_playerBackground->setChecked(m_map->showPlayerBackground());
+  m_action_playerView->setChecked(m_map->showPlayerView());
+  m_action_gridLines->setChecked(m_map->showGridLines());
+  m_action_gridTicks->setChecked(m_map->showGridTicks());
+  m_action_locations->setChecked(m_map->showLocations());
+  m_action_spawns->setChecked(m_map->showSpawns());
+  m_action_spawnPoints->setChecked(m_map->showSpawnPoints());
+  m_action_unknownSpawns->setChecked(m_map->showUnknownSpawns());
+  m_action_drops->setChecked(m_map->showDrops());
+  m_action_doors->setChecked(m_map->showDoors());
+  m_action_spawnNames->setChecked(m_mapIcons->showSpawnNames());
+  m_action_highlightConsideredSpawns->setChecked(
          m_map->highlightConsideredSpawns());
-  setItemChecked(m_id_walkPath, m_map->walkPathShowSelect());
-  setItemChecked(m_id_npcWalkPaths, m_mapIcons->showNPCWalkPaths());
-  setItemChecked(m_id_mapImage, m_map->showBackgroundImage());
-  setItemChecked(m_id_pvp, m_map->pvp());
-  setItemChecked(m_id_deityPvP, m_map->deityPvP());
-  setItemChecked(m_id_racePvP, m_map->racePvP());
-  setItemChecked(m_id_zoneSafePoint, m_map->showZoneSafePoint());
-  setItemChecked(m_id_instanceLocation, m_map->showInstanceLocationMarker());
+  m_action_walkPath->setChecked(m_map->walkPathShowSelect());
+  m_action_npcWalkPaths->setChecked(m_mapIcons->showNPCWalkPaths());
+  m_action_mapImage->setChecked(m_map->showBackgroundImage());
+  m_action_pvp->setChecked(m_map->pvp());
+  m_action_deityPvP->setChecked(m_map->deityPvP());
+  m_action_racePvP->setChecked(m_map->racePvP());
+  m_action_zoneSafePoint->setChecked(m_map->showZoneSafePoint());
+  m_action_instanceLocation->setChecked(m_map->showInstanceLocationMarker());
 #ifdef DEBUG
-  setItemChecked(m_id_debugInfo, m_map->showDebugInfo());
+  m_action_debugInfo->setChecked(m_map->showDebugInfo());
 #endif
+  /*
   MapOptimizationMethod method = m_map->mapOptimization();
 
   setItemChecked(m_id_mapOptimization_Memory, (method == tMap_MemoryOptim));
   setItemChecked(m_id_mapOptimization_Normal, (method == tMap_NormalOptim));
   setItemChecked(m_id_mapOptimization_Best, (method == tMap_BestOptim));
+  */
 
   m_drawSizeSpinBox->setValue(m_mapIcons->drawSize());
 
   m_fovSpinBox->setValue(m_mapIcons->fovDistance());
 
   int fovStyle = m_map->fovStyle();
-  setItemChecked(m_id_FOVNoBrush, (fovStyle == Qt::NoBrush));
-  setItemChecked(m_id_FOVSolidPattern, (fovStyle == Qt::SolidPattern));
-  setItemChecked(m_id_FOVDense1Pattern, (fovStyle == Qt::Dense1Pattern));
-  setItemChecked(m_id_FOVDense2Pattern, (fovStyle == Qt::Dense2Pattern));
-  setItemChecked(m_id_FOVDense3Pattern, (fovStyle == Qt::Dense3Pattern));
-  setItemChecked(m_id_FOVDense4Pattern, (fovStyle == Qt::Dense4Pattern));
-  setItemChecked(m_id_FOVDense5Pattern, (fovStyle == Qt::Dense5Pattern));
-  setItemChecked(m_id_FOVDense6Pattern, (fovStyle == Qt::Dense6Pattern));
-  setItemChecked(m_id_FOVDense7Pattern, (fovStyle == Qt::Dense7Pattern));
-  setItemChecked(m_id_FOVHorPattern, (fovStyle == Qt::HorPattern));
-  setItemChecked(m_id_FOVVerPattern, (fovStyle == Qt::VerPattern));
-  setItemChecked(m_id_FOVCrossPattern, (fovStyle == Qt::CrossPattern));
-  setItemChecked(m_id_FOVBDiagPattern, (fovStyle == Qt::BDiagPattern));
-  setItemChecked(m_id_FOVFDiagPattern, (fovStyle == Qt::FDiagPattern));
-  setItemChecked(m_id_FOVDiagCrossPattern, (fovStyle == Qt::DiagCrossPattern));
+  m_action_FOVNoBrush->setChecked(fovStyle == Qt::NoBrush);
+  m_action_FOVSolidPattern->setChecked(fovStyle == Qt::SolidPattern);
+  m_action_FOVDense1Pattern->setChecked(fovStyle == Qt::Dense1Pattern);
+  m_action_FOVDense2Pattern->setChecked(fovStyle == Qt::Dense2Pattern);
+  m_action_FOVDense3Pattern->setChecked(fovStyle == Qt::Dense3Pattern);
+  m_action_FOVDense4Pattern->setChecked(fovStyle == Qt::Dense4Pattern);
+  m_action_FOVDense5Pattern->setChecked(fovStyle == Qt::Dense5Pattern);
+  m_action_FOVDense6Pattern->setChecked(fovStyle == Qt::Dense6Pattern);
+  m_action_FOVDense7Pattern->setChecked(fovStyle == Qt::Dense7Pattern);
+  m_action_FOVHorPattern->setChecked(fovStyle == Qt::HorPattern);
+  m_action_FOVVerPattern->setChecked(fovStyle == Qt::VerPattern);
+  m_action_FOVCrossPattern->setChecked(fovStyle == Qt::CrossPattern);
+  m_action_FOVBDiagPattern->setChecked(fovStyle == Qt::BDiagPattern);
+  m_action_FOVFDiagPattern->setChecked(fovStyle == Qt::FDiagPattern);
+  m_action_FOVDiagCrossPattern->setChecked(fovStyle == Qt::DiagCrossPattern);
 
   init_fovMenu();
 
   m_zoomDefaultSpinBox->setValue(m_map->zoomDefault());
 
-  setItemChecked(m_id_cacheAlwaysRepaint, m_map->cacheAlwaysRepaint());
-  setItemChecked(m_id_cacheChanges, m_map->cacheChanges());
+  m_action_cacheAlwaysRepaint->setChecked(m_map->cacheAlwaysRepaint());
+  m_action_cacheChanges->setChecked(m_map->cacheChanges());
 }
 
 void MapMenu::init_fovMenu(void)
@@ -1047,150 +1262,152 @@ void MapMenu::init_fovMenu(void)
 
   int fovDistance = m_mapIcons->fovDistance();
   m_fovSpinBox->setRange(newFOVDistMin, newFOVDistMax);
-  m_fovSpinBox->setLineStep(newFOVDistInc);
+  m_fovSpinBox->setSingleStep(newFOVDistInc);
   m_fovSpinBox->setValue(fovDistance);
 
-  setItemChecked(m_id_FOVDistanceBased, (fovMode == tFOVDistanceBased));
-  setItemChecked(m_id_FOVScaledClassic, (fovMode == tFOVScaledClassic));
-  setItemChecked(m_id_FOVClassic, (fovMode == tFOVClassic));
+  m_action_FOVDistanceBased->setChecked(fovMode == tFOVDistanceBased);
+  m_action_FOVScaledClassic->setChecked(fovMode == tFOVScaledClassic);
+  m_action_FOVClassic->setChecked(fovMode == tFOVClassic);
 }
-void MapMenu::select_follow(int itemId)
+void MapMenu::select_follow(QAction* item)
 {
+  int mode = item->data().value<int>();
   // set the selected follow mode
-  m_map->setFollowMode((FollowMode)itemParameter(itemId));
+  m_map->setFollowMode((FollowMode)mode);
 }
 
-void MapMenu::select_mapLine(int itemId)
+void MapMenu::select_mapLine(QAction* item)
 {
-  m_map->setMapLineStyle((MapLineStyle)itemParameter(itemId));
+  int style = item->data().value<int>();
+  m_map->setMapLineStyle((MapLineStyle)style);
 }
 
-void MapMenu::toggle_spawnDepthFilter(int itemId)
+void MapMenu::toggle_spawnDepthFilter()
 {
   m_map->setSpawnDepthFilter(!m_map->spawnDepthFilter());
 }
 
-void MapMenu::toggle_tooltip(int itemId)
+void MapMenu::toggle_tooltip()
 {
   m_map->setShowTooltips(!m_map->showTooltips());
 }
 
-void MapMenu::toggle_filtered(int itemId)
+void MapMenu::toggle_filtered()
 {
   m_map->setShowFiltered(!m_map->showFiltered());
 }
 
-void MapMenu::toggle_map(int itemId)
+void MapMenu::toggle_map()
 {
   m_map->setShowLines(!m_map->showLines());
 }
 
-void MapMenu::toggle_pvp(int itemId)
+void MapMenu::toggle_pvp()
 {
   m_map->setPvP(!m_map->pvp());
 }
 
-void MapMenu::toggle_deityPvP(int itemId)
+void MapMenu::toggle_deityPvP()
 {
   m_map->setDeityPvP(!m_map->deityPvP());
 }
 
-void MapMenu::toggle_racePvP(int itemId)
+void MapMenu::toggle_racePvP()
 {
   m_map->setRacePvP(!m_map->racePvP());
 }
 
-void MapMenu::toggle_velocity(int itemId)
+void MapMenu::toggle_velocity()
 {
   m_map->setShowVelocityLines(!m_map->showVelocityLines());
 }
 
-void MapMenu::toggle_animate(int itemId)
+void MapMenu::toggle_animate()
 {
   m_map->setAnimate(!m_map->animate());
 }
 
-void MapMenu::toggle_player(int itemId)
+void MapMenu::toggle_player()
 {
   m_map->setShowPlayer(!m_map->showPlayer());
 }
 
-void MapMenu::toggle_playerBackground(int itemId)
+void MapMenu::toggle_playerBackground()
 {
   m_map->setShowPlayerBackground(!m_map->showPlayerBackground());
 }
 
-void MapMenu::toggle_playerView(int itemId)
+void MapMenu::toggle_playerView()
 {
   m_map->setShowPlayerView(!m_map->showPlayerView());
 }
 
-void MapMenu::toggle_gridLines(int itemId)
+void MapMenu::toggle_gridLines()
 {
   m_map->setShowGridLines(!m_map->showGridLines());
 }
 
-void MapMenu::toggle_gridTicks(int itemId)
+void MapMenu::toggle_gridTicks()
 {
   m_map->setShowGridTicks(!m_map->showGridTicks());
 }
 
-void MapMenu::toggle_locations(int itemId)
+void MapMenu::toggle_locations()
 {
   m_map->setShowLocations(!m_map->showLocations());
 }
 
-void MapMenu::toggle_spawns(int itemId)
+void MapMenu::toggle_spawns()
 {
   m_map->setShowSpawns(!m_map->showSpawns());
 }
 
-void MapMenu::toggle_spawnPnts(int itemId)
+void MapMenu::toggle_spawnPnts()
 {
   m_map->setShowSpawnPoints(!m_map->showSpawnPoints());
 }
 
-void MapMenu::toggle_unknownSpawns(int itemId)
+void MapMenu::toggle_unknownSpawns()
 {
   m_map->setShowUnknownSpawns(!m_map->showUnknownSpawns());
 }
 
-void MapMenu::toggle_drops(int itemId)
+void MapMenu::toggle_drops()
 {
   m_map->setShowDrops(!m_map->showDrops());
 }
 
-void MapMenu::toggle_doors(int itemId)
+void MapMenu::toggle_doors()
 {
   m_map->setShowDoors(!m_map->showDoors());
 }
 
-void MapMenu::toggle_spawnNames(int itemId)
+void MapMenu::toggle_spawnNames()
 {
   m_mapIcons->setShowSpawnNames(!m_mapIcons->showSpawnNames());
 }
 
-void MapMenu::toggle_highlightConsideredSpawns(int itemId)
+void MapMenu::toggle_highlightConsideredSpawns()
 {
   m_map->setHighlightConsideredSpawns(!m_map->highlightConsideredSpawns());
 }
 
-void MapMenu::toggle_walkPath(int itemId)
+void MapMenu::toggle_walkPath()
 {
   m_map->setWalkPathShowSelect(!m_map->walkPathShowSelect());
 }
 
-void MapMenu::toggle_npcWalkPaths(int itemId)
+void MapMenu::toggle_npcWalkPaths()
 {
   m_mapIcons->setShowNPCWalkPaths(!m_mapIcons->showNPCWalkPaths());
 }
 
-void MapMenu::toggle_mapImage(int itemId)
+void MapMenu::toggle_mapImage()
 {
   m_map->setShowBackgroundImage(!m_map->showBackgroundImage());
 }
 
-void MapMenu::toggle_debugInfo(int itemId)
+void MapMenu::toggle_debugInfo()
 {
 #ifdef DEBUG
   m_map->setShowDebugInfo(!m_map->showDebugInfo());
@@ -1207,86 +1424,90 @@ void MapMenu::toggle_cacheChanges()
   m_map->setCacheChanges(!m_map->cacheChanges());
 }
 
-void MapMenu::toggle_zoneSafePoint(int itemId)
+void MapMenu::toggle_zoneSafePoint()
 {
   m_map->setShowZoneSafePoint(!m_map->showZoneSafePoint());
 }
 
-void MapMenu::toggle_instanceLocationMarker(int itemId)
+void MapMenu::toggle_instanceLocationMarker()
 {
   m_map->setShowInstanceLocationMarker(!m_map->showInstanceLocationMarker());
 }
 
+/*
 void MapMenu::select_mapOptimization(int itemId)
 {
   m_map->setMapOptimization((MapOptimizationMethod)itemParameter(itemId));
 }
+*/
 
-void MapMenu::select_gridTickColor(int itemId)
+void MapMenu::select_gridTickColor()
 {
   QString name = QString("ShowEQ - ") + m_map->preferenceName() 
     + " Grid Tick Color";
   QColor newColor = QColorDialog::getColor(m_map->gridTickColor(),
-                       m_map, (const char*)name);
+                       m_map, name);
 
   if (newColor.isValid())
     m_map->setGridTickColor(newColor);
 }
 
-void MapMenu::select_gridLineColor(int itemId)
+void MapMenu::select_gridLineColor()
 {
   QString name = QString("ShowEQ - ") + m_map->preferenceName() 
-    + " Grid Tick Color";
+    + " Grid Line Color";
   QColor newColor = QColorDialog::getColor(m_map->gridLineColor(),
-                       m_map, (const char*)name);
+                       m_map, name);
 
   if (newColor.isValid())
     m_map->setGridLineColor(newColor);
 }
 
-void MapMenu::select_backgroundColor(int itemId)
+void MapMenu::select_backgroundColor()
 {
   QString name = QString("ShowEQ - ") + m_map->preferenceName() 
     + " Background Color";
   QColor newColor = QColorDialog::getColor(m_map->backgroundColor(),
-                       m_map, (const char*)name);
+                       m_map, name);
 
   if (newColor.isValid())
     m_map->setBackgroundColor(newColor);
 }
 
-void MapMenu::select_font(int itemId)
+void MapMenu::select_font()
 {
   QString name = QString("ShowEQ - ") + m_map->preferenceName() 
     + " Font";
   bool ok = false;
   QFont newFont;
-  newFont = QFontDialog::getFont(&ok, m_map->font(), m_map, (const char*)name);
+  newFont = QFontDialog::getFont(&ok, m_map->font(), m_map, name);
 
   if (ok)
     m_map->setFont(newFont);
 }
 
-void MapMenu::select_fovColor(int itemId)
+void MapMenu::select_fovColor()
 {
   QString name = QString("ShowEQ - ") + m_map->preferenceName() 
     + " Player FOV Color";
   QColor newColor = QColorDialog::getColor(m_map->fovColor(),
-                       m_map, (const char*)name);
+                       m_map, name);
 
   if (newColor.isValid())
     m_map->setFOVColor(newColor);
 }
 
-void MapMenu::select_fovStyle(int itemId)
+void MapMenu::select_fovStyle(QAction* item)
 {
-  m_map->setFOVStyle(itemParameter(itemId));
+  int style = item->data().value<int>();
+  m_map->setFOVStyle(style);
 }
 
-void MapMenu::select_fovMode(int itemId)
+void MapMenu::select_fovMode(QAction* item)
 {
+  int mode = item->data().value<int>();
   FOVMode oldFOVMode = m_map->fovMode();
-  FOVMode newFOVMode = (FOVMode)itemParameter(itemId);
+  FOVMode newFOVMode = (FOVMode)mode;
 
   if (oldFOVMode != newFOVMode)
   {
@@ -1318,7 +1539,7 @@ Map::Map(MapMgr* mapMgr,
      uint32_t runtimeFilterFlagMask,
      QWidget * parent, 
      const char *name)
-  : QWidget (parent, name),
+  : QWidget (parent),
     m_preferenceName(preferenceName),
     m_param(mapMgr->mapData()),
     m_mapMgr(mapMgr),
@@ -1332,8 +1553,10 @@ Map::Map(MapMgr* mapMgr,
     m_zoneMgr(zoneMgr),
     m_spawnMonitor(spawnMonitor)
 {
+
+  setObjectName(name);
 #ifdef DEBUGMAP
-  debug ("Map()");
+  qDebug ("Map()");
 #endif /* DEBUGMAP */
 
   // save the name used for preferences 
@@ -1370,7 +1593,7 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "Caption";
   tmpDefault = QString("ShowEQ - ") + prefString;
-  setCaption(pSEQPrefs->getPrefString(tmpPrefString, prefString, tmpDefault));
+  setWindowTitle(pSEQPrefs->getPrefString(tmpPrefString, prefString, tmpDefault));
 
   tmpPrefString = "CacheChanges";
   m_cacheChanges = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
@@ -1435,7 +1658,7 @@ Map::Map(MapMgr* mapMgr,
                          tFOVDistanceBased);
 
   tmpPrefString = "FOVStyle";
-  m_fovStyle = pSEQPrefs->getPrefInt(tmpPrefString, prefString, QBrush::Dense7Pattern);
+  m_fovStyle = pSEQPrefs->getPrefInt(tmpPrefString, prefString, Qt::Dense7Pattern);
 
   tmpPrefString = "FOVColor";
   m_fovColor = pSEQPrefs->getPrefColor(tmpPrefString, prefString, QColor("#505050"));
@@ -1491,8 +1714,10 @@ Map::Map(MapMgr* mapMgr,
   tmpPrefString = "FloorRoom";
   m_param.setFloorRoom(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 75));
 
+  /*
   tmpPrefString = "OptimizeMethod";
   m_param.setMapOptimizationMethod((MapOptimizationMethod)pSEQPrefs->getPrefInt(tmpPrefString, prefString, (int)tMap_NormalOptim));
+  */
 
   tmpPrefString = "ZoomDefault";
   m_param.setZoomDefault(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 1));
@@ -1516,43 +1741,43 @@ Map::Map(MapMgr* mapMgr,
   m_showInstanceLocationMarker = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
 
   // Accelerators
-  QAccel *accel = new QAccel(this);
-  int key;
+  QShortcut *tmpShortcut = nullptr;
+  QKeySequence key;
   key = pSEQPrefs->getPrefKey("ZoomInKey", prefString, "+");
-  accel->connectItem(accel->insertItem(key), this, SLOT(zoomIn()));
+  tmpShortcut = new QShortcut(key, this, SLOT(zoomIn()));
 
   key = pSEQPrefs->getPrefKey("ZoomOutKey", prefString, "-");
-  accel->connectItem(accel->insertItem(key), this, SLOT(zoomOut()));
+  tmpShortcut = new QShortcut(key, this, SLOT(zoomOut()));
 
   key = pSEQPrefs->getPrefKey("PanDownLeftKey", prefString, "Ctrl+1");
-  accel->connectItem(accel->insertItem(key), this, SLOT(panDownLeft()));
+  tmpShortcut = new QShortcut(key, this, SLOT(panDownLeft()));
 
   key = pSEQPrefs->getPrefKey("PanDownKey", prefString, "Ctrl+2");
-  accel->connectItem(accel->insertItem(key), this, SLOT(panDown()));
+  tmpShortcut = new QShortcut(key, this, SLOT(panDown()));
 
   key = pSEQPrefs->getPrefKey("PanDownRightKey", prefString, "Ctrl+3");
-  accel->connectItem(accel->insertItem(key), this, SLOT(panDownRight()));
+  tmpShortcut = new QShortcut(key, this, SLOT(panDownRight()));
 
   key = pSEQPrefs->getPrefKey("PanLeftKey", prefString, "Ctrl+4");
-  accel->connectItem(accel->insertItem(key), this, SLOT(panLeft()));
+  tmpShortcut = new QShortcut(key, this, SLOT(panLeft()));
 
   key = pSEQPrefs->getPrefKey("CenterSelectedKey", prefString, "Ctrl+5");
-  accel->connectItem(accel->insertItem(key), this, SLOT(viewTarget()));
+  tmpShortcut = new QShortcut(key, this, SLOT(viewTarget()));
 
   key = pSEQPrefs->getPrefKey("PanRightKey", prefString, "Ctrl+6");
-  accel->connectItem(accel->insertItem(key), this, SLOT(panRight()));
+  tmpShortcut = new QShortcut(key, this, SLOT(panRight()));
 
   key = pSEQPrefs->getPrefKey("PanUpLeftKey", prefString, "Ctrl+7");
-  accel->connectItem(accel->insertItem(key), this, SLOT(panUpLeft()));
+  tmpShortcut = new QShortcut(key, this, SLOT(panUpLeft()));
 
   key = pSEQPrefs->getPrefKey("PanUpKey", prefString, "Ctrl+8");
-  accel->connectItem(accel->insertItem(key), this, SLOT(panUp()));
+  tmpShortcut = new QShortcut(key, this, SLOT(panUp()));
 
   key = pSEQPrefs->getPrefKey("PanUpRightKey", prefString, "Ctrl+9");
-  accel->connectItem(accel->insertItem(key), this, SLOT(panUpRight()));
+  tmpShortcut = new QShortcut(key, this, SLOT(panUpRight()));
 
   key = pSEQPrefs->getPrefKey("ViewLockKey", prefString, "Ctrl+0");
-  accel->connectItem(accel->insertItem(key), this, SLOT(viewLock()));
+  tmpShortcut = new QShortcut(key, this, SLOT(viewLock()));
 
   m_followMode = tFollowPlayer;
   
@@ -1572,8 +1797,8 @@ Map::Map(MapMgr* mapMgr,
   m_param.setScreenSize(size());
   
   // Setup offscreen image
-  m_offscreen.resize(m_param.screenLength());
-  m_offscreen.setOptimization(m_param.pixmapOptimizationMethod());
+  m_offscreen = QPixmap(m_param.screenLength());
+//  m_offscreen.setOptimization(m_param.pixmapOptimizationMethod());
   
   m_mapTip = new MapLabel( this );
   this->setMouseTracking( TRUE );
@@ -1602,9 +1827,9 @@ Map::Map(MapMgr* mapMgr,
   connect (m_spawnShell,SIGNAL(changeItem(const Item*, uint32_t)),
        this, SLOT(changeItem(const Item*, uint32_t)));
 
-  m_timer->start(1000/m_frameRate, false);
+  m_timer->start(1000/m_frameRate);
 
-#ifdef DEBUG  
+#ifdef DEBUG
   if (m_showDebugInfo)
     m_time.start();
 #endif
@@ -1639,7 +1864,7 @@ MapMenu* Map::menu()
 QSize Map::sizeHint() const // preferred size
 {
 #ifdef DEBUGMAP
-  debug ("sizeHint()");
+  qDebug ("sizeHint()");
 #endif /* DEBUGMAP */
   
   return QSize(600, 600);
@@ -1648,7 +1873,7 @@ QSize Map::sizeHint() const // preferred size
 QSize Map::minimumSizeHint() const // minimum size
 {
 #ifdef DEBUGMAP
-  debug ("minimumSizeHint()");
+  qDebug ("minimumSizeHint()");
 #endif /* DEBUGMAP */
   return QSize(300, 300);
 }
@@ -1656,7 +1881,7 @@ QSize Map::minimumSizeHint() const // minimum size
 QSizePolicy Map::sizePolicy() const // size policy
 {
 #ifdef DEBUGMAP
-  debug ("sizePolicy()");
+  qDebug ("sizePolicy()");
 #endif /* DEBUGMAP */
   return QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
@@ -1664,27 +1889,27 @@ QSizePolicy Map::sizePolicy() const // size policy
 void Map::mouseDoubleClickEvent(QMouseEvent * me)
 {
 #ifdef DEBUGMAP
-  debug ("mouseDoubleClickEvent()");
+  qDebug ("mouseDoubleClickEvent()");
 #endif /* DEBUGMAP */
-  if (me->button () == MidButton)
+  if (me->button () == Qt::MidButton)
     viewTarget();
 }
 
 void Map::mouseReleaseEvent(QMouseEvent* me)
 {
 #ifdef DEBUGMAP
-  debug ("mouseReleaseEvent()");
+  qDebug ("mouseReleaseEvent()");
 #endif /* DEBUGMAP */
-  if (me->button() == MidButton)
+  if (me->button() == Qt::MidButton)
     m_mapPanning = false;
 }
 
 void Map::mousePressEvent(QMouseEvent* me)
 {
 #ifdef DEBUGMAP
-  debug ("mousePressEvent()");
+  qDebug ("mousePressEvent()");
 #endif /* DEBUGMAP */
-  if (me->button () == RightButton) 
+  if (me->button () == Qt::RightButton) 
   {
     // display the Map's menu
     menu()->popup(mapToGlobal(me->pos()));
@@ -1700,7 +1925,7 @@ void Map::mousePressEvent(QMouseEvent* me)
     }
 #endif /* DEBUGMAP */
   }
-  else if (me->button () == MidButton) 
+  else if (me->button () == Qt::MidButton) 
   {
     m_mapPanning = true;
     m_mapPanX     = me->x ();
@@ -1749,7 +1974,7 @@ void Map::mousePressEvent(QMouseEvent* me)
 void Map::zoomIn()
 {
 #ifdef DEBUGMAP
-   debug("Map::zoomIn()");
+   qDebug ("Map::zoomIn()");
 #endif /* DEBUGMAP */
    if (m_player->id() != 1)
    {
@@ -1769,7 +1994,7 @@ void Map::zoomIn()
 void Map::zoomOut()
 {
 #ifdef DEBUGMAP
-   debug("Map::zoomOut()");
+   qDebug ("Map::zoomOut()");
 #endif /* DEBUGMAP */
 
    if (m_player->id() != 1)
@@ -1790,7 +2015,7 @@ void Map::zoomOut()
 void Map::panRight()
 {
 #ifdef DEBUGMAP
-   debug("Map::panRight()");
+   qDebug ("Map::panRight()");
 #endif /* DEBUGMAP */
    m_param.panX(-panAmmt);
 
@@ -1805,7 +2030,7 @@ void Map::panRight()
 void Map::panLeft()
 {
 #ifdef DEBUGMAP
-   debug("Map::panLeft()");
+   qDebug ("Map::panLeft()");
 #endif /* DEBUGMAP */
    m_param.panX(panAmmt);
 
@@ -1821,7 +2046,7 @@ void Map::panLeft()
 void Map::panDown()
 {
 #ifdef DEBUGMAP
-   debug("Map::panDown()");
+   qDebug ("Map::panDown()");
 #endif /* DEBUGMAP */
    m_param.panY(-panAmmt);
 
@@ -1837,7 +2062,7 @@ void Map::panDown()
 void Map::panUp()
 {
 #ifdef DEBUGMAP
-   debug("Map::panUp()");
+   qDebug ("Map::panUp()");
 #endif /* DEBUGMAP */
    m_param.panY(panAmmt);
 
@@ -1852,7 +2077,7 @@ void Map::panUp()
 void Map::panUpRight()
 {
 #ifdef DEBUGMAP
-   debug("Map::panUpRight()");
+   qDebug ("Map::panUpRight()");
 #endif /* DEBUGMAP */
    m_param.panXY(-panAmmt, panAmmt);
 
@@ -1868,7 +2093,7 @@ void Map::panUpRight()
 void Map::panUpLeft()
 {
 #ifdef DEBUGMAP
-   debug("Map::panUpLeft()");
+   qDebug ("Map::panUpLeft()");
 #endif /* DEBUGMAP */
    m_param.panXY(panAmmt, panAmmt);
 
@@ -1884,7 +2109,7 @@ void Map::panUpLeft()
 void Map::panDownRight()
 {
 #ifdef DEBUGMAP
-   debug("Map::panDownRight()");
+   qDebug ("Map::panDownRight()");
 #endif /* DEBUGMAP */
    m_param.panXY(-panAmmt, -panAmmt);
 
@@ -1900,7 +2125,7 @@ void Map::panDownRight()
 void Map::panDownLeft()
 {
 #ifdef DEBUGMAP
-   debug("Map::panDownLeft()");
+   qDebug ("Map::panDownLeft()");
 #endif /* DEBUGMAP */
    m_param.panXY(panAmmt, -panAmmt);
 
@@ -1932,7 +2157,7 @@ void Map::decreaseGridResolution (void)
 void Map::viewTarget()
 {
 #ifdef DEBUGMAP
-  debug("Map::viewTarget()");
+  qDebug ("Map::viewTarget()");
 #endif /* DEBUGMAP */
   
   switch (m_followMode)
@@ -1962,7 +2187,7 @@ void Map::viewTarget()
 void Map::viewLock()
 {
 #ifdef DEBUGMAP
-   debug("Map::viewLock()");
+   qDebug ("Map::viewLock()");
 #endif /* DEBUGMAP */
    switch (m_followMode)
    {
@@ -2134,7 +2359,7 @@ void Map::setFrameRate(int val)
     emit frameRateChanged(m_frameRate);
 
     if (m_timer->isActive())
-      m_timer->changeInterval(1000/m_frameRate);
+      m_timer->setInterval(1000/m_frameRate);
   }
 }
 
@@ -2442,6 +2667,7 @@ void Map::setMapLineStyle(MapLineStyle style)
     refreshMap ();
 }
 
+/*
 void Map::setMapOptimization(MapOptimizationMethod method) 
 { 
   // set the general optimization method
@@ -2454,6 +2680,7 @@ void Map::setMapOptimization(MapOptimizationMethod method)
   // set the offscreen images optimization method
   m_offscreen.setOptimization(m_param.pixmapOptimizationMethod());
 }
+*/
 
 void Map::setZoom(int val) 
 { 
@@ -2680,7 +2907,7 @@ void Map::setShowInstanceLocationMarker(bool val)
 void Map::dumpInfo(QTextStream& out)
 {
   out << "[" << preferenceName() << "]" << endl;
-  out << "Caption: " << caption() << endl;
+  out << "Caption: " << windowTitle() << endl;
   out << "AnimateSpawnMovement: " << m_animate << endl;
   out << "VelocityLines: " << m_showVelocityLines << endl;
   out << "SpawnDepthFilter: " << m_showVelocityLines << endl;
@@ -2716,7 +2943,7 @@ void Map::dumpInfo(QTextStream& out)
   out << "BackgroundColor: " << m_param.backgroundColor().name() << endl;
   out << "HeadRoom: " << m_param.headRoom() << endl;
   out << "FloorRoom: " << m_param.floorRoom() << endl;
-  out << "OptimizeMethod: " << (int)m_param.mapOptimizationMethod() << endl;
+//  out << "OptimizeMethod: " << (int)m_param.mapOptimizationMethod() << endl;
 
   out << endl;
   m_mapIcons->dumpInfo(out);
@@ -2783,9 +3010,10 @@ void Map::showMapIconDialog()
   if (!m_mapIconDialog)
   {
     // first create the dialog
-    m_mapIconDialog = new MapIconDialog(this, caption() + " Icon Dialog",
-                    false);
-    
+    m_mapIconDialog = new MapIconDialog(this);
+    m_mapIconDialog->setObjectName(
+            QString(windowTitle() + " Icon Dialog").toAscii().data());
+
     // then pass it this objects map icons object
     m_mapIconDialog->setMapIcons(m_mapIcons);
   }
@@ -2797,11 +3025,11 @@ void Map::showMapIconDialog()
 void Map::resizeEvent (QResizeEvent *qs)
 {
 #ifdef DEBUGMAP
-   debug ("resizeEvent()");
+   qDebug ("resizeEvent()");
 #endif /* DEBUGMAP */
    m_param.setScreenSize(qs->size());
 
-   m_offscreen.resize(m_param.screenLength());
+   m_offscreen = QPixmap(m_param.screenLength());
 
    reAdjust();
 
@@ -2814,15 +3042,15 @@ void Map::reAdjustAndRefreshMap(void)
   reAdjust();
 
   // then, repaint the map
-   repaint(mapRect(), FALSE);
+   repaint(mapRect());
 }
 
 void Map::refreshMap(void)
 {
 #ifdef DEBUGMAP
-   debug ("refreshMap()");
+   qDebug ("refreshMap()");
 #endif /* DEBUGMAP */
-   repaint(mapRect(), FALSE);
+   repaint(mapRect());
 }
 
 void Map::reAdjust()
@@ -2884,7 +3112,7 @@ void Map::reAdjust()
 void Map::addLocation(void)
 {
 #ifdef DEBUGMAP
-  debug ("addLocation()");
+  qDebug ("addLocation()");
 #endif /* DEBUGMAP */
 
   // get it's approximage location
@@ -2903,7 +3131,7 @@ void Map::addLocation(void)
 void Map::startLine (void)
 {
 #ifdef DEBUGMAP
-  debug ("startLine()");
+  qDebug ("startLine()");
 #endif /* DEBUGMAP */
   // get it's approximate position
   MapPoint point;
@@ -2920,7 +3148,7 @@ void Map::startLine (void)
 void Map::addLinePoint() 
 {
 #ifdef DEBUGMAP
-  debug ("addLinePoint()");
+  qDebug ("addLinePoint()");
 #endif /* DEBUGMAP */
 
   // get the player spawns approximate position
@@ -2941,7 +3169,7 @@ void Map::addLinePoint()
 void Map::delLinePoint(void)
 {
 #ifdef DEBUGMAP
-  debug ("delLinePoint()");
+  qDebug ("delLinePoint()");
 #endif /* DEBUGMAP */
 
   m_mapCache.forceRepaint();
@@ -2955,16 +3183,16 @@ void Map::showLineDlg(void)
   m_mapMgr->showLineDlg(this);
 }
 
-void Map::scaleDownZ(int id)
+void Map::scaleDownZ(QAction* item)
 {
   m_mapCache.forceRepaint();
-  m_mapMgr->scaleDownZ(m_menu->itemParameter(id));
+  m_mapMgr->scaleDownZ(item->data().value<int>());
 }
 
-void Map::scaleUpZ(int id)
+void Map::scaleUpZ(QAction* item)
 {
   m_mapCache.forceRepaint();
-  m_mapMgr->scaleUpZ(m_menu->itemParameter(id));
+  m_mapMgr->scaleUpZ(item->data().value<int>());
 }
 
 void Map::addPathPoint() 
@@ -3007,7 +3235,7 @@ QRect Map::mapRect () const
 void Map::paintMap (QPainter * p)
 {
 #ifdef DEBUGMAP
-  debug ("paintMap()");
+  qDebug ("paintMap()");
 #endif /* DEBUGMAP */
   QPainter tmp;
   
@@ -3048,15 +3276,14 @@ void Map::paintMap (QPainter * p)
 
   // copy the background
   const QPixmap& tmpPix = m_mapCache.getMapImage(m_param);
-  bitBlt(&m_offscreen, 0, 0,
-     &tmpPix, 0, 0, tmpPix.width(), tmpPix.height(),
-     CopyROP, true);
+  m_offscreen = tmpPix.copy(0, 0, tmpPix.width(), tmpPix.height());
+
 
   //Now, if we're animating, allow player to walk off. Grr, centering issue.
 
   /* Begin painting */
   tmp.begin (&m_offscreen);
-  tmp.setPen (NoPen);
+  tmp.setPen (Qt::NoPen);
   tmp.setFont (m_param.font());
 
   if (m_player->validPos() && !m_zoneMgr->isZoning() && m_player->id() != 0)
@@ -3139,11 +3366,13 @@ void Map::paintMap (QPainter * p)
    //--------------------------------------------------
    // finished painting
    tmp.end ();
-   
    // draw to the widget
-  bitBlt(this, 0, 0,
-     &m_offscreen, 0, 0, m_offscreen.width(), m_offscreen.height(),
-     CopyROP, true);
+   p->drawImage(
+           QRect(0, 0, m_offscreen.width(), m_offscreen.height()), //target rect
+           m_offscreen.toImage(),
+           QRect(0, 0, m_offscreen.width(), m_offscreen.height()), //source rect
+           Qt::AutoColor);
+
 }
 
 void Map::paintPlayerBackground(MapParameters& param, QPainter& p)
@@ -3155,7 +3384,7 @@ void Map::paintPlayerBackground(MapParameters& param, QPainter& p)
   tmpBrush.setColor(m_fovColor);
   tmpBrush.setStyle((Qt::BrushStyle)m_fovStyle);
   p.setBrush(tmpBrush);
-  if(m_fovStyle == Qt::SolidPattern) p.setRasterOp(Qt::OrROP);
+  if(m_fovStyle == Qt::SolidPattern) p.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
   // sizeWH is 2 * centerOffset
   int sizeWH = m_scaledFOVDistance << 1; 
@@ -3166,7 +3395,7 @@ void Map::paintPlayerBackground(MapParameters& param, QPainter& p)
          sizeWH, sizeWH);
   
   if(m_fovStyle == Qt::SolidPattern) 
-    p.setRasterOp(Qt::CopyROP);
+    p.setCompositionMode(QPainter::CompositionMode_Source);
   
 }
 
@@ -3190,12 +3419,12 @@ void Map::paintPlayerView(MapParameters& param, QPainter& p)
     double const fov_angle = radians_per_circle * 0.25;
     double fox_angle_offset = fov_angle / 2;
     
-    p.setPen(yellow); // color
+    p.setPen(Qt::yellow); // color
     p.drawLine( m_param.playerXOffset(), m_param.playerYOffset(),
         m_param.playerXOffset() + int (sin( angle ) * m_scaledFOVDistance),
         m_param.playerYOffset() + int (cos( angle ) * m_scaledFOVDistance) );
     
-    p.setPen(red); // color
+    p.setPen(Qt::red); // color
     for ( int n = 2; n--; )
     {
       int const start_x = m_param.playerXOffset() + start_offset_x;
@@ -3220,8 +3449,8 @@ void Map::paintPlayer(MapParameters& param, QPainter& p)
     if (! m_player->isCorpse())
     {
         // White dot for non-corpse
-        p.setPen(gray);
-        p.setBrush(white);
+        p.setPen(Qt::gray);
+        p.setBrush(Qt::white);
         p.drawEllipse(m_param.playerXOffset() - 3, 
             m_param.playerYOffset() - 3, 6, 6);
     }
@@ -3253,13 +3482,16 @@ void Map::paintDrops(MapParameters& param,
   uint8_t flag;
 
   // all drops are the same color
-  p.setPen(yellow);
+  p.setPen(Qt::yellow);
 
   /* Paint the dropped items */
-  for (; it.current(); ++it)
+  while (it.hasNext())
   {
+    it.next();
     // get the item from the list
-    item = it.current();
+    item = it.value();
+    if (!item)
+        break;
 
     filterFlags = item->filterFlags();
  
@@ -3313,10 +3545,13 @@ void Map::paintDoors(MapParameters& param,
   p.setPen(QColor (110, 60, 0));
 
   /* Paint the door items */
-  for (; it.current(); ++it)
+  while (it.hasNext())
   {
+    it.next();
     // get the item from the list
-    item = (const Door*)it.current();
+    item = (const Door*)it.value();
+    if (!item)
+        break;
 
     filterFlags = item->filterFlags();
 
@@ -3356,14 +3591,14 @@ void Map::paintDoors(MapParameters& param,
   }
 }             
 
-const QColor& Map::raceTeamHighlightColor(const Spawn* spawn) const
+const QColor Map::raceTeamHighlightColor(const Spawn* spawn) const
 {
   uint8_t playerLevel = m_player->level();
   int diff = spawn->level() - playerLevel;
   if (diff < -8)  //They are much easier than you.
-    return green; 
+    return Qt::green; 
   if (diff > 8)  //They are much harder than you.
-    return darkRed; 
+    return Qt::darkRed; 
 
   if (diff < 0) 
     diff *= -1;
@@ -3377,61 +3612,61 @@ const QColor& Map::raceTeamHighlightColor(const Spawn* spawn) const
     // easy
     case 0:  // you are 8 above them
     case 1:  // you are 7 above them
-      return green; 
+      return Qt::green; 
       break;
     case 2:  // you are 6 above them
     case 3:  // you are 5 above them
-      return darkGreen; 
+      return Qt::darkGreen; 
       break;
       
     // moderate
     case 4:  // you are 4 above them
     case 5:  // you are 3 above them
-      return blue; 
+      return Qt::blue; 
       break;
     case 6:  // you are 2 above them
     case 7:  // you are 1 above them
-      return darkBlue; 
+      return Qt::darkBlue; 
       break;
       
     // even
     case 8:  // you are even with them
-      return white; 
+      return Qt::white; 
       break;
         
     // difficult 
     case 9:  // you are 1 below them
     case 10:  // you are 2 below them
-      return yellow; 
+      return Qt::yellow; 
       break;
         
     // downright hard
     case 11:  // you are 3 below them
     case 12:  // you are 4 below them
-      return magenta; 
+      return Qt::magenta; 
       break;
     case 13:  // you are 5 below them
     case 14:  // you are 6 below them
-      return red; 
+      return Qt::red; 
       break;
     case 15:  // you are 7 below them
     case 16:  // you are 8 below them
-      return darkRed; 
+      return Qt::darkRed; 
       break;
     }
   }
   
-  return black;
+  return Qt::black;
 }
 
-const QColor& Map::deityTeamHighlightColor(const Spawn* spawn) const
+const QColor Map::deityTeamHighlightColor(const Spawn* spawn) const
 {
   uint8_t playerLevel = m_player->level();
   int diff = spawn->level() - playerLevel;
   if (diff < -5)  //They are much easier than you.
-    return green; 
+    return Qt::green; 
   if (diff > 5)  //They are much harder than you.
-    return darkRed; 
+    return Qt::darkRed; 
 
   if (diff < 0) 
     diff *= -1;
@@ -3445,45 +3680,45 @@ const QColor& Map::deityTeamHighlightColor(const Spawn* spawn) const
     // easy
     case 0:  // you are 5 above them
     case 1:  // you are 4 above them
-      return green; 
+      return Qt::green; 
       break;
     case 2:  // you are 3 above them
-      return darkGreen; 
+      return Qt::darkGreen; 
       break;
       
     // moderate
     case 3:  // you are 2 above them
-      return blue; 
+      return Qt::blue; 
       break;
     case 4:  // you are 1 above them
-      return darkBlue; 
+      return Qt::darkBlue; 
       break;
       
     // even
     case 5:  // you are even with them
-      return white; 
+      return Qt::white; 
       break;
       
     // difficult 
     case 6:  // you are 1 below them
-      return yellow; 
+      return Qt::yellow; 
       break;
       
       // downright hard
     case 7:  // you are 2 below them
     case 8:  // you are 3 below them
-      return magenta; 
+      return Qt::magenta; 
       break;
     case 9:  // you are 4 below them
-      return red; 
+      return Qt::red; 
       break;
     case 10:  // you are 5 below them
-      return darkRed; 
+      return Qt::darkRed; 
       break;
     }
   }
 
-  return black;
+  return Qt::black;
 }
 
 void Map::paintSpawns(MapParameters& param,
@@ -3496,7 +3731,7 @@ void Map::paintSpawns(MapParameters& param,
   const ItemMap& itemMap = m_spawnShell->spawns();
   ItemConstIterator it(itemMap);
   const Item* item;
-  QPointArray  atri(3);
+  QPolygon  atri(3);
   QString spawnNameText;
   QFontMetrics fm(param.font());
   EQPoint spawnOffset;
@@ -3515,13 +3750,13 @@ void Map::paintSpawns(MapParameters& param,
   /* Paint the spawns */
   const Spawn* spawn;
   // iterate over all spawns in of the current type
-  while (it.current())
+  while (it.hasNext())
   {
+    it.next();
     // get the item from the list
-    item = it.current();
-
-    // increment iterator to the next spawn
-    ++it;
+    item = it.value();
+    if (!item)
+        break;
 
 #ifdef DEBUGMAP
     spawn = spawnType(item);
@@ -3569,7 +3804,7 @@ void Map::paintSpawns(MapParameters& param,
     if (m_showVelocityLines &&
         (spawn->deltaX() || spawn->deltaY())) // only if has a delta
     {
-      p.setPen (darkGray);
+      p.setPen (Qt::darkGray);
       p.drawLine (spawnOffsetXPos,
           spawnOffsetYPos,
           spawnOffsetXPos - spawn->deltaX(),
@@ -3599,8 +3834,8 @@ void Map::paintSpawns(MapParameters& param,
                      MapParameters::qFormat, range);
         sizeWH = scaledRange << 1;
         
-        p.setBrush(NoBrush);
-        p.setPen(red); 
+        p.setBrush(Qt::NoBrush);
+        p.setPen(Qt::red); 
         
         p.drawEllipse(spawnOffsetXPos - scaledRange, 
                   spawnOffsetYPos - scaledRange, 
@@ -3686,15 +3921,15 @@ void Map::paintSpawns(MapParameters& param,
           
           if (levelDiff < 0)
           {
-            p2.setColor(yellow);
+            p2.setColor(Qt::yellow);
           }
           else if (levelDiff > 0)
           {
-            p2.setColor(blue);
+            p2.setColor(Qt::blue);
           }
           else
           {
-            p2.setColor(white);
+            p2.setColor(Qt::white);
           }
           mapIcon.setHighlightPen(p2);
         }
@@ -3715,15 +3950,15 @@ void Map::paintSpawns(MapParameters& param,
             
             if (levelDiff < 0)
             {
-              p2.setColor(yellow);
+              p2.setColor(Qt::yellow);
             }
             else if (levelDiff > 0)
             {
-              p2.setColor(blue);
+              p2.setColor(Qt::blue);
             }
             else
             {
-              p2.setColor(white);
+              p2.setColor(Qt::white);
             }
             mapIcon.setHighlightPen(p2);
           }
@@ -3849,15 +4084,16 @@ void Map::paintSpawnPoints( MapParameters& param, QPainter& p )
     return;
   
   // get an iterator over the list of spawn points
-  QAsciiDictIterator<SpawnPoint> it( m_spawnMonitor->spawnPoints() );
+  QHashIterator<QString, SpawnPoint*> it(m_spawnMonitor->spawnPoints());
   const SpawnPoint* sp;
 
   const MapIcon& mapIcon = m_mapIcons->icon(tIconTypeSpawnPoint);
 
   // iterate over the list of spawn points
-  while ((sp = it.current()))
+  while (it.hasNext())
   {
-    ++it;
+    it.next();
+    sp = it.value();
 
     // make sure spawn point is within bounds
     if (!inRect(screenBounds, sp->x(), sp->y()) ||
@@ -3879,7 +4115,7 @@ void Map::paintDebugInfo(MapParameters& param,
              int drawTime)
 {
   // show coords of upper left corner and lower right corner
-  p.setPen( yellow );
+  p.setPen( Qt::yellow );
   QString ts;
   ts.sprintf( "(%d, %d)", 
           (int)(param.screenCenterX() * param.ratioX()), 
@@ -3900,7 +4136,7 @@ void Map::paintDebugInfo(MapParameters& param,
 void Map::paintEvent (QPaintEvent * e)
 {
 #ifdef DEBUGMAP
-   debug ("paintEvent()");
+   qDebug ("paintEvent()");
 #endif /* DEBUGMAP */
    QRect updateR = e->rect ();
    QPainter p;
@@ -3985,7 +4221,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
 
     // spawn time
     if ( createDate != QDate::currentDate() )
-      spawned = createDate.dayName( createDate.dayOfWeek() ) + " ";
+      spawned = createDate.shortDayName( createDate.dayOfWeek() ) + " ";
     
     spawned += dateTime.time().toString();
     
@@ -3993,15 +4229,15 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     string.sprintf("SpawnPoint: %s\n"
            "%.3s/Z: %5d/%5d/%5d\n"
            "Last: %s\n"
-           "Spawned: %s\t Remaining: %s\t Count: %d", 
-           (const char*)sp->name(),
+           "Spawned: %s\t Remaining: %s\t Count: %d",
+           sp->name().toAscii().data(),
            showeq_params->retarded_coords ? "Y/X" : "X/Y",
            showeq_params->retarded_coords ? sp->y() : sp->x(),
            showeq_params->retarded_coords ? sp->x() : sp->y(),
            sp->z(),
-           (const char*)sp->last(), 
-           (const char*)spawned,
-           (const char*)remaining,
+           sp->last().toAscii().data(),
+           spawned.toAscii().data(),
+           remaining.toAscii().data(),
            sp->count());
 
     m_mapTip->setText( string  );
@@ -4025,7 +4261,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       if (spawn->guildID() < MAX_GUILDS)
       {
         if (!spawn->guildTag().isEmpty())
-          guild.sprintf("<%s>", (const char*)spawn->guildTag());
+          guild.sprintf("<%s>", spawn->guildTag().toAscii().data());
         else
           guild = QString::number(spawn->guildID());
       }
@@ -4051,22 +4287,22 @@ void Map::mouseMoveEvent( QMouseEvent* event )
         else
           lastName.append(" ");
       }
-      else 
+      else
         lastName = "";
 
       string.sprintf("%s %s%s\n"
              "Level: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5d\n"
-             "Race: %s\t Class: %s", 
-             (const char*)spawn->transformedName().utf8(),
-             (const char*)lastName.utf8(),
-             guild.latin1(),
-             spawn->level(), (const char*)hp,
+             "Race: %s\t Class: %s",
+             spawn->transformedName().toUtf8().data(),
+             lastName.toUtf8().data(),
+             guild.toLatin1().data(),
+             spawn->level(), hp.toAscii().data(),
              showeq_params->retarded_coords ? "Y/X" : "X/Y",
              showeq_params->retarded_coords ? spawn->y() : spawn->x(),
              showeq_params->retarded_coords ? spawn->x() : spawn->y(),
              item->z(),
-             (const char*)spawn->raceString(), 
-             (const char*)spawn->classString());
+             spawn->raceString().toAscii().data(),
+             spawn->classString().toAscii().data());
       if (m_deityPvP)
         string += " Deity: " + spawn->deityName();
 
@@ -4081,14 +4317,14 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     {
       string.sprintf("%s\n"
              "%.3s/Z: %5d/%5d/%5d\n"
-             "Race: %s\t Class: %s", 
-             (const char*)item->transformedName().utf8(),
+             "Race: %s\t Class: %s",
+             item->transformedName().toUtf8().data(),
              showeq_params->retarded_coords ? "Y/X" : "X/Y",
              showeq_params->retarded_coords ? item->y() : item->x(),
              showeq_params->retarded_coords ? item->x() : item->y(),
              item->z(),
-             (const char*)item->raceString(), 
-             (const char*)item->classString());
+             item->raceString().toAscii().data(),
+             item->classString().toAscii().data());
 
       if ((door) && (door->zonePoint() != 0xFFFFFFFF))
       {
@@ -4212,11 +4448,14 @@ const Item* Map::closestSpawnToPoint(const QPoint& pt,
     ItemConstIterator it(itemMap);
 
     // iterate over all spawns in of the current type
-    for (; it.current(); ++it)
+    while (it.hasNext())
     {
+      it.next();
       // get the item from the list
-      item = it.current();
-    
+      item = it.value();
+      if (!item)
+          break;
+
       if (m_spawnDepthFilter &&
           ((item->z() > m_param.playerHeadRoom()) ||
            (item->z() < m_param.playerFloorRoom())))
@@ -4262,12 +4501,13 @@ const SpawnPoint* Map::closestSpawnPointToPoint(const QPoint& pt,
   uint32_t distance;
   EQPoint testPoint;
 
-  QAsciiDictIterator<SpawnPoint> it(m_spawnMonitor->spawnPoints());
+  QHashIterator<QString, SpawnPoint*> it(m_spawnMonitor->spawnPoints());
   SpawnPoint* sp;
 
-  while ((sp = it.current()))
+  while (it.hasNext())
   {
-    ++it;
+    it.next();
+    sp = it.value();
 
     if (m_spawnDepthFilter &&
         ((sp->z() > m_param.playerHeadRoom()) ||
@@ -4292,7 +4532,7 @@ const SpawnPoint* Map::closestSpawnPointToPoint(const QPoint& pt,
 void Map::mapUnloaded(void)
 {
 #ifdef DEBUGMAP
-  debug ("mapUnloaded()");
+  qDebug ("mapUnloaded()");
 #endif /* DEBUGMAP */
 
   m_selectedItem = NULL;
@@ -4306,8 +4546,8 @@ void Map::mapUnloaded(void)
   // stop the map update timer
   //  m_timer->stop();
 
-  m_offscreen.resize(m_param.screenLength());
-  
+  m_offscreen = QPixmap(m_param.screenLength());
+
   // force a map refresh
   refreshMap();
   
@@ -4320,18 +4560,18 @@ void Map::mapUnloaded(void)
 void Map::mapLoaded(void)
 {
 #ifdef DEBUGMAP
-  debug ("mapLoaded()");
+  qDebug ("mapLoaded()");
 #endif /* DEBUGMAP */
 
   reAdjust();
   
   if (!m_cacheChanges)
     refreshMap();
-  
+
   // start the map update timer if necessary
   if (!m_timer->isActive())
-    m_timer->start(1000/m_frameRate, false);
-  
+    m_timer->start(1000/m_frameRate);
+
 #ifdef DEBUG
   if (m_showDebugInfo)
     m_time.restart();
@@ -4349,24 +4589,26 @@ void Map::mapUpdated(void)
 
 void Map::saveMapImage(void)
 {
-  QStrList formats(QImageIO::outputFormats());
+  QList<QByteArray> formats(QImageWriter::supportedImageFormats());
   QString filters;
-  for (char* tmp =formats.first(); tmp != 0; tmp = formats.next())
-    filters += QString(tmp) + QString(" (*.") + QString(tmp) + ")\n";
-  
-  QFileDialog fileDlg(QString::null, filters, this, "saveMapImage", true);
-  fileDlg.setCaption("Save Map Image Filename");
-  fileDlg.setMode(QFileDialog::AnyFile);
+  QList<QByteArray>::iterator it;
+  for (it = formats.begin(); it != formats.end(); ++it)
+      filters += QString(*it) + QString(" (*.") + QString(*it) + ")\n";
+
+  QFileDialog fileDlg(this, "Save Map Image Filename", QString(), filters);
 
   if (fileDlg.exec() != QDialog::Accepted)
     return;
 
   QString filter = fileDlg.selectedFilter();
-  QString filename = fileDlg.selectedFile();
+  QStringList files = fileDlg.selectedFiles();
+  QString filename;
+  if (!files.isEmpty())
+      filename = files[0];
 
   if (!filename.isEmpty())
-    m_offscreen.save(filename, 
-             filter.left(filter.find(' ')));
+    m_offscreen.save(filename.toAscii().data(),
+             filter.left(filter.indexOf(' ')).toAscii().data());
 }
 
 //----------------------------------------------------------------------
@@ -4391,17 +4633,23 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 
   QLabel* tmpLabel;
 
+  QWidget* mainWidget = new QWidget();
+  setWidget(mainWidget);
+
   // setup the vertical box
-  m_vertical = new QVBoxLayout(boxLayout());
+  m_vertical = new QVBoxLayout(mainWidget);
+  m_vertical->setContentsMargins(0, 0, 0, 0);
 
   // setup the top control window
-  m_topControlBox = new QHBox(this);
-  m_vertical->addWidget(m_topControlBox);
-  m_topControlBox->setSpacing(1);
-  m_topControlBox->setMargin(0);
+  m_topControlBox = new QWidget(this);
+  QHBoxLayout* topControlBoxLayout = new QHBoxLayout(m_topControlBox);
+  topControlBoxLayout->setSpacing(1);
+  topControlBoxLayout->setMargin(0);
+  m_topControlBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   tmpPrefString = "ShowTopControlBox";
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
     m_topControlBox->hide();
+  m_vertical->addWidget(m_topControlBox);
 
   // setup runtime filter
   m_filterMgr->registerRuntimeFilter(m_mapPreferenceName, 
@@ -4415,72 +4663,120 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_vertical->addWidget(m_map);
 
   // setup bottom control window
-  m_bottomControlBox = new QHBox(this);
-  m_vertical->addWidget(m_bottomControlBox);
-  m_bottomControlBox->setSpacing(1);
-  m_bottomControlBox->setMargin(0);
+  m_bottomControlBox = new QWidget(this);
+  QHBoxLayout* bottomControlBoxLayout = new QHBoxLayout(m_bottomControlBox);
+  bottomControlBoxLayout->setSpacing(1);
+  bottomControlBoxLayout->setMargin(0);
+  m_bottomControlBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   tmpPrefString = "ShowBottomControlBox";
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
     m_bottomControlBox->hide();
+  m_vertical->addWidget(m_bottomControlBox);
 
-  
+
   // setup Zoom control
-  m_zoomBox = new QHBox(m_topControlBox);
+  m_zoomBox = new QWidget(m_topControlBox);
+  m_zoomBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  QHBoxLayout* zoomBoxLayout = new QHBoxLayout(m_zoomBox);
+  zoomBoxLayout->setSpacing(1);
+  zoomBoxLayout->setMargin(0);
   tmpLabel = new QLabel(m_zoomBox);
   tmpLabel->setText("Zoom:");
-  m_zoom = new QSpinBox(1, 32, 1, m_zoomBox);
+  zoomBoxLayout->addWidget(tmpLabel);
+  m_zoom = new QSpinBox(m_zoomBox);
+  m_zoom->setMinimum(1);
+  m_zoom->setMaximum(32);
+  m_zoom->setSingleStep(1);
   m_zoom->setWrapping(true);
   m_zoom->setSuffix("x");
   m_zoom->setValue(m_map->zoom());
+  zoomBoxLayout->addWidget(m_zoom);
   tmpLabel->setBuddy(m_zoom);
   tmpPrefString = "ShowZoom";
+  //minimum width should be the sum of all the minimum widths of the components
+  //minimum height should be the minimum height of the tallest component
+  m_zoomBox->setMinimumSize(tmpLabel->minimumSizeHint().width() + m_zoom->minimumSizeHint().width(),
+          qMax(tmpLabel->minimumSizeHint().height(), m_zoom->minimumSizeHint().height()));
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
     m_zoomBox->hide();
   connect(m_zoom, SIGNAL(valueChanged(int)),
       m_map, SLOT(setZoom(int)));
   connect(m_map, SIGNAL(zoomChanged(int)),
       m_zoom, SLOT(setValue(int)));
+  topControlBoxLayout->addWidget(m_zoomBox);
 
   // setup Player Location display
-  m_playerLocationBox = new QHBox(m_topControlBox);
+  m_playerLocationBox = new QWidget(m_topControlBox);
+  m_playerLocationBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  QHBoxLayout* playerLocationBoxLayout = new QHBoxLayout(m_playerLocationBox);
+  playerLocationBoxLayout->setSpacing(1);
+  playerLocationBoxLayout->setMargin(0);
   tmpLabel = new QLabel(m_playerLocationBox);
   tmpLabel->setText("You:");
+  playerLocationBoxLayout->addWidget(tmpLabel);
   m_playerLocation = new QLabel(m_playerLocationBox);
   m_playerLocation->setFrameStyle(QFrame::Panel | QFrame::Sunken);
   m_playerLocation->setText("0      0      0      ");
   m_playerLocation->setMinimumWidth(90);
+  playerLocationBoxLayout->addWidget(m_playerLocation);
   tmpLabel->setBuddy(m_playerLocation);
   tmpPrefString = "ShowPlayerLocation";
+  //minimum width should be the sum of all the minimum widths of the components
+  //minimum height should be the minimum height of the tallest component
+  m_playerLocationBox->setMinimumSize(tmpLabel->minimumSizeHint().width() + m_playerLocation->minimumSizeHint().width(),
+          qMax(tmpLabel->minimumSizeHint().height(), m_playerLocation->minimumSizeHint().height()));
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, false))
     m_playerLocationBox->hide();
   connect (player, SIGNAL(posChanged(int16_t,int16_t,int16_t,
                     int16_t,int16_t,int16_t,int32_t)), 
        this, SLOT(setPlayer(int16_t,int16_t,int16_t,
                 int16_t,int16_t,int16_t,int32_t)));
+  topControlBoxLayout->addWidget(m_playerLocationBox);
 
   // setup Mouse Location display
-  m_mouseLocationBox = new QHBox(m_topControlBox);
+  m_mouseLocationBox = new QWidget(m_topControlBox);
+  m_mouseLocationBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  QHBoxLayout* mouseLocationBoxLayout = new QHBoxLayout(m_mouseLocationBox);
+  mouseLocationBoxLayout->setSpacing(1);
+  mouseLocationBoxLayout->setMargin(0);
   tmpLabel = new QLabel(m_mouseLocationBox);
   tmpLabel->setText("Cursor:");
+  mouseLocationBoxLayout->addWidget(tmpLabel);
   m_mouseLocation = new QLabel(m_mouseLocationBox);
   m_mouseLocation->setFrameStyle(QFrame::Panel | QFrame::Sunken);
   m_mouseLocation->setText("0      0      ");
-  m_mouseLocation->setMinimumWidth(70);
+  m_mouseLocation->setMinimumWidth(90);
+  mouseLocationBoxLayout->addWidget(m_mouseLocation);
   tmpLabel->setBuddy(m_mouseLocationBox);
   tmpPrefString = "ShowMouseLocation";
+  //minimum width should be the sum of all the minimum widths of the components
+  //minimum height should be the minimum height of the tallest component
+  m_mouseLocationBox->setMinimumSize(tmpLabel->minimumSizeHint().width() +
+          m_mouseLocation->minimumWidth(),
+          qMax(tmpLabel->minimumSizeHint().height(), m_mouseLocation->minimumSizeHint().height()));
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
     m_mouseLocationBox->hide();
   connect (m_map, SIGNAL(mouseLocation(int16_t, int16_t)), 
        this, SLOT(mouseLocation(int16_t, int16_t)));
+  topControlBoxLayout->addWidget(m_mouseLocationBox);
 
   // setup Filter
-  m_filterBox = new QHBox(m_topControlBox);
+  m_filterBox = new QWidget(m_topControlBox);
+  m_filterBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+  QHBoxLayout* filterBoxLayout = new QHBoxLayout(m_filterBox);
+  filterBoxLayout->setSpacing(1);
+  filterBoxLayout->setMargin(0);
   tmpLabel = new QLabel(m_filterBox);
   tmpLabel->setText("Find:");
+  filterBoxLayout->addWidget(tmpLabel);
   m_filter = new MapFilterLineEdit(m_filterBox);
-  //  m_filter->setAlignment(Qt::AlignCenter);
+  filterBoxLayout->addWidget(m_filter);
   tmpLabel->setBuddy(m_filter);
   tmpPrefString = "ShowFilter";
+  //minimum width should be the sum of all the minimum widths of the components
+  //minimum height should be the minimum height of the tallest component
+  m_filterBox->setMinimumSize(tmpLabel->minimumSizeHint().width() + m_filter->minimumSizeHint().width(),
+          qMax(tmpLabel->minimumSizeHint().height(), m_filter->minimumSizeHint().height()));
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
     m_filterBox->hide();
 #ifdef MAPFRAME_IMMEDIATE_REGEX
@@ -4490,17 +4786,31 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   connect (m_filter, SIGNAL(returnPressed()),
        this, SLOT(filterConfirmed()));
 #endif
+  topControlBoxLayout->addWidget(m_filterBox);
 
   // setup Frame Rate control
-  m_frameRateBox = new QHBox(m_bottomControlBox);
+  m_frameRateBox = new QWidget(m_bottomControlBox);
+  m_frameRateBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  QHBoxLayout* frameRateBoxLayout = new QHBoxLayout(m_frameRateBox);
+  frameRateBoxLayout->setSpacing(1);
+  frameRateBoxLayout->setMargin(0);
   tmpLabel = new QLabel(m_frameRateBox);
   tmpLabel->setText("Frame Rate:");
-  m_frameRate = new QSpinBox(1, 60, 1, m_frameRateBox);
+  frameRateBoxLayout->addWidget(tmpLabel);
+  m_frameRate = new QSpinBox(m_frameRateBox);
+  m_frameRate->setMinimum(1);
+  m_frameRate->setMaximum(60);
+  m_frameRate->setSingleStep(1);
   m_frameRate->setWrapping(true);
   m_frameRate->setSuffix(" fps");
   m_frameRate->setValue(m_map->frameRate());
+  frameRateBoxLayout->addWidget(m_frameRate);
   tmpLabel->setBuddy(m_frameRate);
   tmpPrefString = "ShowFrameRate";
+  //minimum width should be the sum of all the minimum widths of the components
+  //minimum height should be the minimum height of the tallest component
+  m_frameRateBox->setMinimumSize(tmpLabel->minimumSizeHint().width() + m_frameRate->minimumSizeHint().width(),
+          qMax(tmpLabel->minimumSizeHint().height(), m_frameRate->minimumSizeHint().height()));
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
     m_frameRateBox->hide();
   m_frameRate->setValue(m_map->frameRate());
@@ -4508,18 +4818,46 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
       m_map, SLOT(setFrameRate(int)));
   connect(m_map, SIGNAL(frameRateChanged(int)),
       m_frameRate, SLOT(setValue(int)));
+  bottomControlBoxLayout->addWidget(m_frameRateBox);
 
   // setup Pan Controls
-  m_panBox = new QHBox(m_bottomControlBox);
+  m_panBox = new QWidget(m_bottomControlBox);
+  m_panBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  QHBoxLayout* panBoxLayout = new QHBoxLayout(m_panBox);
+  panBoxLayout->setSpacing(1);
+  panBoxLayout->setMargin(0);
   tmpLabel = new QLabel(m_panBox);
   tmpLabel->setText("Pan X:");
-  m_panX = new QSpinBox(-8192, 8192, 16, m_panBox);
+  QSize panXLabelMinSize = tmpLabel->minimumSizeHint();
+  panBoxLayout->addWidget(tmpLabel);
+  m_panX = new QSpinBox(m_panBox);
+  m_panX->setMinimum(-8192);
+  m_panX->setMaximum(8192);
+  m_panX->setSingleStep(16);
   m_panX->setValue(m_map->panOffsetX());
+  panBoxLayout->addWidget(m_panX);
   tmpLabel = new QLabel(m_panBox);
   tmpLabel->setText("Y:");
-  m_panY = new QSpinBox(-8192, 8192, 16, m_panBox);
+  QSize panYLabelMinSize = tmpLabel->minimumSizeHint();
+  panBoxLayout->addWidget(tmpLabel);
+  m_panY = new QSpinBox(m_panBox);
+  m_panY->setMinimum(-8192);
+  m_panY->setMaximum(8192);
+  m_panY->setSingleStep(16);
   m_panY->setValue(m_map->panOffsetY());
+  panBoxLayout->addWidget(m_panY);
   tmpPrefString = "ShowPanControls";
+  //minimum width should be the sum of all the minimum widths of the components
+  //minimum height should be the minimum height of the tallest component
+  m_panBox->setMinimumSize(
+          //width
+          panXLabelMinSize.width() + m_panX->minimumSizeHint().width() +
+          panYLabelMinSize.width() + m_panY->minimumSizeHint().width(),
+          //height
+          qMax(panYLabelMinSize.height(),
+              qMax(m_panY->minimumSizeHint().height(),
+                  qMax(panXLabelMinSize.height(),
+                      m_panX->minimumSizeHint().height()))));
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
     m_panBox->hide();
   connect(m_panX, SIGNAL(valueChanged(int)),
@@ -4530,17 +4868,47 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
       m_panX, SLOT(setValue(int)));
   connect(m_map, SIGNAL(panYChanged(int)),
       m_panY, SLOT(setValue(int)));
+  bottomControlBoxLayout->addWidget(m_panBox);
 
-  m_depthControlBox = new QHBox(m_bottomControlBox);
+  m_depthControlBox = new QWidget(m_bottomControlBox);
+  m_depthControlBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  QHBoxLayout* depthControlBoxLayout = new QHBoxLayout(m_depthControlBox);
+  depthControlBoxLayout->setSpacing(1);
+  depthControlBoxLayout->setMargin(0);
   tmpLabel = new QLabel(m_depthControlBox);
   tmpLabel->setText("Head:");
-  m_head = new QSpinBox(5, 3000, 10, m_depthControlBox);
+  QSize depthHeadLabelMinSize = tmpLabel->minimumSizeHint();
+  depthControlBoxLayout->addWidget(tmpLabel);
+  m_head = new QSpinBox(m_depthControlBox);
+  m_head->setMinimum(5);
+  m_head->setMaximum(3000);
+  m_head->setSingleStep(10);
   m_head->setValue(m_map->headRoom());
+  depthControlBoxLayout->addWidget(m_head);
   tmpLabel = new QLabel(m_depthControlBox);
   tmpLabel->setText("Floor:");
-  m_floor = new QSpinBox(5, 3000, 10, m_depthControlBox);
+  QSize depthFloorLabelMinSize = tmpLabel->minimumSizeHint();
+  depthControlBoxLayout->addWidget(tmpLabel);
+  m_floor = new QSpinBox(m_depthControlBox);
+  m_floor->setMinimum(5);
+  m_floor->setMaximum(3000);
+  m_floor->setSingleStep(10);
   m_floor->setValue(m_map->floorRoom());
+  depthControlBoxLayout->addWidget(m_floor);
   tmpPrefString = "ShowDepthFilterControls";
+  //minimum width should be the sum of all the minimum widths of the components
+  //minimum height should be the minimum height of the tallest component
+  m_depthControlBox->setMinimumSize(
+          //width
+          depthHeadLabelMinSize.width() +
+          m_panX->minimumSizeHint().width() +
+          depthFloorLabelMinSize.width() +
+          m_floor->minimumSizeHint().width(),
+          //height
+          qMax(depthHeadLabelMinSize.height(),
+              qMax(m_panX->minimumSizeHint().height(),
+                  qMax(depthFloorLabelMinSize.height(),
+                      m_floor->minimumSizeHint().height()))));
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 
                   (m_map->mapLineStyle() == tMap_DepthFiltered)))
     m_depthControlBox->hide();
@@ -4552,64 +4920,70 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
       m_map, SLOT(setFloorRoom(int)));
   connect(m_map, SIGNAL(floorRoomChanged(int)),
       m_floor, SLOT(setValue(int)));
+  bottomControlBoxLayout->addWidget(m_depthControlBox);
 
   // add our own menu items to the maps menu
-  QPopupMenu* mapMenu = m_map->menu();
+  QMenu* mapMenu = m_map->menu();
 
   // insert a seperator to seperate our stuff from the rest
-  mapMenu->insertSeparator(-1);
-  m_id_topControl = mapMenu->insertItem("Show Top Controls",
-                    this, SLOT(toggle_top_controls(int)));
+  mapMenu->addSeparator();
 
-  m_id_bottomControl = mapMenu->insertItem("Show Bottom Controls",
-                       this, 
-                       SLOT(toggle_bottom_controls(int)));
+  m_action_topControl = mapMenu->addAction("Show Top Controls", this,
+          SLOT(toggle_top_controls()));
+  m_action_topControl->setCheckable(true);
 
-  mapMenu->insertItem("Status Font...",
-              this, 
-              SLOT(set_font(int)));
+  m_action_bottomControl = mapMenu->addAction("Show Bottom Controls", this,
+                       SLOT(toggle_bottom_controls()));
+  m_action_bottomControl->setCheckable(true);
+
+  mapMenu->addAction("Status Font...", this, SLOT(set_font()));
 
   // insert a seperator to seperate main controls from sub-menus
-  mapMenu->insertSeparator(-1);
-  
-  QPopupMenu* subMenu;
-  subMenu = new QPopupMenu();
-  subMenu->setCheckable(true);
-  m_id_zoom = subMenu->insertItem("Show Zoom Controls", 
-                  this, SLOT(toggle_zoom(int)));
-  m_id_playerLocation = subMenu->insertItem("Show Player Location",
-                        this, 
-                        SLOT(toggle_playerLocation(int)));
-  m_id_mouseLocation = subMenu->insertItem("Show Mouse Location",
-                       this, 
-                       SLOT(toggle_mouseLocation(int)));
+  mapMenu->addSeparator();
 
-  m_id_filter = subMenu->insertItem("Show Find",
-                    this, SLOT(toggle_filter(int)));
+  QMenu* subMenu = new QMenu("Top Controls");
 
-  m_id_topControl_Options = mapMenu->insertItem("Top Controls", subMenu);
+  m_action_zoom = subMenu->addAction("Show Zoom Controls", this,
+          SLOT(toggle_zoom()));
+  m_action_zoom->setCheckable(true);
 
-  subMenu = new QPopupMenu();
-  subMenu->setCheckable(true);
-  m_id_frameRate = subMenu->insertItem("Show Frame Rate",
-                       this, SLOT(toggle_frameRate(int)));
-  m_id_pan = subMenu->insertItem("Show Pan",
-                 this, SLOT(toggle_pan(int)));
-  m_id_depthControlRoom = subMenu->insertItem("Show Depth Filter Controls",
-                       this, 
-                       SLOT(toggle_depthControls(int)));
-  m_id_bottomControl_Options = mapMenu->insertItem("Bottom Controls", subMenu);
+  m_action_playerLocation = subMenu->addAction("Show Player Location", this,
+          SLOT(toggle_playerLocation()));
+  m_action_playerLocation->setCheckable(true);
+
+  m_action_mouseLocation = subMenu->addAction("Show Mouse Location", this,
+          SLOT(toggle_mouseLocation()));
+  m_action_mouseLocation->setCheckable(true);
+
+  m_action_filter = subMenu->addAction("Show Find", this, SLOT(toggle_filter()));
+  m_action_filter->setCheckable(true);
+
+  m_action_topControl_Options = mapMenu->addMenu(subMenu);
+
+  subMenu = new QMenu("Bottom Controls");
+
+  m_action_frameRate = subMenu->addAction("Show Frame Rate", this,
+          SLOT(toggle_frameRate()));
+  m_action_frameRate->setCheckable(true);
+
+  m_action_pan = subMenu->addAction("Show Pan", this, SLOT(toggle_pan()));
+  m_action_pan->setCheckable(true);
+
+  m_action_depthControlRoom = subMenu->addAction("Show Depth Filter Controls",
+                       this, SLOT(toggle_depthControls()));
+  m_action_depthControlRoom->setCheckable(true);
+
+  m_action_bottomControl_Options = mapMenu->addMenu(subMenu);
 
   // setup signal to initialize menu items when the map is about to be displayeed
-  connect(mapMenu, SIGNAL(aboutToShow()),
-      this, SLOT(init_Menu()));
+  connect(mapMenu, SIGNAL(aboutToShow()), this, SLOT(init_Menu()));
 }
 
 MapFrame::~MapFrame()
 {
 }
 
-QPopupMenu* MapFrame::menu()
+QMenu* MapFrame::menu()
 {
   return m_map->menu();
 }
@@ -4639,12 +5013,12 @@ void MapFrame::setregexp(const QString &str)
     needCommit = true;
   }
 
+  m_lastFilter = str;
+
   if(str.isEmpty()) 
     regexpok(0);
   else
   {
-    m_lastFilter = str;
-
     bool valid = m_filterMgr->runtimeFilterAddFilter(m_runtimeFilterFlag, str);
     
     needCommit = true;
@@ -4710,7 +5084,7 @@ void MapFrame::dumpInfo(QTextStream& out)
 {
   // first dump information about the map frame
   out << "[" << preferenceName() << "]" << endl;
-  out << "Caption: " << caption() << endl;
+  out << "Caption: " << windowTitle() << endl;
   out << "ShowStatusBox: " << m_topControlBox->isVisible() << endl;
   out << "ShowZoom: " << m_zoomBox->isVisible() << endl;
   out << "ShowPlayerLocation: " << m_playerLocationBox->isVisible() << endl;
@@ -4732,35 +5106,26 @@ void MapFrame::dumpInfo(QTextStream& out)
 
 void MapFrame::init_Menu(void)
 {
-  QPopupMenu* mapMenu = m_map->menu();
-  mapMenu->setItemEnabled(m_id_topControl_Options, 
-              m_topControlBox->isVisible());
-  mapMenu->setItemChecked(m_id_topControl,
-              m_topControlBox->isVisible());
+  QMenu* mapMenu = m_map->menu();
+  m_action_topControl->setChecked(m_topControlBox->isVisible());
   if (m_topControlBox->isVisible())
   {
-    mapMenu->setItemChecked(m_id_zoom, m_zoomBox->isVisible());
-    mapMenu->setItemChecked(m_id_playerLocation, 
-                m_playerLocationBox->isVisible());
-    mapMenu->setItemChecked(m_id_mouseLocation, 
-                m_mouseLocation->isVisible());
-    mapMenu->setItemChecked(m_id_filter, m_filterBox->isVisible());
+    m_action_zoom->setChecked(m_zoomBox->isVisible());
+    m_action_playerLocation->setChecked(m_playerLocationBox->isVisible());
+    m_action_mouseLocation->setChecked(m_mouseLocation->isVisible());
+    m_action_filter->setChecked(m_filterBox->isVisible());
   }
 
-  mapMenu->setItemEnabled(m_id_bottomControl_Options,
-              m_bottomControlBox->isVisible());
-  mapMenu->setItemChecked(m_id_bottomControl,
-              m_bottomControlBox->isVisible());
+  m_action_bottomControl->setChecked(m_bottomControlBox->isVisible());
   if (m_bottomControlBox->isVisible())
   {
-    mapMenu->setItemChecked(m_id_frameRate, m_frameRateBox->isVisible());
-    mapMenu->setItemChecked(m_id_pan, m_panBox->isVisible());
-    mapMenu->setItemChecked(m_id_depthControlRoom, 
-                m_depthControlBox->isVisible());
+    m_action_frameRate->setChecked(m_frameRateBox->isVisible());
+    m_action_pan->setChecked(m_panBox->isVisible());
+    m_action_depthControlRoom->setChecked(m_depthControlBox->isVisible());
   }
 }
 
-void MapFrame::toggle_top_controls(int id)
+void MapFrame::toggle_top_controls()
 {
   if (m_topControlBox->isVisible())
     m_topControlBox->hide();
@@ -4775,7 +5140,7 @@ void MapFrame::toggle_top_controls(int id)
   }
 }
 
-void MapFrame::toggle_bottom_controls(int id)
+void MapFrame::toggle_bottom_controls()
 {
   if (m_bottomControlBox->isVisible())
     m_bottomControlBox->hide();
@@ -4790,9 +5155,9 @@ void MapFrame::toggle_bottom_controls(int id)
   }
 }
 
-void MapFrame::set_font(int id)
+void MapFrame::set_font()
 {
-  QString name = caption() + " Font";
+  QString name = windowTitle() + " Font";
   bool ok = false;
 
   // setup a default new status font
@@ -4809,7 +5174,7 @@ void MapFrame::set_font(int id)
     setWindowFont(newFont);
 }
 
-void MapFrame::toggle_zoom(int id)
+void MapFrame::toggle_zoom()
 {
   if (m_zoomBox->isVisible())
     m_zoomBox->hide();
@@ -4824,7 +5189,7 @@ void MapFrame::toggle_zoom(int id)
   }
 }
 
-void MapFrame::toggle_playerLocation(int id)
+void MapFrame::toggle_playerLocation()
 {
   if (m_playerLocationBox->isVisible())
     m_playerLocationBox->hide();
@@ -4839,7 +5204,7 @@ void MapFrame::toggle_playerLocation(int id)
   }
 }
 
-void MapFrame::toggle_mouseLocation(int id)
+void MapFrame::toggle_mouseLocation()
 {
   if (m_mouseLocationBox->isVisible())
     m_mouseLocationBox->hide();
@@ -4854,7 +5219,7 @@ void MapFrame::toggle_mouseLocation(int id)
   }
 }
 
-void MapFrame::toggle_filter(int id)
+void MapFrame::toggle_filter()
 {
   if (m_filterBox->isVisible())
     m_filterBox->hide();
@@ -4869,7 +5234,7 @@ void MapFrame::toggle_filter(int id)
   }
 }
 
-void MapFrame::toggle_frameRate(int id)
+void MapFrame::toggle_frameRate()
 {
   if (m_frameRateBox->isVisible())
     m_frameRateBox->hide();
@@ -4884,7 +5249,7 @@ void MapFrame::toggle_frameRate(int id)
   }
 }
 
-void MapFrame::toggle_pan(int id)
+void MapFrame::toggle_pan()
 {
   if (m_panBox->isVisible())
     m_panBox->hide();
@@ -4899,7 +5264,7 @@ void MapFrame::toggle_pan(int id)
   }
 }
 
-void MapFrame::toggle_depthControls(int id)
+void MapFrame::toggle_depthControls()
 {
   if (m_depthControlBox->isVisible())
     m_depthControlBox->hide();

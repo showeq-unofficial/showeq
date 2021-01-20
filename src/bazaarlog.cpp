@@ -1,14 +1,27 @@
 /*
- * packetlog.cpp
+ *  bazaarlog.cpp
+ *  Copyright 2003-2007, 2009, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <qdatetime.h>
-#include <ctype.h>
+#include <QDateTime>
+#include <cctype>
 
 #include "bazaarlog.h"
 #include "spawnshell.h"
@@ -45,16 +58,16 @@ void BazaarLog::bazaarSearch(const uint8_t* data, size_t len, uint8_t dir)
       const struct bazaarSearchResponseStruct& resp = r[i];
 
       // First copy and remove count from item name
-      char name[256];
+      char name[256] = { 0 };
       // assert(255>sizeof(resp.item_name));
-      strncpy(name,resp.item_name,sizeof(resp.item_name));
+      strncpy(name,resp.item_name,qMin(static_cast<unsigned long>(sizeof(resp.item_name)), 255UL));
       char *p;
       if ((p = rindex(name,'(')) != NULL && isdigit(*(p+1)))
 	*p=0;
-      Item *merchant = m_shell.spawns().find(resp.player_id);
+      Item *merchant = m_shell.spawns().value(resp.player_id, nullptr);
       const char *merchant_name = "unknown";
       if (merchant)
-	merchant_name = merchant->name();
+	merchant_name = merchant->name().toAscii().data();
       QString csv;
       csv.sprintf("1^%d^%d^%d^%s^%s",
 		  int(time(NULL)),resp.price,resp.count,

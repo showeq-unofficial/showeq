@@ -1,11 +1,24 @@
 /*
- * guildlist.h
+ *  guildlist.h
+ *  Copyright 2004 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2006, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2004 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef _GUILDLIST_H_
@@ -14,15 +27,16 @@
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #else
-#include <stdint.h>
+#include <cstdint>
 #endif
 
 #include "seqwindow.h"
-#include "seqlistview.h" 
+#include "seqlistview.h"
 
-#include <qlistview.h>
-#include <qptrdict.h>
-#include <qstring.h>
+#include <QHash>
+#include <QString>
+#include <QLabel>
+#include <QMenu>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -33,7 +47,7 @@ class GuildShell;
 
 class QLabel;
 class QLineEdit;
-class QPopupMenu;
+class QMenu;
 
 //--------------------------------------------------
 // constants
@@ -50,23 +64,22 @@ const int tGuildListColMaxCols = 9;
 
 //----------------------------------------------------------------------
 // GuildListItem
-class GuildListItem : public QListViewItem
+class GuildListItem : public SEQListViewItem
 {
  public:
-  GuildListItem(QListView* parent,
-		const GuildMember* member, 
-		const GuildShell* guildShell);
-  virtual ~GuildListItem();
+   GuildListItem(SEQListView* parent,
+                 const GuildMember* member,
+                 const GuildShell* guildShell);
+   virtual ~GuildListItem();
 
-   virtual void paintCell( QPainter *p, const QColorGroup &cg,
-                           int column, int width, int alignment );
-
-   virtual int compare(QListViewItem *i, int col, bool ascending) const;
+   bool operator<(const GuildListItem& other) const;
 
    void update(const GuildShell* guildShell);
 
-   const GuildMember* guildMember() { return m_member; }
+   const GuildMember* guildMember() const { return m_member; }
    void setGuildMember(const GuildMember* member);
+
+   QVariant data(int column, int role) const;
 
    virtual int rtti() const;
 
@@ -85,7 +98,7 @@ class GuildListWindow : public SEQWindow
 		  QWidget* parent = 0, const char* name = 0);
   ~GuildListWindow();
 
-  virtual QPopupMenu* menu();
+  virtual QMenu* menu();
 
  public slots: 
   void cleared();
@@ -95,12 +108,13 @@ class GuildListWindow : public SEQWindow
 
  protected slots:
   void init_Menu(void);
-  void toggle_showOffline(int id);
-  void toggle_keepSorted(int id);
-  void toggle_showAlts(int id);
-  void toggle_guildListCol(int id);
-  void set_font(int id);
-  void set_caption(int id);
+  void toggle_showOffline(bool enable);
+  void toggle_keepSorted(bool enable);
+  void toggle_showAlts(bool enable);
+  void toggle_guildListCol(QAction* col);
+  void set_font();
+  void set_caption();
+  void listMouseRightButtonPressed(QMouseEvent*);
 
  protected:
   void clear(void);
@@ -109,13 +123,13 @@ class GuildListWindow : public SEQWindow
 
   Player* m_player;
   GuildShell* m_guildShell;
-  
+
   QLabel* m_guildName;
   QLabel* m_guildTotals;
   SEQListView* m_guildList;
-  QPtrDict<GuildListItem> m_guildListItemDict;
-  QPopupMenu* m_menu;
-  int m_id_guildList_Cols[tGuildListColMaxCols];
+  QHash<void*, GuildListItem*> m_guildListItemDict;
+  QMenu* m_menu;
+  QAction* m_action_guildList_Cols[tGuildListColMaxCols];
 
   uint32_t m_membersOn;
   bool m_showOffline;

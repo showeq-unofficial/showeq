@@ -1,35 +1,46 @@
-
 /*
- * editor.cpp
+ *  editor.cpp - text file editor
+ *  Copyright 2001-2007, 2019 by the respective ShowEQ Developers
  *
- * text file editor
- *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2002-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /* Implementation of text editor class */
 #include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cerrno>
 
-#include <qapplication.h>
-#include <qtoolbar.h> 
-#include <qstatusbar.h> 
-#include <qpopupmenu.h> 
-#include <qmenubar.h> 
-#include <qmainwindow.h> 
-#include <qfiledialog.h> 
-#include <qtoolbutton.h> 
-#include <qtextstream.h> 
-#include <qpaintdevice.h> 
-#include <qobject.h> 
-#include <qmultilineedit.h>
-#include <qmessagebox.h>
+#include <QToolBar>
+#include <QStatusBar>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMainWindow>
+#include <QFileDialog>
+#include <QToolButton>
+#include <QTextStream>
+#include <QPaintDevice>
+#include <QObject>
+#include <QTextEdit>
+#include <QMessageBox>
+#include <QPixmap>
+#include <QCloseEvent>
 
 #include "util.h"
 
@@ -82,41 +93,35 @@ static const char *fileopen[] = {
 };
 
 EditorWindow::EditorWindow(const char *fileName)
-     : QMainWindow( 0, "ShowEQ - Editor", WDestructiveClose )
+     : QMainWindow( 0 )
  {
-     int id;
-  
+     setObjectName("ShowEQ - Editor");
+     setAttribute(Qt::WA_DeleteOnClose);
      QPixmap openIcon, saveIcon;
- 
-     fileTools = new QToolBar( this, "file operations" );
+     openIcon = QPixmap( fileopen );
+     saveIcon = QPixmap( filesave );
 
-     fileTools->setLabel( tr( "File Operations" ) );
- 
-        openIcon = QPixmap( fileopen );
-	new QToolButton( openIcon, "Open File", QString::null,
-                               this, SLOT(load()), fileTools, "open file" );
-    
-        saveIcon = QPixmap( filesave );
-        new QToolButton( saveIcon, "Save File", QString::null,
-                               this, SLOT(save()), fileTools, "save file" );
- 
-     QPopupMenu * file = new QPopupMenu( this );
-     menuBar()->insertItem( "&File", file );
- 
-     id = file->insertItem( openIcon, "&Open",
-                            this, SLOT(load()), CTRL+Key_O );
- 
-     id = file->insertItem( saveIcon, "&Save",
-                            this, SLOT(save()), CTRL+Key_S );
+     fileTools = new QToolBar(this);
+     fileTools->setWindowTitle( tr( "File Operations" ) );
+     fileTools->addAction(openIcon, "Open File", this, SLOT(load()));
+     fileTools->addAction(saveIcon, "Save File", this, SLOT(save()));
+     addToolBar(fileTools);
 
-     file->insertSeparator();
-     file->insertItem( "&Close Editor", this, SLOT(close()), CTRL+Key_W );
+     QMenu * file = new QMenu("&File", this);
+     menuBar()->addMenu(file);
 
-     e = new QMultiLineEdit( this, "editor" );
+     file->addAction( openIcon, "&Open", this, SLOT(load()), Qt::CTRL+Qt::Key_O );
+
+     file->addAction( saveIcon, "&Save", this, SLOT(save()), Qt::CTRL+Qt::Key_S );
+     file->addSeparator();
+     file->addAction( "&Close Editor", this, SLOT(close()), Qt::CTRL+Qt::Key_W );
+
+     e = new QTextEdit(this);
+     e->setObjectName("editor");
      e->setFocus();
      setCentralWidget( e );
 
-     statusBar()->message( "Ready", 2000 );
+     statusBar()->showMessage( "Ready", 2000 );
 
      resize( 600, 450 );
      filename = (QString)fileName;
@@ -129,37 +134,34 @@ EditorWindow::EditorWindow(const char *fileName)
 
  void EditorWindow::load()
  {
-     QString fn = QFileDialog::getOpenFileName( QString::null, QString::null,
-                                                this);
+     QString fn = QFileDialog::getOpenFileName(this);
      if ( !fn.isEmpty() )
-         load( fn );
+         load(fn.toAscii().data());
      else
-         statusBar()->message( "File Open Cancelled", 2000 );
+         statusBar()->showMessage( "File Open Cancelled", 2000 );
  }
 
  void EditorWindow::load( const char *fileName )
  {
      QFile f( fileName );
-     if ( !f.open( IO_ReadOnly ) )
+     if ( !f.open( QIODevice::ReadOnly ) )
          return;
 
-     e->setAutoUpdate( FALSE );
      e->clear();
 
      QTextStream t(&f);
-     while ( !t.eof() ) {
+     while ( !t.atEnd() ) {
          QString s = t.readLine();
          e->append( s );
      }
      f.close();
 
-     e->setAutoUpdate( TRUE );
      e->repaint();
-     e->setEdited( FALSE );
-     setCaption( fileName );
+     e->document()->setModified( FALSE );
+     setWindowTitle( fileName );
      QString s;
      s.sprintf( "Opened %s", fileName );
-     statusBar()->message( s, 2000 );
+     statusBar()->showMessage( s, 2000 );
  }
 
  void EditorWindow::save()
@@ -169,10 +171,10 @@ EditorWindow::EditorWindow(const char *fileName)
          return;
      }
 
-     QString text = e->text();
+     QString text = e->toPlainText();
      QFile f( filename );
-     if ( !f.open( IO_WriteOnly ) ) {
-         statusBar()->message( QString("Could not write to %1").arg(filename),
+     if ( !f.open( QIODevice::WriteOnly ) ) {
+         statusBar()->showMessage( QString("Could not write to %1").arg(filename),
                                2000 );
          return;
      }
@@ -181,28 +183,27 @@ EditorWindow::EditorWindow(const char *fileName)
      t << text;
      f.close();
 
-     e->setEdited( FALSE );
+     e->document()->setModified( FALSE );
 
-     setCaption( filename );
+     setWindowTitle( filename );
 
-     statusBar()->message( QString( "Saved %1" ).arg( filename ), 2000 );
+     statusBar()->showMessage( QString( "Saved %1" ).arg( filename ), 2000 );
  }
 
  void EditorWindow::saveAs()
  {
-     QString fn = QFileDialog::getSaveFileName( QString::null, QString::null,
-                                                this );
+     QString fn = QFileDialog::getSaveFileName(this);
      if ( !fn.isEmpty() ) {
          filename = fn;
          save();
      } else {
-         statusBar()->message( "Saving cancelled", 2000 );
+         statusBar()->showMessage( "Saving cancelled", 2000 );
      }
  }
 
  void EditorWindow::closeEvent( QCloseEvent* ce )
  {
-     if ( !e->edited() ) {
+     if ( !e->document()->isModified() ) {
          ce->accept();
          return;
      }

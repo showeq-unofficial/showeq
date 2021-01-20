@@ -2440,6 +2440,10 @@
    <bool value="true" />
    <comment>Dock Spawn List</comment>
   </property>
+  <property name="DockedSpawnPoint" >
+   <bool value="true" />
+   <comment>Dock Spawn Point List</comment>
+  </property>
   <property name="DockedSpellList" >
    <bool value="true" />
    <comment>Dock Spell List</comment>

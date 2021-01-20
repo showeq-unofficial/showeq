@@ -1,8 +1,24 @@
 /*
- * spawnlist.h
+ *  spawnlist.h
+ *  Copyright 2000 Maerlyn (MaerlynTheWiz@yahoo.com)
+ *  Copyright 2001-2005, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://www.hackersquest.gomp.ch/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /*
@@ -24,23 +40,20 @@
 #ifndef SPAWNLIST_H
 #define SPAWNLIST_H
 
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
+#include <cstdio>
 #include <sys/time.h>
 
-#include <qvaluelist.h>
-#include <qlistview.h>
-#include <qptrdict.h>
-#include <qtextstream.h>
+#include <QHash>
+#include <QTextStream>
+#include <QMenu>
 
 // these are all used for the CFilterDlg
 #include <regex.h>
 
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qhbox.h>
-#include <qvbox.h>
-#include <qpushbutton.h>
+#include <QLabel>
+#include <QLayout>
+#include <QPushButton>
 
 #include "seqwindow.h"
 #include "seqlistview.h"
@@ -72,7 +85,7 @@ public:
 	     QWidget *parent = 0, const char * name = 0);
 
    SpawnListItem* Selected();
-   SpawnListItem* Find(QListViewItemIterator& it, 
+   SpawnListItem* Find(SEQListViewItemIterator& it, 
 		       const Item* item, 
 		       bool first = false);
 
@@ -108,13 +121,14 @@ public slots:
    void playerLevelChanged(uint8_t);
    
 private slots:
-   void selChanged(QListViewItem*);
+   void selChanged();
 
-   void mousePressEvent (int button, QListViewItem *litem, const QPoint &point, int col);
-   void mouseDoubleClickEvent(QListViewItem *litem);
+   void listItemPressed(QTreeWidgetItem* litem, int col);
+   void listMouseRightButtonPressed(QMouseEvent* event);
+   void listItemDoubleClicked(QTreeWidgetItem* litem, int col);
 
 private:
-   void setSelectedQuiet(QListViewItem* item, bool selected);
+   void setSelectedQuiet(SEQListViewItem* item, bool selected);
    void populateSpawns(void);
    void populateCategory(const Category* cat);
    QString filterString(const Item *item, int flags = 0);
@@ -125,7 +139,7 @@ private:
    SpawnShell* m_spawnShell;
 
    // category pointer used as keys to look up the associated SpawnListItem
-   QPtrDict<SpawnListItem> m_categoryListItems;
+   QHash<void*, SpawnListItem*> m_categoryListItems;
 
    SpawnListMenu* m_menu;
 
@@ -141,7 +155,7 @@ class SpawnListWindow : public SEQWindow
 		  CategoryMgr* categoryMgr,
 		  QWidget* parent = 0, const char* name = 0);
   ~SpawnListWindow();
-  virtual QPopupMenu* menu();
+  virtual QMenu* menu();
   SpawnList* spawnList() { return m_spawnList; }
 
  public slots:

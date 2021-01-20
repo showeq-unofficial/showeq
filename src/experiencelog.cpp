@@ -1,10 +1,23 @@
 /*
  *  experiencelog.cpp
+ *  Copyright 2001-2007, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 
@@ -17,15 +30,18 @@
 #include "diagnosticmessages.h"
 #include "zonemgr.h"
 
-#include <stdio.h>
-#include <time.h>
+#include <cstdio>
+#include <ctime>
 
-#include <qgrid.h>
-#include <qtimer.h>
-#include <qhbox.h>
-#include <qvgroupbox.h>
-#include <qmessagebox.h>
-#include <qfileinfo.h>
+#include <QTimer>
+#include <QGroupBox>
+#include <QMessageBox>
+#include <QFileInfo>
+#include <QResizeEvent>
+#include <QGridLayout>
+#include <QLabel>
+#include <QMenu>
+#include <QVBoxLayout>
 
 #define DEBUGEXP
 
@@ -136,6 +152,9 @@ ExperienceWindow::~ExperienceWindow()
 {
   if (m_log)
     ::fclose(m_log);
+
+   qDeleteAll(m_exp_list);
+   m_exp_list.clear();
 }
 
 ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr, 
@@ -148,6 +167,9 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
     m_group(groupMgr),
     m_zoneMgr(zoneMgr)
 {
+    if (!name)
+        setObjectName("Experience");
+
   /* Hopefully this is only called once to set up the window,
      so this is a good place to initialize some things which
      otherwise won't be. */
@@ -157,40 +179,76 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
    m_calcZEM=0;
    m_ZEMviewtype = 0;
 
-   m_view_menu = new QPopupMenu( this );
-   m_view_menu->insertItem( "&All Mobs", this, SLOT(viewAll()) );
-   m_view_menu->insertItem( "Previous &15 Minutes", this, SLOT(view15Minutes()) );
-   m_view_menu->insertItem( "Previous &30 Minutes", this, SLOT(view30Minutes()) );
-   m_view_menu->insertItem( "Previous &60 Minutes", this, SLOT(view60Minutes()) );
-   m_view_menu->setItemChecked( m_view_menu->idAt(0), true );
+   QAction* tmpAction;
 
-   m_view_menu->insertSeparator();
-   m_exp_rate_menu = new QPopupMenu( this );
-   m_exp_rate_menu->insertItem( "per &minute", this, SLOT(viewRatePerMinute()) );
-   m_exp_rate_menu->insertItem( "per &hour", this, SLOT(viewRatePerHour()) );
-   m_exp_rate_menu->setItemChecked( m_exp_rate_menu->idAt(0), true );
-   m_view_menu->insertItem( "Experience &Rate", m_exp_rate_menu );
+   m_view_menu = new QMenu("&View");
+   QActionGroup* view_time_action_group = new QActionGroup(m_view_menu);
 
-   m_view_menu->insertSeparator();
-   m_view_menu->insertItem( "Clear Kills", this, SLOT(viewClear()) );
+   tmpAction = m_view_menu->addAction( "&All Mobs", this, SLOT(viewAll()) );
+   tmpAction->setCheckable(true);
+   tmpAction->setChecked(true);
+   view_time_action_group->addAction(tmpAction);
+   tmpAction = m_view_menu->addAction( "Previous &15 Minutes", this, SLOT(view15Minutes()) );
+   tmpAction->setCheckable(true);
+   view_time_action_group->addAction(tmpAction);
+   tmpAction = m_view_menu->addAction( "Previous &30 Minutes", this, SLOT(view30Minutes()) );
+   tmpAction->setCheckable(true);
+   view_time_action_group->addAction(tmpAction);
+   tmpAction = m_view_menu->addAction( "Previous &60 Minutes", this, SLOT(view60Minutes()) );
+   tmpAction->setCheckable(true);
+   view_time_action_group->addAction(tmpAction);
+   view_time_action_group->setExclusive(true);
 
-   m_view_menu->insertSeparator();
-   m_ZEM_menu = new QPopupMenu( this );
-   m_ZEM_menu->insertItem( "Calculated Value", this, SLOT(viewZEMcalculated()) );
-   m_ZEM_menu->insertItem( "Raw Value", this, SLOT(viewZEMraw()) );
-   m_ZEM_menu->insertItem( "Percent Bonus", this, SLOT(viewZEMpercent()) );
-   m_ZEM_menu->setItemChecked( m_ZEM_menu->idAt(0), true );
-   m_view_menu->insertItem( "ZEM View Options", m_ZEM_menu );
-   m_view_menu->insertItem( "Calculate ZEM on next kill", this, SLOT(calcZEMNextKill()) );
+   m_view_menu->addSeparator();
+   QActionGroup* exp_rate_action_group = new QActionGroup(m_view_menu);
+   m_exp_rate_menu = new QMenu("Experience &Rate");
+   tmpAction = m_exp_rate_menu->addAction( "per &minute", this, SLOT(viewRatePerMinute()) );
+   tmpAction->setCheckable(true);
+   tmpAction->setChecked(true);
+   exp_rate_action_group->addAction(tmpAction);
+   tmpAction = m_exp_rate_menu->addAction( "per &hour", this, SLOT(viewRatePerHour()) );
+   exp_rate_action_group->addAction(tmpAction);
+   tmpAction->setCheckable(true);
+   exp_rate_action_group->setExclusive(true);
 
-   m_layout = new QVBoxLayout(boxLayout());
+   m_view_menu->addMenu(m_exp_rate_menu);
+
+   m_view_menu->addSeparator();
+   m_view_menu->addAction( "Clear Kills", this, SLOT(viewClear()) );
+
+   m_view_menu->addSeparator();
+   m_ZEM_menu = new QMenu("ZEM View Options");
+   QActionGroup* zem_options_action_group = new QActionGroup(m_view_menu);
+   tmpAction = m_ZEM_menu->addAction( "Calculated Value", this, SLOT(viewZEMcalculated()) );
+   tmpAction->setCheckable(true);
+   tmpAction->setChecked(true);
+   zem_options_action_group->addAction(tmpAction);
+   tmpAction = m_ZEM_menu->addAction( "Raw Value", this, SLOT(viewZEMraw()) );
+   tmpAction->setCheckable(true);
+   zem_options_action_group->addAction(tmpAction);
+   tmpAction = m_ZEM_menu->addAction( "Percent Bonus", this, SLOT(viewZEMpercent()) );
+   tmpAction->setCheckable(true);
+   zem_options_action_group->addAction(tmpAction);
+   zem_options_action_group->setExclusive(true);
+
+   m_view_menu->addMenu(m_ZEM_menu);
+
+   m_action_calc_zem = m_view_menu->addAction( "Calculate ZEM on next kill",
+           this, SLOT(calcZEMNextKill()) );
+   m_action_calc_zem->setCheckable(true);
+
+   QWidget* mainWidget = new QWidget();
+   setWidget(mainWidget);
+
+   m_layout = new QVBoxLayout(mainWidget);
+   m_layout->setContentsMargins(0, 0, 0, 0);
 
    m_menu_bar = new QMenuBar( this );
-   m_menu_bar->insertItem( "&View", m_view_menu );
+   m_menu_bar->addMenu(m_view_menu );
    //m_layout->addSpacing( m_menu_bar->height() + 5 );
    m_layout->addWidget(m_menu_bar);
 
-   QGroupBox *listGBox = new QVGroupBox( "Experience Log", this );
+   QGroupBox *listGBox = new QGroupBox( "Experience Log", this );
    m_layout->addWidget( listGBox );
 
    m_exp_listview = new SEQListView(preferenceName(), listGBox);
@@ -202,50 +260,60 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
    m_exp_listview->addColumn("Class total");
    m_exp_listview->addColumn("Group total");
    m_exp_listview->addColumn("Experience Gained");
-   
+
    m_exp_listview->restoreColumns();
 
    m_exp_listview->setMinimumSize( m_exp_listview->sizeHint().width(),
       200 );
 
-   QGroupBox *statsGBox = new QVGroupBox( "Statistics", this );
+   QHBoxLayout * listGBoxLayout = new QHBoxLayout(listGBox);
+   listGBoxLayout->addWidget(m_exp_listview);
+
+   QGroupBox *statsGBox = new QGroupBox( "Statistics", this );
+   QHBoxLayout *statsGBoxLayout = new QHBoxLayout(statsGBox);
+
    m_layout->addWidget( statsGBox );
-   
-   QGrid *statsGrid = new QGrid( 4, statsGBox );
 
-   new QLabel( "Total Experience Received:",
-      statsGrid );
-   m_total_received = new QLabel( statsGrid );
+   QGridLayout *statsGridLayout = new QGridLayout();
 
-   new QLabel( "Play Time:", statsGrid );
-   m_play_time = new QLabel( statsGrid );
+   statsGBoxLayout->addLayout(statsGridLayout);
 
-   new QLabel( "Total Mobs Killed:", statsGrid );
-   m_mob_count = new QLabel( statsGrid );
+   statsGridLayout->addWidget(new QLabel("Total Experience Received:", statsGBox), 0, 0);
+   m_total_received = new QLabel(statsGBox);
+   statsGridLayout->addWidget(m_total_received, 0, 1);
 
-   m_experience_rate_label = new QLabel( "Experience Rate (per minute):", statsGrid );
-   m_experience_rate = new QLabel( statsGrid );
+   statsGridLayout->addWidget(new QLabel("Play Time:", statsGBox), 0, 2);
+   m_play_time = new QLabel(statsGBox);
+   statsGridLayout->addWidget(m_play_time, 0, 3);
 
-   new QLabel( "Average Experience per Mob:",
-      statsGrid );
-   m_average_per_mob = new QLabel( statsGrid );
+   statsGridLayout->addWidget(new QLabel("Total Mobs Killed:", statsGBox), 1, 0);
+   m_mob_count = new QLabel(statsGBox);
+   statsGridLayout->addWidget(m_mob_count, 1, 1);
 
-   new QLabel( "Estimated Kills To Level:",
-      statsGrid );
-   m_kills_to_level = new QLabel( statsGrid );
+   m_experience_rate_label = new QLabel( "Experience Rate (per minute):", statsGBox );
+   statsGridLayout->addWidget(m_experience_rate_label, 1, 2);
+   m_experience_rate = new QLabel(statsGBox);
+   statsGridLayout->addWidget(m_experience_rate, 1, 3);
 
-   new QLabel( "Experience Remaining:",
-      statsGrid );
-   m_experience_remaining = new QLabel( statsGrid );
+   statsGridLayout->addWidget(new QLabel("Average Experience per Mob:", statsGBox), 2, 0);
+   m_average_per_mob = new QLabel(statsGBox);
+   statsGridLayout->addWidget(m_average_per_mob, 2, 1);
 
-   new QLabel( "Estimated Time To Level:",
-      statsGrid );
-   m_time_to_level = new QLabel( statsGrid );
+   statsGridLayout->addWidget(new QLabel( "Estimated Kills To Level:", statsGBox), 2, 2);
+   m_kills_to_level = new QLabel(statsGBox);
+   statsGridLayout->addWidget(m_kills_to_level, 2, 3);
 
-   // ewww, why can't we just get it from QGrid? :(
-   ((QGridLayout *)statsGrid->layout())->setColStretch( 1, 1 );
-   ((QGridLayout *)statsGrid->layout())->setColStretch( 3, 1 );
-   statsGrid->layout()->setSpacing( 5 );
+   statsGridLayout->addWidget(new QLabel( "Experience Remaining:", statsGBox), 3, 0);
+   m_experience_remaining = new QLabel(statsGBox);
+   statsGridLayout->addWidget(m_experience_remaining, 3, 1);
+
+   statsGridLayout->addWidget(new QLabel( "Estimated Time To Level:", statsGBox ), 3, 2);
+   m_time_to_level = new QLabel(statsGBox);
+   statsGridLayout->addWidget(m_time_to_level, 3, 3);
+
+   statsGridLayout->setColumnStretch( 1, 1 );
+   statsGridLayout->setColumnStretch( 3, 1 );
+   statsGridLayout->setSpacing( 5 );
 
    updateAverage( );
 
@@ -256,7 +324,7 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
 
    QFileInfo fileInfo = m_dataLocMgr->findWriteFile("logs", "exp.log");
 
-   m_log = fopen(fileInfo.absFilePath(), "a");
+   m_log = fopen(fileInfo.absoluteFilePath().toAscii().data(), "a");
    if (m_log == 0)
    {
       m_log_exp = 0;
@@ -269,10 +337,7 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
 
    fileInfo = m_dataLocMgr->findWriteFile("logs", "newexp.log");
 
-   m_newExpLogFile = fileInfo.absFilePath();
-
-   // Clear the exp list on removes and deletes.
-   m_exp_list.setAutoDelete(true);  
+   m_newExpLogFile = fileInfo.absoluteFilePath();
 }
 
 void ExperienceWindow::savePrefs()
@@ -298,7 +363,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
 #ifdef DEBUGEXP
    resize( sizeHint() );
   qDebug("ExperienceWindow::addExpRecord()  '%s', lvl %d, exp %d",
-      mob_name.ascii(), mob_level, xp_gained);
+      mob_name.toAscii().data(), mob_level, xp_gained);
 #endif
 
    if (m_log_exp)
@@ -318,8 +383,8 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    {
       calculateZEM(xp_gained, mob_level);
       m_calcZEM = 0;
-      m_view_menu->setItemChecked(m_view_menu->idAt(10), false);
-   }   
+      m_action_calc_zem->setChecked(false);
+   }
    s_xp_value.setNum(xp->getExpValue());
    QString s_xp_valueZEM;
    switch (m_ZEMviewtype) {
@@ -338,34 +403,34 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    strftime(s_time, 64, "%m/%d %H:%M:%S", localtime( &timev ));
 
    /* Update suggested by Shag */
-   QListViewItem *new_exp_entry = 
-     new QListViewItem( m_exp_listview, s_time, s_mob_name, 
-			s_mob_level, s_xp_value, s_xp_valueZEM,
-			s_xp_valuep, s_xp_valueg, s_xp_gained );
+   QStringList values;
+   values << s_time << s_mob_name << s_mob_level << s_xp_value
+       << s_xp_valueZEM << s_xp_valuep << s_xp_valueg << s_xp_gained;
 
-   m_exp_listview->insertItem( new_exp_entry );
-   m_exp_listview->setSelected( new_exp_entry, TRUE );
-   m_exp_listview->ensureItemVisible( new_exp_entry );
+   SEQListViewItem* new_exp_entry =
+       new SEQListViewItem(m_exp_listview, values);
+
+   m_exp_listview->setCurrentItem(new_exp_entry);
+
+   m_exp_listview->scrollToItem(new_exp_entry);
 
    // Initial work on new logging mechanism with more data
    FILE* newlogfp = NULL;
 
    // open the file for append
-   newlogfp = fopen(m_newExpLogFile, "a");
+   newlogfp = fopen(m_newExpLogFile.toAscii().data(), "a");
 
    if (newlogfp != NULL)
-   {   
+   {
       // append a new record entry
 
-      fprintf(newlogfp, 
-              "0\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d", 
-              s_time, (const char*)s_mob_name, mob_level, 
-              (const char*)s_xp_value, (const char*)s_xp_valueZEM,
-              (const char*)s_xp_valuep, (const char*)s_xp_valueg,
-              (const char*)s_xp_gained, 
-              (const char*)m_player->name(),
-              (const char*)m_player->lastName(),
-              m_player->level(), 
+      fprintf(newlogfp,
+              "0\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%lu",
+              s_time, s_mob_name.toAscii().data(), mob_level,
+              s_xp_value.toAscii().data(), s_xp_valueZEM.toAscii().data(),
+              s_xp_valuep.toAscii().data(), s_xp_valueg.toAscii().data(),
+              s_xp_gained.toAscii().data(), m_player->name().toAscii().data(),
+              m_player->lastName().toAscii().data(), m_player->level(),
               m_player->classVal(), m_group->groupSize());
 
       const Spawn* spawn;
@@ -410,22 +475,25 @@ void ExperienceWindow::updateAverage( )
    // start at the end, add up the xp & mob count until we hit the
    // beginning of list
    // or the time cutoff
-   QListIterator<ExperienceRecord> it(m_exp_list);
+   QListIterator<ExperienceRecord*> it(m_exp_list);
 
    int mob_count = 0;
    time_t first_kill_time = 0;
 
-   it.toLast();
-   while ( it.current() && it.current()->getTime() >= time_cutoff ) 
-   {
+   ExperienceRecord* rec;
 
-      total_exp+=it.current()->getExpGained();
+   it.toBack();
+   while (it.hasPrevious())
+   {
+       rec = it.previous();
+       if (rec->getTime() < time_cutoff)
+           break;
+
+      total_exp+=rec->getExpGained();
       mob_count++;
 
-      if ( it.current()->getTime() < first_kill_time || !first_kill_time )
-         first_kill_time = it.current()->getTime();
-
-      --it;
+      if ( rec->getTime() < first_kill_time || !first_kill_time )
+         first_kill_time = rec->getTime();
    }
 
    // calculate the number of minutes that have passed
@@ -535,99 +603,60 @@ void ExperienceWindow::resizeEvent ( QResizeEvent *e )
 
 }
 
-void ExperienceWindow::viewAll() 
+void ExperienceWindow::viewAll()
 {
    m_timeframe = 0;
    updateAverage();
-   m_view_menu->setItemChecked(m_view_menu->idAt(0), true);
-   m_view_menu->setItemChecked(m_view_menu->idAt(1), false);
-   m_view_menu->setItemChecked(m_view_menu->idAt(2), false);
-   m_view_menu->setItemChecked(m_view_menu->idAt(3), false);
-
 }
 
-void ExperienceWindow::view15Minutes() 
+void ExperienceWindow::view15Minutes()
 {
    m_timeframe = 15;
    updateAverage();
-   m_view_menu->setItemChecked(m_view_menu->idAt(0), false);
-   m_view_menu->setItemChecked(m_view_menu->idAt(1), true);
-   m_view_menu->setItemChecked(m_view_menu->idAt(2), false);
-   m_view_menu->setItemChecked(m_view_menu->idAt(3), false);
-
 }
 
-void ExperienceWindow::view30Minutes() 
+void ExperienceWindow::view30Minutes()
 {
    m_timeframe = 30;
    updateAverage();
-   m_view_menu->setItemChecked(m_view_menu->idAt(0), false);
-   m_view_menu->setItemChecked(m_view_menu->idAt(1), false);
-   m_view_menu->setItemChecked(m_view_menu->idAt(2), true);
-   m_view_menu->setItemChecked(m_view_menu->idAt(3), false);
-
 }
 
-void ExperienceWindow::view60Minutes() 
+void ExperienceWindow::view60Minutes()
 {
    m_timeframe = 60;
    updateAverage();
-   m_view_menu->setItemChecked(m_view_menu->idAt(0), false);
-   m_view_menu->setItemChecked(m_view_menu->idAt(1), false);
-   m_view_menu->setItemChecked(m_view_menu->idAt(2), false);
-   m_view_menu->setItemChecked(m_view_menu->idAt(3), true);
-
 }
 
-void ExperienceWindow::viewRatePerHour() 
+void ExperienceWindow::viewRatePerHour()
 {
    m_ratio = 60;
    updateAverage();
-   m_exp_rate_menu->setItemChecked(m_exp_rate_menu->idAt(0), false);
-   m_exp_rate_menu->setItemChecked(m_exp_rate_menu->idAt(1), true);
-
 }
 
-void ExperienceWindow::viewRatePerMinute() 
+void ExperienceWindow::viewRatePerMinute()
 {
    m_ratio = 1;
    updateAverage();
-   m_exp_rate_menu->setItemChecked(m_exp_rate_menu->idAt(0), true);
-   m_exp_rate_menu->setItemChecked(m_exp_rate_menu->idAt(1), false);
-
 }
 
-void ExperienceWindow::calcZEMNextKill() 
+void ExperienceWindow::calcZEMNextKill()
 {
    m_calcZEM = 1;
-   m_view_menu->setItemChecked(m_view_menu->idAt(10), true);
 }
 
-void ExperienceWindow::viewZEMcalculated() 
+void ExperienceWindow::viewZEMcalculated()
 {
    m_ZEMviewtype = 0;
-   m_ZEM_menu->setItemChecked(m_ZEM_menu->idAt(0), true);
-   m_ZEM_menu->setItemChecked(m_ZEM_menu->idAt(1), false);
-   m_ZEM_menu->setItemChecked(m_ZEM_menu->idAt(2), false);
-
 }
 
-void ExperienceWindow::viewZEMraw() 
+void ExperienceWindow::viewZEMraw()
 {
    m_ZEMviewtype = 1;
-   m_ZEM_menu->setItemChecked(m_ZEM_menu->idAt(0), false);
-   m_ZEM_menu->setItemChecked(m_ZEM_menu->idAt(1), true);
-   m_ZEM_menu->setItemChecked(m_ZEM_menu->idAt(2), false);
-
 }
 
-void ExperienceWindow::viewZEMpercent() 
+void ExperienceWindow::viewZEMpercent()
 {
    m_ZEMviewtype = 2;
-   m_ZEM_menu->setItemChecked(m_ZEM_menu->idAt(0), false);
-   m_ZEM_menu->setItemChecked(m_ZEM_menu->idAt(1), false);
-   m_ZEM_menu->setItemChecked(m_ZEM_menu->idAt(2), true);
-
 }
 
 void ExperienceWindow::viewClear() 
@@ -652,7 +681,7 @@ void ExperienceWindow::logexp(long xp_gained, int mob_level)
    if (!m_log_exp || (!m_log)) /* sanity */
       return;
 
-   fprintf(m_log, "1 %d %d %ld %d %d %d", 
+   fprintf(m_log, "1 %d %d %ld %d %d %lu", 
 	   (int)time(NULL), mob_level, 
       xp_gained, m_player->level(), 
       m_player->classVal(), m_group->groupSize());

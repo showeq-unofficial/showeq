@@ -1,40 +1,54 @@
 /*
- * messagefilterdialog.cpp
+ *  messagefilterdialog.cpp
+ *  Copyright 2003-2007, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sf.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2007 by the respective ShowEQ Developers
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "messagefilterdialog.h"
 #include "messagefilter.h"
 #include "message.h"
 
-#include <stdint.h>
-#include <stdio.h>
+#include <cstdint>
+#include <cstdio>
 
-#include <qstring.h>
-#include <qregexp.h>
-#include <qlayout.h>
-#include <qgroupbox.h>
-#include <qlabel.h>
-#include <qlineedit.h>
-#include <qpushbutton.h>
-#include <qlistbox.h>
+#include <QString>
+#include <QRegExp>
+#include <QLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QListWidget>
+#include <QHBoxLayout>
+#include <QGridLayout>
+#include <QVBoxLayout>
+#include <QFormLayout>
 
 //----------------------------------------------------------------------
 // MessageFilterListBoxText
-class MessageFilterListBoxText : public QListBoxText
+class MessageFilterListBoxText : public QListWidgetItem
 {
 public:
-  MessageFilterListBoxText(QListBox * listbox, 
+  MessageFilterListBoxText(QListWidget * listbox,
 			   const QString & text = QString::null, 
 			   uint32_t data = 0);
-  MessageFilterListBoxText(QListBox * listbox, QListBoxItem* after,
-			   const QString & text = QString::null, 
-			   uint32_t data = 0);
+
   virtual ~MessageFilterListBoxText();
 
   uint32_t data() { return m_data; }
@@ -44,22 +58,14 @@ protected:
   uint32_t m_data;
 };
 
-MessageFilterListBoxText::MessageFilterListBoxText(QListBox * listbox, 
+MessageFilterListBoxText::MessageFilterListBoxText(QListWidget * listbox,
 						   const QString & text, 
 						   uint32_t data)
-  : QListBoxText(listbox, text),
+  : QListWidgetItem(text, listbox),
     m_data(data)
 {
 }
 
-MessageFilterListBoxText::MessageFilterListBoxText(QListBox* listbox, 
-						   QListBoxItem* after,
-						   const QString& text, 
-						   uint32_t data)
-  : QListBoxText(listbox, text, after),
-    m_data(data)
-{
-}
 
 MessageFilterListBoxText::~MessageFilterListBoxText()
 {
@@ -71,13 +77,14 @@ MessageFilterDialog::MessageFilterDialog(MessageFilters* filters,
 					 const QString& caption,
 					 QWidget* parent,
 					 const char* name)
-  : QDialog(parent, name, false, WType_Dialog),
-    m_filters(filters), 
+  : QDialog(parent, Qt::Dialog),
+    m_filters(filters),
     m_currentFilterNum(0xFF),
     m_currentFilter(0)
 {
+  setObjectName(name);
   // set the caption
-  setCaption(caption);
+  setWindowTitle(caption);
 
   // don't support resizing the dialog
   setSizeGripEnabled(false);
@@ -90,80 +97,90 @@ MessageFilterDialog::MessageFilterDialog(MessageFilters* filters,
 	  this, SLOT(addedFilter(uint32_t, uint8_t, const MessageFilter&)));
 
   // setup the dialog
-  QVBoxLayout* outerLayout = new QVBoxLayout(this, 5, -1, "outerlayout");
-  QHBoxLayout* columnLayout = new QHBoxLayout(outerLayout, -1, "columns");
-  QVBoxLayout* column1Layout = new QVBoxLayout(5, "column1");
+  QVBoxLayout* outerLayout = new QVBoxLayout(this);
+  QHBoxLayout* columnLayout = new QHBoxLayout();
+  QVBoxLayout* column1Layout = new QVBoxLayout();
+  outerLayout->addLayout(columnLayout, 1);
   columnLayout->addLayout(column1Layout, 1);
 
   // layout 1st column
   QLabel* label = new QLabel("&Existing Filters", this);
-  column1Layout->addWidget(label, 1, AlignCenter);
+  column1Layout->addWidget(label, 1, Qt::AlignCenter);
 
-  m_existingFilters = new QListBox(this, "existingfilters");
+  m_existingFilters = new QListWidget(this);
   column1Layout->addWidget(m_existingFilters, 10);
   label->setBuddy(m_existingFilters);
-  m_existingFilters->setSelectionMode(QListBox::Single);
-  connect(m_existingFilters, SIGNAL(selectionChanged(QListBoxItem*)),
-	  this, SLOT(existingFilterSelectionChanged(QListBoxItem*))); 
+  m_existingFilters->setSelectionMode(QAbstractItemView::SingleSelection);
+  connect(m_existingFilters->selectionModel(),
+          SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+          this,
+          SLOT(existingFilterSelectionChanged(const QItemSelection&, const QItemSelection&)));
 
   m_new = new QPushButton("Ne&w", this);
-  column1Layout->addWidget(m_new, 1, AlignCenter);
+  column1Layout->addWidget(m_new, 1, Qt::AlignCenter);
   connect(m_new, SIGNAL(clicked()),
 	  this, SLOT(newFilter()));
 
-  m_filterGroup = new QGroupBox(1, Vertical, 
-				"New &Filter", this, "filtergroup");
+  m_filterGroup = new QGroupBox("New &Filter", this);
   columnLayout->addWidget(m_filterGroup, 5);
 
-  QFrame* dummy = new QFrame(m_filterGroup, "dummy");
+  QVBoxLayout *filterGBoxLayout = new QVBoxLayout(m_filterGroup);
+  QHBoxLayout *filterButtonLayout = new QHBoxLayout();
+  QFormLayout* newFilterLayout = new QFormLayout();
 
-  QGridLayout* filterLayout = new QGridLayout(dummy, 8, 3, 5, -1, "filterlayout");
-  
-  label = new QLabel("&Name", dummy);
-  filterLayout->addWidget(label, 0, 0, AlignLeft | AlignVCenter);
-  m_name = new QLineEdit(dummy, "name");
-  filterLayout->addMultiCellWidget(m_name, 0, 0, 1, 2);
-  label->setBuddy(m_name);
+  m_name = new QLineEdit(m_filterGroup);
+  m_name->setObjectName("name");
+  newFilterLayout->addRow("&Name", m_name);
   connect(m_name, SIGNAL(textChanged(const QString&)),
 	  this, SLOT(anyTextChanged(const QString&)));
 
-  label = new QLabel("&Pattern", dummy);
-  filterLayout->addWidget(label, 1, 0, AlignLeft | AlignVCenter);
-  m_pattern = new QLineEdit(dummy, "pattern");
-  filterLayout->addMultiCellWidget(m_pattern, 1, 1, 1, 2);
-  label->setBuddy(m_pattern);
+  m_pattern = new QLineEdit(m_filterGroup);
+  m_pattern->setObjectName("pattern");
+  newFilterLayout->addRow("&Pattern", m_pattern);
   connect(m_pattern, SIGNAL(textChanged(const QString&)),
 	  this, SLOT(anyTextChanged(const QString&)));
 
-  label = new QLabel("&Message Types", dummy);
-  filterLayout->addWidget(label, 2, 0, AlignLeft | AlignVCenter);
-  m_messageTypes = new QListBox(dummy, "messagetypes");
-  filterLayout->addMultiCellWidget(m_messageTypes, 2, 6, 1, 2);
-  label->setBuddy(m_messageTypes);
-  m_messageTypes->setSelectionMode(QListBox::Multi);
-  connect(m_messageTypes, SIGNAL(selectionChanged()),
-	  this, SLOT(messageTypeSelectionChanged()));
+  m_messageTypes = new QListWidget(m_filterGroup);
+  newFilterLayout->addRow("&Message Types", m_messageTypes);
+  m_messageTypes->setSelectionMode(QAbstractItemView::MultiSelection);
+  connect(m_messageTypes->selectionModel(),
+          SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+          this,
+          SLOT(messageTypeSelectionChanged(const QItemSelection&, const QItemSelection&)));
 
-  m_delete = new QPushButton("&Delete", dummy);
-  filterLayout->addWidget(m_delete, 7, 0, AlignCenter);
+  m_delete = new QPushButton("&Delete", m_filterGroup);
+  m_delete->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  filterButtonLayout->addWidget(m_delete);
   m_delete->setEnabled(false);
   connect(m_delete, SIGNAL(clicked()),
 	  this, SLOT(deleteFilter()));
 
-  m_update = new QPushButton("&Update", dummy);
-  filterLayout->addWidget(m_update, 7, 1, AlignCenter);
+  m_update = new QPushButton("&Update", m_filterGroup);
+  m_update->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  filterButtonLayout->addWidget(m_update);
   m_update->setEnabled(false);
   connect(m_update, SIGNAL(clicked()),
 	  this, SLOT(updateFilter()));
 
-  m_add = new QPushButton("&Add", dummy);
-  filterLayout->addWidget(m_add, 7, 2, AlignCenter);
+  m_add = new QPushButton("&Add", m_filterGroup);
+  m_add->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  filterButtonLayout->addWidget(m_add);
   m_add->setEnabled(false);
   connect(m_add, SIGNAL(clicked()),
 	  this, SLOT(addFilter()));
 
+  filterButtonLayout->setAlignment(Qt::AlignCenter);
+  filterButtonLayout->insertStretch(0, 1);
+  filterButtonLayout->insertStretch(2, 1);
+  filterButtonLayout->insertStretch(4, 1);
+  filterButtonLayout->insertStretch(6, 1);
+
+  newFilterLayout->addRow(filterButtonLayout);
+
+  filterGBoxLayout->addLayout(newFilterLayout, 2);
+
   QPushButton* close = new QPushButton("&Close", this);
-  outerLayout->addWidget(close, 1, AlignCenter);
+  outerLayout->addWidget(close, 1, Qt::AlignCenter);
   connect(close, SIGNAL(clicked()),
 	  this, SLOT(accept()));
 
@@ -208,23 +225,23 @@ void MessageFilterDialog::addFilter()
   uint64_t types = 0;
 
   // iterate over the message types
-  for (QListBoxItem* currentLBT = m_messageTypes->firstItem();
-       currentLBT;
-       currentLBT = currentLBT->next())
+  int numTypeRows = m_messageTypes->count();
+  for (int row = 0; row < numTypeRows; ++row)
   {
-    // if the item isn't selected, add in its type flag, and enable updates
-    if (currentLBT->isSelected())
-    {
-      // get the message type of the selected item
-      type = ((MessageFilterListBoxText*)currentLBT)->data();
+      MessageFilterListBoxText* item = (MessageFilterListBoxText*) m_messageTypes->item(row);
 
-      // add its flag to the types 
-      types |= (uint64_t(1) << type);
-    }
-  } 
+      if (item->isSelected())
+      {
+          // get the message type of the selected item
+          type = item->data();
+
+          // add its flag to the types
+          types |= (uint64_t(1) << type);
+      }
+  }
 
   // create a message filter object
-  MessageFilter newFilter(m_name->text(), types, m_pattern->text());
+  MessageFilter newFilter(m_name->text(), types, QRegExp(m_pattern->text()));
 
   // if this isn't a valid filter, don't create it
   if (!newFilter.valid())
@@ -232,7 +249,7 @@ void MessageFilterDialog::addFilter()
 
   // add the new filter
   m_currentFilterNum = m_filters->addFilter(newFilter);
-  
+
   // if it is a valid filter, make the new filter the current selection
   if (m_currentFilterNum != 0xFF)
   {
@@ -240,16 +257,17 @@ void MessageFilterDialog::addFilter()
     m_currentFilter = m_filters->filter(m_currentFilterNum);
 
     // iterate over the existing filters
-    for (QListBoxItem* currentLBT = m_existingFilters->firstItem();
-	 currentLBT;
-	 currentLBT = currentLBT->next())
+    int numFiltRows = m_existingFilters->count();
+    for (int row = 0; row < numFiltRows; ++row)
     {
+      MessageFilterListBoxText* item = (MessageFilterListBoxText*) m_existingFilters->item(row);
       // find the current filter
-      if (((MessageFilterListBoxText*)currentLBT)->data() == m_currentFilterNum)
+      if (item->data() == m_currentFilterNum)
       {
-	// make the current filter the selected filter
-	m_existingFilters->setSelected(currentLBT, true);
-	break;
+          // make the current filter the selected filter
+          item->setSelected(true);
+          m_existingFilters->setCurrentRow(row);
+          break;
       }
     }
   }
@@ -266,12 +284,31 @@ void MessageFilterDialog::addFilter()
 
 void MessageFilterDialog::updateFilter()
 {
-  // delete the old filter
-  if (m_currentFilter)
-    m_filters->remFilter(*m_currentFilter);
+
+  //Note, this used to happen in the opposite order: delete then add.
+  //But in Qt4, removing the old filter triggers the list selection update,
+  //which causes the previous/next item to be selected, losing the updated
+  //values and instead duplicating the adjacent filter.
+  //
+  //Doing it this way avoids that problem, but as a result it causes the
+  //updated filter to jump to a different position in the list.
+  //
+  //TODO to properly fix this, either we need to do one or both of:
+  // 1) implement a proper "update" that update the existing filter and
+  //    list item without removing the old one
+  // 2) Change the filter list to sort by something other than the filter index
+  //    Name might be a good choice here.
+  //
+
+  const MessageFilter* oldFilter = m_currentFilter;
 
   // add in a new filter
   addFilter();
+
+  // delete the old filter
+  if (oldFilter)
+    m_filters->remFilter(*oldFilter);
+
 }
 
 void MessageFilterDialog::deleteFilter()
@@ -296,41 +333,53 @@ void MessageFilterDialog::anyTextChanged(const QString& newText)
   checkState();
 }
 
-void MessageFilterDialog::messageTypeSelectionChanged()
+void MessageFilterDialog::messageTypeSelectionChanged(
+        const QItemSelection& selected, const QItemSelection& deselected)
 {
   // check the state whenever the message type selection changed
   checkState();
 }
 
-void MessageFilterDialog::existingFilterSelectionChanged(QListBoxItem * item)
+void MessageFilterDialog::existingFilterSelectionChanged(
+        const QItemSelection& selected, const QItemSelection& deselected)
 {
-  if (item)
+
+  //
+  if (selected.count())
   {
-    // get the current filter number from the listbox item
-    m_currentFilterNum = ((MessageFilterListBoxText*)item)->data();
-    
-    // get the specified filter
-    m_currentFilter = m_filters->filter(m_currentFilterNum);
+      // the filter list only allows selecting one item at a time, so
+      // we can simply grab the first (and only) selection
+      int row = selected.indexes().first().row();
 
-    // set the GroupBox's label
-    m_filterGroup->setTitle(m_currentFilter->name() + " &Filter");
+      MessageFilterListBoxText* item = (MessageFilterListBoxText*)m_existingFilters->item(row);
 
-    // setup all the filter values
-    m_name->setText(m_currentFilter->name());
-    m_pattern->setText(m_currentFilter->regexp().pattern());
+      // get the current filter number from the listbox item
+      m_currentFilterNum = item->data();
 
-    // select all the message types
-    uint64_t messageTypes = m_currentFilter->types();
-    uint32_t messageType;
-    for (QListBoxItem* currentLBT = m_messageTypes->firstItem();
-	 currentLBT;
-	 currentLBT = currentLBT->next())
-    {
-      messageType = ((MessageFilterListBoxText*)currentLBT)->data();
-      m_messageTypes->setSelected(currentLBT, ((uint64_t(1) << messageType) & messageTypes) != 0);
-    }
+      // get the specified filter
+      m_currentFilter = m_filters->filter(m_currentFilterNum);
+
+      // set the GroupBox's label
+      m_filterGroup->setTitle(m_currentFilter->name() + " &Filter");
+
+      // setup all the filter values
+      m_name->setText(m_currentFilter->name());
+      m_pattern->setText(m_currentFilter->regexp().pattern());
+
+      // select all the message types
+      uint64_t messageTypes = m_currentFilter->types();
+      uint32_t messageType;
+      int numRows = m_messageTypes->count();
+      for (int row = 0; row < numRows; ++row)
+      {
+          MessageFilterListBoxText* item = (MessageFilterListBoxText*) m_messageTypes->item(row);
+
+          messageType = item->data();
+          item->setSelected(((uint64_t(1) << messageType) & messageTypes) != 0);
+      }
+
   }
-  else // no item selected, clear all filter setup
+  else
     clearFilter();
 
   // check the current state
@@ -340,19 +389,20 @@ void MessageFilterDialog::existingFilterSelectionChanged(QListBoxItem * item)
 void MessageFilterDialog::removedFilter(uint32_t mask, uint8_t filter)
 {
   // iterate over all the existing filters
-  for (QListBoxItem* currentLBT = m_existingFilters->firstItem();
-       currentLBT;
-       currentLBT = currentLBT->next())
+  int numRows = m_existingFilters->count();
+  for (int row = 0; row < numRows; ++row)
   {
-    // check if this is the removed filter
-    if (((MessageFilterListBoxText*)currentLBT)->data() == filter)
-    {
-      // delete the removed filter's list box item
-      delete currentLBT;
+      MessageFilterListBoxText* item = (MessageFilterListBoxText*)m_existingFilters->item(row);
 
-      // nothing more to do
-      break;
-    }
+      // check if this is the removed filter
+      if (item->data() == filter)
+      {
+          // delete the removed filter's list box item
+          delete m_existingFilters->takeItem(row);
+
+          // nothing more to do
+          break;
+      }
   }
 }
 
@@ -362,25 +412,35 @@ void MessageFilterDialog::addedFilter(uint32_t mask, uint8_t filterid,
   if (m_existingFilters->count() == 0)
   {
       // add the new message filter 
-      new MessageFilterListBoxText(m_existingFilters, 0,
-				   filter.name(), filterid);
+      new MessageFilterListBoxText(m_existingFilters, filter.name(), filterid);
 
+      return;
   }
 
   // iterate over all the existing filters
-  for (QListBoxItem* currentLBT = m_existingFilters->firstItem();
-       currentLBT;
-       currentLBT = currentLBT->next())
+  int numFiltRows = m_existingFilters->count();
+  for (int row = 0; row < numFiltRows; ++row)
   {
+    MessageFilterListBoxText* item = (MessageFilterListBoxText*)m_existingFilters->item(row);
     // check if this is the removed filter
-    if (((MessageFilterListBoxText*)currentLBT)->data() > filterid)
+    if (item->data() > filterid)
     {
       // add a new message filter at the appropriate location
       //   NOTE: This maintains list order during an item update
-      new MessageFilterListBoxText(m_existingFilters, currentLBT->prev(),
-				   filter.name(), filterid);
-
+      m_existingFilters->insertItem(row,
+              new MessageFilterListBoxText(nullptr, filter.name(), filterid));
       break;
+    }
+    else
+    {
+      //if we're at the end of the list and still haven't inserted, we need
+      //to do it, otherwise, it won't get added to the list.
+      if (row + 1 == numFiltRows)
+      {
+        m_existingFilters->addItem(
+                new MessageFilterListBoxText(nullptr, filter.name(), filterid));
+        break;
+      }
     }
   }
 }
@@ -406,36 +466,36 @@ void MessageFilterDialog::checkState()
   {
     uint32_t type;
     uint64_t types = 0;
-    
+
     // buttons should only be enabled for valid message filter content
     if (!m_name->text().isEmpty() &&
 	!m_pattern->text().isEmpty() &&
 	QRegExp(m_pattern->text()).isValid())
     {
       // iterate over all the message types
-      for (QListBoxItem* currentLBT = m_messageTypes->firstItem();
-	   currentLBT;
-	   currentLBT = currentLBT->next())
+      int numRows = m_messageTypes->count();
+      for (int row = 0; row < numRows; ++row)
       {
-	// is the current item selected
-	if (currentLBT->isSelected())
-	{
-	  // get the items message type
-	  type = ((MessageFilterListBoxText*)currentLBT)->data();
+          MessageFilterListBoxText* item = (MessageFilterListBoxText*)m_messageTypes->item(row);
+          // is the current item selected
+          if (item->isSelected())
+          {
+              // get the items message type
+              type = item->data();
 
-	  // add the message type into the message types
-	  types |= (uint64_t(1) << type);
+              // add the message type into the message types
+              types |= (uint64_t(1) << type);
 
-	  // found a selected item, fields are valid for update
-	  update = true;
-	}
+              // found a selected item, fields are valid for update
+              update = true;
+          }
       }
 
       // only enable add if the filter is different from its predecessor
-      if ((m_name->text() != m_currentFilter->name()) || 
-	  (m_pattern->text() != m_currentFilter->regexp().pattern()) ||
-	  (types != m_currentFilter->types()))
-	add = true;
+      if ((m_name->text() != m_currentFilter->name()) ||
+              (m_pattern->text() != m_currentFilter->regexp().pattern()) ||
+              (types != m_currentFilter->types()))
+          add = true;
 
     }
   }
@@ -446,17 +506,17 @@ void MessageFilterDialog::checkState()
 	!m_pattern->text().isEmpty())
     {
       // iterate over all the message types
-      for (QListBoxItem* currentLBT = m_messageTypes->firstItem();
-	   currentLBT;
-	   currentLBT = currentLBT->next())
+      int numRows = m_messageTypes->count();
+      for (int row = 0; row < numRows; ++row)
       {
-	// if the item isn't selected, try the next item
-	if (!currentLBT->isSelected())
-	  continue;
-	
-	// found a selected item, fields are valid for add
-	add = true;
-	break;
+          MessageFilterListBoxText* item = (MessageFilterListBoxText*)m_messageTypes->item(row);
+          // if the item isn't selected, try the next item
+          if (!item->isSelected())
+              continue;
+
+          // found a selected item, fields are valid for add
+          add = true;
+          break;
       }
     }
   }

@@ -1,21 +1,34 @@
 /*
- * datalocationmgr.cpp
+ *  datalocationmgr.cpp
+ *  Copyright 2003 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "datalocationmgr.h"
 #include "diagnosticmessages.h"
 
-#include <stdio.h>
+#include <cstdio>
 
-#include <qdir.h>
-#include <qfileinfo.h>
-#include <qregexp.h>
+#include <QDir>
+#include <QFileInfo>
+#include <QRegExp>
 
 DataLocationMgr::DataLocationMgr(const QString& homeSubDir)
 {
@@ -23,7 +36,7 @@ DataLocationMgr::DataLocationMgr(const QString& homeSubDir)
   m_pkgData = PKGDATADIR;
 
   // create the user directory object
-  m_userData = QDir::homeDirPath() + "/" + homeSubDir;
+  m_userData = QDir::homePath() + "/" + homeSubDir;
 }
 
 DataLocationMgr::~DataLocationMgr()
@@ -40,10 +53,9 @@ bool DataLocationMgr::setupUserDirectory()
     QDir userDataDir(m_userData);
 
     // no, then attempt to create it.
-    if (!userDataDir.mkdir(m_userData, true))
+    if (!userDataDir.mkdir(m_userData))
     {
-      seqWarn("Failed to create '%s'\n", 
-	      (const char*)userDataDir.absPath());
+      seqWarn("Failed to create '%s'\n", userDataDir.absolutePath().toAscii().data());
       return false;
     }
   }
@@ -126,29 +138,29 @@ QFileInfo DataLocationMgr::findFile(const QDir& dir, const QString& filename,
   if (!caseSensitive)
   {
     // create a case insensitive regex
-    QRegExp regex(filename, false, false);
+    QRegExp regex(filename, Qt::CaseInsensitive);
 
     // construct the filterspec to choose only the files with matching access
-    int filterSpec;
+    QDir::Filters filterSpec;
     if (!writable)
       filterSpec = QDir::Files|QDir::Readable;
     else
       filterSpec = QDir::Files|QDir::Writable;
     
     // get all the matching file info entries
-    const QFileInfoList* fileInfoList = dir.entryInfoList(filterSpec);
-    if (fileInfoList)
+    const QFileInfoList fileInfoList = dir.entryInfoList(filterSpec);
+    if (!fileInfoList.isEmpty())
     {
-      QFileInfoListIterator it(*fileInfoList);
-      QFileInfo* fi;
+      //QFileInfoListIterator it(fileInfoList);
+      QListIterator<QFileInfo> it(fileInfoList);
+      QFileInfo fi;
       // iterate over the matches
-      while ((fi = it.current()) != 0)
+      while (it.hasNext())
       {
+          fi = it.next();
 	// if found a match, then return it.
-	if (regex.exactMatch(fi->fileName()))
-	  return *fi;
-
-	++it;
+	if (regex.exactMatch(fi.fileName()))
+	  return fi;
       }
     }
   }
@@ -182,7 +194,7 @@ QFileInfo DataLocationMgr::findWriteFile(const QString& dir1,
   // ok, try to make it
   dir = findOrMakeSubDir(dir1, subdir);
 
-  QFileInfo dirInfo(dir.absPath());
+  QFileInfo dirInfo(dir.absolutePath());
   
   // see if we found or made the subdir and it is writable...
   if (dirInfo.exists() && dirInfo.isDir() && dirInfo.isWritable())
@@ -203,8 +215,8 @@ QFileInfo DataLocationMgr::findWriteFile(const QString& dir1,
 
   // ok, try to make it
   dir = findOrMakeSubDir(dir2, subdir);
-     
-  dirInfo.setFile(dir.absPath());
+
+  dirInfo.setFile(dir.absolutePath());
 
   // see if we found or made the subdir and it is writable...
   if (dirInfo.exists() && dirInfo.isDir() && dirInfo.isWritable())
@@ -217,11 +229,11 @@ QFileInfo DataLocationMgr::findWriteFile(const QString& dir1,
   if (!dir.cd("tmp"))
     if (!dir.cd("temp"))
       if (!dir.cd("/var/tmp"))
-	return QFileInfo(dir, filename); // can't catch a break
-  
+          return QFileInfo(dir, filename); // can't catch a break
+
   // ok, try to make the subdirectory
-  dir = findOrMakeSubDir(dir.absPath(), subdir);
-  dirInfo.setFile(dir.absPath());
+  dir = findOrMakeSubDir(dir.absolutePath(), subdir);
+  dirInfo.setFile(dir.absolutePath());
 
   // see if we found or made the subdir and it is writable...
   if (dirInfo.exists() && dirInfo.isDir() && dirInfo.isWritable())
@@ -246,11 +258,11 @@ QDir DataLocationMgr::findOrMakeSubDir(const QString& dir,
 
   // if the parent directory doesn't exist, attempt to create it.
   if (!dirDir.exists())
-    dirDir.mkdir(".", false);
+    dirDir.mkdir(".");
 
   // attempt to create the directory;
   if (!dirDir.exists(subdir))
-    dirDir.mkdir(subdir, false);
+    dirDir.mkdir("./" + subdir);
 
   // attempt to cd into the directory that was theoretically just created.
   if (dirDir.cd(subdir))
@@ -258,5 +270,5 @@ QDir DataLocationMgr::findOrMakeSubDir(const QString& dir,
 
   // return a QFileInfo, the caller can use its methods to determine the
   // directories status
-  return QDir(QFileInfo(dirDir, subdir).dirPath(true));
+  return QDir(QFileInfo(dirDir, subdir).absolutePath());
 }

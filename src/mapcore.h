@@ -1,11 +1,24 @@
 /*
- * mapcore.h
+ *  mapcore.h
+ *  Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net).
+ *  Copyright 2001-2004, 2019 by the respective ShowEQ Developers
  *
- *  ShowEQ Distributed under GPL
- *  http://seq.sf.net/
- * 
- * Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
- * 
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 // Author: Zaphod (dohpaz@users.sourceforge.net)
@@ -25,15 +38,15 @@
 #ifndef _MAPCORE_H
 #define _MAPCORE_H
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 
-#include <qstring.h>
-#include <qcolor.h>
-#include <qfont.h>
-#include <qpixmap.h>
-#include <qptrlist.h>
-#include <qpointarray.h>
+#include <QString>
+#include <QColor>
+#include <QFont>
+#include <QPixmap>
+#include <QList>
+#include <QPolygon>
 
 #include "point.h"
 #include "pointarray.h"
@@ -61,6 +74,13 @@ enum MapLineStyle
   tMap_FadedFloors,
 };
 
+/*
+ * QT4 no longer allows the user to set the pixmap optimization.
+ * As a result, all of the pixmap optimization code is being commented out
+ * and can be deleted once it's determined to not unexpectedly break
+ * anything. - cn187
+ */
+/*
 enum MapOptimizationMethod
 {
   tMap_MemoryOptim = 0,
@@ -69,6 +89,7 @@ enum MapOptimizationMethod
   tMap_DefaultOptim = 3,
   tMap_NoOptim = 4,
 };
+*/
 
 //----------------------------------------------------------------------
 // constants
@@ -118,8 +139,10 @@ class MapParameters
   const QFont& font() const { return m_font; }
   int16_t headRoom() const { return m_headRoom; }
   int16_t floorRoom() const { return m_floorRoom; }
+  /*
   MapOptimizationMethod mapOptimizationMethod() { return m_optimization; }
   QPixmap::Optimization pixmapOptimizationMethod();
+  */
   MapLineStyle mapLineStyle() { return m_mapLineStyle; }
   bool fadeFloors() const { return (m_mapLineStyle == tMap_FadedFloors); }
   bool depthFiltering() const { return (m_mapLineStyle == tMap_DepthFiltered); }
@@ -158,8 +181,10 @@ class MapParameters
   void setScreenSize(const QSize& size);
   void setBackgroundColor(const QColor& color) { m_backgroundColor = color; }
   void setFont(const QFont& font) { m_font = font; }
+  /*
   void setMapOptimizationMethod(MapOptimizationMethod method) 
     { m_optimization = method; }  
+    */
   void setMapLineStyle(MapLineStyle style) { m_mapLineStyle = style; }
   void setShowBackgroundImage(bool val) { m_showBackgroundImage = val; }
   void setShowLocations(bool val) { m_showLocations = val; }
@@ -204,7 +229,7 @@ class MapParameters
   MapPoint m_targetPoint;
   bool m_targetPointSet;
 
-  MapOptimizationMethod m_optimization;
+  //MapOptimizationMethod m_optimization;
   MapLineStyle m_mapLineStyle;
   bool m_showBackgroundImage; 
   bool m_showLocations;
@@ -424,7 +449,7 @@ inline QString MapCommon::colorName() const
 
 //----------------------------------------------------------------------
 // MapLineL
-class MapLineL : public MapCommon, public QPointArray
+class MapLineL : public MapCommon, public QPolygon
 {
  public:
   MapLineL();
@@ -438,7 +463,7 @@ class MapLineL : public MapCommon, public QPointArray
 
   void setZPos(uint16_t z)
     {  m_z = z; m_heightSet = true; }
-  void calcBounds() { m_bounds = QPointArray::boundingRect(); }
+  void calcBounds() { m_bounds = QPolygon::boundingRect(); }
 
  private:
   int16_t m_z;
@@ -531,10 +556,10 @@ class MapData
   int16_t minY() const { return m_minY; }
   int16_t maxX() const { return m_maxX; }
   int16_t maxY() const { return m_maxY; }
-  QPtrList<MapLineL>& lLines() { return m_lLines; }
-  QPtrList<MapLineM>& mLines() { return m_mLines; }
-  QPtrList<MapLocation>& locations() { return m_locations; }
-  QPtrList<MapAggro>& aggros() { return m_aggros; }
+  QList<MapLineL*>& lLines() { return m_lLines; }
+  QList<MapLineM*>& mLines() { return m_mLines; }
+  QList<MapLocation*>& locations() { return m_locations; }
+  QList<MapAggro*>& aggros() { return m_aggros; }
   const QPixmap& image() const { return m_image; }
   bool imageLoaded() const { return m_imageLoaded; }
   bool mapLoaded() const { return m_mapLoaded; }
@@ -579,12 +604,12 @@ class MapData
   QString m_fileName;
   QString m_zoneLongName;
   QString m_zoneShortName;
-  QPtrList<MapLineL> m_lLines;
-  QPtrList<MapLineM> m_mLines;
+  QList<MapLineL*> m_lLines;
+  QList<MapLineM*> m_mLines;
   MapLineM* m_editLineM;
-  QPtrList<MapLocation> m_locations;
+  QList<MapLocation*> m_locations;
   MapLocation* m_editLocation;
-  QPtrList<MapAggro> m_aggros;
+  QList<MapAggro*> m_aggros;
   uint8_t m_zoneZEM;
   QPixmap m_image;
   bool m_imageLoaded;

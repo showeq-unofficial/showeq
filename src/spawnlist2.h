@@ -1,14 +1,30 @@
 /*
- * spawnlist2.h
+ *  spawnlist2.h
+ *  Copyright 2002-2005, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://www.hackersquest.gomp.ch/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef SPAWNLIST2_H
 #define SPAWNLIST2_H
 
-#include <qptrdict.h>
+#include <QHash>
+#include <QMenu>
 
 #include "seqwindow.h"
 #include "seqlistview.h"
@@ -37,7 +53,7 @@ class SpawnListWindow2 : public SEQWindow
 		   QWidget* parent = 0, const char* name = 0);
   ~SpawnListWindow2();
 
-   virtual QPopupMenu* menu();
+   virtual QMenu* menu();
 
 
    SpawnListItem* selected();
@@ -78,22 +94,23 @@ public slots:
  private slots:
    // category combo box signals
    void categorySelected(int index);
-   
-    // listview signals
-   void selChanged(QListViewItem*);
 
-   void mousePressEvent (int button, QListViewItem *litem, const QPoint &point, int col);
-   void mouseDoubleClickEvent(QListViewItem *litem);
+    // listview signals
+   void selChanged();
+
+   void listMouseRightButtonPressed(QMouseEvent* event);
+   void listItemPressed(QTreeWidgetItem *litem, int col);
+   void listItemDoubleClicked(QTreeWidgetItem *litem, int col);
 
    // fpm spinbox signals
    void setFPM(int rate);
 
    // additional menu items
-   void toggle_immediateUpdate(int id);
-   void toggle_keepSorted(int id);
-   void toggle_keepSelectedVisible(int id);
+   void toggle_immediateUpdate(bool enable);
+   void toggle_keepSorted(bool enable);
+   void toggle_keepSelectedVisible(bool enable);
  private:
-   void setSelectedQuiet(QListViewItem* item, bool selected);
+   void setSelectedQuiet(SEQListViewItem* item, bool selected);
    void populateSpawns(void);
    void populateCategory(const Category* cat);
    void updateCount(void);
@@ -116,8 +133,8 @@ public slots:
    QLineEdit* m_totalSpawns;
 
    // index dictionary for retrieving SpawnListItems by Item
-   QPtrDict<SpawnListItem> m_spawnListItemDict;
-   
+   QHash<void*, SpawnListItem*> m_spawnListItemDict;
+
    // timer used
    QTimer* m_timer;
 

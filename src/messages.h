@@ -1,11 +1,24 @@
 /*
- * messages.h
- * 
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
+ *  messages.h
+ *  Copyright 2002-2003 Zaphod (dohpaz@users.sourceforge.net)
+ *  Copyright 2009, 2019 by the respective ShowEQ Developers
  *
- * Copyright 2002-2003 Zaphod (dohpaz@users.sourceforge.net)
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
  *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef _MESSAGES_H_
@@ -14,11 +27,11 @@
 #include "message.h"
 #include "messagefilter.h"
 
-#include <stdint.h>
+#include <cstdint>
 
-#include <qobject.h>
-#include <qstring.h>
-#include <qvaluelist.h>
+#include <QObject>
+#include <QString>
+#include <QList>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -26,7 +39,7 @@ class DateTimeMgr;
 
 //----------------------------------------------------------------------
 // MessageList
-typedef QValueList<MessageEntry> MessageList;
+typedef QList<MessageEntry> MessageList;
 
 //----------------------------------------------------------------------
 // Messages

@@ -1,14 +1,27 @@
 /*
- * packetlog.cpp
+ *  packetlog.cpp
+ *  Copyright 2000-2005, 2009, 2019 by the respective ShowEQ Developers
+ *  Portions Copyright 2001-2004,2007 Zaphod (dohpaz@users.sourceforge.net).
  *
- *  ShowEQ Distributed under GPL
+ *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2004 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2004,2007 Zaphod (dohpaz@users.sourceforge.net). 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <qdatetime.h>
+#include <QDateTime>
 
 #include "packetlog.h"
 #include "packetformat.h"
@@ -60,7 +73,7 @@ inline QString opCodeToString(uint16_t opCode)
 QString PacketLog::print_addr (in_addr_t  addr)
 {
 #ifdef DEBUG_PACKET
-   debug ("print_addr()");
+   qDebug ("print_addr()");
 #endif /* DEBUG_PACKET */
   QString paddr;
 
@@ -81,8 +94,8 @@ void PacketLog::logMessage(const QString& message)
 {
   if (!open())
     return;
-    
-   outputf ("%s\n", (const char*)message);
+
+   outputf ("%s\n", message.toAscii().data());
 
    flush();
 }
@@ -96,11 +109,11 @@ void PacketLog::logData(const uint8_t* data,
     return;
 
   if (!prefix.isEmpty())
-    outputf("%s ", (const char*)prefix.utf8());
+    outputf("%s ", prefix.toUtf8().data());
 
-   outputf("[Size: %d] %s\n", 
-	  len, 
-	  (const char*)QDateTime::currentDateTime().toString(m_timeDateFormat).utf8());
+   outputf("[Size: %d] %s\n",
+           len,
+           QDateTime::currentDateTime().toString(m_timeDateFormat).toUtf8().data());
 
    // make sure there is a len before attempting to print it
    if (len)
@@ -287,13 +300,13 @@ void PacketLog::printData(const uint8_t* data, size_t len, uint8_t dir,
 			  uint16_t opcode, const QString& origPrefix)
 {
   if (!origPrefix.isEmpty())
-    ::printf("%s ", (const char*)origPrefix);
+    ::printf("%s ", origPrefix.toAscii().data());
   else
     ::putchar('\n');
-  
-  ::printf("%s [Size: %u]%s\n",
-	   ((dir == DIR_Server) ? "[Server->Client]" : "[Client->Server]"),
-	   len, (const char*)opCodeToString(opcode));
+
+  ::printf("%s [Size: %lu]%s\n",
+          ((dir == DIR_Server) ? "[Server->Client]" : "[Client->Server]"),
+          len, opCodeToString(opcode).toAscii().data());
 
   if (len)
   {
@@ -402,8 +415,7 @@ void OPCodeMonitorPacketLog::init(QString monitoredOPCodes)
   }
 
   seqInfo("OpCode monitoring ENABLED...");
-  seqInfo("Using list:\t%s",
-	  (const char*)monitoredOPCodes);
+  seqInfo("Using list:\t%s", monitoredOPCodes.toAscii().data());
 
 
   QString qsCommaBuffer (""); /* Construct these outside the loop so we don't have to construct
@@ -421,59 +433,59 @@ void OPCodeMonitorPacketLog::init(QString monitoredOPCodes)
     MonitoredOpCodeList      [uiIndex] [1] = 3; /* Direction, DEFAULT: Client <--> Server */
     MonitoredOpCodeList      [uiIndex] [2] = 1; /* Show raw data if packet is marked as known */
     MonitoredOpCodeAliasList [uiIndex]     = "Monitored OpCode"; /* Name used when displaying the raw data */
-    
-    iCommaPos = monitoredOPCodes.find (",");
-    
+
+    iCommaPos = monitoredOPCodes.indexOf(",");
+
     if (iCommaPos == -1)
       iCommaPos = monitoredOPCodes.length ();
-    
+
     qsCommaBuffer = monitoredOPCodes.left (iCommaPos);
     monitoredOPCodes.remove (0, iCommaPos + 1);
-    
+
     uiIterationID = 0;
-    
-    uint8_t uiColonCount = qsCommaBuffer.contains(":");
-    iColonPos = qsCommaBuffer.find (":");
-    
+
+    uint8_t uiColonCount = qsCommaBuffer.count(":");
+    iColonPos = qsCommaBuffer.indexOf(":");
+
     if (iColonPos == -1)
       qsColonBuffer  = qsCommaBuffer;
-    
+
     else
       qsColonBuffer = qsCommaBuffer.left (iColonPos);
-    
+
     while (uiIterationID <= uiColonCount)
     {
       if (uiIterationID == 0)
-	MonitoredOpCodeList [uiIndex] [0] = qsColonBuffer.toUInt (NULL, 16);
-      
+          MonitoredOpCodeList [uiIndex] [0] = qsColonBuffer.toUInt (NULL, 16);
+
       else if (uiIterationID == 1)
-	MonitoredOpCodeAliasList [uiIndex] = qsColonBuffer;
-      
+          MonitoredOpCodeAliasList [uiIndex] = qsColonBuffer;
+
       else if (uiIterationID == 2)
-	MonitoredOpCodeList [uiIndex] [1] = qsColonBuffer.toUInt (NULL, 10);
-      
+          MonitoredOpCodeList [uiIndex] [1] = qsColonBuffer.toUInt (NULL, 10);
+
       else if (uiIterationID == 3)
-	MonitoredOpCodeList [uiIndex] [2] = qsColonBuffer.toUInt (NULL, 10);
-      
+          MonitoredOpCodeList [uiIndex] [2] = qsColonBuffer.toUInt (NULL, 10);
+
       qsCommaBuffer.remove (0, iColonPos + 1);
-      
-      iColonPos = qsCommaBuffer.find (":");
-      
+
+      iColonPos = qsCommaBuffer.indexOf(":");
+
       if (iColonPos == -1)
-	qsColonBuffer = qsCommaBuffer;
-      
+          qsColonBuffer = qsCommaBuffer;
+
       else
-	qsColonBuffer = qsCommaBuffer.left (iColonPos);
-      
+          qsColonBuffer = qsCommaBuffer.left (iColonPos);
+
       uiIterationID ++;
     }
-    
+
 #if 1 // ZBTEMP
     seqDebug("opcode=%04x name='%s' dir=%d known=%d",
-	     MonitoredOpCodeList [uiIndex] [0],
-	     (const char*)MonitoredOpCodeAliasList [uiIndex],
-	     MonitoredOpCodeList [uiIndex] [1],
-	     MonitoredOpCodeList [uiIndex] [2]);
+            MonitoredOpCodeList [uiIndex] [0],
+            MonitoredOpCodeAliasList [uiIndex].toAscii().data(),
+            MonitoredOpCodeList [uiIndex] [1],
+            MonitoredOpCodeList [uiIndex] [2]);
 #endif
   }
 }
@@ -499,14 +511,14 @@ void OPCodeMonitorPacketLog::packet(const uint8_t* data, size_t len,
       }
     }
   }
-  
+
   if (uiOpCodeIndex > 0)
   {
-    QString opCodeName = MonitoredOpCodeAliasList[uiOpCodeIndex - 1].latin1();
-    
+    QString opCodeName = MonitoredOpCodeAliasList[uiOpCodeIndex - 1].toLatin1().data();
+
     if (m_view)
       printData(data, len, dir, opcode, opCodeName);
-    
+
     if (m_log)
       logData(data, len, dir, opcode, opcodeEntry,opCodeName);
   }

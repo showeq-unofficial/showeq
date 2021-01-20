@@ -1,8 +1,23 @@
 /*
- * messagewindow.h
+ *  messagewindow.h
+ *  Copyright 2003-2005, 2019 by the respective ShowEQ Developers
  *
- * ShowEQ Distributed under GPL
- * http://seq.sf.net/
+ *  This file is part of ShowEQ.
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef _MESSAGEWINDOW_H_
@@ -10,11 +25,16 @@
 
 #include "seqwindow.h"
 
-#include <stdint.h>
+#include <cstdint>
 
-#include <qtextedit.h>
-#include <qregexp.h>
-#include <qdialog.h>
+#include <QTextEdit>
+#include <QRegExp>
+#include <QDialog>
+#include <QLabel>
+#include <QMouseEvent>
+#include <QMenu>
+#include <QKeyEvent>
+#include <QEvent>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -24,7 +44,7 @@ class MessageFilters;
 class Messages;
 class MessageFilterDialog;
 
-class QPopupMenu;
+class QMenu;
 class QLineEdit;
 class QCheckBox;
 class QLabel;
@@ -148,7 +168,7 @@ class MessageWindow : public SEQWindow
 		QWidget* parent = 0, const char* name = 0);
   ~MessageWindow();
 
-  virtual QPopupMenu* menu();
+  virtual QMenu* menu();
   
  public slots:
   void newMessage(const MessageEntry& message);
@@ -158,22 +178,22 @@ class MessageWindow : public SEQWindow
   void saveText(void);
 
  protected slots:
-  void toggleTypeFilter(int);
+  void toggleTypeFilter(QAction*);
   void disableAllTypeFilters();
   void enableAllTypeFilters();
-  void toggleShowUserFilter(int);
+  void toggleShowUserFilter(QAction*);
   void disableAllShowUserFilters();
   void enableAllShowUserFilters();
-  void toggleHideUserFilter(int);
+  void toggleHideUserFilter(QAction*);
   void disableAllHideUserFilters();
   void enableAllHideUserFilters();
   void toggleLockedText();
-  void toggleDisplayType(int);
-  void toggleDisplayTime(int);
-  void toggleEQDisplayTime(int);
-  void toggleUseTypeStyles(int);
-  void toggleWrapText(int);
-  void setTypeStyle(int);
+  void toggleDisplayType(bool);
+  void toggleDisplayTime(bool);
+  void toggleEQDisplayTime(bool);
+  void toggleUseTypeStyles(bool);
+  void toggleWrapText(bool);
+  void setTypeStyle(QAction*);
   void setColor();
   void setBGColor();
   void setFont();
@@ -185,15 +205,15 @@ class MessageWindow : public SEQWindow
  protected:
   void addMessage(const MessageEntry& message);
   void addColorMessage(const MessageEntry& message);
-  
+
   Messages* m_messages;
   MessageFilters* m_messageFilters;
   MessageBrowser* m_messageWindow;
-  QPopupMenu* m_menu;
-  QPopupMenu* m_typeFilterMenu;
-  QPopupMenu* m_showUserFilterMenu;
-  QPopupMenu* m_hideUserFilterMenu;
-  int m_id_lockText;
+  QMenu* m_menu;
+  QMenu* m_typeFilterMenu;
+  QMenu* m_showUserFilterMenu;
+  QMenu* m_hideUserFilterMenu;
+  QAction* m_action_lockText;
   MessageFindDialog* m_findDialog;
   MessageFilterDialog* m_filterDialog;
   uint64_t m_enabledTypes;
