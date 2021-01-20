@@ -7,6 +7,7 @@ ShowEQ Frequently Asked Questions
 4) What happened to experience?
 5) Seq keeps crashing with "!!!! EQPacketFragmentSequence::addFragment(): 
    buffer overflow adding in new fragment". Why won't you fix this?
+6) Why do I get extreme lag/slowness when using X11 forwarding?
 
 
 1) Hit points always say 65536, 0, 100, etc, what is wrong
@@ -122,3 +123,23 @@ If you still see problems, you may want to set these higher. Setting these may
 be distribution specific. Check to see if you have sysctl (man sysctl) or 
 /etc/sysctl.conf, or these can be put directly into /proc by looking
 in /proc/sys/net/core.
+
+
+6) Why do I get extreme lag/slowness when using ShowEQ over a forwarded X11
+session?
+
+There were rendering changes in Qt4 and it behaves differently than Qt3 did,
+particularly when using X11 forwarding.
+
+The workaround for this is to set the QT_GRAPHICSSYSTEM environment variable
+prior to running showeq.  Possible values are native, raster, and opengl.
+
+You can either export the variable prior to running ShowEQ:
+
+    export QT_GRAPHICSSUBSYSTEM=native
+    showeq
+
+or prepend it to the showeq command:
+
+    QT_GRAPHICSSUBSYSTEM=native showeq
+
