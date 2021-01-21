@@ -1,5 +1,12 @@
 cn187 (01/20/21)
 ----------------
+- Updated version to 6.0.0.1
+- Additional fixes for EQ patch 01/20/21
+	- Fix struct alignment issue causing crashes and invalid spawn data
+	- Fix map loading issue in some zones
+
+cn187 (01/20/21)
+----------------
 - Updated version to 6.0.0.0
 - Updated to QT4
 - Various bug fixes
