@@ -638,6 +638,12 @@ void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
     // LDoN likes to append a _262 to the zonename. Get rid of it.
     QRegExp rx("_\\d+$");
     m_shortZoneName.replace( rx, "");
+
+    // 2020-01-20 patch seems to have added _progress suffix to certain
+    // zone names, presumably for the progression servers. This happens in
+    // ToV DZs for sure, but there may be others.
+    QRexExp rz("_progress$");
+    m_shortZoneName.replace(rz, "");
   }
 
   m_longZoneName = zoneNew->longName;
