@@ -263,7 +263,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   }
 
   // Looks like face, haircolor, beardcolor, eyes, etc. Skipping over it.
-  netStream.skipBytes(52);
+  netStream.skipBytes(51);
 
   player->profile.points = netStream.readUInt32NC();
   player->profile.MANA = netStream.readUInt32NC();
