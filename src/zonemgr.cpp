@@ -642,7 +642,7 @@ void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
     // 2020-01-20 patch seems to have added _progress suffix to certain
     // zone names, presumably for the progression servers. This happens in
     // ToV DZs for sure, but there may be others.
-    QRexExp rz("_progress$");
+    QRegExp rz("_progress$");
     m_shortZoneName.replace(rz, "");
   }
 
