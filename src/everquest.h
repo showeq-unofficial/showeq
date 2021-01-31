@@ -584,8 +584,8 @@ struct ClientZoneEntryStruct
 /*0000*/ uint32_t unknown0000;                   // ***Placeholder
 /*0004*/ char     name[32];                      // Player firstname
 /*0036*/ uint8_t  unknown0036[28];               // ***Placeholder
-/*0064*/ uint32_t unknown0064[6];                // unknown
-/*0088*/
+/*0064*/ uint32_t unknown0064[7];                // unknown
+/*0092*/
 };
 
 
