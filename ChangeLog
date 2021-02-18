@@ -1,3 +1,9 @@
+cn187 (02/17/21)
+----------------
+- Updated version to 6.0.0.2
+- Support for EQ patch 02/17/21
+- Updated ClientZoneEntryStruct to eliminate warning (fransick)
+
 cn187 (01/20/21)
 ----------------
 - Updated version to 6.0.0.1
