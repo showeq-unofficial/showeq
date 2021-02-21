@@ -8,6 +8,8 @@ ShowEQ Frequently Asked Questions
 5) Seq keeps crashing with "!!!! EQPacketFragmentSequence::addFragment(): 
    buffer overflow adding in new fragment". Why won't you fix this?
 6) Why do I get extreme lag/slowness when using X11 forwarding?
+7) The Seq screen is blank and I'm seeing X errors reporting BadAccess,
+   BadShmSeg and BadDrawable. What do I do?
 
 
 1) Hit points always say 65536, 0, 100, etc, what is wrong
@@ -142,4 +144,19 @@ You can either export the variable prior to running ShowEQ:
 or prepend it to the showeq command:
 
     QT_GRAPHICSSUBSYSTEM=native showeq
+
+
+7) The Seq screen is blank and I'm seeing X errors reporting BadAccess,
+   BadShmSeg and BadDrawable. What do I do?
+
+This can be worked around by setting the QT_X11_NO_MITSHM environment variable.
+
+You can either export the variable prior to running ShowEQ:
+
+    export QT_X11_NO_MITSHM=1
+    showeq
+
+or prepend it to the showeq command:
+
+    QT_X11_MIT_NO_MITSHM=1 showeq
 
