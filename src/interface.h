@@ -341,6 +341,8 @@ class EQInterface:public QMainWindow
    void insertWindowMenu(SEQWindow* window);
    void removeWindowMenu(SEQWindow* window);
    void setDockEnabled(QDockWidget* dw, bool enable);
+   QStringList enumerateDevices();
+   QString promptForNetDevice();
 
  public:
    Player* m_player;
@@ -414,6 +416,9 @@ class EQInterface:public QMainWindow
    NetDiag* m_netDiag;
    MessageFilterDialog* m_messageFilterDialog;
    GuildListWindow* m_guildListWindow;
+
+   QStringList m_deviceList;
+
 
    QLabel* m_stsbarSpawns;
    QLabel* m_stsbarStatus;

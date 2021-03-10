@@ -207,7 +207,7 @@ QString EQStr::formatMessage(uint32_t formatid,
 	    }
 
 	    // replace template argument with subst string
-	    if (substFormatStringRes.isEmpty())
+	    if (!substFormatStringRes.isEmpty())
 		formatString.replace(curPos, rxt.matchedLength(), substFormatStringRes);
 	    else
 		curPos += rxt.matchedLength(); // if no replacement string, skip over

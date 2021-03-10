@@ -209,13 +209,12 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      {
        setText(tSpawnColDeity, spawn->deityName());
        setText(tSpawnColBodyType, spawn->typeString());
-       if (spawn->guildID() < MAX_GUILDS)
-       {  
-          if(!spawn->guildTag().isEmpty())
+       if (!spawn->guildTag().isEmpty())
             setText(tSpawnColGuildID, spawn->guildTag());
-          else
+       else if (spawn->guildID())
             setText(tSpawnColGuildID, QString::number(spawn->guildID()));
-       }
+       else
+           setText(tSpawnColGuildID, " ");
      }
    }
    else if (changeType == tSpawnChangedALL)

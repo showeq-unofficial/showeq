@@ -253,20 +253,21 @@ void MessageShell::specialMessage(const uint8_t* data, size_t, uint8_t dir)
     target = m_spawnShell->findID(tSpawn, smsg->target);
 
   // calculate the message position
-  const char* message = smsg->source + strlen(smsg->source) + 1 
-    + sizeof(smsg->unknown0xxx);
-  
-  if (target)
-    m_messages->addMessage(chatColor2MessageType(smsg->messageColor), 
-			   QString("Special: '%1' -> '%2' - %3")
-			   .arg(smsg->source)
-			   .arg(target->name())
-			   .arg(message));
-  else
-    m_messages->addMessage(chatColor2MessageType(smsg->messageColor),
-			   QString("Special: '%1' - %2")
-			   .arg(smsg->source)
-			   .arg(message));
+  // const char* message = smsg->source + strlen(smsg->source) + 1
+  //  + sizeof(smsg->unknown0xxx);
+  // NOTE: gcc 8 (and maybe others) over-optimizes the above strlen call on the
+  // variable-sized source array (possibly because it isn't the last member
+  // of the struct), and as a result, strlen always returns 0 unless compiler
+  // optimizations are disabled.  So we work around this by creating a QString
+  // and using its size
+  const char* message = smsg->source + QString(smsg->source).length() + 1
+      + sizeof(smsg->unknown0xxx);
+
+  if (target) m_messages->addMessage(chatColor2MessageType(smsg->messageColor),
+          QString("Special: '%1' -> '%2' - %3") .arg(smsg->source)
+          .arg(target->name()) .arg(message)); else
+      m_messages->addMessage(chatColor2MessageType(smsg->messageColor),
+              QString("Special: '%1' - %2") .arg(smsg->source) .arg(message));
 }
 
 void MessageShell::guildMOTD(const uint8_t* data, size_t, uint8_t dir)

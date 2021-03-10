@@ -375,7 +375,8 @@ void Player::player(const charProfileStruct* player)
 
   // Guild
   setGuildID(player->guildID);
-  setGuildTag(m_guildMgr->guildIdToName(guildID()));
+  setGuildServerID(player->guildServerID);
+  setGuildTag(m_guildMgr->guildIdToName(guildID(), guildServerID()));
   emit guildChanged();
 
   // Position

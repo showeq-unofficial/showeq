@@ -142,6 +142,10 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
    connect(m_player, SIGNAL(changedID(uint16_t)),
 	   this, SLOT(playerChangedID(uint16_t)));
 
+   // connect to guildmgr to receive notifications of guild tag updates
+   connect(m_guildMgr, SIGNAL(guildTagUpdated(uint32_t)),
+           this, SLOT(updateGuildTag(uint32_t)));
+
    // restore the spawn list if necessary
    if (showeq_params->restoreSpawns)
      restoreSpawns();
@@ -247,6 +251,47 @@ const Item* SpawnShell::findClosestItem(spawnItemType type,
    // return the closest item.
    return closest;
 }
+
+void SpawnShell::updateGuildTag(uint32_t guildId)
+{
+    ItemIterator it(m_spawns);
+    Spawn* spawn;
+
+    while (it.hasNext())
+    {
+        it.next();
+
+        spawn = (Spawn*)it.value();
+        if (!spawn)
+            break;
+
+        if (guildId == spawn->guildID())
+        {
+            spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID(), spawn->guildServerID()));
+            spawn->updateLastChanged();
+            emit changeItem(spawn, tSpawnChangedALL);
+        }
+    }
+
+    ItemIterator pl(m_players);
+
+    while (pl.hasNext())
+    {
+        pl.next();
+
+        spawn = (Spawn*)pl.value();
+        if (!spawn)
+            break;
+
+        if (guildId == spawn->guildID())
+        {
+            spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID(), spawn->guildServerID()));
+            spawn->updateLastChanged();
+            emit changeItem(spawn, tSpawnChangedALL);
+        }
+    }
+}
+
 
 Spawn* SpawnShell::findSpawnByName(const QString& name)
 {
@@ -686,7 +731,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->holding = netStream.readUInt8();
    spawn->deity = netStream.readUInt32NC();
    spawn->guildID = netStream.readUInt32NC();
-   netStream.skipBytes(4);			/* new data in 11/16/2016 patch */
+   spawn->guildServerID = netStream.readUInt32NC();
    /* spawn->guildstatus = netStream.readUInt32NC();	disappeared 11/14/2018 */
    spawn->guildstatus = 0;
    spawn->class_ = netStream.readUInt32NC();
@@ -732,20 +777,22 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       netStream.skipBytes(36);
       for(i = 0; i < 9; i++)
       {
-         spawn->equipment[i].equip3 = netStream.readUInt32NC();
          spawn->equipment[i].itemId = netStream.readUInt32NC();
+         spawn->equipment[i].equip3 = netStream.readUInt32NC();
          spawn->equipment[i].equip2 = netStream.readUInt32NC();
          spawn->equipment[i].equip1 = netStream.readUInt32NC();
          spawn->equipment[i].equip0 = netStream.readUInt32NC();
       }
    } else {
-      netStream.skipBytes(28);
+      netStream.skipBytes(20);
       spawn->equipment[7].itemId = netStream.readUInt32NC();
+      spawn->equipment[7].equip3 = netStream.readUInt32NC();
       spawn->equipment[7].equip2 = netStream.readUInt32NC();
       spawn->equipment[7].equip1 = netStream.readUInt32NC();
       spawn->equipment[7].equip0 = netStream.readUInt32NC();
       // secondary
       spawn->equipment[8].itemId = netStream.readUInt32NC();
+      spawn->equipment[8].equip3 = netStream.readUInt32NC();
       spawn->equipment[8].equip2 = netStream.readUInt32NC();
       spawn->equipment[8].equip1 = netStream.readUInt32NC();
       spawn->equipment[8].equip0 = netStream.readUInt32NC();
@@ -879,10 +926,8 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      updateRuntimeFilterFlags(spawn);
      item->updateLastChanged();
 
-     if (spawn->guildID() < MAX_GUILDS)
-        spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
-     else
-        spawn->setGuildTag("");
+     spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID(), spawn->guildServerID()));
+
      if (!showeq_params->fast_machine)
         item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
      else
@@ -898,10 +943,8 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      updateRuntimeFilterFlags(spawn);
      m_spawns.insert(s.spawnId, item);
 
-     if (spawn->guildID() < MAX_GUILDS)
-        spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
-     else
-        spawn->setGuildTag("");
+     spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID(), spawn->guildServerID()));
+
      if (!showeq_params->fast_machine)
         item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
      else
@@ -1577,14 +1620,7 @@ void SpawnShell::respawnFromHover(const uint8_t* data, size_t len, uint8_t dir)
     updateRuntimeFilterFlags(corpse);
     m_spawns.insert(corpse->id(), corpse);
 
-    if (corpse->guildID() < MAX_GUILDS)
-    {
-        corpse->setGuildTag(m_guildMgr->guildIdToName(corpse->guildID()));
-    }
-    else
-    {
-        corpse->setGuildTag("");
-    }
+    corpse->setGuildTag(m_guildMgr->guildIdToName(corpse->guildID(), corpse->guildServerID()));
 
     emit addItem(corpse);
 

@@ -47,19 +47,21 @@ class GuildMgr : public QObject
 
   ~GuildMgr();
 
-  QString guildIdToName(uint16_t);
+  QString guildIdToName(uint16_t, uint16_t);
 
  public slots:
-  void worldGuildList(const uint8_t*, size_t);
+  void newGuildInZone(const uint8_t* data, size_t len);
+  void guildsInZoneList(const uint8_t * data, size_t len);
   void readGuildList();
   void guildList2text(QString);
   void listGuildInfo();
+  void writeGuildList();
+
+ signals:
+  void guildTagUpdated(uint32_t);
 
  private:
-  std::vector<QString> m_guildMap;
   std::map<uint32_t, QString> m_guildList;
- 
-  void writeGuildList(const uint8_t*, size_t);
 
   QString guildsFileName;
 

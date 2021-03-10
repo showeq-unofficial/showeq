@@ -399,6 +399,7 @@ Spawn::Spawn(Spawn* s, uint16_t id) : Item(tSpawn, id)
     setHP(s->HP());
     setMaxHP(s->maxHP());
     setGuildID(s->guildID());
+    setGuildServerID(s->guildServerID());
     setLevel(s->level());
     for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, s->equipment(i));
@@ -433,6 +434,7 @@ void Spawn::update(const spawnStruct* s)
   setHP(s->curHp);
   setMaxHP(100); //the client sets this to 100
   setGuildID(s->guildID);
+  setGuildServerID(s->guildServerID);
   setLevel(s->level);
   for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, s->equipment[i]);
@@ -541,8 +543,11 @@ void Spawn::backfill(const spawnStruct* s)
 
   // set guildID
   if (s->NPC == SPAWN_PLAYER || s->NPC == SPAWN_SELF)
+  {
     setGuildID(s->guildID);
-  else 
+    setGuildServerID(s->guildServerID);
+  }
+  else
     setGuildID(0xffff);
 }
 

@@ -4258,18 +4258,15 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     if (spawn)
     {
       QString guild;
-      if (spawn->guildID() < MAX_GUILDS)
-      {
-        if (!spawn->guildTag().isEmpty())
+      if (!spawn->guildTag().isEmpty())
           guild.sprintf("<%s>", spawn->guildTag().toAscii().data());
-        else
+      else if (spawn->guildID())
           guild = QString::number(spawn->guildID());
-      }
       else
           guild = " ";
 
       QString hp;
-      
+
       if (spawn->HP() <= 0)
         hp = "<= 0";
           else

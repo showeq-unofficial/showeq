@@ -122,7 +122,7 @@
 #define MAX_SPELLBOOK_SLOTS             800
 #define MAX_GROUP_MEMBERS               6
 #define MAX_BUFFS                       42
-#define MAX_GUILDS                      8192
+#define MAX_GUILDS                      32768
 #define MAX_AA                          300
 #define MAX_BANDOLIERS                  20
 #define MAX_POTIONS_IN_BELT             5
@@ -797,6 +797,7 @@ struct charProfileStruct
 /*20210*/ uint8_t   gm;                               // 0=no, 1=yes (guessing!)
 /*20211*/ int8_t    guildstatus;                      // 0=member, 1=officer, 2=guildleader
 /*20212*/ uint8_t   unknown20212[16];                 // *** Placeholder
+/*20224*/ uint32_t  guildServerID;
 /*20228*/ uint32_t  exp;                              // Current Experience
 /*20232*/ uint8_t   unknown20232[12];                 // *** Placeholder
 /*20244*/ uint8_t   languages[MAX_KNOWN_LANGS];       // List of languages
@@ -1100,6 +1101,7 @@ struct spawnStruct
 /*0000*/ uint8_t  holding;
 /*0000*/ uint32_t deity;
 /*0000*/ uint32_t guildID;
+/*0000*/ uint32_t guildServerID;
 /*0000*/ uint32_t guildstatus;                   // 0=member, 1=officer, 2=leader, -1=not guilded
 /*0000*/ uint8_t  class_;
 /*0000*/ uint8_t  state;                         // stand state 
@@ -1991,18 +1993,18 @@ struct environmentDamageStruct
 
 /*
 ** Money Loot
-** Length: 20 Octets
+** Length: 24 Octets
 ** OpCode: MoneyOnCorpseCode
 */
 
 struct moneyOnCorpseStruct
 {
-/*0000*/ uint8_t  unknown0000[4];                // ***Placeholder
-/*0004*/ uint32_t platinum;                      // Platinum Pieces
-/*0008*/ uint32_t gold;                          // Gold Pieces
-/*0012*/ uint32_t silver;                        // Silver Pieces
-/*0016*/ uint32_t copper;                        // Copper Pieces
-/*0020*/
+/*0000*/ uint8_t  unknown0000[8];                // ***Placeholder
+/*0008*/ uint32_t platinum;                      // Platinum Pieces
+/*0012*/ uint32_t gold;                          // Gold Pieces
+/*0016*/ uint32_t silver;                        // Silver Pieces
+/*0020*/ uint32_t copper;                        // Copper Pieces
+/*0024*/
 };
 
 /*
@@ -2506,9 +2508,20 @@ struct attack2Struct
 
 struct newGuildInZoneStruct
 {
-/*0000*/ uint8_t  unknown0000[8];                // ***Placeholder
-/*0008*/ char     guildname[56];                 // Guildname
-/*0064*/
+/*0000*/ uint32_t  guildId;                      // Guild ID
+/*0004*/ uint32_t  serverID;                     // ***Placeholder
+/*0008*/ char      guildname[0];                 // Guild name, null terminated
+/*xxxx*/
+};
+
+struct guildsInZoneListStruct
+{
+/*0000*/ uint32_t  name_len;                     // length of player name
+/*0004*/ char      name[16];                     // player name of length name_len,
+                                                 // no null terminator, max 16
+/*xxxx*/ uint32_t  num_guilds;                   // number of guild names in this struct
+/*xxxx*/ newGuildInZoneStruct guilds[0];
+/*xxxx*/
 };
 
 struct moneyUpdateStruct
@@ -2615,14 +2628,14 @@ struct clientLFGStruct
 struct buffStruct
 {
 /*0000*/ uint32_t spawnid;                       //spawn id
-/*0004*/ uint8_t  unknown0004[5]; 
-/*0009*/ int8_t   level;                         // Level of person who cast buff
-/*0010*/ uint8_t  unknown010[6];
-/*0016*/ uint32_t spellid;                       // spellid
-/*0020*/ uint32_t duration;                      // Time remaining in ticks
-/*0024*/ int32_t unknown0024;                    // Buff length in ticks
-/*0028*/ uint8_t  unknown028[84];
-/*0112*/ uint32_t spellslot;                     // spellslot
+/*0004*/ uint8_t  unknown0004[64]; 
+/*0068*/ uint32_t spellid;                       // spellid
+/*0072*/ uint32_t duration;                      // Time remaining in ticks
+/*0076*/ int32_t unknown0024;                    // Buff length in ticks
+/*0080*/ uint8_t  unknown0080[25];
+/*0105*/ int8_t   level;                         // Level of person who cast buff
+/*0106*/ uint8_t  unknown0106[6];
+/*0112*/ uint32_t spellslot;                     // buff slot in buff window
 /*0116*/ uint32_t changetype;                    // 1=buff fading,2=buff duration
 /*0120*/ 
 };

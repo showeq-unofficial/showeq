@@ -71,6 +71,7 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <cstdio>
+#include <ifaddrs.h>
 
 #include <QFont>
 #include <QApplication>
@@ -145,7 +146,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
     m_combatWindow(0),
     m_netDiag(0),
     m_messageFilterDialog(0),
-    m_guildListWindow(0)
+    m_guildListWindow(0),
+    m_deviceList(enumerateDevices())
 {
   setObjectName(name);
   setWindowFlags(Qt::Window);
@@ -221,10 +223,23 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    fileInfo2 = m_dataLocationMgr->findExistingFile(".", fileName2);
 
+   QString net_device = pSEQPrefs->getPrefString("Device", section, "eth0");
+   if (!m_deviceList.contains(net_device))
+   {
+       QString selected = promptForNetDevice();
+
+       if (!selected.isEmpty())
+       {
+           // set it as the device to monitor next session
+           pSEQPrefs->setPrefString("Device", "Network", selected);
+           net_device = selected;
+       }
+   }
+
    m_packet = new EQPacket(fileInfo.absoluteFilePath(),
 			   fileInfo2.absoluteFilePath(),
 			   pSEQPrefs->getPrefInt("ArqSeqGiveUp", section, 512),
-			   pSEQPrefs->getPrefString("Device", section, "eth0"),
+			   net_device,
 			   pSEQPrefs->getPrefString("IP", section,
 						    AUTOMATIC_CLIENT_IP),
 			   pSEQPrefs->getPrefString("MAC", section, "0"),
@@ -525,6 +540,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    pFileMenu->addAction("Sa&ve Map", m_mapMgr, SLOT(saveMap()), Qt::Key_F2);
    pFileMenu->addAction("Save SOE Map", m_mapMgr, SLOT(saveSOEMap()));
    pFileMenu->addAction("Reload Guilds File", m_guildmgr, SLOT(readGuildList()));
+   pFileMenu->addAction("Save Guilds File", m_guildmgr, SLOT(writeGuildList()));
    pFileMenu->addAction("Add Spawn Category", this, SLOT(addCategory()),
            Qt::ALT+Qt::Key_C);
    pFileMenu->addAction("Rebuild SpawnList", this, SLOT(rebuildSpawnList()),
@@ -2010,13 +2026,24 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    if (m_guildmgr)
    {
+       /*
      m_packet->connect2("OP_GuildList", SP_World, DIR_Server, 
 			"worldGuildListStruct", SZC_None,
 			m_guildmgr, 
 			SLOT(worldGuildList(const uint8_t*, size_t)));
+            */
+
+     m_packet->connect2("OP_GuildsInZoneList", SP_Zone, DIR_Server,
+             "guildsInZoneListStruct", SZC_None, m_guildmgr,
+             SLOT(guildsInZoneList(const uint8_t*, size_t)));
+
+     m_packet->connect2("OP_NewGuildInZone", SP_Zone, DIR_Server,
+             "newGuildInZoneStruct", SZC_None, m_guildmgr,
+             SLOT(newGuildInZone(const uint8_t*, size_t)));
 
      connect(this, SIGNAL(guildList2text(QString)),
 	     m_guildmgr, SLOT(guildList2text(QString)));
+
    }
 
    if (m_guildShell)
@@ -2578,6 +2605,9 @@ EQInterface::~EQInterface()
 
   if (m_guildShell != 0)
     delete m_guildShell;
+
+  if (m_guildmgr != 0)
+    delete m_guildmgr;
 
   if (m_zoneMgr != 0)
     delete m_zoneMgr;
@@ -5134,23 +5164,68 @@ void EQInterface::set_net_client_MAC_address()
   }
 }
 
+QStringList EQInterface::enumerateDevices()
+{
+    struct ifaddrs *ifaddr, *ifa;
+    int n;
+    QStringList devices;
+
+    if (getifaddrs(&ifaddr) == -1)
+    {
+        seqWarn("Could not enumerate network devices");
+        return QStringList();
+    }
+
+    for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++)
+    {
+        if (ifa->ifa_addr == NULL)
+            continue;
+
+        if (ifa->ifa_addr->sa_family == AF_INET)
+            devices.append(ifa->ifa_name);
+    }
+
+    freeifaddrs(ifaddr);
+
+    return devices;
+}
+
+QString EQInterface::promptForNetDevice()
+{
+    m_deviceList = enumerateDevices();
+
+    int current = 0;
+    if (m_packet)
+        current = m_deviceList.indexOf(m_packet->device());
+
+    bool ok = false;
+    QString selected = QInputDialog::getItem(this, "ShowEQ - Device",
+            "Enter the device to sniff for EQ Packets:",
+            m_deviceList, current, true, &ok);
+
+    if (ok)
+        return selected;
+    else
+        return QString();
+}
+
+
 void EQInterface::set_net_device()
 {
-  bool ok = false;
-  QString dev =
-    QInputDialog::getText(this, "ShowEQ - Device",
-            "Enter the device to sniff for EQ Packets:",
-            QLineEdit::Normal, m_packet->device(),
-            &ok);
 
-  if (ok)
-  {
-    // start monitoring the device
-    m_packet->monitorDevice(dev);
+    QString selected = promptForNetDevice();
 
-    // set it as the device to monitor next session
-    pSEQPrefs->setPrefString("Device", "Network", m_packet->device());
-  }
+    if (!selected.isEmpty())
+    {
+        if (m_packet)
+        {
+            // start monitoring the device
+            m_packet->monitorDevice(selected);
+        }
+
+        // set it as the device to monitor next session
+        pSEQPrefs->setPrefString("Device", "Network", selected);
+    }
 }
 
 void EQInterface::set_net_arq_giveup(int giveup)

@@ -239,6 +239,7 @@ class Spawn : public Item
   int32_t HP() const { return m_curHP; }
   int32_t maxHP() const { return m_maxHP; }
   uint16_t guildID() const { return m_guildID; }
+  uint16_t guildServerID() const { return m_guildServerID; }
   QString guildTag() const { return m_guildTag; }
   uint16_t petOwnerID() const { return m_petOwnerID; }
   uint8_t light() const { return m_light; }
@@ -338,6 +339,7 @@ class Spawn : public Item
   void setHP(int32_t HP) { m_curHP = HP; }
   void setMaxHP(int32_t maxHP) { m_maxHP = maxHP; }
   void setGuildID(uint16_t GuildID) { m_guildID = GuildID; }
+  void setGuildServerID(uint16_t GuildServerID) { m_guildServerID = GuildServerID; }
   void setGuildTag(QString GuildTag) { m_guildTag = GuildTag; }
   void setLevel(int level) { m_level = level; }
   void setEquipment(uint8_t wearSlot, EquipStruct item)
@@ -378,6 +380,7 @@ class Spawn : public Item
   int32_t m_curHP;
   int32_t m_maxHP;
   uint16_t m_guildID;
+  uint16_t m_guildServerID;
   uint16_t m_deity;
   int16_t m_deityTeam;
   EquipStruct m_equipment[tNumWearSlots];

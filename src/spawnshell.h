@@ -150,6 +150,8 @@ public slots:
    void saveSpawns(void);
    void restoreSpawns(void);
 
+   void updateGuildTag(uint32_t guildId);
+
  protected:
    void refilterSpawns(spawnItemType type);
    void refilterSpawnsRuntime(spawnItemType type);

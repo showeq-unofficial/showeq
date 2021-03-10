@@ -47,20 +47,101 @@ GuildMgr::~GuildMgr()
 {
 }
 
-QString GuildMgr::guildIdToName(uint16_t guildID)
+QString GuildMgr::guildIdToName(uint16_t guildID, uint16_t guildServerID)
 {
-  if (guildID >= m_guildMap.size())
-    return "";
-  return m_guildMap[guildID];
+    uint32_t key = guildServerID << 16 | guildID;
+    //unguilded PCs have a guild ID of 0
+    if (!guildID || !guildServerID | !m_guildList.count(key))
+        return "";
+    return m_guildList[key];
 }
 
-void GuildMgr::worldGuildList(const uint8_t* data, size_t len)
+
+void GuildMgr::newGuildInZone(const uint8_t* data, size_t len)
 {
-  writeGuildList(data, len);
-  readGuildList();
+    NetStream netStream(data, len);
+    QString guildName;
+    uint32_t size = 0; // to keep track of how much we're reading from the packet
+    uint32_t guildId = 0;
+    uint32_t guildServerId = 0;
+
+    guildId = netStream.readUInt32NC();
+    size += 4;
+
+    guildServerId = netStream.readUInt32NC();
+    size += 4;
+
+    uint32_t key = guildServerId << 16 | guildId;
+
+    guildName = netStream.readText();
+    if (guildName.length() && !m_guildList.count(key))
+    {
+        m_guildList[key] = guildName;
+        writeGuildList();
+        emit guildTagUpdated(guildId);
+    }
+    size += guildName.length() + 1; // include null in count
+
+    if (size != len)
+        seqWarn("newGuildInZone packet is not the expected length: %u != %u", size, len);
 }
 
-void GuildMgr::writeGuildList(const uint8_t* data, size_t len)
+void GuildMgr::guildsInZoneList(const uint8_t* data, size_t len)
+{
+    NetStream netStream(data, len);
+    QString guildName;
+    QString emptyName = "";
+    uint32_t size = 0; // to keep track of how much we're reading from the packet
+    uint32_t guildId = 0;
+    uint32_t guildServerId = 0;
+    uint32_t numGuilds = 0;
+
+    uint32_t nameLen = netStream.readUInt32NC();
+    size += 4;
+
+    // skip the player name to get to the guilds
+    netStream.skipBytes(nameLen);
+    size += nameLen;
+
+    numGuilds = netStream.readUInt32NC();
+    size += 4;
+
+    bool need_save = false;
+
+    while(!netStream.end())
+    {
+        guildId = netStream.readUInt32NC();
+        size += 4;
+
+        guildServerId = netStream.readUInt32NC();
+        size += 4;
+
+        uint32_t key = guildServerId << 16 | guildId;
+
+        guildName = netStream.readText();
+        if (guildName.length() && !m_guildList.count(key))
+        {
+            m_guildList[key] = guildName;
+            need_save = true;
+            emit guildTagUpdated(guildId);
+        }
+
+        size += guildName.length() + 1; // include null in count
+
+        if (size >= len)
+            break;
+    }
+
+    if (size != len)
+        seqWarn("guildsInZoneList packet is not the expected length: %u != %u", size, len);
+
+    if (need_save)
+        writeGuildList();
+
+}
+
+
+void GuildMgr::writeGuildList()
 {
   QFile guildsfile(guildsFileName);
 
@@ -76,56 +157,14 @@ void GuildMgr::writeGuildList(const uint8_t* data, size_t len)
     seqWarn("GuildMgr: Could not open %s for writing, unable to replace with server data!",
              guildsFileName.toLatin1().data());
 
-  QDataStream guildDataStream(&guildsfile);
+  QTextStream guildDataStream(&guildsfile);
 
-  NetStream netStream(data,len);
-  QString guildName;
-  QString emptyName = "";
-  uint32_t size = 0; // to keep track of how much we're reading from the packet
-  uint32_t guildId = 0;
-
-  for (guildId = 0; guildId < 20000; guildId++)
-    m_guildList[guildId] = emptyName;
-  guildId = 0;
-
-  /*
-   0x48 in the packet starts the serialized list.  See guildListStruct
-   and worldGuildListStruct in everquest.h
-  */
-
-  // skip to the first guild in the list
-  netStream.skipBytes(0x44);
-  size += 0x44;
-
-  while(!netStream.end())
+  for (auto itr = m_guildList.begin(); itr != m_guildList.end(); ++itr)
   {
-     guildId = netStream.readUInt32NC();
-     size += 4; // four bytes for the guild ID
-     netStream.skipBytes(4);
-     size += 4; // four bytes added 11/16/2016
-     guildName = netStream.readText();
-
-     if(guildName.length())
-     {
-        m_guildList[guildId] = guildName;
-
-        // add guild name length, plus one for the null character
-        size += guildName.length() + 1;
-     }
-
-     if(size + 1 == len)
-        break; // the end
-  }
-
-  std::map<uint32_t, QString>::iterator it;
-
-  for(it = m_guildList.begin(); it != m_guildList.end(); it++)
-  {
-     char szGuildName[64] = {0};
-
-     strcpy(szGuildName, it->second.toLatin1().data());
-     //seqDebug("GuildMgr::writeGuildList - add guild '%s' (%d)", szGuildName, it->first);
-     guildDataStream.writeRawData(szGuildName, sizeof(szGuildName));
+     if (itr->first == 0)
+         continue;
+     QString line = QString::number(itr->first) + "|" + itr->second.toLatin1();
+     guildDataStream << line.trimmed() << "\n";
   }
 
   guildsfile.close();
@@ -135,17 +174,23 @@ void GuildMgr::writeGuildList(const uint8_t* data, size_t len)
 void GuildMgr::readGuildList()
 {
   QFile guildsfile(guildsFileName);
+  m_guildList.clear();
 
-  m_guildMap.clear();
   if (guildsfile.open(QIODevice::ReadOnly))
   {
      while (!guildsfile.atEnd())
      {
-        char szGuildName[64] = {0};
-
-        guildsfile.read(szGuildName, sizeof(szGuildName));
-        //seqDebug("GuildMgr::readGuildList - read guild '%s'", szGuildName);
-        m_guildMap.push_back(QString::fromUtf8(szGuildName));
+         QByteArray line = guildsfile.readLine();
+         QList<QByteArray> line_parts = line.split('|');
+         if (line_parts.size() != 2)
+         {
+             seqWarn("GuildMgr::readGuildList - skipping malformed line");
+             continue;
+         }
+         uint32_t key = line_parts.at(0).toULong();
+         QString guildName = line_parts.at(1).trimmed();
+         m_guildList[key] = guildName;
+         emit guildTagUpdated(key & 0x0000ffff);
      }
 
     guildsfile.close();
@@ -174,10 +219,11 @@ void GuildMgr::guildList2text(QString fn)
       return;
    }
 
-   for (unsigned int i =0 ; i < m_guildMap.size(); i++) 
+   for (auto itr = m_guildList.begin(); itr != m_guildList.end(); ++itr)
    {
-       if (!m_guildMap[i].isNull())
-          guildtext << i << "\t" << m_guildMap[i] << endl;
+       if (itr->first == 0)
+           continue;
+       guildtext << itr->first << "\t" << itr->second << endl;
    }
 
    guildsfile.close();
@@ -188,10 +234,10 @@ void GuildMgr::guildList2text(QString fn)
 
 void GuildMgr::listGuildInfo()
 {
-   for (unsigned int i = 0; i < m_guildMap.size(); i++)
+   for (auto itr = m_guildList.begin(); itr != m_guildList.end(); ++itr)
    {
-     if (!m_guildMap[i].isNull())
-       seqInfo("%d\t%s", i, m_guildMap[i].toAscii().data());
+     if (!itr->second.isNull())
+       seqInfo("%d\t%s", itr->first, itr->second.toAscii().data());
    }
 }
 

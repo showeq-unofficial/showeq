@@ -2500,7 +2500,7 @@ ShowEQ - Spawn List 2,ShowEQ - Spawn Points,ShowEQ - Spell List,Map ,
 " />
   </property>
   <property name="GuildsFile" >
-   <string value="guilds2.dat" />
+   <string value="guilds3.dat" />
    <comment>Location of file containing guild strings</comment>
   </property>
   <property name="GuildsDumpFile" >

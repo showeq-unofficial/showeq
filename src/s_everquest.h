@@ -110,6 +110,7 @@ AddStruct(inspectedStruct);
 AddStruct(attack1Struct);
 AddStruct(attack2Struct);
 AddStruct(newGuildInZoneStruct);
+AddStruct(guildsInZoneListStruct);
 AddStruct(moneyUpdateStruct);
 AddStruct(memorizeSlotStruct);
 AddStruct(cRunToggleStruct);
