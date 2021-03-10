@@ -1,3 +1,12 @@
+cn187 (03/10/21)
+----------------
+- Updated version to 6.1.0.0
+- Support for EQ patch 03/10/21
+- Enumerate net devices and prompt for selection if needed
+- Message formatting fixes
+- Struct and opcode fixes for spell list functionality (fransick)
+- Opcode and struct updates (fransick)
+
 cn187 (02/17/21)
 ----------------
 - Updated version to 6.0.0.2
