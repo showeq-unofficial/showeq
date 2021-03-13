@@ -6,6 +6,8 @@ cn187 (03/10/21)
 - Message formatting fixes
 - Struct and opcode fixes for spell list functionality (fransick)
 - Opcode and struct updates (fransick)
+- Fix guild tag display
+- Fix display of held/worn equipment
 
 cn187 (02/17/21)
 ----------------
