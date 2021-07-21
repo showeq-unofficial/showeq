@@ -148,7 +148,7 @@ QString EQStr::formatMessage(uint32_t formatid,
 	while (cp < ((unsigned char *) &arguments[argsLen] - sizeof(uint32_t)*sizeof(unsigned char))) {
 	    arg_len = (cp[0] << 0) | (cp[1] << 8) | (cp[2] << 16) | (cp[3] << 24);
 	    cp += 4;
-	    if (arg_len == 0)
+	    if (arg_len == 0 || arg_len > argsLen)
 		break;
 	    tempStr += " ";
 	    tempStr += QString::fromUtf8((const char *) cp, arg_len);
