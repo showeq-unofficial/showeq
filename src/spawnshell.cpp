@@ -798,11 +798,9 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       spawn->equipment[8].equip0 = netStream.readUInt32NC();
    }
 
-   spawn->posData[0] = netStream.readUInt32NC();
-   spawn->posData[1] = netStream.readUInt32NC();
-   spawn->posData[2] = netStream.readUInt32NC();
-   spawn->posData[3] = netStream.readUInt32NC();
-   spawn->posData[4] = netStream.readUInt32NC();
+   for (int i = 0; i < (sizeof(spawn->posData)/sizeof(spawn->posData[0])); ++i) {
+       spawn->posData[i] = netStream.readUInt32NC();
+   }
 
    if(spawn->hasTitle)
    {
