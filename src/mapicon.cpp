@@ -1023,39 +1023,43 @@ void MapIcons::paintSpawnIcon(MapParameters& param,
   if (mapIcon.showWalkPath() ||
       (m_showNPCWalkPaths && spawn->isNPC()))
   {
+    const SpawnTrackList& trackList = spawn->trackList();
     SpawnTrackListIterator trackIt(spawn->trackList());
+    int cnt = trackList.count ();
     
-    const SpawnTrackPoint* trackPoint = trackIt.next();
-    if (trackPoint)
-    {
-      if (!mapIcon.useWalkPathPen())
-	p.setPen(Qt::blue);
-      else
-	p.setPen(mapIcon.walkPathPen());
+    if (cnt >= 2) {	// only make a line if there is more than one point
+	const SpawnTrackPoint* trackPoint = trackIt.next();
+	if (trackPoint)
+	{
+	  if (!mapIcon.useWalkPathPen())
+	    p.setPen(Qt::blue);
+	  else
+	    p.setPen(mapIcon.walkPathPen());
 
-      int16_t x_1, y_1, x_2, y_2;
+	  int16_t x_1, y_1, x_2, y_2;
 
-      x_1 = trackPoint->x();
-      y_1 = trackPoint->y();
+	  x_1 = trackPoint->x();
+	  y_1 = trackPoint->y();
 
-      while (trackIt.hasNext())
-      {
-          trackPoint = trackIt.next();
-          if (!trackPoint)
-              break;
+	  while (trackIt.hasNext())
+	  {
+	      trackPoint = trackIt.next();
+	      if (!trackPoint)
+		  break;
 
-          x_2 = trackPoint->x();
-          y_2 = trackPoint->y();
+	      x_2 = trackPoint->x();
+	      y_2 = trackPoint->y();
 
-          p.drawLine (param.calcXOffsetI(x_1),
-                      param.calcYOffsetI(y_1),
-                      param.calcXOffsetI(x_2),
-                      param.calcYOffsetI(y_2));
-          x_1 = x_2;
-          y_1 = y_2;
-      }
+	      p.drawLine (param.calcXOffsetI(x_1),
+			  param.calcYOffsetI(y_1),
+			  param.calcXOffsetI(x_2),
+			  param.calcYOffsetI(y_2));
+	      x_1 = x_2;
+	      y_1 = y_2;
+	  }
 
-      p.drawLine (x_2, y_2, point.x(), point.y());
+	  p.drawLine (param.calcXOffsetI(x_2), param.calcYOffsetI(y_2), point.x(), point.y());
+	}
     }
   }
 
