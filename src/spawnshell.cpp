@@ -686,9 +686,10 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
 
    if(spawn->aura)	    // aura stuff
    {
-       netStream.readText();	// skip 2 variable len strings
+       netStream.readText();	// skip 3 variable len strings
        netStream.readText();
-       netStream.skipBytes(54);	// and 54 static bytes
+       netStream.readText();
+       netStream.skipBytes(53);	// and 53 static bytes
    }
 
    spawn->charProperties = netStream.readUInt8();

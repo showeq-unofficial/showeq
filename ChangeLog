@@ -1,3 +1,11 @@
+cn187 (11/17/21)
+----------------
+- Update to version 6.1.8
+- Support for EQ patch 11/17/21
+- Opcode and struct changes (Newby, cn187)
+- Add spawntime support to filter strings (Newby)
+- Fix NPC aura decoding (Newby)
+
 cn187 (10/21/21)
 ----------------
 - Update to version 6.1.7
