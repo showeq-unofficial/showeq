@@ -1046,63 +1046,63 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
 
   m_action_FOVNoBrush = subSubMenu->addAction("No Background");
   m_action_FOVNoBrush->setCheckable(true);
-  m_action_FOVNoBrush->setData(Qt::NoBrush);
+  m_action_FOVNoBrush->setData(static_cast<int>(Qt::NoBrush));
 
   m_action_FOVSolidPattern = subSubMenu->addAction("Solid");
   m_action_FOVSolidPattern->setCheckable(true);
-  m_action_FOVSolidPattern->setData(Qt::SolidPattern);
+  m_action_FOVSolidPattern->setData(static_cast<int>(Qt::SolidPattern));
 
   m_action_FOVDense1Pattern = subSubMenu->addAction("94% fill");
   m_action_FOVDense1Pattern->setCheckable(true);
-  m_action_FOVDense1Pattern->setData(Qt::Dense1Pattern);
+  m_action_FOVDense1Pattern->setData(static_cast<int>(Qt::Dense1Pattern));
 
   m_action_FOVDense2Pattern = subSubMenu->addAction("88% fill");
   m_action_FOVDense2Pattern->setCheckable(true);
-  m_action_FOVDense2Pattern->setData(Qt::Dense2Pattern);
+  m_action_FOVDense2Pattern->setData(static_cast<int>(Qt::Dense2Pattern));
 
   m_action_FOVDense3Pattern  = subSubMenu->addAction("63% fill");
   m_action_FOVDense3Pattern ->setCheckable(true);
-  m_action_FOVDense3Pattern ->setData(Qt::Dense3Pattern);
+  m_action_FOVDense3Pattern ->setData(static_cast<int>(Qt::Dense3Pattern));
 
   m_action_FOVDense4Pattern = subSubMenu->addAction("50% fill");
   m_action_FOVDense4Pattern->setCheckable(true);
-  m_action_FOVDense4Pattern->setData(Qt::Dense4Pattern);
+  m_action_FOVDense4Pattern->setData(static_cast<int>(Qt::Dense4Pattern));
 
   m_action_FOVDense5Pattern = subSubMenu->addAction("37% fill");
   m_action_FOVDense5Pattern->setCheckable(true);
-  m_action_FOVDense5Pattern->setData(Qt::Dense5Pattern);
+  m_action_FOVDense5Pattern->setData(static_cast<int>(Qt::Dense5Pattern));
 
   m_action_FOVDense6Pattern = subSubMenu->addAction("12% fill");
   m_action_FOVDense6Pattern->setCheckable(true);
-  m_action_FOVDense6Pattern->setData(Qt::Dense6Pattern);
+  m_action_FOVDense6Pattern->setData(static_cast<int>(Qt::Dense6Pattern));
 
   m_action_FOVDense7Pattern = subSubMenu->addAction("6% fill");
   m_action_FOVDense7Pattern->setCheckable(true);
-  m_action_FOVDense7Pattern->setData(Qt::Dense7Pattern);
+  m_action_FOVDense7Pattern->setData(static_cast<int>(Qt::Dense7Pattern));
 
   m_action_FOVHorPattern = subSubMenu->addAction("Horizontal lines");
   m_action_FOVHorPattern->setCheckable(true);
-  m_action_FOVHorPattern->setData(Qt::HorPattern);
+  m_action_FOVHorPattern->setData(static_cast<int>(Qt::HorPattern));
 
   m_action_FOVVerPattern = subSubMenu->addAction("Vertical lines");
   m_action_FOVVerPattern->setCheckable(true);
-  m_action_FOVVerPattern->setData(Qt::VerPattern);
+  m_action_FOVVerPattern->setData(static_cast<int>(Qt::VerPattern));
 
   m_action_FOVCrossPattern = subSubMenu->addAction("Crossing lines");
   m_action_FOVCrossPattern->setCheckable(true);
-  m_action_FOVCrossPattern->setData(Qt::CrossPattern);
+  m_action_FOVCrossPattern->setData(static_cast<int>(Qt::CrossPattern));
 
   m_action_FOVBDiagPattern = subSubMenu->addAction("Diagonal lines (directed /)");
   m_action_FOVBDiagPattern->setCheckable(true);
-  m_action_FOVBDiagPattern->setData(Qt::BDiagPattern);
+  m_action_FOVBDiagPattern->setData(static_cast<int>(Qt::BDiagPattern));
 
   m_action_FOVFDiagPattern = subSubMenu->addAction("Diagonal lines (directed \\)");
   m_action_FOVFDiagPattern->setCheckable(true);
-  m_action_FOVFDiagPattern->setData(Qt::FDiagPattern);
+  m_action_FOVFDiagPattern->setData(static_cast<int>(Qt::FDiagPattern));
 
   m_action_FOVDiagCrossPattern = subSubMenu->addAction("Diagonal crossing lines");
   m_action_FOVDiagCrossPattern->setCheckable(true);
-  m_action_FOVDiagCrossPattern->setData(Qt::DiagCrossPattern);
+  m_action_FOVDiagCrossPattern->setData(static_cast<int>(Qt::DiagCrossPattern));
 
   connect(subSubMenu, SIGNAL(triggered(QAction*)), this,
           SLOT(select_fovStyle(QAction*)));
