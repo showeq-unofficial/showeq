@@ -1,6 +1,6 @@
 ##   -*- autoconf -*-
 
-# serial 3 add qt5 support
+# serial 4 improve qt5 autodetection on certain plaforms
 
 dnl    This file is part of ShowEQ and is based on the file from KDE.
 dnl    Copyright (C) 1997 Janos Farkas (chexum@shadow.banki.hu)
@@ -862,9 +862,10 @@ qt_incdirs="$ac_qt_includes $qt_incdirs"
 
 
 dnl qt5 (and later?) has QT_VERSION_STR in qconfig.h, while qt4 has it in qglobal.h
-AC_FIND_FILE("QtCore/qconfig.h", $qt_incdirs, qt5_incdir)
 AC_FIND_FILE("Qt/qglobal.h", $qt_incdirs, qt4_incdir)
-
+AC_FIND_FILE("QtCore/qconfig.h", $qt_incdirs, qt5_incdir_base)
+AC_FIND_FILE("QtCore/qconfig-32.h", $qt_incdirs, qt5_incdir_32)
+AC_FIND_FILE("QtCore/qconfig-64.h", $qt_incdirs, qt5_incdir_64)
 
 dnl  *************************************************
 dnl  * At this point, we extract the Qt version from *
@@ -887,9 +888,19 @@ qt_version_string=`cat $qt_version_source 2> configure.dbg |\
 if [[ -n "$qt_version_string" ]]; then
     qt_incdir="$qt4_incdir"
 
-else 
-
-        qt_version_source="$qt5_incdir/QtCore/qconfig.h"
+else
+    if [[ "$qt5_incdir_64" != "NO" ]]; then
+        qt_version_source="$qt5_incdir_64/QtCore/qconfig-64.h"
+        qt_incdir="$qt5_incdir_64"
+    else
+        if [[ "$qt5_incdir_32" != "NO" ]]; then
+            qt_version_source="$qt5_incdir_32/QtCore/qconfig-32.h"
+            qt_incdir="$qt5_incdir_32"
+        else
+            qt_version_source="$qt5_incdir_base/QtCore/qconfig.h"
+            qt_incdir="$qt5_incdir_base"
+        fi
+    fi
 
         qt_version_string=`cat $qt_version_source 2> configure.dbg |\
                   grep "#define QT_VERSION_STR"                      |\
@@ -899,9 +910,7 @@ else
                   sed 's/	//g'                                     |\
                   sed 's/"//g'`;
 
-        qt_incdir="$qt5_incdir"
 fi
-
 
 qt_version_number=`cat $qt_version_source 2> configure.dbg |\
                    grep "#define QT_VERSION[^_]"                      |\
