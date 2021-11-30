@@ -75,7 +75,7 @@ bool GDBMConvenience::Insert(QString dbName, Datum& key, Datum& data,
   dbName += ".dbm";
 
   // attempt to open the database for write
-  if ((dbf = gdbm_open(dbName.toAscii().data(), 0, GDBM_WRCREAT, 0644, 0))
+  if ((dbf = gdbm_open(dbName.toLatin1().data(), 0, GDBM_WRCREAT, 0644, 0))
       != NULL)
   {
     // if successful, then attempt to insert or replace data under key
@@ -86,7 +86,7 @@ bool GDBMConvenience::Insert(QString dbName, Datum& key, Datum& data,
           success = true;
           break;
       default:
-    displayGDBMError("Insert: gdbm_store", dbName.toAscii().data());
+    displayGDBMError("Insert: gdbm_store", dbName.toLatin1().data());
       }
 
     // close the database
@@ -95,7 +95,7 @@ bool GDBMConvenience::Insert(QString dbName, Datum& key, Datum& data,
   else
   {
     // display GDBM Error
-    displayGDBMError("Insert: gdbm_open", dbName.toAscii().data());
+    displayGDBMError("Insert: gdbm_open", dbName.toLatin1().data());
 
     // attempt to diagnose the open for write failure
     diagFileWriteFail(dbName);
@@ -116,14 +116,14 @@ bool GDBMConvenience::Delete(QString dbName, Datum& key)
   dbName += ".dbm";
 
   // attempt to open the database for write
-  if ((dbf = gdbm_open(dbName.toAscii().data(), 0, GDBM_WRITER, 0644, 0))
+  if ((dbf = gdbm_open(dbName.toLatin1().data(), 0, GDBM_WRITER, 0644, 0))
       != NULL)
   {
     // if successful, then attempt to insert or replace data under key
     if (gdbm_delete(dbf, key_) == 0)
       success = true;
     else
-      displayGDBMError("Delete: gdbm_delete", dbName.toAscii().data());
+      displayGDBMError("Delete: gdbm_delete", dbName.toLatin1().data());
 
     // close the database
     gdbm_close(dbf);
@@ -131,7 +131,7 @@ bool GDBMConvenience::Delete(QString dbName, Datum& key)
   else
   {
     // display GDBM Error
-    displayGDBMError("Delete: gdbm_open", dbName.toAscii().data());
+    displayGDBMError("Delete: gdbm_open", dbName.toLatin1().data());
 
     // attempt to diagnose the open for write failure
     diagFileWriteFail(dbName);
@@ -153,7 +153,7 @@ bool GDBMConvenience::IsEntryExist(QString dbName, Datum& key)
   dbName += ".dbm";
 
   // attempt to open the database for read
-  if ((dbf = gdbm_open(dbName.toAscii().data(), 0, GDBM_READER,
+  if ((dbf = gdbm_open(dbName.toLatin1().data(), 0, GDBM_READER,
                        0644, 0)) != NULL)
   {
     // attempt to retrieve the entry from the database
@@ -188,7 +188,7 @@ bool GDBMConvenience::GetEntry(QString dbName, Datum& key, Datum& data)
   dbName += ".dbm";
 
   // attmpet to open the database for read
-  if ((dbf = gdbm_open(dbName.toAscii().data(), 0, GDBM_READER,
+  if ((dbf = gdbm_open(dbName.toLatin1().data(), 0, GDBM_READER,
                        0644, 0)) != NULL)
   {
     // attempt to retrieve the entry from the database
@@ -208,7 +208,7 @@ bool GDBMConvenience::GetEntry(QString dbName, Datum& key, Datum& data)
   else
   {
     // display the notice (this isn't necessarily bad)
-    displayGDBMError("GetEntry: gdbm_open", dbName.toAscii().data(), "Notice");
+    displayGDBMError("GetEntry: gdbm_open", dbName.toLatin1().data(), "Notice");
 
     // attempt to diagnose the open for read failure
     diagFileReadFail(dbName);
@@ -227,14 +227,14 @@ bool GDBMConvenience::Reorganize(QString dbName)
   dbName += ".dbm";
 
   // attempt to open the database for write
-  if ((dbf = gdbm_open(dbName.toAscii().data(), 0, GDBM_WRITER, 0644, 0))
+  if ((dbf = gdbm_open(dbName.toLatin1().data(), 0, GDBM_WRITER, 0644, 0))
       != NULL)
   {
     // if successful, then attempt to insert or replace data under key
     if (gdbm_reorganize(dbf) == 0)
       success = true;
     else
-      displayGDBMError("Reorganize: gdbm_reorganize", dbName.toAscii().data());
+      displayGDBMError("Reorganize: gdbm_reorganize", dbName.toLatin1().data());
 
     // close the database
     gdbm_close(dbf);
@@ -242,7 +242,7 @@ bool GDBMConvenience::Reorganize(QString dbName)
   else
   {
     // display GDBM Error
-    displayGDBMError("Reorganize: gdbm_open", dbName.toAscii().data());
+    displayGDBMError("Reorganize: gdbm_open", dbName.toLatin1().data());
     
     // attempt to diagnose the open for write failure
     diagFileWriteFail(dbName);
@@ -311,13 +311,13 @@ bool GDBMIterator::GetFirstKey(QString dbName, Datum& key)
   dbName += ".dbm";
 
   // open the specified DB file for reading
-  m_dbf = gdbm_open(dbName.toAscii().data(), 0, GDBM_READER,
+  m_dbf = gdbm_open(dbName.toLatin1().data(), 0, GDBM_READER,
                     0644, 0);
 
   // if failed, then nothing to read
   if (m_dbf == NULL)
   {
-    displayGDBMError("GetFirstKey: gdbm_open", dbName.toAscii().data());
+    displayGDBMError("GetFirstKey: gdbm_open", dbName.toLatin1().data());
 
     // attempt to diagnose the open for read failure
     diagFileReadFail(dbName);

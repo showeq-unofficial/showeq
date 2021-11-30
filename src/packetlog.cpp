@@ -95,7 +95,7 @@ void PacketLog::logMessage(const QString& message)
   if (!open())
     return;
 
-   outputf ("%s\n", message.toAscii().data());
+   outputf ("%s\n", message.toLatin1().data());
 
    flush();
 }
@@ -300,13 +300,13 @@ void PacketLog::printData(const uint8_t* data, size_t len, uint8_t dir,
 			  uint16_t opcode, const QString& origPrefix)
 {
   if (!origPrefix.isEmpty())
-    ::printf("%s ", origPrefix.toAscii().data());
+    ::printf("%s ", origPrefix.toLatin1().data());
   else
     ::putchar('\n');
 
   ::printf("%s [Size: %lu]%s\n",
           ((dir == DIR_Server) ? "[Server->Client]" : "[Client->Server]"),
-          len, opCodeToString(opcode).toAscii().data());
+          len, opCodeToString(opcode).toLatin1().data());
 
   if (len)
   {
@@ -415,7 +415,7 @@ void OPCodeMonitorPacketLog::init(QString monitoredOPCodes)
   }
 
   seqInfo("OpCode monitoring ENABLED...");
-  seqInfo("Using list:\t%s", monitoredOPCodes.toAscii().data());
+  seqInfo("Using list:\t%s", monitoredOPCodes.toLatin1().data());
 
 
   QString qsCommaBuffer (""); /* Construct these outside the loop so we don't have to construct
@@ -483,7 +483,7 @@ void OPCodeMonitorPacketLog::init(QString monitoredOPCodes)
 #if 1 // ZBTEMP
     seqDebug("opcode=%04x name='%s' dir=%d known=%d",
             MonitoredOpCodeList [uiIndex] [0],
-            MonitoredOpCodeAliasList [uiIndex].toAscii().data(),
+            MonitoredOpCodeAliasList [uiIndex].toLatin1().data(),
             MonitoredOpCodeList [uiIndex] [1],
             MonitoredOpCodeList [uiIndex] [2]);
 #endif

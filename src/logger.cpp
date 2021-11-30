@@ -52,14 +52,14 @@ bool SEQLogger::open()
   if (m_fp)
     return true;
 
-  m_fp = fopen(m_filename.toAscii().data(),"a");
+  m_fp = fopen(m_filename.toLatin1().data(),"a");
 
   if (!m_fp)
   {
     if (!m_errOpen)
     {
       ::fprintf(stderr, "Error opening %s: %s (will keep trying)\n",
-              m_filename.toAscii().data(), strerror(errno));
+              m_filename.toLatin1().data(), strerror(errno));
       m_errOpen = true;
     }
 

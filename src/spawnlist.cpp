@@ -1094,7 +1094,7 @@ void SpawnList::listItemDoubleClicked(QTreeWidgetItem* litem, int col)
   const Item* item = ((SpawnListItem*)lvitem)->item();
   if (item != NULL)
   {
-    seqInfo("%s", item->filterString().toAscii().data());
+    seqInfo("%s", item->filterString().toLatin1().data());
   }
 }
 

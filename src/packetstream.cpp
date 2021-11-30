@@ -118,9 +118,9 @@ bool EQPacketStream::connect2(const QString& opcodeName,
   if (!opcode)
   {
     seqDebug("connect2: Unknown opcode '%s' with payload type '%s'",
-            opcodeName.toAscii().data(), payloadType);
+            opcodeName.toLatin1().data(), payloadType);
     seqDebug("\tfor receiver '%s' of type '%s' to member '%s'",
-            receiver->objectName().toAscii().data(),
+            receiver->objectName().toLatin1().data(),
             receiver->metaObject()->className(), member);
     return false;
   }
@@ -145,11 +145,11 @@ bool EQPacketStream::connect2(const QString& opcodeName,
   if (!payload)
   {
     seqDebug("connect2: Warning! opcode '%s' has no matching payload.",
-            opcodeName.toAscii().data());
+            opcodeName.toLatin1().data());
     seqDebug("\tdir '%d' payload '%s' szt '%d'",
             m_dir, payloadType, szt);
     seqDebug("\tfor receiver '%s' of type '%s' to member '%s'",
-            receiver->objectName().toAscii().data(),
+            receiver->objectName().toLatin1().data(),
             receiver->metaObject()->className(), member);
 
     return false;
@@ -164,12 +164,12 @@ bool EQPacketStream::connect2(const QString& opcodeName,
     // construct a name for the dispatch
     QString dispatchName(256, '\0');
     dispatchName.sprintf("PacketDispatch:%s:%s:%d:%s:%d",
-            objectName().toAscii().data(), opcodeName.toAscii().data(),
-            payload->dir(), payload->typeName().toAscii().data(),
+            objectName().toLatin1().data(), opcodeName.toLatin1().data(),
+            payload->dir(), payload->typeName().toLatin1().data(),
             payload->sizeCheckType());
 
     // create new dispatch object
-    dispatch = new EQPacketDispatch(this, dispatchName.toAscii().data());
+    dispatch = new EQPacketDispatch(this, dispatchName.toLatin1().data());
 
     // insert dispatcher into dispatcher dictionary
     m_dispatchers.insert((void*)payload, dispatch);
@@ -464,7 +464,7 @@ void EQPacketStream::dispatchPacket(const uint8_t* data, size_t len,
     {
       QString tempStr;
       tempStr.sprintf("%s  (%#04x) (dataLen: %lu) doesn't match:",
-              opcodeEntry->name().toAscii().data(),
+              opcodeEntry->name().toLatin1().data(),
               opcodeEntry->opcode(), len);
 
       pit.toFront();
@@ -485,7 +485,7 @@ void EQPacketStream::dispatchPacket(const uint8_t* data, size_t len,
 	}
       }
 
-      seqWarn(tempStr.toAscii().data());
+      seqWarn(tempStr.toLatin1().data());
     }
 #endif // PACKET_PAYLOAD_SIZE_DIAG
   }

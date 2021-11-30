@@ -527,7 +527,7 @@ void paintMap ()
      gdImageString (im, gdFontSmall,
              calcXOffset (locationX[n]) - 2,
              calcYOffset (locationY[n]) - 2,
-             (unsigned char*)locationName[n].toAscii().data(), tmpcolor);
+             (unsigned char*)locationName[n].toLatin1().data(), tmpcolor);
    }
 
   /* Print the http header */
@@ -583,7 +583,7 @@ int main (int argc, char *argv[])
     mapName.replace(slashExp, "_");
 
     mapName.prepend(PKGDATADIR "maps/");
-    loadFileMap (mapName.toAscii().data());
+    loadFileMap (mapName.toLatin1().data());
     paintMap();
   }
   else

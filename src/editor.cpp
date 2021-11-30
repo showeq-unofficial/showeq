@@ -136,7 +136,7 @@ EditorWindow::EditorWindow(const char *fileName)
  {
      QString fn = QFileDialog::getOpenFileName(this);
      if ( !fn.isEmpty() )
-         load(fn.toAscii().data());
+         load(fn.toLatin1().data());
      else
          statusBar()->showMessage( "File Open Cancelled", 2000 );
  }

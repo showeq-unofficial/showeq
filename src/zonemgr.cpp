@@ -164,7 +164,7 @@ void ZoneMgr::restoreZoneState(void)
     if (magicTest != *magic)
     {
       seqWarn("Failure loading %s: Bad magic string!",
-              fileName.toAscii().data());
+              fileName.toLatin1().data());
       return;
     }
 
@@ -172,13 +172,13 @@ void ZoneMgr::restoreZoneState(void)
     d >> m_shortZoneName;
 
     seqInfo("Restored Zone: %s (%s)!",
-            m_shortZoneName.toAscii().data(),
-            m_longZoneName.toAscii().data());
+            m_shortZoneName.toLatin1().data(),
+            m_longZoneName.toLatin1().data());
   }
   else
   {
     seqWarn("Failure loading %s: Unable to open!",
-            fileName.toAscii().data());
+            fileName.toLatin1().data());
   }
 }
 

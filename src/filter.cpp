@@ -181,7 +181,7 @@ void FilterItem::init(const QString& regexString, bool caseSensitive,
   // For the pattern, save off the original. This is what will be saved
   // during save operations. But the actual regexp we filter with will
   // mark the # in spawn names as optional to aid in filter writing.
-  m_regexpOriginalPattern = QString(regexString.toAscii().data());
+  m_regexpOriginalPattern = QString(regexString.toLatin1().data());
 
   QString fixedFilterPattern = regexString;
   fixedFilterPattern.replace("Name:", "Name:#?", Qt::CaseInsensitive);
@@ -190,8 +190,8 @@ void FilterItem::init(const QString& regexString, bool caseSensitive,
   if (!m_regexp.isValid())
   {
     seqWarn("Filter Error: '%s' - %s",
-            m_regexp.pattern().toAscii().data(),
-            m_regexp.errorString().toAscii().data());
+            m_regexp.pattern().toLatin1().data(),
+            m_regexp.errorString().toLatin1().data());
   }
 }
 
@@ -203,8 +203,8 @@ FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive,
   if (!m_regexp.isValid())
   {
     seqWarn("Filter Error: '%s' - %s",
-            m_regexp.pattern().toAscii().data(),
-            m_regexp.errorString().toAscii().data());
+            m_regexp.pattern().toLatin1().data(),
+            m_regexp.errorString().toLatin1().data());
   }
 }
 
@@ -604,13 +604,13 @@ void Filters::list(void) const
   FilterMap::const_iterator it;
 
   seqInfo("Filters from file '%s':",
-          m_file.toAscii().data());
+          m_file.toLatin1().data());
   // iterate over the filters
   for (it = m_filters.begin(); it != m_filters.end(); it++)
   {
     // print the header
     seqInfo("Filter Type '%s':",
-            m_types.name(it->first).toAscii().data());
+            m_types.name(it->first).toLatin1().data());
 
     // list off the actual filters
     it->second->listFilters();

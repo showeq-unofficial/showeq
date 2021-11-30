@@ -300,7 +300,7 @@ void SpawnMonitor::saveSpawnPoints()
 
   if (!spFile.open(QIODevice::WriteOnly))
   {
-    seqWarn("Failed to open %s for writing", newName.toAscii().data());
+    seqWarn("Failed to open %s for writing", newName.toLatin1().data());
     return;
   }
 
@@ -341,17 +341,17 @@ void SpawnMonitor::saveSpawnPoints()
     {
       if (!dir.rename( newName, fileName))
           seqWarn( "Failed to rename %s to %s",
-                  newName.toAscii().data(), fileName.toAscii().data());
+                  newName.toLatin1().data(), fileName.toLatin1().data());
     }
   }
   else
   {
     if (!dir.rename(newName, fileName))
       seqWarn("Failed to rename %s to %s",
-              newName.toAscii().data(), fileName.toAscii().data());
+              newName.toLatin1().data(), fileName.toLatin1().data());
   }
   m_modified = false;
-  seqInfo("Saved spawn points: %s", fileName.toAscii().data());
+  seqInfo("Saved spawn points: %s", fileName.toLatin1().data());
 }
 
 
@@ -367,7 +367,7 @@ void SpawnMonitor::loadSpawnPoints()
   if (!fileInfo.exists())
   {
     seqWarn("Can't find spawn point file %s",
-            fileInfo.absoluteFilePath().toAscii().data());
+            fileInfo.absoluteFilePath().toLatin1().data());
     return;
   }
 
@@ -377,7 +377,7 @@ void SpawnMonitor::loadSpawnPoints()
 
   if (!spFile.open(QIODevice::ReadOnly))
   {
-    seqWarn( "Can't open spawn point file %s", fileName.toAscii().data());
+    seqWarn( "Can't open spawn point file %s", fileName.toLatin1().data());
     return;
   }
 
@@ -417,7 +417,7 @@ void SpawnMonitor::loadSpawnPoints()
     }
   }
 
-  seqInfo("Loaded spawn points: %s", fileName.toAscii().data());
+  seqInfo("Loaded spawn points: %s", fileName.toLatin1().data());
   m_modified = false;
 }
 

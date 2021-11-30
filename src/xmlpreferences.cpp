@@ -117,7 +117,7 @@ void XMLPreferences::loadPreferences(const QString& filename,
   QFile f(filename);
   if (!f.open(QIODevice::ReadOnly))
   {
-    qWarning("Unable to open file: %s!", filename.toAscii().data());
+    qWarning("Unable to open file: %s!", filename.toLatin1().data());
     return;
   }
 
@@ -127,7 +127,7 @@ void XMLPreferences::loadPreferences(const QString& filename,
   if (!doc.setContent(&f, false, &errorMsg, &errorLine, &errorColumn))
   {
     qWarning("Error processing file: %s!\n\t %s on line %d in column %d!", 
-            filename.toAscii().data(), errorMsg.toAscii().data(), errorLine, errorColumn);
+            filename.toLatin1().data(), errorMsg.toLatin1().data(), errorLine, errorColumn);
     f.close();
     return;
   }
@@ -194,7 +194,7 @@ void XMLPreferences::loadPreferences(const QString& filename,
      if (!property.hasAttribute("name"))
      {
        qWarning("property in section '%s' without name! Ignoring!",
-               sectionName.toAscii().data());
+               sectionName.toLatin1().data());
        continue;
      }
 
@@ -235,8 +235,8 @@ void XMLPreferences::loadPreferences(const QString& filename,
        {
            qWarning("property '%s' in section '%s' with bogus value in tag '%s'!"
                    " Ignoring!",
-                   propertyName.toAscii().data(), sectionName.toAscii().data(),
-                   valueElement.tagName().toAscii().data());
+                   propertyName.toLatin1().data(), sectionName.toLatin1().data(),
+                   valueElement.tagName().toLatin1().data());
 
            continue;
        }
@@ -265,7 +265,7 @@ void XMLPreferences::loadPreferences(const QString& filename,
   f.close();
 
 #if 1 // ZBTEMP
-  printf("Loaded preferences file: %s!\n", filename.toAscii().data());
+  printf("Loaded preferences file: %s!\n", filename.toLatin1().data());
 #endif
 }
 
@@ -286,8 +286,8 @@ void XMLPreferences::savePreferences(const QString& filename,
     else
     {
       qWarning("Error processing file: %s!\n\t %s on line %d in column %d!",
-              filename.toAscii().data(),
-              errorMsg.toAscii().data(), errorLine, errorColumn);
+              filename.toLatin1().data(),
+              errorMsg.toLatin1().data(), errorLine, errorColumn);
 
     }
 
@@ -390,7 +390,7 @@ void XMLPreferences::savePreferences(const QString& filename,
           if (!e.hasAttribute("name"))
           {
               qWarning("property in section '%s' without name! Ignoring!",
-                      sectionName.toAscii().data());
+                      sectionName.toLatin1().data());
               continue;
           }
 
@@ -448,7 +448,7 @@ void XMLPreferences::savePreferences(const QString& filename,
       if (!conv.variantToElement(*propertyValue, value))
       {
           qWarning("Unable to set value element in section '%s' property '%s'!",
-                  propertyName.toAscii().data(), propertyName.toAscii().data());
+                  propertyName.toLatin1().data(), propertyName.toLatin1().data());
       }
     }
   }
@@ -457,7 +457,7 @@ void XMLPreferences::savePreferences(const QString& filename,
   if (!f.open(QIODevice::WriteOnly))
   {
     qWarning("Unable to open file for writing: %s!",
-            filename.toAscii().data());
+            filename.toLatin1().data());
   }
 
   // open a Text Stream on the file
@@ -482,7 +482,7 @@ void XMLPreferences::savePreferences(const QString& filename,
   f.close();
 
   printf("Finished saving preferences to file: %s\n",
-          filename.toAscii().data());
+          filename.toLatin1().data());
 }
 
 QVariant* XMLPreferences::getPref(const QString& inName, 
@@ -713,8 +713,8 @@ QKeySequence XMLPreferences::getPrefKey(const QString& inName,
     default:
       qWarning("XMLPreferences::getPrefKey(%s, %s, %s): preference found,\n"
               "\tbut type %s is not convertable to type key!",
-              inName.toAscii().data(), inSection.toAscii().data(),
-              def.toString().toAscii().data(), preference->typeName());
+              inName.toLatin1().data(), inSection.toLatin1().data(),
+              def.toString().toLatin1().data(), preference->typeName());
       return QKeySequence(def);
     }
 
@@ -742,7 +742,7 @@ int64_t XMLPreferences::getPrefInt64(const QString& inName,
     {
     case QVariant::String:
       // convert it to a int64_t (in base 16)
-      value = strtoll(preference->toString().toAscii().data(), 0, 16);
+      value = strtoll(preference->toString().toLatin1().data(), 0, 16);
       break;
     case QVariant::Int:
     case QVariant::UInt:
@@ -761,7 +761,7 @@ int64_t XMLPreferences::getPrefInt64(const QString& inName,
     default:
       qWarning("XMLPreferences::getPrefInt64(%s, %s, %lld): preference found,\n"
               "\tbut type %s is not convertable to type int64_t!",
-              inName.toAscii().data(), inSection.toAscii().data(), (long long)def,
+              inName.toLatin1().data(), inSection.toLatin1().data(), (long long)def,
               preference->typeName());
     }
 
@@ -790,7 +790,7 @@ uint64_t XMLPreferences::getPrefUInt64(const QString& inName,
     {
     case QVariant::String:
       // convert it to a uint64_t (in base 16)
-      value = strtoull(preference->toString().toAscii().data(), 0, 16);
+      value = strtoull(preference->toString().toLatin1().data(), 0, 16);
       break;
     case QVariant::Int:
     case QVariant::UInt:
@@ -809,7 +809,7 @@ uint64_t XMLPreferences::getPrefUInt64(const QString& inName,
     default:
       qWarning("XMLPreferences::getPrefUInt64(%s, %s, %llu): preference found,\n"
               "\tbut type %s is not convertable to type uint64_t!",
-              inName.toAscii().data(), inSection.toAscii().data(),
+              inName.toLatin1().data(), inSection.toLatin1().data(),
               (unsigned long long)def,
               preference->typeName());
     }

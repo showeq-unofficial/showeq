@@ -67,7 +67,7 @@ void BazaarLog::bazaarSearch(const uint8_t* data, size_t len, uint8_t dir)
       Item *merchant = m_shell.spawns().value(resp.player_id, nullptr);
       const char *merchant_name = "unknown";
       if (merchant)
-	merchant_name = merchant->name().toAscii().data();
+	merchant_name = merchant->name().toLatin1().data();
       QString csv;
       csv.sprintf("1^%d^%d^%d^%s^%s",
 		  int(time(NULL)),resp.price,resp.count,

@@ -350,7 +350,7 @@ void MapMgr::zoneEnd(const QString& shortZoneName, const QString& longZoneName)
 {
 #ifdef DEBUGMAP
   qDebug ("zoneEnd(%s, %s)",
-     longZoneName.toAscii().data(), shortZoneName.toAscii().data());
+     longZoneName.toLatin1().data(), shortZoneName.toLatin1().data());
 #endif /* DEBUGMAP */
 
   // atttempt to load the new map
@@ -381,14 +381,14 @@ void MapMgr::loadZoneMap(const QString& shortZoneName)
   }
   else 
   {
-    seqInfo("No Map found for zone '%s'!", shortZoneName.toAscii().data());
+    seqInfo("No Map found for zone '%s'!", shortZoneName.toLatin1().data());
     seqInfo("    Checked for all variants of '%s.map', '%s.txt', and '%s_1.txt'",
-        shortZoneName.toAscii().data(),
-        shortZoneName.toAscii().data(),
-        shortZoneName.toAscii().data());
+        shortZoneName.toLatin1().data(),
+        shortZoneName.toLatin1().data(),
+        shortZoneName.toLatin1().data());
     seqInfo("    in directories '%s' and '%s'!",
-        m_dataLocMgr->userDataDir("maps").absolutePath().toAscii().data(),
-        m_dataLocMgr->pkgDataDir("maps").absolutePath().toAscii().data());
+        m_dataLocMgr->userDataDir("maps").absolutePath().toLatin1().data(),
+        m_dataLocMgr->pkgDataDir("maps").absolutePath().toLatin1().data());
   }
 }
 
@@ -410,7 +410,7 @@ void MapMgr::loadMap ()
   if (fileName.isEmpty ())
     return;
 
-  seqInfo("Attempting to load map: %s", fileName.toAscii().data());
+  seqInfo("Attempting to load map: %s", fileName.toLatin1().data());
 
   // load the map
   loadFileMap(fileName, false, true);
@@ -434,7 +434,7 @@ void MapMgr::importMap ()
   if (fileName.isEmpty ())
     return;
 
-  seqInfo("Attempting to import map: %s", fileName.toAscii().data());
+  seqInfo("Attempting to import map: %s", fileName.toLatin1().data());
 
   // load the map
   loadFileMap(fileName, true, true);
@@ -3012,7 +3012,7 @@ void Map::showMapIconDialog()
     // first create the dialog
     m_mapIconDialog = new MapIconDialog(this);
     m_mapIconDialog->setObjectName(
-            QString(windowTitle() + " Icon Dialog").toAscii().data());
+            QString(windowTitle() + " Icon Dialog").toLatin1().data());
 
     // then pass it this objects map icons object
     m_mapIconDialog->setMapIcons(m_mapIcons);
@@ -4230,14 +4230,14 @@ void Map::mouseMoveEvent( QMouseEvent* event )
            "%.3s/Z: %5d/%5d/%5d\n"
            "Last: %s\n"
            "Spawned: %s\t Remaining: %s\t Count: %d",
-           sp->name().toAscii().data(),
+           sp->name().toLatin1().data(),
            showeq_params->retarded_coords ? "Y/X" : "X/Y",
            showeq_params->retarded_coords ? sp->y() : sp->x(),
            showeq_params->retarded_coords ? sp->x() : sp->y(),
            sp->z(),
-           sp->last().toAscii().data(),
-           spawned.toAscii().data(),
-           remaining.toAscii().data(),
+           sp->last().toLatin1().data(),
+           spawned.toLatin1().data(),
+           remaining.toLatin1().data(),
            sp->count());
 
     m_mapTip->setText( string  );
@@ -4259,7 +4259,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     {
       QString guild;
       if (!spawn->guildTag().isEmpty())
-          guild.sprintf("<%s>", spawn->guildTag().toAscii().data());
+          guild.sprintf("<%s>", spawn->guildTag().toLatin1().data());
       else if (spawn->guildID())
           guild = QString::number(spawn->guildID());
       else
@@ -4293,13 +4293,13 @@ void Map::mouseMoveEvent( QMouseEvent* event )
              spawn->transformedName().toUtf8().data(),
              lastName.toUtf8().data(),
              guild.toLatin1().data(),
-             spawn->level(), hp.toAscii().data(),
+             spawn->level(), hp.toLatin1().data(),
              showeq_params->retarded_coords ? "Y/X" : "X/Y",
              showeq_params->retarded_coords ? spawn->y() : spawn->x(),
              showeq_params->retarded_coords ? spawn->x() : spawn->y(),
              item->z(),
-             spawn->raceString().toAscii().data(),
-             spawn->classString().toAscii().data());
+             spawn->raceString().toLatin1().data(),
+             spawn->classString().toLatin1().data());
       if (m_deityPvP)
         string += " Deity: " + spawn->deityName();
 
@@ -4320,8 +4320,8 @@ void Map::mouseMoveEvent( QMouseEvent* event )
              showeq_params->retarded_coords ? item->y() : item->x(),
              showeq_params->retarded_coords ? item->x() : item->y(),
              item->z(),
-             item->raceString().toAscii().data(),
-             item->classString().toAscii().data());
+             item->raceString().toLatin1().data(),
+             item->classString().toLatin1().data());
 
       if ((door) && (door->zonePoint() != 0xFFFFFFFF))
       {
@@ -4604,8 +4604,8 @@ void Map::saveMapImage(void)
       filename = files[0];
 
   if (!filename.isEmpty())
-    m_offscreen.save(filename.toAscii().data(),
-             filter.left(filter.indexOf(' ')).toAscii().data());
+    m_offscreen.save(filename.toLatin1().data(),
+             filter.left(filter.indexOf(' ')).toLatin1().data());
 }
 
 //----------------------------------------------------------------------

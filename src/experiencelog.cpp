@@ -324,7 +324,7 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
 
    QFileInfo fileInfo = m_dataLocMgr->findWriteFile("logs", "exp.log");
 
-   m_log = fopen(fileInfo.absoluteFilePath().toAscii().data(), "a");
+   m_log = fopen(fileInfo.absoluteFilePath().toLatin1().data(), "a");
    if (m_log == 0)
    {
       m_log_exp = 0;
@@ -363,7 +363,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
 #ifdef DEBUGEXP
    resize( sizeHint() );
   qDebug("ExperienceWindow::addExpRecord()  '%s', lvl %d, exp %d",
-      mob_name.toAscii().data(), mob_level, xp_gained);
+      mob_name.toLatin1().data(), mob_level, xp_gained);
 #endif
 
    if (m_log_exp)
@@ -418,7 +418,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    FILE* newlogfp = NULL;
 
    // open the file for append
-   newlogfp = fopen(m_newExpLogFile.toAscii().data(), "a");
+   newlogfp = fopen(m_newExpLogFile.toLatin1().data(), "a");
 
    if (newlogfp != NULL)
    {
@@ -426,11 +426,11 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
 
       fprintf(newlogfp,
               "0\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%lu",
-              s_time, s_mob_name.toAscii().data(), mob_level,
-              s_xp_value.toAscii().data(), s_xp_valueZEM.toAscii().data(),
-              s_xp_valuep.toAscii().data(), s_xp_valueg.toAscii().data(),
-              s_xp_gained.toAscii().data(), m_player->name().toAscii().data(),
-              m_player->lastName().toAscii().data(), m_player->level(),
+              s_time, s_mob_name.toLatin1().data(), mob_level,
+              s_xp_value.toLatin1().data(), s_xp_valueZEM.toLatin1().data(),
+              s_xp_valuep.toLatin1().data(), s_xp_valueg.toLatin1().data(),
+              s_xp_gained.toLatin1().data(), m_player->name().toLatin1().data(),
+              m_player->lastName().toLatin1().data(), m_player->level(),
               m_player->classVal(), m_group->groupSize());
 
       const Spawn* spawn;

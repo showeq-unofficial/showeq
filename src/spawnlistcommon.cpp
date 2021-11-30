@@ -287,7 +287,7 @@ void SpawnListItem::updateTitle(const QString& name)
   // update childcount in header
   QString temp;
   temp.sprintf("%s (%d)",
-          name.toAscii().data(), childCount());
+          name.toLatin1().data(), childCount());
   setText(tSpawnColName, temp);
 } // end if spawn should be in this category
 

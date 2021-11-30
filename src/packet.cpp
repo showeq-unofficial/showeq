@@ -132,7 +132,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 
   // load the world opcode db
   if (!m_worldOPCodeDB->load(*m_packetTypeDB, worldopcodesxml))
-    seqFatal("Error loading '%s'!", worldopcodesxml.toAscii().data());
+    seqFatal("Error loading '%s'!", worldopcodesxml.toLatin1().data());
 
 #ifdef PACKET_OPCODEDB_DIAG
   m_worldOPCodeDB->list();
@@ -145,7 +145,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 
   // load the zone opcode db
   if (!m_zoneOPCodeDB->load(*m_packetTypeDB, zoneopcodesxml))
-    seqFatal("Error loading '%s'!", zoneopcodesxml.toAscii().data());
+    seqFatal("Error loading '%s'!", zoneopcodesxml.toLatin1().data());
 
 #ifdef PACKET_OPCODEDB_DIAG
   m_zoneOPCodeDB->list();
@@ -201,11 +201,11 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     
     if (m_ip == "auto")
       inet_aton (AUTOMATIC_CLIENT_IP, &ia);
-    else if (inet_aton (m_ip.toAscii().data(), &ia) == 0)
+    else if (inet_aton (m_ip.toLatin1().data(), &ia) == 0)
     {
-      he = gethostbyname(m_ip.toAscii().data());
+      he = gethostbyname(m_ip.toLatin1().data());
       if (!he)
-          seqFatal("Invalid address; %s", m_ip.toAscii().data());
+          seqFatal("Invalid address; %s", m_ip.toLatin1().data());
 
       memcpy (&ia, he->h_addr_list[0], he->h_length);
     }
@@ -220,7 +220,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     else
     {
       m_detectingClient = false;
-      seqInfo("Listening for client: %s", m_ip.toAscii().data());
+      seqInfo("Listening for client: %s", m_ip.toLatin1().data());
     }
   }
 
@@ -229,12 +229,12 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     // create the pcap object and initialize, either with MAC or IP
     m_packetCapture = new PacketCaptureThread();
     if (m_mac.length() == 17)
-      m_packetCapture->start(m_device.toAscii().data(),
-              m_mac.toAscii().data(),
+      m_packetCapture->start(m_device.toLatin1().data(),
+              m_mac.toLatin1().data(),
               m_realtime, MAC_ADDRESS_TYPE );
     else
-      m_packetCapture->start(m_device.toAscii().data(),
-              m_ip.toAscii().data(),
+      m_packetCapture->start(m_device.toLatin1().data(),
+              m_ip.toLatin1().data(),
               m_realtime, IP_ADDRESS_TYPE );
     emit filterChanged();
   }
@@ -245,9 +245,9 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 
     QString filename = pSEQPrefs->getPrefString("Filename", "VPacket");
 
-    m_packetCapture->startOffline(filename.toAscii().data(), m_playbackSpeed);
+    m_packetCapture->startOffline(filename.toLatin1().data(), m_playbackSpeed);
     seqInfo("Playing back packets from '%s' at speed '%d'",
-      filename.toAscii().data(), m_playbackSpeed);
+      filename.toLatin1().data(), m_playbackSpeed);
   }
 
   // Flag session tracking properly on streams
@@ -285,20 +285,20 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 
     if (m_recordPackets)
     {
-      m_vPacket = new VPacket(filename.toAscii().data(), 1, true);
+      m_vPacket = new VPacket(filename.toLatin1().data(), 1, true);
       // Must appear befire next call to getPrefString, which uses a static string
-      seqInfo("Recording packets to '%s' for future playback", filename.toAscii().data());
+      seqInfo("Recording packets to '%s' for future playback", filename.toLatin1().data());
 
       if (!pSEQPrefs->getPrefString("FlushPackets", section).isNull())
           m_vPacket->setFlushPacket(true);
     }
     else if (m_playbackPackets == PLAYBACK_FORMAT_SEQ)
     {
-      m_vPacket = new VPacket(filename.toAscii().data(), 1, false);
+      m_vPacket = new VPacket(filename.toLatin1().data(), 1, false);
       m_vPacket->setCompressTime(pSEQPrefs->getPrefInt("CompressTime", section, 0));
       m_vPacket->setPlaybackSpeed(m_playbackSpeed);
 
-      seqInfo("Playing back packets from '%s' at speed '%d'", filename.toAscii().data(),
+      seqInfo("Playing back packets from '%s' at speed '%d'", filename.toLatin1().data(),
 
               m_playbackSpeed);
     }
@@ -611,7 +611,7 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     m_client_addr = packet.getIPv4DestN();
     m_detectingClient = false;
     emit clientChanged(m_client_addr);
-    seqInfo("Client Detected: %s", m_ip.toAscii().data());
+    seqInfo("Client Detected: %s", m_ip.toLatin1().data());
   }
   else if (m_detectingClient &&
             (packet.getDestPort() >= WorldServerGeneralMinPort
@@ -621,7 +621,7 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     m_client_addr = packet.getIPv4SourceN();
     m_detectingClient = false;
     emit clientChanged(m_client_addr);
-    seqInfo("Client Detected: %s", m_ip.toAscii().data());
+    seqInfo("Client Detected: %s", m_ip.toLatin1().data());
   }
 
   // Dispatch based on known streams
@@ -690,7 +690,7 @@ void EQPacket::closeStream(uint32_t sessionId, EQStreamID streamId)
          (m_playbackPackets == PLAYBACK_OFF || 
           m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP))
   {
-    m_packetCapture->setFilter(m_device.toAscii().data(), m_ip.toAscii().data(),
+    m_packetCapture->setFilter(m_device.toLatin1().data(), m_ip.toLatin1().data(),
             m_realtime, IP_ADDRESS_TYPE, 0, 0);
     emit filterChanged();
   }
@@ -710,7 +710,7 @@ void EQPacket::closeStream(uint32_t sessionId, EQStreamID streamId)
     emit clientPortLatched(m_clientPort);
 
     seqInfo("EQPacket: SessionDisconnect detected, awaiting next zone session,  pcap filter: EQ Client %s",
-            m_ip.toAscii().data());
+            m_ip.toLatin1().data());
   }
 }
 
@@ -726,8 +726,8 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
   {
     if (m_mac.length() == 17)
     {
-      m_packetCapture->setFilter(m_device.toAscii().data(),
-              m_mac.toAscii().data(),
+      m_packetCapture->setFilter(m_device.toLatin1().data(),
+              m_mac.toLatin1().data(),
               m_realtime,
               MAC_ADDRESS_TYPE, 0,
               m_clientPort);
@@ -735,8 +735,8 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
     }
     else
     {
-      m_packetCapture->setFilter(m_device.toAscii().data(),
-              m_ip.toAscii().data(),
+      m_packetCapture->setFilter(m_device.toLatin1().data(),
+              m_ip.toLatin1().data(),
               m_realtime,
               IP_ADDRESS_TYPE, 0,
               m_clientPort);
@@ -748,12 +748,12 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
   if (m_mac.length() == 17)
   {
     seqInfo("EQPacket: SessionRequest detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
-      m_mac.toAscii().data(), m_clientPort, m_serverPort);
+      m_mac.toLatin1().data(), m_clientPort, m_serverPort);
   }
   else
   {
     seqInfo("EQPacket: SessionRequest detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
-      m_ip.toAscii().data(), m_clientPort, m_serverPort);
+      m_ip.toLatin1().data(), m_clientPort, m_serverPort);
   }
 
   emit clientPortLatched(m_clientPort);
@@ -917,18 +917,18 @@ void EQPacket::monitorIPClient(const QString& ip)
 {
   m_ip = ip;
   struct in_addr  ia;
-  inet_aton (m_ip.toAscii().data(), &ia);
+  inet_aton (m_ip.toLatin1().data(), &ia);
   m_client_addr = ia.s_addr;
   emit clientChanged(m_client_addr);
 
   resetEQPacket();
 
-  seqInfo("Listening for IP client: %s", m_ip.toAscii().data());
+  seqInfo("Listening for IP client: %s", m_ip.toLatin1().data());
   if (m_playbackPackets == PLAYBACK_OFF ||
           m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
   {
-    m_packetCapture->setFilter(m_device.toAscii().data(),
-            m_ip.toAscii().data(),
+    m_packetCapture->setFilter(m_device.toLatin1().data(),
+            m_ip.toLatin1().data(),
             m_realtime, 
             IP_ADDRESS_TYPE, 0, 0);
     emit filterChanged();
@@ -948,13 +948,13 @@ void EQPacket::monitorMACClient(const QString& mac)
 
   resetEQPacket();
 
-  seqInfo("Listening for MAC client: %s", m_mac.toAscii().data());
+  seqInfo("Listening for MAC client: %s", m_mac.toLatin1().data());
 
   if (m_playbackPackets == PLAYBACK_OFF ||
           m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
   {
-    m_packetCapture->setFilter(m_device.toAscii().data(),
-            m_ip.toAscii().data(),
+    m_packetCapture->setFilter(m_device.toLatin1().data(),
+            m_ip.toLatin1().data(),
             m_realtime,
             IP_ADDRESS_TYPE, 0, 0);
     emit filterChanged();
@@ -968,7 +968,7 @@ void EQPacket::monitorNextClient()
   m_detectingClient = true;
   m_ip = AUTOMATIC_CLIENT_IP;
   struct in_addr  ia;
-  inet_aton (m_ip.toAscii().data(), &ia);
+  inet_aton (m_ip.toLatin1().data(), &ia);
   m_client_addr = ia.s_addr;
   emit clientChanged(m_client_addr);
 
@@ -979,7 +979,7 @@ void EQPacket::monitorNextClient()
   if (m_playbackPackets == PLAYBACK_OFF ||
           m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
   {
-    m_packetCapture->setFilter(m_device.toAscii().data(), NULL,
+    m_packetCapture->setFilter(m_device.toLatin1().data(), NULL,
             m_realtime,
             DEFAULT_ADDRESS_TYPE, 0, 0);
     emit filterChanged();
@@ -1011,11 +1011,11 @@ void EQPacket::monitorDevice(const QString& dev)
 
     if (m_ip == "auto")
       inet_aton (AUTOMATIC_CLIENT_IP, &ia);
-    else if (inet_aton (m_ip.toAscii().data(), &ia) == 0)
+    else if (inet_aton (m_ip.toLatin1().data(), &ia) == 0)
     {
-      he = gethostbyname(m_ip.toAscii().data());
+      he = gethostbyname(m_ip.toLatin1().data());
       if (!he)
-          seqFatal("Invalid address; %s", m_ip.toAscii().data());
+          seqFatal("Invalid address; %s", m_ip.toLatin1().data());
 
       memcpy (&ia, he->h_addr_list[0], he->h_length);
     }
@@ -1030,7 +1030,7 @@ void EQPacket::monitorDevice(const QString& dev)
     else
     {
       m_detectingClient = false;
-      seqInfo("Listening for client: %s", m_ip.toAscii().data());
+      seqInfo("Listening for client: %s", m_ip.toLatin1().data());
     }
   }
 
@@ -1038,11 +1038,11 @@ void EQPacket::monitorDevice(const QString& dev)
 
   // restart packet capture
   if (m_mac.length() == 17)
-    m_packetCapture->start(m_device.toAscii().data(),
-            m_mac.toAscii().data(),
+    m_packetCapture->start(m_device.toLatin1().data(),
+            m_mac.toLatin1().data(),
             m_realtime, MAC_ADDRESS_TYPE );
   else
-      m_packetCapture->start(m_device.toAscii().data(), m_ip.toAscii().data(),
+      m_packetCapture->start(m_device.toLatin1().data(), m_ip.toLatin1().data(),
               m_realtime, IP_ADDRESS_TYPE );
   emit filterChanged();
 }

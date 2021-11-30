@@ -2493,7 +2493,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    bool usePos = pSEQPrefs->getPrefBool("UseWindowPos", section, true);
    if (usePos)
    {
-       if (!restoreGeometry(QByteArray::fromBase64(dockPrefsGeometry.toAscii())))
+       if (!restoreGeometry(QByteArray::fromBase64(dockPrefsGeometry.toLatin1())))
            seqWarn("Could not restore dock/window geometry.  Rearrange windows "
                    "as desired and then re-save preferences");
        else
@@ -2501,7 +2501,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
            if (isMaximized())
                setGeometry(QApplication::desktop()->availableGeometry(this));
 
-       if (!restoreState(QByteArray::fromBase64(dockPrefsState.toAscii())))
+       if (!restoreState(QByteArray::fromBase64(dockPrefsState.toLatin1())))
            seqWarn("Could not restore dock/window state.  Rearrange windows as"
                    " desired and then re-save prefrences");
    }
@@ -3491,7 +3491,7 @@ void EQInterface::listSpawns (void)
    // dump the spawns 
   m_spawnShell->dumpSpawns(tSpawn, out);
 
-  seqInfo(outText.toAscii().data());
+  seqInfo(outText.toLatin1().data());
 }
 
 void EQInterface::listDrops (void)
@@ -3507,7 +3507,7 @@ void EQInterface::listDrops (void)
   // dump the drops
   m_spawnShell->dumpSpawns(tDrop, out);
 
-  seqInfo(outText.toAscii().data());
+  seqInfo(outText.toLatin1().data());
 }
 
 void EQInterface::listMapInfo(void)
@@ -3531,7 +3531,7 @@ void EQInterface::listMapInfo(void)
       m_map[i]->dumpInfo(out);
   }
 
-  seqInfo(outText.toAscii().data());
+  seqInfo(outText.toLatin1().data());
 }
 
 void EQInterface::listInterfaceInfo(void)
@@ -3556,7 +3556,7 @@ void EQInterface::listInterfaceInfo(void)
   out << "FIXME" << endl;
   out << "-----------------------" << endl;
 
-  seqInfo(outText.toAscii().data());
+  seqInfo(outText.toLatin1().data());
 }
 
 void EQInterface::listGroup(void)
@@ -3572,7 +3572,7 @@ void EQInterface::listGroup(void)
   // dump the drops
   m_groupMgr->dumpInfo(out);
 
-  seqInfo(outText.toAscii().data());
+  seqInfo(outText.toLatin1().data());
 }
 
 
@@ -3589,7 +3589,7 @@ void EQInterface::listGuild(void)
   // dump the drops
   m_guildShell->dumpMembers(out);
 
-  seqInfo(outText.toAscii().data());
+  seqInfo(outText.toLatin1().data());
 }
 
 void EQInterface::dumpSpawns (void)
@@ -3772,7 +3772,7 @@ void EQInterface::dumpGuild(void)
 void
 EQInterface::launch_editor_filters(void)
 {
-  EditorWindow * ew = new EditorWindow(m_filterMgr->filterFile().toAscii().data());
+  EditorWindow * ew = new EditorWindow(m_filterMgr->filterFile().toLatin1().data());
   ew->setWindowTitle(m_filterMgr->filterFile());
   ew->show();
 }
@@ -3780,7 +3780,7 @@ EQInterface::launch_editor_filters(void)
 void
 EQInterface::launch_editor_zoneFilters(void)
 {
-  EditorWindow * ew = new EditorWindow(m_filterMgr->zoneFilterFile().toAscii().data());
+  EditorWindow * ew = new EditorWindow(m_filterMgr->zoneFilterFile().toLatin1().data());
   ew->setWindowTitle(m_filterMgr->zoneFilterFile());
   ew->show();
 }
@@ -4397,7 +4397,7 @@ EQInterface::toggle_opcode_monitoring()
       pSEQPrefs->setPrefString("OpCodeList", section, opCodeList);
 
 
-      seqInfo("OpCode monitoring is now ENABLED...\nUsing list:\t%s", opCodeList.toAscii().data());
+      seqInfo("OpCode monitoring is now ENABLED...\nUsing list:\t%s", opCodeList.toLatin1().data());
     }
   }
   else
@@ -4424,7 +4424,7 @@ void EQInterface::set_opcode_monitored_list(void)
     m_opcodeMonitorLog->init(opCodeList);
 
     seqInfo("The monitored OpCode list has been reloaded...\nUsing list:\t%s",
-            opCodeList.toAscii().data());
+            opCodeList.toLatin1().data());
 
     // set the list of monitored opcodes
     pSEQPrefs->setPrefString("OpCodeList", section, opCodeList);
@@ -5013,7 +5013,7 @@ void EQInterface::selectPrev(void)
 void EQInterface::saveSelectedSpawnPath(void)
 {
   QString fileName;
-  fileName.sprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toAscii().data());
+  fileName.sprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toLatin1().data());
 
   QFileInfo fileInfo = m_dataLocationMgr->findWriteFile("maps", fileName, false);
 
@@ -5024,14 +5024,14 @@ void EQInterface::saveSelectedSpawnPath(void)
     // append the selected spawns path to the end
     saveSpawnPath(out, m_selectedSpawn);
 
-    seqInfo("Finished appending '%s'!\n", fileName.toAscii().data());
+    seqInfo("Finished appending '%s'!\n", fileName.toLatin1().data());
   }
 }
 
 void EQInterface::saveSpawnPaths(void)
 {
   QString fileName;
-  fileName.sprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toAscii().data());
+  fileName.sprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toLatin1().data());
 
   QFileInfo fileInfo = m_dataLocationMgr->findWriteFile("maps", fileName, false);
 
@@ -5059,7 +5059,7 @@ void EQInterface::saveSpawnPaths(void)
 	saveSpawnPath(out, it.value());
     }
 
-    seqInfo("Finished writing '%s'!\n", fileName.toAscii().data());
+    seqInfo("Finished writing '%s'!\n", fileName.toLatin1().data());
   }
 }
 
@@ -5150,7 +5150,7 @@ void EQInterface::set_net_client_MAC_address()
   {
     if (address.length() != 17)
     {
-      seqWarn("Invalid MAC Address (%s)! Ignoring!", address.toAscii().data());
+      seqWarn("Invalid MAC Address (%s)! Ignoring!", address.toLatin1().data());
       return;
     }
  	for (int i = 4; i > 0; i--)
@@ -5782,7 +5782,7 @@ void EQInterface::showMap(int i)
             m_spawnMonitor,
             mapPrefName,
             mapCaption,
-            mapName.toAscii().data(),
+            mapName.toLatin1().data(),
             0);
 
 
@@ -5837,7 +5837,7 @@ void EQInterface::showMessageWindow(int i)
 
     m_messageWindow[i] = new MessageWindow(m_messages, m_messageFilters,
             prefName, caption,
-            0, name.toAscii().data());
+            0, name.toLatin1().data());
 
    setDockEnabled(m_messageWindow[i], 
 		  pSEQPrefs->getPrefBool(QString("Dockable") + prefName,

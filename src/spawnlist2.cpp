@@ -825,7 +825,7 @@ void SpawnListWindow2::listItemDoubleClicked(QTreeWidgetItem* litem, int col)
     //print spawn info to console
     const Item* item = ((SpawnListItem*)lvitem)->item();
     if (item != NULL)
-        seqInfo("%s", filterString(item).toAscii().data());
+        seqInfo("%s", filterString(item).toLatin1().data());
 }
 
 

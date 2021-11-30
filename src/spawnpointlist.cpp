@@ -344,7 +344,7 @@ void SpawnPointList::deleteItem(const SpawnPointListItem* item)
     def = sp->last();
 
   def.sprintf("%d/%d/%d '%s'",
-          sp->x(), sp->y(), sp->z(), def.toAscii().data());
+          sp->x(), sp->y(), sp->z(), def.toLatin1().data());
 
   // confirm that the user wants to delete the category
   QMessageBox mb("Are you sure?",

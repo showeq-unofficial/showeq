@@ -77,7 +77,7 @@ SpawnLog::logSpawnInfo(const char *type, const char *name, int id, int level,
           z,
           time.hour(), time.minute(), time.second(),
           version,
-          zoneShortName.toAscii().data(),
+          zoneShortName.toLatin1().data(),
           eqDateTime.hour(),
           eqDateTime.minute(),
           eqDateDate.month(),
@@ -125,7 +125,7 @@ SpawnLog::logNewSpawn(const Item *item)
 
   const Spawn* spawn = (const Spawn*)item;
 
-  logSpawnInfo("+", spawn->name().toAscii().data() , spawn->id(), spawn->level(),
+  logSpawnInfo("+", spawn->name().toLatin1().data() , spawn->id(), spawn->level(),
           spawn->x(), spawn->y(), spawn->z(), "",0, spawn->guildID());
 }
 
@@ -138,9 +138,9 @@ SpawnLog::logKilledSpawn(const Item *item, const Item* kitem, uint16_t kid)
   const Spawn* spawn = (const Spawn*)item;
   const Spawn* killer = (const Spawn*)kitem;
 
-  logSpawnInfo("x", spawn->name().toAscii().data(), spawn->id(), spawn->level(),
+  logSpawnInfo("x", spawn->name().toLatin1().data(), spawn->id(), spawn->level(),
           spawn->x(), spawn->y(), spawn->z(),
-          killer ? killer->name().toAscii().data() : "unknown",
+          killer ? killer->name().toLatin1().data() : "unknown",
           kid, spawn->guildID());
 }
 
@@ -152,7 +152,7 @@ SpawnLog::logDeleteSpawn(const Item *item)
 
   const Spawn* spawn = (const Spawn*)item;
 
-  logSpawnInfo("-", spawn->name().toAscii().data(), spawn->id(), spawn->level(),
+  logSpawnInfo("-", spawn->name().toLatin1().data(), spawn->id(), spawn->level(),
           spawn->x(), spawn->y(), spawn->z(), "",0, spawn->guildID());
 }
 
@@ -162,7 +162,7 @@ SpawnLog::logNewZone(const QString& zonename)
   if (!open())
       return;
 
-  outputf("----------\nNEW ZONE: %s\n----------\n", zonename.toAscii().data());
+  outputf("----------\nNEW ZONE: %s\n----------\n", zonename.toLatin1().data());
   outputf(" :name(spawnID):Level:Xpos:Ypos:Zpos:H.m.s:Ver:Zone:eqHour.eqMinute.eqMonth.eqDay.eqYear:killedBy(spawnID)\n");
   flush();
   zoneShortName = zonename;

@@ -508,7 +508,7 @@ void MapData::loadMap(const QString& fileName, bool import)
     return;
 
   
-  const char* filename = fileName.toAscii().data();
+  const char* filename = fileName.toLatin1().data();
 
   QFile mapFile(fileName);
 
@@ -607,7 +607,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 
     bool ok;
 
-    switch (entryType.toAscii())
+    switch (entryType.toLatin1())
     {
     case 'M':
       {
@@ -918,7 +918,7 @@ void MapData::loadMap(const QString& fileName, bool import)
   if (m_image.load(imageFileName))
   {
     m_imageLoaded = true;
-    seqInfo("Loaded map image: '%s'", imageFileName.toAscii().data());
+    seqInfo("Loaded map image: '%s'", imageFileName.toLatin1().data());
   }
 
   seqInfo("Loaded map: '%s'", filename);
@@ -952,7 +952,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
   if (fileName.contains("/.txt") != 0)
     return;
 
-  const char* filename = fileName.toAscii().data();
+  const char* filename = fileName.toLatin1().data();
 
   QFile mapFile(fileName);
 
@@ -1027,7 +1027,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
     // get the field count
     count = fields.count();
 
-    switch (entryType.toAscii())
+    switch (entryType.toLatin1())
     {
     case 'L':
       {
@@ -1148,7 +1148,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
   if (m_image.load(imageFileName))
   {
     m_imageLoaded = true;
-    seqInfo("Loaded map image: '%s'", imageFileName.toAscii().data());
+    seqInfo("Loaded map image: '%s'", imageFileName.toLatin1().data());
   }
 
   seqInfo("Loaded SOE map: '%s'", filename);
@@ -1164,9 +1164,9 @@ void MapData::saveMap(const QString& fileName) const
 
   const char* filename;
   if (!fileName.isEmpty())
-    filename = fileName.toAscii().data();
+    filename = fileName.toLatin1().data();
   else
-    filename = m_fileName.toAscii().data();
+    filename = m_fileName.toLatin1().data();
 
   if ((fh = fopen(filename, "w")) == NULL)
   {
@@ -1175,8 +1175,8 @@ void MapData::saveMap(const QString& fileName) const
   }
 
   // write out header info
-  fprintf(fh, "%s,%s,%d,%d\n", m_zoneLongName.toAscii().data(),
-          m_zoneShortName.toAscii().data(), m_size.width(), m_size.height());
+  fprintf(fh, "%s,%s,%d,%d\n", m_zoneLongName.toLatin1().data(),
+          m_zoneShortName.toLatin1().data(), m_size.width(), m_size.height());
 
   // write out ZEM info if non-default
   if (m_zoneZEM != 75)
@@ -1210,8 +1210,8 @@ void MapData::saveMap(const QString& fileName) const
 
     // write out the start of the line info
     fprintf (fh, "L,%s,%s,%d",
-            currentLineL->name().toAscii().data(),
-            currentLineL->colorName().toAscii().data(),
+            currentLineL->name().toLatin1().data(),
+            currentLineL->colorName().toLatin1().data(),
             currentLineL->size());
 
     // write out all the 2D points in the line
@@ -1235,8 +1235,8 @@ void MapData::saveMap(const QString& fileName) const
     currentLineM = *mmit;
     // write out the start of the line info
     fprintf (fh, "M,%s,%s,%d",
-            currentLineM->name().toAscii().data(),
-            currentLineM->colorName().toAscii().data(),
+            currentLineM->name().toLatin1().data(),
+            currentLineM->colorName().toLatin1().data(),
             currentLineM->size());
 
     // write out all the 3D points in the line
@@ -1259,14 +1259,14 @@ void MapData::saveMap(const QString& fileName) const
 
     if (!currentLoc->heightSet())
       fprintf (fh, "P,%s,%s,%d,%d\n",
-              currentLoc->name().toAscii().data(),
-              currentLoc->colorName().toAscii().data(),
+              currentLoc->name().toLatin1().data(),
+              currentLoc->colorName().toLatin1().data(),
               currentLoc->x(),
               currentLoc->y());
     else
       fprintf (fh, "P,%s,%s,%d,%d,%d\n",
-              currentLoc->name().toAscii().data(),
-              currentLoc->colorName().toAscii().data(),
+              currentLoc->name().toLatin1().data(),
+              currentLoc->colorName().toLatin1().data(),
               currentLoc->x(),
               currentLoc->y(),
               currentLoc->z());
@@ -1279,7 +1279,7 @@ void MapData::saveMap(const QString& fileName) const
     MapAggro* currentAggro = *ait;
 
     fprintf (fh, "A,%s,%d\n",
-	     currentAggro->name().toAscii().data(), currentAggro->range());
+	     currentAggro->name().toLatin1().data(), currentAggro->range());
   }
 
 #ifdef DEBUGMAP
@@ -1302,9 +1302,9 @@ void MapData::saveSOEMap(const QString& fileName) const
 
   const char* filename;
   if (!fileName.isEmpty())
-    filename = fileName.toAscii().data();
+    filename = fileName.toLatin1().data();
   else
-    filename = m_fileName.toAscii().data();
+    filename = m_fileName.toLatin1().data();
 
   if ((fh = fopen(filename, "w")) == NULL)
   {
@@ -1392,7 +1392,7 @@ void MapData::saveSOEMap(const QString& fileName) const
             -float(currentLoc->x()), -float(currentLoc->y()), 
             float(currentLoc->z()),
             color.red(), color.green(), color.blue(),
-            name.toAscii().data());
+            name.toLatin1().data());
   }
 #ifdef DEBUGMAP
   seqDebug("saveMap() - map '%s' saved with %d L lines, %d M lines, %d locations", filename,

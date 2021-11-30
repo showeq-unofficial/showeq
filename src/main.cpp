@@ -250,7 +250,7 @@ int main (int argc, char **argv)
    }
 
    /* NOTE: See preferencefile.cpp for info on how to use prefrences class */
-   printf("Using config file '%s'\n", configFile.toAscii().data());
+   printf("Using config file '%s'\n", configFile.toLatin1().data());
    pSEQPrefs = new XMLPreferences(configFileDef, configFile);
 
    showeq_params = new ShowEQParams;

@@ -55,7 +55,7 @@ bool DataLocationMgr::setupUserDirectory()
     // no, then attempt to create it.
     if (!userDataDir.mkdir(m_userData))
     {
-      seqWarn("Failed to create '%s'\n", userDataDir.absolutePath().toAscii().data());
+      seqWarn("Failed to create '%s'\n", userDataDir.absolutePath().toLatin1().data());
       return false;
     }
   }

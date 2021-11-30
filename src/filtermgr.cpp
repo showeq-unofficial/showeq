@@ -138,7 +138,7 @@ void FilterMgr::loadFilters(void)
 
   m_filterFile = fileInfo.absoluteFilePath();
 
-  seqInfo("Loading Filters from '%s'", m_filterFile.toAscii().data());
+  seqInfo("Loading Filters from '%s'", m_filterFile.toLatin1().data());
 
   m_filters->load(m_filterFile);
 
@@ -152,7 +152,7 @@ void FilterMgr::loadFilters(const QString& fileName)
 
   m_filterFile = fileInfo.absoluteFilePath();
 
-  seqInfo("Loading Filters from '%s'", m_filterFile.toAscii().data());
+  seqInfo("Loading Filters from '%s'", m_filterFile.toLatin1().data());
   
   m_filters->load(m_filterFile);
 
@@ -168,7 +168,7 @@ void FilterMgr::saveFilters(void)
 
   m_filterFile = fileInfo.absoluteFilePath();
 
-  seqInfo("Saving filters to %s", m_filterFile.toAscii().data());
+  seqInfo("Saving filters to %s", m_filterFile.toLatin1().data());
 
   m_filters->save(m_filterFile);
 }
@@ -243,7 +243,7 @@ void FilterMgr::loadZone(const QString& shortZoneName)
 
   m_zoneFilterFile = fileInfo.absoluteFilePath();
 
-  seqInfo("Loading Zone Filter File: %s", m_zoneFilterFile.toAscii().data());
+  seqInfo("Loading Zone Filter File: %s", m_zoneFilterFile.toLatin1().data());
 
   m_zoneFilters->load(m_zoneFilterFile);
 
@@ -259,7 +259,7 @@ void FilterMgr::loadZoneFilters(void)
 
   m_zoneFilterFile = fileInfo.absoluteFilePath();
 
-  seqInfo("Loading Zone Filter File: %s", m_zoneFilterFile.toAscii().data());
+  seqInfo("Loading Zone Filter File: %s", m_zoneFilterFile.toLatin1().data());
 
   m_zoneFilters->load(m_zoneFilterFile);
   
@@ -281,7 +281,7 @@ void FilterMgr::saveZoneFilters(void)
 
   m_zoneFilterFile = fileInfo.absoluteFilePath();
 
-  seqInfo("Saving filters to %s", m_zoneFilterFile.toAscii().data());
+  seqInfo("Saving filters to %s", m_zoneFilterFile.toLatin1().data());
 
   if (! m_zoneFilters->save(m_zoneFilterFile))
   {

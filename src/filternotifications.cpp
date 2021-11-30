@@ -141,7 +141,7 @@ void FilterNotifications::executeCommand(const Item* item,
   command.replace(cueExp, audioCue);
 
   // fire off the command
-  system (command.toAscii().data());
+  system (command.toLatin1().data());
 }
 
 #ifndef QMAKEBUILD

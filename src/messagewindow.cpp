@@ -1151,8 +1151,8 @@ void MessageWindow::setTypeStyle(QAction* action)
   QString styleCaption = windowTitle() + " - " + typeName + " Style";
   MessageTypeStyleDialog dialog(m_typeStyles[id],
           m_defaultColor, m_defaultBGColor,
-          styleCaption.toAscii().data(),
-          this, styleCaption.toAscii().data());
+          styleCaption.toLatin1().data(),
+          this, styleCaption.toLatin1().data());
 
   // popup the modal dialog
   int result = dialog.exec();

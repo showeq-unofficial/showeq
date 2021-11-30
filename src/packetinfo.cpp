@@ -479,7 +479,7 @@ void EQPacketOPCodeDB::list(void) const
           break;
 
       seqInfo("\t\t\tdir=%d typename=%s size=%d sizechecktype=%d",
-	      currentPayload->dir(), currentPayload->typeName().toAscii().data(),
+	      currentPayload->dir(), currentPayload->typeName().toLatin1().data(),
 	      currentPayload->typeSize(), currentPayload->sizeCheckType());
     }
   }
@@ -691,7 +691,7 @@ bool OPCodeXmlContentHandler::startElement(const QString&, const QString&,
       
       if (!value.isEmpty())
       {
-          if (!m_currentPayload->setType(m_typeDB, value.toAscii().data()))
+          if (!m_currentPayload->setType(m_typeDB, value.toLatin1().data()))
               seqWarn("Unknown payload typename '%s' for opcode '%04x'",
                       value.toLatin1().data(), m_currentOPCode->opcode());
       }

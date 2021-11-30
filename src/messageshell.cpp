@@ -110,7 +110,7 @@ void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
 		       cmsg->sender,
 		       cmsg->target,
 		       cmsg->message,
-		       language_name(cmsg->language).toAscii().data()
+		       language_name(cmsg->language).toLatin1().data()
 		       );
     }
     else
@@ -118,7 +118,7 @@ void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
       tempStr.sprintf( "'%s' - %s {%s}",
 		       cmsg->sender,
 		       cmsg->message,
-		       language_name(cmsg->language).toAscii().data()
+		       language_name(cmsg->language).toLatin1().data()
 		       );
     }
   }
@@ -549,8 +549,8 @@ void MessageShell::handleSpell(const uint8_t* data, size_t, uint8_t dir)
 
     if (mem->param1 != 4)
       tempStr.sprintf("%s%s', slot %d.",
-              tempStr.toAscii().data(),
-              spellName.toAscii().data(),
+              tempStr.toLatin1().data(),
+              spellName.toLatin1().data(),
               mem->slotId);
 
     else 
@@ -598,8 +598,8 @@ void MessageShell::beginCast(const uint8_t* data)
     spellName = spell_name(bcast->spellId);
 
   tempStr.sprintf( "%s%s' - Casting time is %g Second%s",
-          tempStr.toAscii().data(),
-          spellName.toAscii().data(), casttime,
+          tempStr.toLatin1().data(),
+          spellName.toLatin1().data(), casttime,
           casttime == 1 ? "" : "s");
 
   m_messages->addMessage(MT_Spell, tempStr);
@@ -626,7 +626,7 @@ void MessageShell::interruptSpellCast(const uint8_t* data)
   QString tempStr;
   if (item != NULL)
     tempStr.sprintf("%s(%d): %s",
-            item->name().toAscii().data(), icast->spawnId, icast->message);
+            item->name().toLatin1().data(), icast->spawnId, icast->message);
   else
     tempStr.sprintf("spawn(%d): %s",
             icast->spawnId, icast->message);
@@ -657,7 +657,7 @@ void MessageShell::startCast(const uint8_t* data)
   QString tempStr;
 
   tempStr.sprintf("You begin casting %s.  Current Target is %s(%d)",
-          spellName.toAscii().data(), targetName.toAscii().data(),
+          spellName.toLatin1().data(), targetName.toLatin1().data(),
           cast->targetId);
 
   m_messages->addMessage(MT_Spell, tempStr);
@@ -742,7 +742,7 @@ void MessageShell::groupFollow(const uint8_t* data)
   const groupFollowStruct* gFollow = (const groupFollowStruct*)data;
   QString tempStr;
 
-  if(!strcmp(gFollow->invitee, m_player->name().toAscii().data()))
+  if(!strcmp(gFollow->invitee, m_player->name().toLatin1().data()))
      tempStr = "Follow: You have joined the group";
   else
      tempStr.sprintf("Follow: %s has joined the group", gFollow->invitee);
@@ -872,7 +872,7 @@ void MessageShell::increaseSkill(const uint8_t* data)
   const skillIncStruct* skilli = (const skillIncStruct*)data;
   QString tempStr;
   tempStr.sprintf("Skill: %s has increased (%d)",
-          skill_name(skilli->skillId).toAscii().data(),
+          skill_name(skilli->skillId).toLatin1().data(),
           skilli->value);
   m_messages->addMessage(MT_Player, tempStr);
 }

@@ -68,7 +68,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
       ok = true;
     }
     else
-      qWarning("%s element without value!", e.tagName().toAscii().data());
+      qWarning("%s element without value!", e.tagName().toLatin1().data());
   }
   else if (e.tagName() == "int")
   {
@@ -77,7 +77,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     if (e.hasAttribute("value"))
       v = QVariant(e.attribute("value").toInt(&ok, base));
     else
-      qWarning("%s element without value!", e.tagName().toAscii().data());
+      qWarning("%s element without value!", e.tagName().toLatin1().data());
   }
   else if (e.tagName() == "uint")
   {
@@ -86,14 +86,14 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     if (e.hasAttribute("value"))
       v = QVariant(e.attribute("value").toUInt(&ok, base));
     else
-      qWarning("%s element without value!", e.tagName().toAscii().data());
+      qWarning("%s element without value!", e.tagName().toLatin1().data());
   }
   else if (e.tagName() == "double")
   {
     if (e.hasAttribute("value"))
       v = QVariant(e.attribute("value").toDouble(&ok));
     else
-      qWarning("%s element without value!", e.tagName().toAscii().data());
+      qWarning("%s element without value!", e.tagName().toLatin1().data());
   }
   else if (e.tagName() == "bool")
   {
@@ -104,10 +104,10 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
 
       if (!ok)
           qWarning("%s element with bogus value '%s'!",
-                  e.tagName().toAscii().data(), val.toAscii().data());
+                  e.tagName().toLatin1().data(), val.toLatin1().data());
     }
     else
-      qWarning("%s element without value!", e.tagName().toAscii().data());
+      qWarning("%s element without value!", e.tagName().toLatin1().data());
   }
   else if (e.tagName() == "color")
   {
@@ -118,7 +118,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     v = color;
 
     if (!ok)
-      qWarning("%s element without value!", e.tagName().toAscii().data());
+      qWarning("%s element without value!", e.tagName().toLatin1().data());
   }
   else if (e.tagName() == "pen")
   {
@@ -141,7 +141,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     v = QPen(color, w, s, c, j);
 
     if (!ok)
-      qWarning("%s element without valid value!", e.tagName().toAscii().data());
+      qWarning("%s element without valid value!", e.tagName().toLatin1().data());
   }
   else if (e.tagName() == "brush")
   {
@@ -156,7 +156,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     v = QBrush(color, s);
 
     if (!ok)
-      qWarning("%s element without valid value!", e.tagName().toAscii().data());
+      qWarning("%s element without valid value!", e.tagName().toLatin1().data());
   }
   else if (e.tagName() == "point")
   {
@@ -258,7 +258,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     if (e.hasAttribute("shape"))
       v = QVariant(QCursor(e.attribute("shape").toInt(&ok, 10)));
     else
-      qWarning("%s element without value!", e.tagName().toAscii().data());
+      qWarning("%s element without value!", e.tagName().toLatin1().data());
   }
   else if (e.tagName() == "stringlist")
   {
@@ -272,8 +272,8 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
       if (!stringElement.hasAttribute("value"))
       {
           qWarning("%s element in %s without value! Ignoring!",
-                  stringElement.tagName().toAscii().data(),
-                  e.tagName().toAscii().data());
+                  stringElement.tagName().toLatin1().data(),
+                  e.tagName().toLatin1().data());
           continue;
       }
 
@@ -296,7 +296,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
 
     if (!p)
     {
-      qWarning("Invalid value for tag: %s", e.tagName().toAscii().data());
+      qWarning("Invalid value for tag: %s", e.tagName().toLatin1().data());
       return false;
     }
 
@@ -318,9 +318,9 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
       else 
       {
 	if ( *p >= 'a' && *p <= 'f' )
-	  dv = p->toAscii() - 'a' + 10;
+	  dv = p->toLatin1() - 'a' + 10;
 	else
-	  dv = p->toAscii() - 'A' + 10;
+	  dv = p->toLatin1() - 'A' + 10;
       }
       if ( val > max_mult || (val == max_mult && dv > UINT64_MAX % 16) )
 	return false;
@@ -338,15 +338,15 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
   }
   else if (e.tagName() == "list")
   {
-    qWarning("Unimplemented tag: %s", e.tagName().toAscii().data());
+    qWarning("Unimplemented tag: %s", e.tagName().toLatin1().data());
   }
   else if (e.tagName() == "map")
   {
-    qWarning("Unimplemented tag: %s", e.tagName().toAscii().data());
+    qWarning("Unimplemented tag: %s", e.tagName().toLatin1().data());
   }
   else
   {
-    qWarning("Unknown tag: %s", e.tagName().toAscii().data());
+    qWarning("Unknown tag: %s", e.tagName().toLatin1().data());
   }
 
   return ok;

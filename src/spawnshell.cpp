@@ -851,7 +851,7 @@ void SpawnShell::zoneEntry(const uint8_t* data, size_t len)
 
   Item *item;
 
-  if(!strcmp(spawn->name,m_player->realName().toAscii().data()))
+  if(!strcmp(spawn->name,m_player->realName().toLatin1().data()))
   {
     // Multiple zoneEntry packets are received for your spawn after you zone
     m_player->update(spawn);
@@ -1855,7 +1855,7 @@ void SpawnShell::restoreSpawns(void)
     if (magicTest != *magic)
     {
       seqWarn("Failure loading %s: Bad magic string!",
-              fileName.toAscii().data());
+              fileName.toLatin1().data());
       return;
     }
 
@@ -1864,7 +1864,7 @@ void SpawnShell::restoreSpawns(void)
     if (testVal != sizeof(spawnStruct))
     {
       seqWarn("Failure loading %s: Bad spawnStruct size!",
-              fileName.toAscii().data());
+              fileName.toLatin1().data());
       return;
     }
 
@@ -1874,8 +1874,8 @@ void SpawnShell::restoreSpawns(void)
     if (zoneShortName != m_zoneMgr->shortZoneName().toLower())
     {
       seqWarn("\aWARNING: Restoring spawns for potentially incorrect zone (%s != %s)!",
-              zoneShortName.toAscii().data(),
-              m_zoneMgr->shortZoneName().toLower().toAscii().data());
+              zoneShortName.toLatin1().data(),
+              m_zoneMgr->shortZoneName().toLower().toLatin1().data());
     }
 
     // read the expected number of elements
@@ -1905,7 +1905,7 @@ void SpawnShell::restoreSpawns(void)
   else
   {
     seqWarn("Failure loading %s: Unable to open!",
-            fileName.toAscii().data());
+            fileName.toLatin1().data());
   }
 }
 

@@ -197,7 +197,7 @@ void GuildMgr::readGuildList()
     seqInfo("GuildMgr: Guildsfile loaded");
   }
   else
-    seqWarn("GuildMgr: Could not load guildsfile, %s", guildsFileName.toAscii().data());
+    seqWarn("GuildMgr: Could not load guildsfile, %s", guildsFileName.toLatin1().data());
 }
 
 void GuildMgr::guildList2text(QString fn)
@@ -237,7 +237,7 @@ void GuildMgr::listGuildInfo()
    for (auto itr = m_guildList.begin(); itr != m_guildList.end(); ++itr)
    {
      if (!itr->second.isNull())
-       seqInfo("%d\t%s", itr->first, itr->second.toAscii().data());
+       seqInfo("%d\t%s", itr->first, itr->second.toLatin1().data());
    }
 }
 

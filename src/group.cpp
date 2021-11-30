@@ -198,7 +198,7 @@ void GroupMgr::removeGroupMember(const uint8_t* data)
    const groupDisbandStruct* gmem = (const groupDisbandStruct*)data;
 
    // If we're disbanding, reset counters and clear member slots
-   if(!strcmp(gmem->membername, m_player->name().toAscii().data()))
+   if(!strcmp(gmem->membername, m_player->name().toLatin1().data()))
    {
       m_memberCount = 0;
       m_membersInZoneCount = 0;

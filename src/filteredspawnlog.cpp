@@ -92,12 +92,12 @@ void FilteredSpawnLog::logSpawn(const Item* item, const char* action,
 
   // log the information
   outputf("%s %s %s LOC %dy, %dx, %dz at %s (%s)\n", 
-          m_filterMgr->filterString(flag).toAscii().data(),
+          m_filterMgr->filterString(flag).toLatin1().data(),
           action,
-          item->name().toAscii().data(),
+          item->name().toLatin1().data(),
           item->y(), item->x(), item->z(),
-          eqDate.isValid() ? eqDate.toString().toAscii().data() : "",
-          item->spawnTimeStr().toAscii().data());
+          eqDate.isValid() ? eqDate.toString().toLatin1().data() : "",
+          item->spawnTimeStr().toLatin1().data());
 
   flush();
 }

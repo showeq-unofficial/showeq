@@ -1380,7 +1380,7 @@ void Player::restorePlayerState(void)
     if (magicTest != *magic)
     {
       seqWarn("Failure loading %s: Bad magic string!",
-              fileName.toAscii().data());
+              fileName.toLatin1().data());
       reset();
       clear();
       return;
@@ -1391,7 +1391,7 @@ void Player::restorePlayerState(void)
     if (testVal != sizeof(charProfileStruct))
     {
       seqWarn("Failure loading %s: Bad player size!",
-              fileName.toAscii().data());
+              fileName.toLatin1().data());
       reset();
       clear();
       return;
@@ -1401,7 +1401,7 @@ void Player::restorePlayerState(void)
     if (testVal != MAX_KNOWN_SKILLS)
     {
       seqWarn("Failure loading %s: Bad known skills!",
-              fileName.toAscii().data());
+              fileName.toLatin1().data());
       reset();
       clear();
       return;
@@ -1411,7 +1411,7 @@ void Player::restorePlayerState(void)
     if (testVal != MAX_KNOWN_LANGS)
     {
       seqWarn("Failure loading %s: Bad known langs!",
-              fileName.toAscii().data());
+              fileName.toLatin1().data());
       reset();
       clear();
       return;
@@ -1423,8 +1423,8 @@ void Player::restorePlayerState(void)
     if (zoneShortName != m_zoneMgr->shortZoneName().toLower())
     {
       seqWarn("\aWARNING: Restoring player state for potentially incorrect zone (%s != %s)!",
-              zoneShortName.toAscii().data(),
-              m_zoneMgr->shortZoneName().toLower().toAscii().data());
+              zoneShortName.toLatin1().data(),
+              m_zoneMgr->shortZoneName().toLower().toLatin1().data());
     }
 
     // read in the rest
@@ -1494,13 +1494,13 @@ void Player::restorePlayerState(void)
     fillConTable();
 
     seqInfo("Restored PLAYER: %s (%s)!",
-            m_name.toAscii().data(),
-            m_lastName.toAscii().data());
+            m_name.toLatin1().data(),
+            m_lastName.toLatin1().data());
   }
   else
   {
     seqWarn("Failure loading %s: Unable to open!",
-            fileName.toAscii().data());
+            fileName.toLatin1().data());
     reset();
     clear();
   }

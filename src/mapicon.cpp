@@ -1107,7 +1107,7 @@ void MapIcons::paintSpawnIcon(MapParameters& param,
 
     spawnNameText.sprintf("%2d: %s",
             spawn->level(),
-            spawn->name().toAscii().data());
+            spawn->name().toLatin1().data());
 
     QFontMetrics fm(param.font());
     int width = fm.width(spawnNameText);
@@ -1220,8 +1220,8 @@ void MapIcons::paintSpawnPointIcon(MapParameters& param,
     QString spawnNameText;
 
     spawnNameText.sprintf("sp:%s %s (%d)",
-            sp->name().toAscii().data(),
-            sp->last().toAscii().data(),
+            sp->name().toLatin1().data(),
+            sp->last().toLatin1().data(),
             sp->count());
 
     QFontMetrics fm(param.font());

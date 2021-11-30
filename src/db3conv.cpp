@@ -94,7 +94,7 @@ Db* DB3Convenience::GetDatabase(QString dbName)
   if (!dirInfo.exists())
     {
       fprintf(stderr, "DB3Convenience: Data Directory '%s' doesn't exist.\n",
-              dirInfo.absoluteFilePath().toAscii().data());
+              dirInfo.absoluteFilePath().toLatin1().data());
 
       // nothing more to do, just return NULL
       return (Db*)NULL;
@@ -104,7 +104,7 @@ Db* DB3Convenience::GetDatabase(QString dbName)
   if (!dirInfo.isDir())
     {
       fprintf(stderr, "DB3Convenience: Data Directory '%s isn't a directory.\n",
-              dirInfo.absoluteFilePath().toAscii().data());
+              dirInfo.absoluteFilePath().toLatin1().data());
 
       // nothing more to do, just return NULL
       return (Db*)NULL;
@@ -119,7 +119,7 @@ Db* DB3Convenience::GetDatabase(QString dbName)
 	{
 	  // if the file isn't readable, no point in going on is there...
 	  fprintf(stderr, "DB3Convenience: Data File '%s isn't readable.\n",
-              dirInfo.absoluteFilePath().toAscii().data());
+              dirInfo.absoluteFilePath().toLatin1().data());
 
 	  // nothing more to do, just return NULL
 	  return (Db*)NULL;
@@ -156,7 +156,7 @@ Db* DB3Convenience::GetDatabase(QString dbName)
       
       // setup the common database environment for all databases opened
       // using this object
-      ret = m_dbEnv->open(dirInfo.absoluteFilePath().toAscii().data(), dbEnvFlags,
+      ret = m_dbEnv->open(dirInfo.absoluteFilePath().toLatin1().data(), dbEnvFlags,
               0664);
 
       if (ret != 0)
@@ -187,16 +187,16 @@ Db* DB3Convenience::GetDatabase(QString dbName)
 
 #if 1 // can't do verify with transactions, logging, or locking
   // verify the database before we go any further
-  ret = retdbp->verify(dbName.toAscii().data(), NULL, NULL, 0);
+  ret = retdbp->verify(dbName.toLatin1().data(), NULL, NULL, 0);
 
   if (ret != 0)
     {
       // display a human readable error
       fprintf(stderr, "DB3Convenience: Db::verify() failed on file '%s': %s\n", 
-              dbName.toAscii().data(), DbEnv::strerror(ret));
+              dbName.toLatin1().data(), DbEnv::strerror(ret));
       if (ret == DB_RUNRECOVERY)
           fprintf(stderr, "DB3Convenience: Please run db_recover on file '%s'\n",
-                  dbName.toAscii().data());
+                  dbName.toLatin1().data());
 
       // check if it's a file access problem
       if (openForReadOnly)
@@ -221,7 +221,7 @@ Db* DB3Convenience::GetDatabase(QString dbName)
       // display a human readable error
       fprintf(stderr, 
               "DB3Convenience: Db::set_flags(0) failed on file '%s': %s\n",
-              dbName.toAscii().data(), DbEnv::strerror(ret));
+              dbName.toLatin1().data(), DbEnv::strerror(ret));
 
       // delete the database handle since it's not usable
       delete retdbp;
@@ -233,13 +233,13 @@ Db* DB3Convenience::GetDatabase(QString dbName)
 
   // open the database
   //  ret = retdbp->open((const char*)dbName, NULL, DB_HASH, dbOpenFlags, 0664);
-  ret = retdbp->open(NULL, dbName.toAscii().data(), NULL, DB_BTREE, dbOpenFlags, 0664);
+  ret = retdbp->open(NULL, dbName.toLatin1().data(), NULL, DB_BTREE, dbOpenFlags, 0664);
 
   if (ret != 0)
     {
       // display a human readable error
       fprintf(stderr, "DB3Convenience: Db::open() failed on file '%s': %s\n",
-              dbName.toAscii().data(), DbEnv::strerror(ret));
+              dbName.toLatin1().data(), DbEnv::strerror(ret));
 
       // check if it's a file access problem
       if (openForReadOnly)
@@ -283,7 +283,7 @@ bool DB3Convenience::Insert(QString dbName, Datum& key, Datum& data,
 	success = true;
 	break;
       default:
-    displayDB3Error(ret, "Insert: put", dbName.toAscii().data());
+    displayDB3Error(ret, "Insert: put", dbName.toLatin1().data());
       }
   }
 
@@ -307,7 +307,7 @@ bool DB3Convenience::Delete(QString dbName, Datum& key)
 	success = true;
 	break;
       default:
-    displayDB3Error(ret, "Delete: del", dbName.toAscii().data());
+    displayDB3Error(ret, "Delete: del", dbName.toLatin1().data());
       }
   }
 
@@ -335,7 +335,7 @@ bool DB3Convenience::IsEntryExist(QString dbName, Datum& key)
 	success = false;
 	break;
       default:
-    displayDB3Error(ret, "IsEntryExist: get", dbName.toAscii().data());
+    displayDB3Error(ret, "IsEntryExist: get", dbName.toLatin1().data());
       }
   }
 
@@ -368,7 +368,7 @@ bool DB3Convenience::GetEntry(QString dbName, Datum& key, Datum& data)
 	success = false;
 	break;
       default:
-    displayDB3Error(ret, "GetEntry: get", dbName.toAscii().data());
+    displayDB3Error(ret, "GetEntry: get", dbName.toLatin1().data());
       }
   }
 
@@ -404,7 +404,7 @@ void DB3Convenience::Close(QString dbName)
     int ret = db->close(0);
 
     if (ret != 0)
-      displayDB3Error(ret, "Close: close", dbName.toAscii().data());
+      displayDB3Error(ret, "Close: close", dbName.toLatin1().data());
 
     // remove the db from the dictionary
     m_dbDict.remove(dbName);
@@ -440,7 +440,7 @@ void DB3Convenience::Shutdown()
     ret = db->close(0);
 
     if (ret != 0)
-      displayDB3Error(ret, "Shutdown: close", dbName.toAscii().data());
+      displayDB3Error(ret, "Shutdown: close", dbName.toLatin1().data());
 
     // remove the db from the dictionary
     m_dbDict.remove(dbName);
@@ -510,7 +510,7 @@ bool DB3Iterator::GetFirstKey(DB3Convenience* db3c,
 
   if (ret != 0)
   {
-    displayDB3Error(ret, "GetFirstKey: cursor", dbName.toAscii().data());
+    displayDB3Error(ret, "GetFirstKey: cursor", dbName.toLatin1().data());
 
     return false;
   }
@@ -528,7 +528,7 @@ bool DB3Iterator::GetFirstKey(DB3Convenience* db3c,
   // display an error on any other error returns
   if (ret != 0)
   {
-    displayDB3Error(ret, "GetFirstKey: get", m_dbName.toAscii().data());
+    displayDB3Error(ret, "GetFirstKey: get", m_dbName.toLatin1().data());
 
     return false;
   }
@@ -579,7 +579,7 @@ bool DB3Iterator::GetNextKey(Datum& nextkey)
   // display an error on any other error returns
   if (ret != 0)
   {
-    displayDB3Error(ret, "GetNextKey: get", m_dbName.toAscii().data());
+    displayDB3Error(ret, "GetNextKey: get", m_dbName.toLatin1().data());
 
     return false;
   }
@@ -642,7 +642,7 @@ void DB3Iterator::Done()
     int ret = m_db->close(0);
 
     if (ret != 0)
-      displayDB3Error(ret, "Done: close", m_dbName.toAscii().data());
+      displayDB3Error(ret, "Done: close", m_dbName.toLatin1().data());
   }
 
   // if there is any data left over that the user didn't get, then free it

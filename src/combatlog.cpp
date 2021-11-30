@@ -631,12 +631,12 @@ void CombatWindow::updateOffense()
 			case 52:	// Tiger Claw
 			{
 				// this is a normal skill
-				s_type.sprintf("%s(%d)", skill_name(iType).toAscii().data(), iType);
+				s_type.sprintf("%s(%d)", skill_name(iType).toLatin1().data(), iType);
 				break;
 			}
 			case 231:       // Non Melee Damage
 			{
-				s_type.sprintf("Spell: %s(%d)", spell_name(iSpell).toAscii().data(), iSpell);
+				s_type.sprintf("Spell: %s(%d)", spell_name(iSpell).toLatin1().data(), iSpell);
 				break;
 			}
 			default:        // Damage Shield?

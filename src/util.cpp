@@ -738,7 +738,7 @@ QString reformatMoney (unsigned int uiCopper)
 
   if (uiDivisor == 100 && (uiCopper / uiDivisor) > 0)
   {
-    qsMoney.sprintf("%s%s%d Gold", qsMoney.toAscii().data(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
+    qsMoney.sprintf("%s%s%d Gold", qsMoney.toLatin1().data(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
     bNeedComma = true;
     uiCopper -= ((uiCopper / uiDivisor) * uiDivisor);
   }
@@ -747,7 +747,7 @@ QString reformatMoney (unsigned int uiCopper)
 
   if (uiDivisor == 10 && (uiCopper / uiDivisor) > 0)
   {
-    qsMoney.sprintf("%s%s%d Silver", qsMoney.toAscii().data(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
+    qsMoney.sprintf("%s%s%d Silver", qsMoney.toLatin1().data(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
     bNeedComma = true;
     uiCopper -= ((uiCopper / uiDivisor) * uiDivisor);
   }
@@ -755,7 +755,7 @@ QString reformatMoney (unsigned int uiCopper)
   uiDivisor /= 10;
 
   if (uiDivisor == 1 && uiCopper != 0)
-    qsMoney.sprintf("%s%s%d Copper", qsMoney.toAscii().data(), bNeedComma ? ", " : "", uiCopper);
+    qsMoney.sprintf("%s%s%d Copper", qsMoney.toLatin1().data(), bNeedComma ? ", " : "", uiCopper);
 
   return ( qsMoney );
 }
@@ -822,26 +822,26 @@ void diagFileWriteFail(QString filename)
     // if what's supposed to be a directory isn't somethings wierd.
     if (!dirInfo.isDir())
       seqWarn("\tDirectory '%s' isn't a directory!",
-              dirInfo.absoluteFilePath().toAscii().data());
+              dirInfo.absoluteFilePath().toLatin1().data());
     else
     {
       // if the directory isn't writable, that might explain it
       if (!dirInfo.isWritable())
           seqWarn("\tCan't write to directory: %s",
-                  dirInfo.absoluteFilePath().toAscii().data());
+                  dirInfo.absoluteFilePath().toLatin1().data());
       // if the directory isn't readable, that might explain it
       if (!dirInfo.isReadable())
           seqWarn("\tCan't read directory: %s",
-                  dirInfo.absoluteFilePath().toAscii().data());
+                  dirInfo.absoluteFilePath().toLatin1().data());
       // is the directory executable (listable),
       if (!dirInfo.isExecutable())
           seqWarn("\tCan't execute/access directory: %s",
-                  dirInfo.absoluteFilePath().toAscii().data());
+                  dirInfo.absoluteFilePath().toLatin1().data());
     }
   }
   else // directory doesn't exist
     seqWarn("\tDirectory '%s' doesn't exist!",
-                  dirInfo.absoluteFilePath().toAscii().data());
+                  dirInfo.absoluteFilePath().toLatin1().data());
 
   // Check out the file
   if (fileInfo.exists())
@@ -849,12 +849,12 @@ void diagFileWriteFail(QString filename)
     // The file exists, but is it writable
     if (!fileInfo.isWritable())
       seqWarn("\tCan't write to file: %s",
-              fileInfo.absoluteFilePath().toAscii().data());
+              fileInfo.absoluteFilePath().toLatin1().data());
 
     // Is the file really a file (or did someone do something wierd)
     if (!fileInfo.isFile())
       seqWarn("\tNot a file:'%s'!",
-              fileInfo.absoluteFilePath().toAscii().data());
+              fileInfo.absoluteFilePath().toLatin1().data());
   }
 }
 
@@ -872,22 +872,22 @@ void diagFileReadFail(QString filename)
     // if what's supposed to be a directory isn't somethings wierd.
     if (!dirInfo.isDir())
       seqWarn("\tDirectory '%s' isn't a directory!",
-              dirInfo.absoluteFilePath().toAscii().data());
+              dirInfo.absoluteFilePath().toLatin1().data());
     else
     {
       // if the directory isn't readable, that might explain it
       if (!dirInfo.isReadable())
           seqWarn("\tCan't read directory: %s",
-              dirInfo.absoluteFilePath().toAscii().data());
+              dirInfo.absoluteFilePath().toLatin1().data());
       // is the directory executable (listable),
       if (!dirInfo.isExecutable())
           seqWarn("\tCan't execute/access directory: %s",
-              dirInfo.absoluteFilePath().toAscii().data());
+              dirInfo.absoluteFilePath().toLatin1().data());
     }
   }
   else // directory doesn't exist
     seqWarn("\tDirectory '%s' doesn't exist!",
-              dirInfo.absoluteFilePath().toAscii().data());
+              dirInfo.absoluteFilePath().toLatin1().data());
 
   // Check out the file
   if (fileInfo.exists())
@@ -895,16 +895,16 @@ void diagFileReadFail(QString filename)
     // The file exists, but is it writable
     if (!fileInfo.isReadable())
       seqWarn("\tCan't read to file: %s",
-              fileInfo.absoluteFilePath().toAscii().data());
+              fileInfo.absoluteFilePath().toLatin1().data());
 
     // Is the file really a file (or did someone do something wierd)
     if (!fileInfo.isFile())
       seqWarn("\tNot a file:'%s'!",
-              fileInfo.absoluteFilePath().toAscii().data());
+              fileInfo.absoluteFilePath().toLatin1().data());
   }
   else
     seqWarn("\tFile '%s' doesn't exist.",
-              fileInfo.absoluteFilePath().toAscii().data());
+              fileInfo.absoluteFilePath().toLatin1().data());
 }
 
 
