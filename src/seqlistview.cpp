@@ -27,6 +27,7 @@
 
 #include <QHeaderView>
 #include <QSizePolicy>
+#include <QtGlobal>
 
 #include "seqlistview.h"
 #include "main.h"
@@ -186,14 +187,22 @@ void SEQListView::restoreColumns()
                 width = header()->sectionSizeHint(i);
             }
 
+#if QT_VERSION >= 0x050000
+            header()->setSectionResizeMode(i, QHeaderView::Interactive);
+#else
             header()->setResizeMode(i, QHeaderView::Interactive);
+#endif
             header()->resizeSection(i, width);
             setColumnWidth(i, width);
         }
         else
         {
             // column is not visible, hide it.
+#if QT_VERSION >= 0x050000
+            header()->setSectionResizeMode(i, QHeaderView::Interactive);
+#else
             header()->setResizeMode(i, QHeaderView::Interactive);
+#endif
             header()->resizeSection(i, 0);
             setColumnWidth(i, 0);
         }
@@ -249,7 +258,11 @@ void SEQListView::setColumnVisible(int column, bool visible)
             width = 40;
     }
 
+#if QT_VERSION >= 0x050000
+    header()->setSectionResizeMode(column, QHeaderView::Interactive);
+#else
     header()->setResizeMode(column, QHeaderView::Interactive);
+#endif
     header()->resizeSection(column, width);
     setColumnWidth(column, width);
 
