@@ -1,6 +1,6 @@
 INCLUDES = $(QT_INCLUDES) $(X_INCLUDES) -DPKGDATADIR=\"$(pkgdatadir)/\" -I/usr/include/pcap $(USER_INCLUDES)
 
-QT_LIBS = -lQtCore -lQtGui -lQtXml
+QT_LIBS = $(LIB_QT)
 
 bin_PROGRAMS = showeq 
 

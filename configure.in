@@ -169,6 +169,12 @@ AC_PATH_QT_MOC
 AC_PATH_QT_UIC
 AC_PATH_QT
 
+if [[ $qt_major_version == 4 ]]; then
+    LIB_QT+=" -lQtGui -lQtXml "
+else
+    LIB_QT+=" -lQt${qt_major_version}Gui -lQt${qt_major_version}Xml "
+fi
+
 dnl The below needs to be re-defined since the Qt defines from KDE destroy it
 AC_LANG_CPLUSPLUS
 
