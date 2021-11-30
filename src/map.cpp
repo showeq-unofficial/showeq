@@ -1801,7 +1801,7 @@ Map::Map(MapMgr* mapMgr,
 //  m_offscreen.setOptimization(m_param.pixmapOptimizationMethod());
   
   m_mapTip = new MapLabel( this );
-  this->setMouseTracking( TRUE );
+  this->setMouseTracking( true );
 
   m_mapPanning = false;
 

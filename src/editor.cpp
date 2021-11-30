@@ -157,7 +157,7 @@ EditorWindow::EditorWindow(const char *fileName)
      f.close();
 
      e->repaint();
-     e->document()->setModified( FALSE );
+     e->document()->setModified( false );
      setWindowTitle( fileName );
      QString s;
      s.sprintf( "Opened %s", fileName );
@@ -183,7 +183,7 @@ EditorWindow::EditorWindow(const char *fileName)
      t << text;
      f.close();
 
-     e->document()->setModified( FALSE );
+     e->document()->setModified( false );
 
      setWindowTitle( filename );
 

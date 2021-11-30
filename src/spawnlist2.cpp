@@ -85,7 +85,7 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
 
   // Create the Spawn Counter
   m_totalSpawns = new QLineEdit(this);
-  m_totalSpawns->setReadOnly(TRUE);
+  m_totalSpawns->setReadOnly(true);
   m_totalSpawns->setAlignment(Qt::AlignCenter);
   m_totalSpawns->setMinimumWidth(5);
   m_totalSpawns->setMaximumWidth(50);

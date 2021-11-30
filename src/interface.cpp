@@ -5122,7 +5122,7 @@ void EQInterface::set_net_client_IP_address()
   QString address =
      QInputDialog::getItem(this, "ShowEQ - EQ Client IP Address",
              "Enter IP address of EQ client",
-             iplst, 0, TRUE, &ok);
+             iplst, 0, true, &ok);
   if (ok)
   {
 	for (int i = 4; i > 0; i--)
@@ -5145,7 +5145,7 @@ void EQInterface::set_net_client_MAC_address()
   QString address =
      QInputDialog::getItem(this, "ShowEQ - EQ Client MAC Address",
              "Enter MAC address of EQ client",
-             maclst, 0, TRUE, &ok);
+             maclst, 0, true, &ok);
   if (ok)
   {
     if (address.length() != 17)
