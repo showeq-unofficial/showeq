@@ -33,7 +33,7 @@
 #include <QPixmap>
 
 SEQWindow::SEQWindow(const QString prefName, const QString caption,
-		     QWidget* parent, const char* name, Qt::WFlags f)
+		     QWidget* parent, const char* name, Qt::WindowFlags f)
   : QDockWidget(parent),
     m_preferenceName(prefName)
 {

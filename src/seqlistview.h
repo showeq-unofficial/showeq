@@ -45,7 +45,7 @@ class SEQListView : public QTreeWidget
         SEQListView(const QString prefName,
                     QWidget* parent = 0,
                     const char* name = 0,
-                    Qt::WFlags f = 0);
+                    Qt::WindowFlags f = 0);
         ~SEQListView();
 
         const QString& preferenceName() const { return m_preferenceName; }

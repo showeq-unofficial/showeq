@@ -34,7 +34,7 @@
 SEQListView::SEQListView(const QString prefName,
                          QWidget* parent,
                          const char* name,
-                         Qt::WFlags f)
+                         Qt::WindowFlags f)
     : QTreeWidget(parent),
     m_preferenceName(prefName),
     m_sortColumn(0),
