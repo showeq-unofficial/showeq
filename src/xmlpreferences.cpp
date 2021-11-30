@@ -656,7 +656,7 @@ bool XMLPreferences::isPreference(const QString& inName,
     QVariant* preference = getPref(inName, inSection, pers); \
     \
     if (preference) \
-      return qVariantValue< retType >(*preference); \
+      return preference->value< retType >(); \
     \
     return def; \
   } 
