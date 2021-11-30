@@ -48,7 +48,6 @@
 #endif
 
 #include <QApplication>
-#include <QWindowsStyle>
 #if 1 // ZBTEMP
 #include <QDir>
 #endif
@@ -202,7 +201,6 @@ int main (int argc, char **argv)
 #endif
 
    /* Create application instance */
-   //   QApplication::setStyle( new QWindowsStyle );
    QApplication qapp (argc, argv);
 
    /* Print the version number */

@@ -89,11 +89,6 @@
 #include <QInputDialog>
 #include <QFontDialog>
 #include <QColorDialog>
-#include <QWindowsStyle>
-#include <QPlastiqueStyle>
-#include <QMotifStyle>
-#include <QCDEStyle>
-#include <QCleanlooksStyle>
 #include <QMenu>
 #include <QWidgetAction>
 #include <QDesktopWidget>
