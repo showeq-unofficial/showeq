@@ -4597,7 +4597,7 @@ void Map::saveMapImage(void)
   if (fileDlg.exec() != QDialog::Accepted)
     return;
 
-  QString filter = fileDlg.selectedFilter();
+  QString filter = fileDlg.selectedNameFilter();
   QStringList files = fileDlg.selectedFiles();
   QString filename;
   if (!files.isEmpty())
