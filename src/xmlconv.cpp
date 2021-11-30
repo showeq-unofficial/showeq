@@ -256,7 +256,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
   else if (e.tagName() == "cursor")
   {
     if (e.hasAttribute("shape"))
-      v = QVariant(QCursor(e.attribute("shape").toInt(&ok, 10)));
+      v = QVariant(QCursor(static_cast<Qt::CursorShape>(e.attribute("shape").toInt(&ok, 10))));
     else
       qWarning("%s element without value!", e.tagName().toLatin1().data());
   }
@@ -517,7 +517,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
 
   case QVariant::KeySequence:
     e.setTagName("key");
-    e.setAttribute("sequence", (QString)v.value<QKeySequence>());
+    e.setAttribute("sequence", (QString)v.value<QKeySequence>().toString());
     break;
 
   case QVariant::ByteArray: // this is only for [u]int64_t

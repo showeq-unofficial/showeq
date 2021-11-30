@@ -124,7 +124,7 @@ QVariant SpawnPointListItem::data(int column, int role) const
 
         case Qt::ForegroundRole:
             if (m_spawnPoint->age() > 220)
-                return Qt::red;
+                return QColor(Qt::red);
             else
                 return treeWidget()->foregroundRole();
 

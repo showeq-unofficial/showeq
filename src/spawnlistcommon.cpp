@@ -108,7 +108,7 @@ QVariant SpawnListItem::data(int column, int role) const
         case Qt::ForegroundRole:
             if (filterFlags & FILTER_FLAG_FILTERED)
                 // color filtered spawns grey
-                return Qt::gray;
+                return QColor(Qt::gray);
             else
                 return m_textColor;
 
