@@ -1,3 +1,10 @@
+cn187 (12/07/21)
+----------------
+- Update to version 6.2.0
+- Support for EQ patch 12/07/21
+- Opcode and struct changes
+- Add support for building with Qt5 [EXPERIMENTAL]
+
 cn187 (11/17/21)
 ----------------
 - Update to version 6.1.8
