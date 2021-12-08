@@ -909,4 +909,19 @@
     "Rabbit Mount",               // 885
     "Dragon",                     // 886
     "Dragon",                     // 887
+    "Primal Vampire",             // 888
+    "Blood Beast",                // 889
+    "Tekuel",                     // 890
+    "Tegi",                       // 891
+    "Netherbian",                 // 892
+    "Zelniak",                    // 893
+    "Zelniak",                    // 894
+    "Shade",                      // 895
+    "Goranga",                    // 896
+    "Owlbear",                    // 897
+    "Owlbear Mount",              // 898
+    "Blood Tick",                 // 899
+    "Blood Bag",                  // 900
+    "Stonegrabber",               // 901
+    "Riding Dog",                 // 902
 #endif
