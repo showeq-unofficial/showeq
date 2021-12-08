@@ -869,7 +869,7 @@
 { "vexthaltwo", "Vex Thal" }, // 846
 { "shadowvalley", "Shadow Valley" }, // 847
 { "basilica", "Basilica of Adumbration" }, // 848
-{ "bloodfals", "Bloodfalls" }, // 849
+{ "bloodfalls", "Bloodfalls" }, // 849
 { NULL, NULL }, // 850
 { NULL, NULL }, // 851
 { NULL, NULL }, // 852
