@@ -863,13 +863,13 @@
 { NULL, NULL }, // 840
 { NULL, NULL }, // 841
 { NULL, NULL }, // 842
-{ NULL, NULL }, // 843
-{ NULL, NULL }, // 844
-{ NULL, NULL }, // 845
-{ NULL, NULL }, // 846
-{ NULL, NULL }, // 847
-{ NULL, NULL }, // 848
-{ NULL, NULL }, // 849
+{ "maidentwo", "The Maiden's Eye" }, // 843
+{ "umbraltwo", "Umbral Plains" }, // 844
+{ "akhevatwo", "Ka Vethan" }, // 845
+{ "vexthaltwo", "Vex Thal" }, // 846
+{ "shadowvalley", "Shadow Valley" }, // 847
+{ "basilica", "Basilica of Adumbration" }, // 848
+{ "bloodfals", "Bloodfalls" }, // 849
 { NULL, NULL }, // 850
 { NULL, NULL }, // 851
 { NULL, NULL }, // 852
