@@ -757,8 +757,8 @@
 { "eastsepulcher", "Sepulcher East" }, // 734
 { "westsepulcher", "Sepulcher West" }, // 735
 { "shadowedmount", "Shadowed Mount" }, // 736
-{ "guildhalllrg", "Grand Guild Hall" }, // 737
-{ "guildhallsml", "Greater Guild Hall" }, // 738
+{ "guildhalllrg", "Palatial Guild Hall" }, // 737
+{ "guildhallsml", "Grand Guild Hall" }, // 738
 { "plhogrinteriors1a1", "One Bedroom House Interior" }, // 739
 { "plhogrinteriors1a2", "One Bedroom House Interior" }, // 740
 { "plhogrinteriors3a1", "Three Bedroom House Interior" }, // 741
