@@ -645,6 +645,11 @@ void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
     // ToV DZs for sure, but there may be others.
     QRegExp rz("_progress$");
     m_shortZoneName.replace(rz, "");
+
+    // some zones are getting a suffix of _int (particularly guild halls)
+    // which causes failure to load maps.
+    QRegExp ry("_int$");
+    m_shortZoneName.replace(ry, "");
   }
 
   m_longZoneName = zoneNew->longName;
