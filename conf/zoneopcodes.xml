@@ -552,8 +552,8 @@
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
     <opcode id="ffff" name="OP_MercenaryList" updated="11/20/15">
-        <comment>Listing of hired mercenaries - 648 bytes
-        <payload dir="server" typename="uint8_t" sizechecktype="none"/></comment>
+        <comment>Listing of hired mercenaries - 648 bytes</comment>
+        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
     <opcode id="ffff" name="OP_ClickInventory" updated="11/28/12">
         <comment>Click items from inventory or armor - 16 bytes 5th byte is Slot ID</comment>
@@ -631,7 +631,7 @@
     <opcode id="ffff" name="OP_WelcomeScreenTitle" updated="05/16/11">
     <comment></comment>
     </opcode>
-    <opcode id="ffff" name="OP_VeteranRewards" update="04/18/11">
+    <opcode id="ffff" name="OP_VeteranRewards" updated="04/18/11">
         <comment></comment>
     </opcode>
     <opcode id="ffff" name="OP_SendAATable" updated="08/12/09">
