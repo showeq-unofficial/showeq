@@ -1,3 +1,10 @@
+cn187 (01/19/22)
+----------------
+- Update to version 6.2.1
+- Support for EQ Patch 01/19/22
+- Opcode and struct changes
+- Fixes for guild hall map detection
+
 cn187 (12/07/21)
 ----------------
 - Update to version 6.2.0.1
