@@ -443,7 +443,7 @@ struct Color_Struct
 
 /*
 * Used in charProfileStruct. Buffs
-* Length: 86 Octets
+* Length: 110 Octets
 */
 struct spellBuff
 {
@@ -458,8 +458,8 @@ struct spellBuff
 /*0020*/ int8_t level;                           // Level of person who cast buff
 /*0021*/ int32_t spellid;                        // Spell
 /*0025*/ int32_t effect;                         // holds the dmg absorb amount on runes
-/*0029*/ uint8_t unknown0029[57];
-/*0086*/
+/*0029*/ uint8_t unknown0029[81];
+/*0110*/
 };
 
 
@@ -1113,25 +1113,23 @@ struct spawnStruct
            struct
            {
 
-              signed   deltaZ:13;                         // change in z
               signed   deltaX:13;                         // change in x
-              unsigned padding00:6;
-
-              unsigned pitch:12;                          // pitch (up/down heading)
-              signed   x:19;                              // x coord (1st loc value)
-              unsigned padding01:1;
-
-              signed   y:19;                              // y coord (2nd loc value)
-              unsigned heading:12;                        // heading
-              unsigned padding02:1;
+              signed   deltaHeading:10;                   // change in heading
+              unsigned padding00:9;
 
               signed   animation:10;                      // current animation
-              signed   deltaY:13;                         // change in y
-              unsigned padding03:9;
+              unsigned pitch:12;                          // pitch (up/down heading)
+              unsigned padding01:10;
 
-              signed   deltaHeading:10;                   // change in heading
+              unsigned heading:12;                        // heading
+              signed   x:19;                              // x coord (1st loc value)
+              unsigned padding02:1;
+
               signed   z:19;                              // z coord (3rd loc value)
-              unsigned padding04:3;
+              signed   deltaZ:13;                         // change in z
+
+              signed   deltaY:13;                         // change in y
+              signed   y:19;                              // y coord (2nd loc value)
 
            };
            int32_t posData[5];
@@ -1959,7 +1957,7 @@ struct castOnStruct
 
 /*
 ** Spawn Death Blow
-** Length: 32 Octets
+** Length: 40 Octets
 ** OpCode: NewCorpseCode
 */
 
@@ -1973,8 +1971,8 @@ struct newCorpseStruct
 /*0020*/ uint16_t zoneId;                        // Bind zone id
 /*0022*/ uint16_t zoneInstance;                  // Bind zone instance
 /*0024*/ uint32_t damage;                        // Damage
-/*0028*/ uint8_t  unknown0028[4];                // ***Placeholder
-/*0032*/
+/*0028*/ uint8_t  unknown0028[12];                // ***Placeholder
+/*0040*/
 };
 
 /**
@@ -2036,9 +2034,9 @@ struct action2Struct
 /*0004*/ uint8_t  type;                          // Bash, kick, cast, etc.
 /*0005*/ int16_t  spell;                         // SpellID
 /*0007*/ int32_t  damage;
-/*0011*/ uint8_t  unknown0011[13];               // ***Placeholder
-/*0024*/ uint8_t  unknown0024[6];	         // ***Placeholder (11/24/07)
-/*0030*/
+/*0011*/ uint8_t  unknown0011[17];               // ***Placeholder
+/*0028*/ uint8_t  unknown0028[6];	         // ***Placeholder (11/24/07)
+/*0034*/
 };
 
 // This can be used to gather info on spells cast on us
@@ -2047,14 +2045,14 @@ struct actionStruct
 /*0000*/ uint16_t target;                        // Target ID
 /*0002*/ uint16_t source;                        // SourceID
 /*0004*/ uint8_t  level;                         // Caster level
-/*0005*/ uint8_t  unknown0005[23];               // ***Placeholder
-/*0028*/ uint8_t  type;                          // Casts, Falls, Bashes, etc...
-/*0029*/ uint8_t  unknown0029[8];
-/*0037*/ int16_t  spell;                         // SpellID
-/*0039*/ uint8_t  unknown0039[2];                // ***Placeholder
-/*0041*/ uint8_t  unknown0041[2];                // ***Placeholder
-/*0043*/ uint8_t  unknown0043[3];                // ***Placeholder
-/*0046*/
+/*0005*/ uint8_t  unknown0005[27];               // ***Placeholder
+/*0032*/ uint8_t  type;                          // Casts, Falls, Bashes, etc...
+/*0033*/ uint8_t  unknown0033[16];
+/*0049*/ int16_t  spell;                         // SpellID
+/*0051*/ uint8_t  unknown0051[2];                // ***Placeholder
+/*0053*/ uint8_t  unknown0053[2];                // ***Placeholder
+/*0055*/ uint8_t  unknown0055[3];                // ***Placeholder
+/*0058*/
 };
 
 // Starting with 2/21/2006, OP_Actions seem to come in pairs, duplicating
@@ -2065,15 +2063,15 @@ struct actionAltStruct
 /*0000*/ uint16_t target;                        // Target ID
 /*0002*/ uint16_t source;                        // SourceID
 /*0004*/ uint8_t  level;                         // Caster level
-/*0005*/ uint8_t  unknown0005[23];               // ***Placeholder
-/*0028*/ uint8_t  type;                          // Casts, Falls, Bashes, etc...
-/*0029*/ uint8_t  unknown0029[8];
-/*0037*/ int16_t  spell;                         // SpellID
-/*0039*/ uint8_t  unknown0039[2];                // ***Placeholder
-/*0041*/ uint32_t unknown0041;
-/*0045*/ uint32_t unknown0045;
-/*0049*/ uint8_t  unknown0049[15];
-/*0064*/
+/*0005*/ uint8_t  unknown0005[27];               // ***Placeholder
+/*0032*/ uint8_t  type;                          // Casts, Falls, Bashes, etc...
+/*0033*/ uint8_t  unknown0033[16];
+/*0049*/ int16_t  spell;                         // SpellID
+/*0051*/ uint8_t  unknown0051[2];                // ***Placeholder
+/*0053*/ uint32_t unknown0053;
+/*0057*/ uint32_t unknown0057;
+/*0061*/ uint8_t  unknown0061[15];
+/*0076*/
 };
 
 /*
@@ -2395,31 +2393,29 @@ struct playerSpawnPosStruct
 /*0000*/ uint16_t spawnId;
 /*0002*/ uint16_t spawnId2;
 /*0004*/
-         signed   deltaZ:13;                       // change in z
          signed   deltaX:13;                       // change in x
-         unsigned padding00:6;
+         signed   deltaHeading:10;                 // change in heading
+         unsigned padding00:9;
 /*0008*/
+         signed   animation:10;                    // current animation
          unsigned pitch:12;                        // pitch (up/down heading)
-         signed   x:19;                            // x coord (1st loc value)
-         unsigned padding01:1;
+         unsigned padding01:10;
 /*0012*/
-         signed   y:19;                            // y coord (2nd loc value)
          unsigned heading:12;                      // heading
+         signed   x:19;                            // x coord (1st loc value)
          unsigned padding02:1;
 /*0016*/
-         signed   animation:10;                    // current animation
-         signed   deltaY:13;                       // change in y
-         unsigned padding03:9;
-/*0020*/
-         signed   deltaHeading:10;                 // change in heading
          signed   z:19;                            // z coord (3rd loc value)
-         unsigned padding04:3;
+         signed   deltaZ:13;                       // change in z
+/*0020*/
+         signed   deltaY:13;                       // change in y
+         signed   y:19;                            // y coord (2nd loc value)
 /*0024*/
 };
 
 /*
 ** Self Position Update
-** Length: 46 Octets
+** Length: 38 Octets
 ** OpCode: PlayerPosCode
 */
 struct playerSelfPosStruct
@@ -2428,30 +2424,25 @@ struct playerSelfPosStruct
 /*0002*/ uint16_t spawnId;                       // Player's spawn id
 /*0004*/ uint16_t unknown0004;                   // ***Placeholder
 /*0006*/
-	 unsigned heading:12;                // heading
-	 unsigned padding00:20;
-/*0010*/
 	 float    x;                         // x coord (1st loc value)
-/*0014*/
-	 unsigned pitch:12;                  // pitch (up/down heading)
-	 unsigned padding02:20;
-/*0018*/
-	 float    deltaZ;                    // change in z
-/*0022*/
-	 float    deltaX;                    // change in x
-/*0026*/
-	 float    z;                         // z coord (3rd loc value)
-/*0030*/
-	 float    y;                         // y coord (2nd loc value)
-/*0034*/
-	 signed   deltaHeading:10;           // change in heading
-	 unsigned padding07:22;
-/*0038*/
+/*0010*/
 	 float    deltaY;                    // change in y
-/*0042*/
+/*0014*/
+	 float    y;                         // y coord (2nd loc value)
+/*0018*/
+	 unsigned pitch:12;                  // pitch (up/down heading)
+	 unsigned padding03:20;
+/*0022*/
+	 float    z;                         // z coord (3rd loc value)
+/*0026*/
+	 float    deltaZ;                    // change in z
+/*0030*/
 	 signed   animation:10;              // current animation
-	 unsigned padding09:22;
-/*0046*/
+	 unsigned heading:12;                // heading
+	 signed   deltaHeading:10;           // change in heading
+/*0034*/
+	 float    deltaX;                    // change in x
+/*0038*/
 };
 
 /*
