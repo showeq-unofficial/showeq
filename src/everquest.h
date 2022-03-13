@@ -2619,23 +2619,23 @@ struct clientLFGStruct
 
 /*
 ** buffStruct
-** Length: 120 Octets
+** Length: 168 Octets
 ** 
 */
 
 struct buffStruct
 {
 /*0000*/ uint32_t spawnid;                       //spawn id
-/*0004*/ uint8_t  unknown0004[64]; 
-/*0068*/ uint32_t spellid;                       // spellid
-/*0072*/ uint32_t duration;                      // Time remaining in ticks
-/*0076*/ int32_t unknown0024;                    // Buff length in ticks
-/*0080*/ uint8_t  unknown0080[25];
-/*0105*/ int8_t   level;                         // Level of person who cast buff
-/*0106*/ uint8_t  unknown0106[6];
-/*0112*/ uint32_t spellslot;                     // buff slot in buff window
-/*0116*/ uint32_t changetype;                    // 1=buff fading,2=buff duration
-/*0120*/ 
+/*0004*/ uint8_t  unknown0004[112]; 
+/*0116*/ uint32_t spellid;                       // spellid
+/*0120*/ uint32_t duration;                      // Time remaining in ticks
+/*0124*/ int32_t unknown0024;                    // Buff length in ticks
+/*0128*/ uint8_t  unknown0080[25];
+/*0153*/ int8_t   level;                         // Level of person who cast buff
+/*0154*/ uint8_t  unknown0106[6];
+/*0160*/ uint32_t spellslot;                     // buff slot in buff window
+/*0164*/ uint32_t changetype;                    // 1=buff fading,2=buff duration
+/*0168*/ 
 };
 
 /*
