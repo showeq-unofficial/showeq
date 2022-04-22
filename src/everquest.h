@@ -1113,26 +1113,29 @@ struct spawnStruct
            struct
            {
 
-              signed   deltaX:13;                         // change in x
-              signed   deltaHeading:10;                   // change in heading
-              unsigned padding00:9;
-
-              signed   animation:10;                      // current animation
-              unsigned pitch:12;                          // pitch (up/down heading)
-              unsigned padding01:10;
-
-              unsigned heading:12;                        // heading
+              signed   deltaZ:13;                         // change in z
               signed   x:19;                              // x coord (1st loc value)
-              unsigned padding02:1;
+
+              unsigned pitch:12;                          // pitch (up/down heading)
+              signed   deltaY:13;                         // change in y
+              unsigned padding01:7;
+
+              signed   deltaX:13;                         // change in x
+              signed   animation:10;                      // current animation
+              unsigned padding02:9;
 
               signed   z:19;                              // z coord (3rd loc value)
-              signed   deltaZ:13;                         // change in z
+              unsigned padding03:13;
 
-              signed   deltaY:13;                         // change in y
               signed   y:19;                              // y coord (2nd loc value)
+              unsigned heading:12;                        // heading
+              unsigned padding04:1;
+
+              signed   deltaHeading:10;                   // change in heading
+              unsigned padding05:22;
 
            };
-           int32_t posData[5];
+           int32_t posData[6];
          };
 
 /*0000*/ union
@@ -2031,12 +2034,13 @@ struct action2Struct
 {
 /*0000*/ uint16_t target;                        // Target ID
 /*0002*/ uint16_t source;                        // Source ID
-/*0004*/ uint8_t  type;                          // Bash, kick, cast, etc.
-/*0005*/ int16_t  spell;                         // SpellID
-/*0007*/ int32_t  damage;
-/*0011*/ uint8_t  unknown0011[17];               // ***Placeholder
-/*0028*/ uint8_t  unknown0028[6];	         // ***Placeholder (11/24/07)
-/*0034*/
+/*0004*/ uint8_t  unknown0004[16];
+/*0020*/ int16_t  spell;                         // SpellID
+/*0022*/ int32_t  damage;
+/*0026*/ uint8_t  uknown0026[10];
+/*0036*/ uint8_t  type;                          // Bash, kick, cast, etc.
+/*0037*/ uint8_t  unknown0011[3];
+/*0040*/
 };
 
 // This can be used to gather info on spells cast on us
@@ -2044,15 +2048,13 @@ struct actionStruct
 {
 /*0000*/ uint16_t target;                        // Target ID
 /*0002*/ uint16_t source;                        // SourceID
-/*0004*/ uint8_t  level;                         // Caster level
-/*0005*/ uint8_t  unknown0005[27];               // ***Placeholder
-/*0032*/ uint8_t  type;                          // Casts, Falls, Bashes, etc...
-/*0033*/ uint8_t  unknown0033[16];
-/*0049*/ int16_t  spell;                         // SpellID
-/*0051*/ uint8_t  unknown0051[2];                // ***Placeholder
-/*0053*/ uint8_t  unknown0053[2];                // ***Placeholder
-/*0055*/ uint8_t  unknown0055[3];                // ***Placeholder
-/*0058*/
+/*0004*/ int16_t  spell;                         // SpellID
+/*0006*/ uint8_t  unknown0006[6];
+/*0012*/ uint8_t  level;                         // Caster level
+/*0013*/ uint8_t  unknown0013[43];               // ***Placeholder
+/*0056*/ uint8_t  type;                          // Casts, Falls, Bashes, etc...
+/*0057*/ uint8_t  unknown0057[7];
+/*0064*/
 };
 
 // Starting with 2/21/2006, OP_Actions seem to come in pairs, duplicating
@@ -2062,16 +2064,13 @@ struct actionAltStruct
 {
 /*0000*/ uint16_t target;                        // Target ID
 /*0002*/ uint16_t source;                        // SourceID
-/*0004*/ uint8_t  level;                         // Caster level
-/*0005*/ uint8_t  unknown0005[27];               // ***Placeholder
-/*0032*/ uint8_t  type;                          // Casts, Falls, Bashes, etc...
-/*0033*/ uint8_t  unknown0033[16];
-/*0049*/ int16_t  spell;                         // SpellID
-/*0051*/ uint8_t  unknown0051[2];                // ***Placeholder
-/*0053*/ uint32_t unknown0053;
-/*0057*/ uint32_t unknown0057;
-/*0061*/ uint8_t  unknown0061[15];
-/*0076*/
+/*0004*/ int16_t  spell;                         // SpellID
+/*0006*/ uint8_t  unknown0006[6];
+/*0012*/ uint8_t  level;                         // Caster level
+/*0013*/ uint8_t  unknown0013[43];               // ***Placeholder
+/*0056*/ uint8_t  type;                          // Casts, Falls, Bashes, etc...
+/*0057*/ uint8_t  unknown0057[31];
+/*0088*/
 };
 
 /*
@@ -2385,7 +2384,7 @@ struct randomStruct
 
 /*
 ** Player Position Update
-** Length: 24 Octets
+** Length: 28 Octets
 ** OpCode: PlayerPosCode
 */
 struct playerSpawnPosStruct
@@ -2393,29 +2392,32 @@ struct playerSpawnPosStruct
 /*0000*/ uint16_t spawnId;
 /*0002*/ uint16_t spawnId2;
 /*0004*/
-         signed   deltaX:13;                       // change in x
-         signed   deltaHeading:10;                 // change in heading
-         unsigned padding00:9;
-/*0008*/
-         signed   animation:10;                    // current animation
-         unsigned pitch:12;                        // pitch (up/down heading)
-         unsigned padding01:10;
-/*0012*/
-         unsigned heading:12;                      // heading
+         signed   deltaZ:13;                       // change in z
          signed   x:19;                            // x coord (1st loc value)
-         unsigned padding02:1;
+/*0008*/
+         unsigned pitch:12;                        // pitch (up/down heading)
+         signed   deltaY:13;                       // change in y
+         unsigned padding01:7;
+/*0012*/
+         signed   deltaX:13;                       // change in x
+         signed   animation:10;                    // current animation
+         unsigned padding02:9;
 /*0016*/
          signed   z:19;                            // z coord (3rd loc value)
-         signed   deltaZ:13;                       // change in z
+         unsigned padding03:13;
 /*0020*/
-         signed   deltaY:13;                       // change in y
          signed   y:19;                            // y coord (2nd loc value)
+         unsigned heading:12;                      // heading
+         unsigned padding04:1;
 /*0024*/
+         signed   deltaHeading:10;                 // change in heading
+         unsigned padding05:22;
+/*0028*/
 };
 
 /*
 ** Self Position Update
-** Length: 38 Octets
+** Length: 42 Octets
 ** OpCode: PlayerPosCode
 */
 struct playerSelfPosStruct
@@ -2424,25 +2426,28 @@ struct playerSelfPosStruct
 /*0002*/ uint16_t spawnId;                       // Player's spawn id
 /*0004*/ uint16_t unknown0004;                   // ***Placeholder
 /*0006*/
-	 float    x;                         // x coord (1st loc value)
-/*0010*/
-	 float    deltaY;                    // change in y
-/*0014*/
-	 float    y;                         // y coord (2nd loc value)
-/*0018*/
-	 unsigned pitch:12;                  // pitch (up/down heading)
-	 unsigned padding03:20;
-/*0022*/
-	 float    z;                         // z coord (3rd loc value)
-/*0026*/
-	 float    deltaZ;                    // change in z
-/*0030*/
-	 signed   animation:10;              // current animation
 	 unsigned heading:12;                // heading
+	 unsigned padding00:20;
+/*0010*/
+	 float    deltaZ;                    // change in z
+/*0014*/
+	 unsigned pitch:12;                  // pitch (up/down heading)
 	 signed   deltaHeading:10;           // change in heading
-/*0034*/
+	 unsigned padding02:10;
+/*0018*/
+	 float    x;                         // x coord (1st loc value)
+/*0022*/
+	 float    y;                         // y coord (2nd loc value)
+/*0026*/
+	 signed   animation:10;              // current animation
+	 unsigned padding05:22;
+/*0030*/
 	 float    deltaX;                    // change in x
+/*0034*/
+	 float    z;                         // z coord (3rd loc value)
 /*0038*/
+	 float    deltaY;                    // change in y
+/*0042*/
 };
 
 /*

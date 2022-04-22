@@ -1954,7 +1954,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			"zoneChangeStruct", SZC_Match,
 			m_zoneMgr, SLOT(zoneChange(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_NewZone", SP_Zone, DIR_Server,
-			"newZoneStruct", SZC_Match,
+			"uint8_t", SZC_None,
 			m_zoneMgr, SLOT(zoneNew(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_SendZonePoints", SP_Zone, DIR_Server,
 			"zonePointsStruct", SZC_None,
@@ -2100,7 +2100,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			"none", SZC_Match,
 			m_messageShell, SLOT(logOut(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_NewZone", SP_Zone, DIR_Server,
-			"newZoneStruct", SZC_Match,
+			"uint8_t", SZC_None,
 			m_messageShell, SLOT(zoneNew(const uint8_t*, size_t, uint8_t)));
      connect(m_zoneMgr, SIGNAL(zoneBegin(const ClientZoneEntryStruct*, size_t, uint8_t)),
 	     m_messageShell, SLOT(zoneEntryClient(const ClientZoneEntryStruct*)));

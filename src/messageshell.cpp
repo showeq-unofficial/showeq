@@ -430,13 +430,14 @@ void MessageShell::zoneChanged(const zoneChangeStruct* zoneChange, size_t, uint8
   m_messages->addMessage(MT_Zone, tempStr);
 }
 
-void MessageShell::zoneNew(const uint8_t* data, size_t, uint8_t dir)
+void MessageShell::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
 {
-  const newZoneStruct* zoneNew = (const newZoneStruct*)data;
+  NetStream netStream(data, len);
+  QString newZoneShortName = netStream.readText ();
+  QString newZoneLongName = netStream.readText ();
   QString tempStr;
   tempStr = "NewCode: Zone: ";
-  tempStr += QString(zoneNew->shortName) + " ("
-    + zoneNew->longName + ")";
+  tempStr += newZoneShortName + " (" + newZoneLongName + ")";
   m_messages->addMessage(MT_Zone, tempStr);
 }
 

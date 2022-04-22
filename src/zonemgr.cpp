@@ -621,7 +621,39 @@ void ZoneMgr::zoneChange(const uint8_t* data, size_t len, uint8_t dir)
 
 void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
 {
-  const newZoneStruct* zoneNew = (const newZoneStruct*)data;
+  newZoneStruct *zoneNew = new newZoneStruct;
+  memset (zoneNew, 0, sizeof (newZoneStruct));
+  NetStream netStream (data, len);
+
+  QString shortName = netStream.readText ();
+  if (shortName.length ())
+    strcpy (zoneNew->shortName, shortName.toLatin1().data());
+
+  QString longName = netStream.readText ();
+  if (longName.length ())
+    strcpy (zoneNew->longName, longName.toLatin1().data());
+
+  netStream.skipBytes (2);
+
+  QString zonefile = netStream.readText ();
+  if (zonefile.length ())
+    strcpy (zoneNew->zonefile, zonefile.toLatin1().data());
+
+  netStream.skipBytes (90);
+
+  union { uint32_t n; float f; } x;
+  x.n = netStream.readUInt32NC();
+  zoneNew->zone_exp_multiplier = x.f;
+
+  netStream.skipBytes (28);
+
+  x.n = netStream.readUInt32NC();
+  zoneNew->safe_y = x.f;
+  x.n = netStream.readUInt32NC();
+  zoneNew->safe_x = x.f;
+  x.n = netStream.readUInt32NC();
+  zoneNew->safe_z = x.f;
+
   m_safePoint.setPoint(lrintf(zoneNew->safe_x), lrintf(zoneNew->safe_y),
 		       lrintf(zoneNew->safe_z));
   m_zone_exp_multiplier = zoneNew->zone_exp_multiplier;
@@ -670,6 +702,8 @@ void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
 
   if (showeq_params->saveZoneState)
     saveZoneState();
+
+  delete zoneNew;
 }
 
 void ZoneMgr::zonePoints(const uint8_t* data, size_t len, uint8_t)
