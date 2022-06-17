@@ -356,14 +356,14 @@
     "Troll",                      // 332
     "Troll",                      // 333
     "Troll Pirate Ghost",         // 334
-    "Pirate",                     // 335
-    "Pirate",                     // 336
-    "Pirate",                     // 337
-    "Pirate",                     // 338
-    "Pirate",                     // 339
-    "Pirate",                     // 340
-    "Pirate",                     // 341
-    "Pirate",                     // 342
+    "Pirate 335",                 // 335
+    "Pirate 336",                 // 336
+    "Troll Pirate",               // 337
+    "Gnome Pirate",               // 338
+    "Dark Elf Pirate",            // 339
+    "Ogre Pirate",                // 340
+    "Human Pirate",               // 341
+    "Erudite Pirate",             // 342
     "Frog",                       // 343
     "Troll Zombie",               // 344
     "Luggald",                    // 345
