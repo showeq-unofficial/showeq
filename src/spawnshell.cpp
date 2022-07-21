@@ -756,7 +756,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       strcpy(spawn->lastName, name.toLatin1().data());
    }
 
-   netStream.skipBytes(6);
+   netStream.skipBytes(2);
 
    spawn->petOwnerId = netStream.readUInt32NC();
 
