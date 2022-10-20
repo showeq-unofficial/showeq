@@ -201,6 +201,9 @@ int main (int argc, char **argv)
 #endif
 
    /* Create application instance */
+#if QT_VERSION >= 0x050000
+   QApplication::setSetuidAllowed(true);
+#endif
    QApplication qapp (argc, argv);
 
    /* Print the version number */
