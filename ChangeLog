@@ -1,7 +1,13 @@
-BlueAdept (09/27/22)
+BlueAdept (11/17/22)
+----------------
+- Update to version 6.2.12
+- Support for EQ patch 11/16/22
+- Opcode and struct changes (Newby)
+
+BlueAdept (10/27/22)
 ----------------
 - Update to version 6.2.11
-- Support for EQ patch 09/26/22
+- Support for EQ patch 10/26/22
 - Opcode and struct changes (Newby)
 
 BlueAdept (09/23/22)
@@ -9,7 +15,6 @@ BlueAdept (09/23/22)
 - Update to version 6.2.10
 - Support for EQ patch 09/21/22
 - Opcode and struct changes (Newby)
-
 
 BlueAdept (08/17/22)
 ----------------
