@@ -689,7 +689,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
        netStream.readText();	// skip 3 variable len strings
        netStream.readText();
        netStream.readText();
-       netStream.skipBytes(58);	// and 58 static bytes
+       netStream.skipBytes(54);	// and 54 static bytes
    }
 
    spawn->charProperties = netStream.readUInt8();
