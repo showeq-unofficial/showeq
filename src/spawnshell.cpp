@@ -689,7 +689,14 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
        netStream.readText();	// skip 3 variable len strings
        netStream.readText();
        netStream.readText();
-       netStream.skipBytes(54);	// and 54 static bytes
+       netStream.skipBytes(50);	// and 50 static bytes
+
+       //the next byte indicates how many DWORDs to skip, and
+       //includes the DWORD that the byte is part of
+       uint8_t skip = netStream.readUInt8();
+       netStream.skipBytes(3); //to complete DWORD
+       --skip; //we just skipped the first dword
+       netStream.skipBytes(skip * sizeof(uint32_t));
    }
 
    spawn->charProperties = netStream.readUInt8();
