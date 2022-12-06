@@ -1539,7 +1539,7 @@ struct spawnIllusionStruct
 /*0075*/ uint8_t    unknown0075;                 // ***Placeholder
 /*0076*/ uint32_t   unknown0076;                 // ***Placeholder
 /*0080*/ uint32_t   face;                        // New face
-/*0084*/ uint8_t    unknown0084[252];            // ***Placeholder
+/*0084*/ uint8_t    unknown0084[248];            // ***Placeholder
 /*0336*/
 };
 
@@ -2293,7 +2293,7 @@ struct SpawnUpdateStruct
 /*0004*/ int16_t  arg1;                          // first option
 /*0006*/ int16_t  arg2;                          // second option
 /*0008*/ uint8_t  arg3;                          // third option?
-/*0009*/ uint8_t unknown0009[18];
+/*0009*/ uint8_t unknown0009[23];
 /*0027*/
 };
 
