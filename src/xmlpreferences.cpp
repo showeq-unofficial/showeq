@@ -740,30 +740,34 @@ int64_t XMLPreferences::getPrefInt64(const QString& inName,
 
     switch(preference->type())
     {
-    case QVariant::String:
-      // convert it to a int64_t (in base 16)
+    case QMetaType::QString:
+      // convert it to a uint64_t (in base 16)
+      //TODO ok
       value = strtoll(preference->toString().toLatin1().data(), 0, 16);
       break;
-    case QVariant::Int:
-    case QVariant::UInt:
-      value = preference->toInt();
+    case QMetaType::UInt:
+    case QMetaType::Int:
+    case QMetaType::Long:
+    case QMetaType::ULong:
+    case QMetaType::ULongLong:
+    case QMetaType::LongLong:
+
+      value = preference->toLongLong();
       break;
-    case QVariant::Double:
+    case QMetaType::Double:
       value = int64_t(preference->toDouble());
       break;
-    case QVariant::ByteArray:
-      {
-          QByteArray ba = preference->toByteArray();
-          if (ba.size() == sizeof(int64_t))
-              value = *(int64_t*)ba.data();
-          break;
-      }
+
     default:
-      qWarning("XMLPreferences::getPrefInt64(%s, %s, %lld): preference found,\n"
+      qWarning("XMLPreferences::getPrefInt64(%s, %s, %llu): preference found,\n"
               "\tbut type %s is not convertable to type int64_t!",
-              inName.toLatin1().data(), inSection.toLatin1().data(), (long long)def,
+              inName.toLatin1().data(), inSection.toLatin1().data(),
+              (unsigned long long)def,
               preference->typeName());
-    }
+
+              value=def;
+              break;
+    } //end switch
 
     // return the key
     return value;
@@ -788,31 +792,34 @@ uint64_t XMLPreferences::getPrefUInt64(const QString& inName,
 
     switch(preference->type())
     {
-    case QVariant::String:
+    case QMetaType::QString:
       // convert it to a uint64_t (in base 16)
+      // TODO ok
       value = strtoull(preference->toString().toLatin1().data(), 0, 16);
       break;
-    case QVariant::Int:
-    case QVariant::UInt:
-      value = preference->toInt();
+    case QMetaType::UInt:
+    case QMetaType::Int:
+    case QMetaType::Long:
+    case QMetaType::ULong:
+    case QMetaType::ULongLong:
+    case QMetaType::LongLong:
+
+      value = preference->toULongLong();
       break;
-    case QVariant::Double:
+    case QMetaType::Double:
       value = uint64_t(preference->toDouble());
       break;
-    case QVariant::ByteArray:
-      {
-          QByteArray ba = preference->toByteArray();
-          if (ba.size() == sizeof(uint64_t))
-              value = *(uint64_t*)ba.data();
-          break;
-      }
+
     default:
       qWarning("XMLPreferences::getPrefUInt64(%s, %s, %llu): preference found,\n"
               "\tbut type %s is not convertable to type uint64_t!",
               inName.toLatin1().data(), inSection.toLatin1().data(),
               (unsigned long long)def,
               preference->typeName());
-    }
+
+              value=def;
+              break;
+    } //end switch
 
     // return the key
     return value;
@@ -885,9 +892,9 @@ void XMLPreferences::setPrefInt64(const QString& inName,
 				  int64_t inValue,
 				  Persistence pers)
 {
-  QByteArray ba_ref = QByteArray::fromRawData((const char*)&inValue, sizeof(int64_t));
-  QByteArray ba = ba_ref;
-  setPref(inName, inSection, ba, pers);
+  QVariant tmp;
+  tmp.setValue((qlonglong)inValue);
+  setPref(inName, inSection, tmp, pers);
 }
 
 
@@ -896,9 +903,9 @@ void XMLPreferences::setPrefUInt64(const QString& inName,
 				   uint64_t inValue,
 				   Persistence pers)
 {
-  QByteArray ba_ref = QByteArray::fromRawData((const char*)&inValue, sizeof(uint64_t));
-  QByteArray ba = ba_ref;
-  setPref(inName, inSection, ba, pers);
+  QVariant tmp;
+  tmp.setValue((qulonglong)inValue);
+  setPref(inName, inSection, tmp, pers);
 }
 
 void XMLPreferences::setPrefVariant(const QString& inName, 

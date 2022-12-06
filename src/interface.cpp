@@ -5449,6 +5449,10 @@ void EQInterface::showMessageFilterDialog(void)
 
 void EQInterface::toggleTypeFilter(QAction* type)
 {
+
+  if (type->text() == "&Enable All" || type->text() == "&Disable All")
+      return;
+
   uint64_t enabledTypes = m_terminal->enabledTypes();
 
   int id = type->data().value<int>();
@@ -5473,7 +5477,7 @@ void EQInterface::disableAllTypeFilters()
   for (int i = MT_Guild; i <= MT_Max; i++)
   {
     typeName = MessageEntry::messageTypeString((MessageType)i);
-    if (!typeName.isEmpty())
+    if (!typeName.isEmpty() && m_action_term_MessageTypeFilters[i])
       m_action_term_MessageTypeFilters[i]->setChecked(false);
   }
 }
@@ -5494,6 +5498,10 @@ void EQInterface::enableAllTypeFilters()
 
 void EQInterface::toggleShowUserFilter(QAction* filter)
 {
+
+  if (filter->text() == "&Enable All" || filter->text() == "&Disable All")
+      return;
+
   uint32_t enabledShowUserFilters = m_terminal->enabledShowUserFilters();
 
   int id = filter->data().value<int>();
@@ -5540,6 +5548,9 @@ void EQInterface::enableAllShowUserFilters()
 
 void EQInterface::toggleHideUserFilter(QAction* filter)
 {
+  if (filter->text() == "&Enable All" || filter->text() == "&Disable All")
+      return;
+
   uint32_t enabledHideUserFilters = m_terminal->enabledHideUserFilters();
 
   int id = filter->data().value<int>();

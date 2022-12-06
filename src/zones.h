@@ -870,15 +870,15 @@
 { "shadowvalley", "Shadow Valley" }, // 847
 { "basilica", "Basilica of Adumbration" }, // 848
 { "bloodfalls", "Bloodfalls" }, // 849
-{ NULL, NULL }, // 850
-{ NULL, NULL }, // 851
-{ NULL, NULL }, // 852
-{ NULL, NULL }, // 853
-{ NULL, NULL }, // 854
-{ NULL, NULL }, // 855
-{ NULL, NULL }, // 856
-{ NULL, NULL }, // 857
-{ NULL, NULL }, // 858
+{ "maidenhouseint", "Coterie Chambers" }, // 850
+{ "shadowhaventwo", "Ruins of Shadow Haven" }, // 851
+{ "sharvahltwo", "Shar Vahl, Divided" }, // 852
+{ "paludaltwo", "Paludal Depths" }, // 853
+{ "shadeweavertwo", "Shadeweaver's Tangle" }, // 854
+{ "darklightcaverns", "Darklight Caverns" }, // 855
+{ "deepshade", "Deepshade" }, // 856
+{ "firefallpass", "Firefall Pass" }, // 857
+{ "hollowshadetwo", "Hollowshade Moor" }, // 858
 { NULL, NULL }, // 859
 { NULL, NULL }, // 860
 { NULL, NULL }, // 861

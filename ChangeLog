@@ -1,3 +1,11 @@
+cn187 (12/06/22)
+----------------
+- Update to version 6.2.15
+- Support EQ Patch 12/06/22
+- Struct and opcode updates
+- Add zones/races for Night of Shadows
+- Fix save/restore of message filter visibility preferences
+
 cn187 (11/29/22)
 ----------------
 - Update to version 6.2.14

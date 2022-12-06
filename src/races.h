@@ -924,4 +924,22 @@
     "Blood Bag",                  // 900
     "Stonegrabber",               // 901
     "Riding Dog",                 // 902
+    "Boar Mount",                 // 903
+    "Fungal Fiend",               // 904
+    "Grimling",                   // 905
+    "Rockhopper",                 // 906
+    "Shik'Nar",                   // 907
+    "Shrieker",                   // 908
+    "Underbulk",                  // 909
+    "Sonic Wolf",                 // 910
+    "Sonic Wolf Mount",           // 911
+    "Shik'Nar Mount",             // 912
+    "Rakshasa",                   // 913
+    "Gumdrop",                    // 914
+    "Fish",                       // 915
+    "Turtle",                     // 916
+    "Bear",                       // 917
+    "Stitchwork Lion",            // 918
+    "Fungus Man",                 // 919
+    "Duck",                       // 920
 #endif

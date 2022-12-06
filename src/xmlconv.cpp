@@ -288,53 +288,14 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
   {
     QString value = e.attribute("value");
 
-    // borrowed more or less from Qt 3.2 (since we have to support older)
-    uint64_t val = 0;
-    const QChar* p = value.unicode();
-    int l = value.length();
-    const uint64_t max_mult = UINT64_MAX / 16;
 
-    if (!p)
-    {
-      qWarning("Invalid value for tag: %s", e.tagName().toLatin1().data());
-      return false;
-    }
+    uint64_t tmp = value.toULongLong(&ok, 16);
 
-    while ( l && p->isSpace() )                 // skip leading space
-      l--,p++;
-    if ( !l )
-      return false;
-    if ( *p == '+' )
-      l--,p++;
-    
-    if ( !l || !ok_in_hex(*p) )
+    if (!ok)
         return false;
-    while ( l && ok_in_hex(*p) ) 
-    {
-      l--;
-      uint dv;
-      if ( p->isDigit() ) 
-	dv = p->digitValue();
-      else 
-      {
-	if ( *p >= 'a' && *p <= 'f' )
-	  dv = p->toLatin1() - 'a' + 10;
-	else
-	  dv = p->toLatin1() - 'A' + 10;
-      }
-      if ( val > max_mult || (val == max_mult && dv > UINT64_MAX % 16) )
-	return false;
-      val = 16 * val + dv;
-      p++;
-    }
 
-    //fromRawData() creates a reference to the existing data
-    QByteArray ba_ref = QByteArray::fromRawData((const char*)&val, sizeof(uint64_t));
-    //so we make a (deep) copy
-    QByteArray ba = ba_ref;
+    v.setValue(tmp);
 
-    v = ba;
-    ok = true;
   }
   else if (e.tagName() == "list")
   {
@@ -360,27 +321,55 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
 
   switch (v.type())
   {
-  case QVariant::String:
+  case QMetaType::QString:
     e.setTagName("string");
     e.setAttribute("value", v.toString().toUtf8().data());
     break;
-  case QVariant::Int:
+  case QMetaType::Int:
     e.setTagName("int");
     e.setAttribute("value", v.toInt());
     break;
-  case QVariant::UInt:
+  case QMetaType::UInt:
     e.setTagName("uint");
     e.setAttribute("value", v.toUInt());
     break;
-  case QVariant::Double:
+  case QMetaType::Long:
+  case QMetaType::LongLong:
+  {
+    e.setTagName("int64");
+    QString val;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+    val = QString::asprintf("%0.16llx", v.toLongLong());
+#else
+    val = v.toLongLong();
+    val.sprintf("%0.16llx", v.toLongLong());
+#endif
+    e.setAttribute("value", val);
+    break;
+  }
+  case QMetaType::ULong:
+  case QMetaType::ULongLong:
+  {
+    e.setTagName("uint64");
+    QString val;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+    val = QString::asprintf("%0.16llx", v.toULongLong());
+#else
+    val = v.toULongLong();
+    val.sprintf("%0.16llx", v.toULongLong());
+#endif
+    e.setAttribute("value", val);
+    break;
+  }
+  case QMetaType::Double:
     e.setTagName("double");
     e.setAttribute("value", v.toDouble());
     break;
-  case QVariant::Bool:
+  case QMetaType::Bool:
     e.setTagName("bool");
     e.setAttribute("value", boolString(v.toBool()));
     break;
-  case QVariant::Color:
+  case QMetaType::QColor:
     {
       e.setTagName("color");
       QColor color = v.value<QColor>();
@@ -389,7 +378,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
       e.setAttribute("blue", color.blue());
     }
     break;
-  case QVariant::Pen:
+  case QMetaType::QPen:
     {
       e.setTagName("pen");
       QPen pen = v.value<QPen>();
@@ -401,7 +390,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
       e.setAttribute("join", pen.joinStyle());
     }
     break;
-  case QVariant::Brush:
+  case QMetaType::QBrush:
     {
       e.setTagName("brush");
       QBrush brush = v.value<QBrush>();
@@ -411,7 +400,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
       e.setAttribute("style", brush.style());
     }
     break;
-  case QVariant::Point:
+  case QMetaType::QPoint:
     {
       e.setTagName("point");
       QPoint point = v.toPoint();
@@ -419,7 +408,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
       e.setAttribute("y", point.y());
     }
     break;
-  case QVariant::Rect:
+  case QMetaType::QRect:
     {
       e.setTagName("rect");
       QRect rect = v.toRect();
@@ -429,7 +418,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
       e.setAttribute("height", rect.height());
     }
     break;
-  case QVariant::Size:
+  case QMetaType::QSize:
     {
       e.setTagName("size");
       QSize qsize = v.toSize();
@@ -437,7 +426,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
       e.setAttribute("height", qsize.height());
     }
     break;
-  case QVariant::Font:
+  case QMetaType::QFont:
     {
       e.setTagName("font");
       QFont f(v.value<QFont>());
@@ -449,7 +438,7 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
       e.setAttribute("strikeout", boolString(f.strikeOut()));
     }
     break;
-  case QVariant::SizePolicy:
+  case QMetaType::QSizePolicy:
     {
       e.setTagName("sizepolicy");
       QSizePolicy sp(v.value<QSizePolicy>());
@@ -459,12 +448,12 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
       e.setAttribute("verstretch", sp.verticalStretch());
     }
     break;
-  case QVariant::Cursor:
+  case QMetaType::QCursor:
     e.setTagName("cursor");
     e.setAttribute("shape", v.value<QCursor>().shape());
     break;
 
-  case QVariant::StringList:
+  case QMetaType::QStringList:
     {
       e.setTagName("stringlist");
       uint j;
@@ -515,48 +504,9 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
     }
     break;
 
-  case QVariant::KeySequence:
+  case QMetaType::QKeySequence:
     e.setTagName("key");
     e.setAttribute("sequence", (QString)v.value<QKeySequence>().toString());
-    break;
-
-  case QVariant::ByteArray: // this is only for [u]int64_t
-    {
-      e.setTagName("uint64");
-      QByteArray ba = v.toByteArray();
-
-      // make sure this only handles [u]int64_t's
-      if (ba.size() != sizeof(uint64_t))
-      {
-	qWarning("Don't know how to persist variant of type: %s (%d) (size=%d)!",
-		 v.typeName(), v.type(), ba.size());
-	ok = false;
-	break;
-      }
-
-      // convert the data back into a uint64_t
-      uint64_t num = *(uint64_t*)ba.data();
-      
-      QChar buff[33];
-      QChar* p = &buff[32];
-      const char* digitSet = "0123456789abcdef";
-      int len = 0;
-
-      // construct the string
-      do 
-      {
-        *--p = digitSet[((int)(num%16))];
-        num = num >> 4; // divide by 16
-        len++;
-      } while ( num );
-
-      // store it in a QString
-      QString storage;
-      storage.setUnicode(p, len);
-      
-      // set the value
-      e.setAttribute("value", storage);
-    }
     break;
 
 #if 0
