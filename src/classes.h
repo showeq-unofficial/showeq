@@ -89,5 +89,12 @@
   "Guild Tribute Master", // 64
   NULL,                 // 65
   "Guild Banker",       // 66
+  "Norrath's Keepers Merchant", // 67
+  "Dark Reign Merchant", // 68
+  "Fellowship Registrar", //69
+  "Alt Currency Merchant", // 70
+  "Mercenary Liaison",  // 71
+  NULL,                 // 72
+  "Loyalist Merchant",  // 73
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
