@@ -1,3 +1,11 @@
+cn187 (12/08/22)
+----------------
+- Update to version 6.2.16
+- Support for EQ Patch 12/08/22
+- Struct and opcode updates (Newby, cn187)
+- Simplicfication of aura/ldon fix (Newby)
+- Add some missing NPC classes (xerces, cn187)
+
 cn187 (12/06/22)
 ----------------
 - Update to version 6.2.15
