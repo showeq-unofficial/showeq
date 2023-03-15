@@ -163,10 +163,18 @@ bool EQPacketStream::connect2(const QString& opcodeName,
   {
     // construct a name for the dispatch
     QString dispatchName(256, '\0');
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+    dispatchName.asprintf("PacketDispatch:%s:%s:%d:%s:%d",
+            objectName().toLatin1().data(), opcodeName.toLatin1().data(),
+            payload->dir(), payload->typeName().toLatin1().data(),
+            payload->sizeCheckType());
+#else
     dispatchName.sprintf("PacketDispatch:%s:%s:%d:%s:%d",
             objectName().toLatin1().data(), opcodeName.toLatin1().data(),
             payload->dir(), payload->typeName().toLatin1().data(),
             payload->sizeCheckType());
+#endif
+
 
     // create new dispatch object
     dispatch = new EQPacketDispatch(this, dispatchName.toLatin1().data());
@@ -463,9 +471,15 @@ void EQPacketStream::dispatchPacket(const uint8_t* data, size_t len,
     if (!found && !opcodeEntry->isEmpty())
     {
       QString tempStr;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+      tempStr.asprintf("%s  (%#04x) (dataLen: %lu) doesn't match:",
+              opcodeEntry->name().toLatin1().data(),
+              opcodeEntry->opcode(), len);
+#else
       tempStr.sprintf("%s  (%#04x) (dataLen: %lu) doesn't match:",
               opcodeEntry->name().toLatin1().data(),
               opcodeEntry->opcode(), len);
+#endif
 
       pit.toFront();
       while (pit.hasNext())

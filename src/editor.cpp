@@ -160,7 +160,11 @@ EditorWindow::EditorWindow(const char *fileName)
      e->document()->setModified( false );
      setWindowTitle( fileName );
      QString s;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+     s.asprintf( "Opened %s", fileName );
+#else
      s.sprintf( "Opened %s", fileName );
+#endif
      statusBar()->showMessage( s, 2000 );
  }
 

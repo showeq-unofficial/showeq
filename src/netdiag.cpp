@@ -219,14 +219,22 @@ NetDiag::~NetDiag()
 void NetDiag::seqReceive(int seq, int stream)
 {
   QString disp;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  disp.asprintf("%4.4x", seq);
+#else
   disp.sprintf("%4.4x", seq);
+#endif
   m_seqCur[stream]->setText(disp);
 }
 
 void NetDiag::seqExpect(int seq, int stream)
 {
   QString disp;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  disp.asprintf("%4.4x", seq);
+#else
   disp.sprintf("%4.4x", seq);
+#endif
   m_seqExp[stream]->setText(disp);
 }
 
@@ -241,8 +249,13 @@ void NetDiag::clientChanged(in_addr_t addr)
   switch (sessionState)
   {
   case 2:
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+    tmp.asprintf(":%d", 
+		m_packet->clientPort());
+#else
     tmp.sprintf(":%d", 
 		m_packet->clientPort());
+#endif
     disp += tmp;
     break;
   case 1:
@@ -260,7 +273,11 @@ void NetDiag::clientPortLatched(in_port_t clientPort)
   uint32_t addr = m_packet->clientAddr();
 
   disp = print_addr(addr);
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  tmp.asprintf(":%d", clientPort);
+#else
   tmp.sprintf(":%d", clientPort);
+#endif
 
   disp += tmp;
 
@@ -327,10 +344,19 @@ void NetDiag::numPacket(int num, int stream)
    m_packetRecent[stream]->setText(QString::number(num));
    int delta = mTime() - m_packetStartTime[stream];
    if (numdelta && delta)
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+     tempStr.asprintf("%2.1f", 
+		     (float) (numdelta<<10) / (float) delta);
+#else
      tempStr.sprintf("%2.1f", 
 		     (float) (numdelta<<10) / (float) delta);
+#endif
    else   
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+     tempStr.asprintf("0.0");
+#else
      tempStr.sprintf("0.0");
+#endif
 
    m_packetAvg[stream]->setText(tempStr);
 }
@@ -352,12 +378,21 @@ QString NetDiag::print_addr(in_addr_t  addr)
 #endif /* DEBUG_PACKET */
   QString paddr;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  paddr.asprintf ( "%d.%d.%d.%d",
+		  addr & 0x000000ff,
+		  (addr & 0x0000ff00) >> 8,
+		  (addr & 0x00ff0000) >> 16,
+		  (addr & 0xff000000) >> 24
+                  );
+#else
   paddr.sprintf ( "%d.%d.%d.%d",
 		  addr & 0x000000ff,
 		  (addr & 0x0000ff00) >> 8,
 		  (addr & 0x00ff0000) >> 16,
 		  (addr & 0xff000000) >> 24
                   );
+#endif
 
    return paddr;
 }

@@ -190,18 +190,30 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      if (changeType & tSpawnChangedLevel)
      {
        // Level
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+       buff.asprintf("%2d", spawn->level());
+#else
        buff.sprintf("%2d", spawn->level());
+#endif
        setText(tSpawnColLevel, buff);
      }
      
      if (changeType & tSpawnChangedHP)
      {
        // Hitpoints
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+       buff.asprintf("%5d", spawn->HP());
+#else
        buff.sprintf("%5d", spawn->HP());
+#endif
        setText(tSpawnColHP, buff);
        
        // Maximum Hitpoints
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+       buff.asprintf("%5d", spawn->maxHP());
+#else
        buff.sprintf("%5d", spawn->maxHP());
+#endif
        setText(tSpawnColMaxHP, buff);
      }
 
@@ -228,29 +240,51 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
    if (changeType & tSpawnChangedPosition)
    {
      // X position
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+     buff.asprintf("%5d", showeq_params->retarded_coords ? 
+		  (int)item()->y() : (int)item()->x());
+#else
      buff.sprintf("%5d", showeq_params->retarded_coords ? 
 		  (int)item()->y() : (int)item()->x());
+#endif
      setText(tSpawnColXPos, buff);
      
      // Y position
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+     buff.asprintf("%5d", showeq_params->retarded_coords ? 
+		  (int)item()->x() : (int)item()->y());
+#else
      buff.sprintf("%5d", showeq_params->retarded_coords ? 
 		  (int)item()->x() : (int)item()->y());
+#endif
      setText(tSpawnColYPos, buff);
      
      // Z position
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+     buff.asprintf("%5d", item()->z());
+#else
      buff.sprintf("%5d", item()->z());
+#endif
      setText(tSpawnColZPos, buff);
 
      // Distance
      if (!showeq_params->fast_machine)
      {
        //buff.sprintf("%5d", player->calcDist2DInt(*item()));
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+       buff.asprintf("%5d", item()->getIDistanceToPlayer());
+#else
        buff.sprintf("%5d", item()->getIDistanceToPlayer());
+#endif
      }
      else
      {
        //buff.sprintf("%5.1f", player->calcDist(*item()));
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+       buff.asprintf("%5.1f", item()->getFDistanceToPlayer());
+#else
        buff.sprintf("%5.1f", item()->getFDistanceToPlayer());
+#endif
      }
      setText(tSpawnColDist, buff);
    }
@@ -258,7 +292,11 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
    if (changeType == tSpawnChangedALL)
    {
      // Id
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+     buff.asprintf("%5d", item()->id());
+#else
      buff.sprintf("%5d", item()->id());
+#endif
      setText(tSpawnColID, buff);
      
      // Race
@@ -286,8 +324,14 @@ void SpawnListItem::updateTitle(const QString& name)
 {
   // update childcount in header
   QString temp;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  temp.asprintf("%s (%d)",
+          name.toLatin1().data(), childCount());
+#else
   temp.sprintf("%s (%d)",
           name.toLatin1().data(), childCount());
+#endif
+
   setText(tSpawnColName, temp);
 } // end if spawn should be in this category
 

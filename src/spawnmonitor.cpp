@@ -56,7 +56,11 @@ SpawnPoint::~SpawnPoint()
 QString SpawnPoint::key( int x, int y, int z)
 {
   QString		t;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  t.asprintf( "%d%d%d", x, y, z );
+#else
   t.sprintf( "%d%d%d", x, y, z );
+#endif
   return t;
 }
 

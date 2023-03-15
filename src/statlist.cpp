@@ -57,7 +57,11 @@ StatList::StatList(Player* player,
    QString statPrefName;
    for (int nloop = 0; nloop < LIST_MAXLIST; nloop++)
    {
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+     statPrefName.asprintf("show%s", statNames[nloop]);
+#else
      statPrefName.sprintf("show%s", statNames[nloop]);
+#endif
      m_showStat[nloop] = pSEQPrefs->getPrefBool(statPrefName, 
 						preferenceName(), false);
      updateStat(nloop);
@@ -243,7 +247,11 @@ void StatList::enableStat(uint8_t stat, bool enabled)
   m_showStat[stat] = enabled;
 
   QString statPrefName;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  statPrefName.asprintf("show%s", statNames[stat]);
+#else
   statPrefName.sprintf("show%s", statNames[stat]);
+#endif
 
   pSEQPrefs->setPrefBool(statPrefName, "StatList", m_showStat[stat]);
 

@@ -109,7 +109,11 @@ void SkillList::addSkill (int skillId, int value)
 #endif
   QString str;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  str.asprintf("%3d", value);
+#else
   str.sprintf("%3d", value);
+#endif
 
   /* If the skill is not added yet, look up the correct skill namd and add it
    * to the list
@@ -137,7 +141,11 @@ void SkillList::changeSkill (int skillId, int value)
 
   QString str;
   /* Update skill value with new value */
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  str.asprintf ("%3d", value);
+#else
   str.sprintf ("%3d", value);
+#endif
 
   // create skill entry if needed or set the value of the existing item
   if (!m_skillList[skillId])
@@ -186,7 +194,11 @@ void SkillList::addLanguage (int langId, int value)
   if (value == 00)
     str = " NA";
   else
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+    str.asprintf ("%3d", value);
+#else
     str.sprintf ("%3d", value);
+#endif
 
   // If the language is not added yet, look up the correct skill namd and 
   // add it to the list
@@ -218,7 +230,11 @@ void SkillList::changeLanguage (int langId, int value)
   QString str;
 
   /* Update skill value with new value */
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  str.asprintf ("%3d", value);
+#else
   str.sprintf ("%3d", value);
+#endif
 
   // create language entry if needed or set the value of the existing item
   if (!m_languageList[langId])

@@ -54,7 +54,11 @@ PacketLog::~PacketLog()
 inline QString opCodeToString(uint16_t opCode)
 {
   QString tempStr;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  tempStr.asprintf("[OPCode: %#.04x]", opCode);
+#else
   tempStr.sprintf("[OPCode: %#.04x]", opCode);
+#endif
 
   // Flags are gone? Combined and implicit don't make sense anymore and
   // nothing is compressed or encrypted at this point...
@@ -87,11 +91,19 @@ QString PacketLog::print_addr (in_addr_t  addr)
   if (addr == m_packet.clientAddr())
     paddr = "client";
   else
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+    paddr.asprintf( "%d.%d.%d.%d",
+		   addr & 0x000000ff,
+		   (addr & 0x0000ff00) >> 8,
+		   (addr & 0x00ff0000) >> 16,
+		   (addr & 0xff000000) >> 24);
+#else
     paddr.sprintf( "%d.%d.%d.%d",
 		   addr & 0x000000ff,
 		   (addr & 0x0000ff00) >> 8,
 		   (addr & 0x00ff0000) >> 16,
 		   (addr & 0xff000000) >> 24);
+#endif
 
    return paddr;
 }

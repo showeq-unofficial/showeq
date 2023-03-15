@@ -3126,7 +3126,11 @@ void EQInterface::set_main_WindowFont(QAction* win)
     {
       int i = winnum - mapCaptionBase;
       if (i)
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+	title.asprintf("Map %d", i);
+#else
 	title.sprintf("Map %d", i);
+#endif
       else
 	title = "Map";
 
@@ -3722,17 +3726,31 @@ void EQInterface::dumpSpellBook(void)
 
     if (spell)
     {
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+        txt.asprintf("%.3d %.2d %.2d %#4.04x %02d\t%s",
+                i, ((i / 8) + 1), ((i % 8) + 1),
+                spellid, spell->level(playerClass),
+                spell->name().toLatin1().data());
+#else
         txt.sprintf("%.3d %.2d %.2d %#4.04x %02d\t%s",
                 i, ((i / 8) + 1), ((i % 8) + 1),
                 spellid, spell->level(playerClass),
                 spell->name().toLatin1().data());
+#endif
     }
     else
     {
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+        txt.asprintf("%.3d %.2d %.2d %#4.04x   \t%s",
+                i, ((i / 8) + 1), ((i % 8) + 1),
+                spellid,
+                spell_name(spellid).toLatin1().data());
+#else
         txt.sprintf("%.3d %.2d %.2d %#4.04x   \t%s",
                 i, ((i / 8) + 1), ((i % 8) + 1),
                 spellid,
                 spell_name(spellid).toLatin1().data());
+#endif
     }
 
     out << txt << ENDL;
@@ -4679,7 +4697,11 @@ void EQInterface::newAltExp(uint32_t newExp, uint32_t totalExp,
 void EQInterface::levelChanged(uint8_t level)
 {
   QString tempStr;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  tempStr.asprintf("New Level: %u", level);
+#else
   tempStr.sprintf("New Level: %u", level);
+#endif
   if (m_stsbarStatus)
     m_stsbarStatus->setText(tempStr);
 }
@@ -4704,7 +4726,11 @@ EQInterface::numSpawns(int num)
   lastupdate = mTime();
 
    QString tempStr;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+   tempStr.asprintf("Mobs: %d", num);
+#else
    tempStr.sprintf("Mobs: %d", num);
+#endif
    m_stsbarSpawns->setText(tempStr);
 }
 
@@ -4718,7 +4744,11 @@ EQInterface::newSpeed(double speed)
   lastupdate = mTime();
 
    QString tempStr;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+   tempStr.asprintf("Run Speed: %3.6f", speed);
+#else
    tempStr.sprintf("Run Speed: %3.6f", speed);
+#endif
    m_stsbarSpeed->setText(tempStr);
 }
 
@@ -4752,9 +4782,17 @@ EQInterface::numPacket(int num, int stream)
    int delta = mTime() - m_packetStartTime;
    num -= m_initialcount;
    if (num && delta)
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+     tempStr.asprintf("Pkt: %d (%2.1f)", num, (float) (num<<10) / (float) delta);
+#else
      tempStr.sprintf("Pkt: %d (%2.1f)", num, (float) (num<<10) / (float) delta);
+#endif
    else   
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+     tempStr.asprintf("Pkt: %d", num);
+#else
      tempStr.sprintf("Pkt: %d", num);
+#endif
 
    m_stsbarPkt->setText(tempStr);
 }
@@ -4809,7 +4847,11 @@ void EQInterface::zoneBegin(const QString& shortZoneName)
   emit newZoneName(shortZoneName);
   float percentZEM = ((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100;
   QString tempStr;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  tempStr.asprintf("ZEM: %3.2f%%", percentZEM);
+#else
   tempStr.sprintf("ZEM: %3.2f%%", percentZEM);
+#endif
   if (m_stsbarZEM)
     m_stsbarZEM->setText(tempStr);
 }
@@ -4821,7 +4863,11 @@ void EQInterface::zoneEnd(const QString& shortZoneName,
   stsMessage("");
   float percentZEM = ((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100;
   QString tempStr;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  tempStr.asprintf("ZEM: %3.2f%%", percentZEM);
+#else
   tempStr.sprintf("ZEM: %3.2f%%", percentZEM);
+#endif
   if (m_stsbarZEM)
     m_stsbarZEM->setText(tempStr);
 }
@@ -4832,7 +4878,11 @@ void EQInterface::zoneChanged(const QString& shortZoneName)
   stsMessage("- Busy Zoning -");
   emit newZoneName(shortZoneName);
   float percentZEM = ((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  tempStr.asprintf("ZEM: %3.2f%%", percentZEM);
+#else
   tempStr.sprintf("ZEM: %3.2f%%", percentZEM);
+#endif
   if (m_stsbarZEM)
     m_stsbarZEM->setText(tempStr);
 }
@@ -4958,15 +5008,29 @@ void EQInterface::updateSelectedSpawnStatus(const Item* item)
   // construct a message for the status message display
   QString string("");
   if (spawn != 0)
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+    string.asprintf("%d: %s:%d (%d/%d) Pos:", // "%d/%d/%d (%d) %s %s Item:%s",
+            item->id(),
+            item->name().toUtf8().data(),
+            spawn->level(), spawn->HP(),
+            spawn->maxHP());
+#else
     string.sprintf("%d: %s:%d (%d/%d) Pos:", // "%d/%d/%d (%d) %s %s Item:%s",
             item->id(),
             item->name().toUtf8().data(),
             spawn->level(), spawn->HP(),
             spawn->maxHP());
+#endif
   else
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+    string.asprintf("%d: %s: Pos:", // "%d/%d/%d (%d) %s %s Item:%s",
+            item->id(),
+            item->name().toUtf8().data());
+#else
     string.sprintf("%d: %s: Pos:", // "%d/%d/%d (%d) %s %s Item:%s",
             item->id(),
             item->name().toUtf8().data());
+#endif
 
   if (showeq_params->retarded_coords)
     string += QString::number(item->y()) + "/" 
@@ -5023,7 +5087,11 @@ void EQInterface::selectPrev(void)
 void EQInterface::saveSelectedSpawnPath(void)
 {
   QString fileName;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  fileName.asprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toLatin1().data());
+#else
   fileName.sprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toLatin1().data());
+#endif
 
   QFileInfo fileInfo = m_dataLocationMgr->findWriteFile("maps", fileName, false);
 
@@ -5041,7 +5109,11 @@ void EQInterface::saveSelectedSpawnPath(void)
 void EQInterface::saveSpawnPaths(void)
 {
   QString fileName;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  fileName.asprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toLatin1().data());
+#else
   fileName.sprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toLatin1().data());
+#endif
 
   QFileInfo fileInfo = m_dataLocationMgr->findWriteFile("maps", fileName, false);
 

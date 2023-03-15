@@ -374,7 +374,11 @@ bool EQPacketOPCodeDB::save(const QString& filename)
     currentOPCode = oit->second;
 
     // output the current opcode
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+    opcodeString.asprintf("%04x", currentOPCode->opcode());
+#else
     opcodeString.sprintf("%04x", currentOPCode->opcode());
+#endif
     out << indent << "<opcode id=\"" << opcodeString << "\" name=\""
 	<< currentOPCode->name() << "\"";
     if (currentOPCode->implicitLen())

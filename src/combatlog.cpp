@@ -631,12 +631,20 @@ void CombatWindow::updateOffense()
 			case 52:	// Tiger Claw
 			{
 				// this is a normal skill
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+				s_type.asprintf("%s(%d)", skill_name(iType).toLatin1().data(), iType);
+#else
 				s_type.sprintf("%s(%d)", skill_name(iType).toLatin1().data(), iType);
+#endif
 				break;
 			}
 			case 231:       // Non Melee Damage
 			{
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+				s_type.asprintf("Spell: %s(%d)", spell_name(iSpell).toLatin1().data(), iSpell);
+#else
 				s_type.sprintf("Spell: %s(%d)", spell_name(iSpell).toLatin1().data(), iSpell);
+#endif
 				break;
 			}
 			default:        // Damage Shield?
@@ -645,7 +653,11 @@ void CombatWindow::updateOffense()
 				// 248 Flameshield of Ro? (45pt) (mage)
 				// -11 Killing Blow with MoR
 				// -8  Killing Blow with Ro? (45pt) (mage)
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+				s_type.asprintf("Damage Shield: (%d)", iType);
+#else
 				s_type.sprintf("Damage Shield: (%d)", iType);
+#endif
 				break;
 			}
 		}

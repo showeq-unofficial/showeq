@@ -143,7 +143,11 @@ QString EQStr::formatMessage(uint32_t formatid,
     {
 	uint32_t arg_len;
 	unsigned char *cp;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+	tempStr.asprintf( "Unknown: %04x:", formatid);
+#else
 	tempStr.sprintf( "Unknown: %04x:", formatid);
+#endif
 	cp = (unsigned char *) arguments;
 	while (cp < ((unsigned char *) &arguments[argsLen] - sizeof(uint32_t)*sizeof(unsigned char))) {
 	    arg_len = (cp[0] << 0) | (cp[1] << 8) | (cp[2] << 16) | (cp[3] << 24);

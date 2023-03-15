@@ -76,7 +76,11 @@ void SpawnPointListItem::update()
     long secs = m_spawnPoint->secsLeft();
     
     if ( secs > 0 )
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+      tmpStr.asprintf( "%2ld:%02ld", secs / 60, secs % 60  );
+#else
       tmpStr.sprintf( "%2ld:%02ld", secs / 60, secs % 60  );
+#endif
     else
       tmpStr = "   now"; // spaces followed by now
   }
@@ -343,8 +347,13 @@ void SpawnPointList::deleteItem(const SpawnPointListItem* item)
   if (def.isEmpty())
     def = sp->last();
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  def.asprintf("%d/%d/%d '%s'",
+          sp->x(), sp->y(), sp->z(), def.toLatin1().data());
+#else
   def.sprintf("%d/%d/%d '%s'",
           sp->x(), sp->y(), sp->z(), def.toLatin1().data());
+#endif
 
   // confirm that the user wants to delete the category
   QMessageBox mb("Are you sure?",

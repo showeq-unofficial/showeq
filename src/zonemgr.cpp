@@ -104,7 +104,11 @@ QString ZoneMgr::zoneNameFromID(uint16_t zoneId)
 
    seqDebug("ZoneMgr::zoneNameFromID: zone name not found: zoneId=%d", zoneId);
    QString tmpStr;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+   tmpStr.asprintf("unk_zone_%d", zoneId);
+#else
    tmpStr.sprintf("unk_zone_%d", zoneId);
+#endif
    return tmpStr;
 }
 
@@ -119,7 +123,11 @@ QString ZoneMgr::zoneLongNameFromID(uint16_t zoneId)
 
    seqDebug("ZoneMgr::zoneLongNameFromID: zone name not found: zoneId=%d", zoneId);
    QString tmpStr;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+   tmpStr.asprintf("unk_zone_%d", zoneId);
+#else
    tmpStr.sprintf("unk_zone_%d", zoneId);
+#endif
    return tmpStr;
 }
 

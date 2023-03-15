@@ -4217,19 +4217,37 @@ void Map::paintDebugInfo(MapParameters& param,
   // show coords of upper left corner and lower right corner
   p.setPen( Qt::yellow );
   QString ts;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  ts.asprintf( "(%d, %d)", 
+          (int)(param.screenCenterX() * param.ratioX()), 
+          (int)(param.screenCenterY() * param.ratioY()));
+#else
   ts.sprintf( "(%d, %d)", 
           (int)(param.screenCenterX() * param.ratioX()), 
           (int)(param.screenCenterY() * param.ratioY()));
+#endif
   p.drawText( 10, 8, ts );
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  ts.asprintf( "(%d, %d)",
+          (int)((param.screenCenterX() - param.screenLength().width()) * 
+            param.ratioX()),
+          (int)((param.screenCenterY() - param.screenLength().height()) *
+            param.ratioY()));
+#else
   ts.sprintf( "(%d, %d)",
           (int)((param.screenCenterX() - param.screenLength().width()) * 
             param.ratioX()),
           (int)((param.screenCenterY() - param.screenLength().height()) *
             param.ratioY()));
+#endif
   p.drawText( width() - 90, height() - 14, ts );
   
   // show frame times
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  ts.asprintf( "%2.0ffps/%dms", fps, drawTime);
+#else
   ts.sprintf( "%2.0ffps/%dms", fps, drawTime);
+#endif
   p.drawText( this->width() - 60, 8, ts );
 }
 
@@ -4308,7 +4326,11 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       long secs = sp->secsLeft();
     
       if ( secs > 0 )
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+    remaining.asprintf( "%2ld:%02ld", secs / 60, secs % 60  );
+#else
     remaining.sprintf( "%2ld:%02ld", secs / 60, secs % 60  );
+#endif
       else
     remaining = "now"; 
     }
@@ -4326,6 +4348,21 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     spawned += dateTime.time().toString();
     
     QString string;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+    string.asprintf("SpawnPoint: %s\n"
+           "%.3s/Z: %5d/%5d/%5d\n"
+           "Last: %s\n"
+           "Spawned: %s\t Remaining: %s\t Count: %d",
+           sp->name().toLatin1().data(),
+           showeq_params->retarded_coords ? "Y/X" : "X/Y",
+           showeq_params->retarded_coords ? sp->y() : sp->x(),
+           showeq_params->retarded_coords ? sp->x() : sp->y(),
+           sp->z(),
+           sp->last().toLatin1().data(),
+           spawned.toLatin1().data(),
+           remaining.toLatin1().data(),
+           sp->count());
+#else
     string.sprintf("SpawnPoint: %s\n"
            "%.3s/Z: %5d/%5d/%5d\n"
            "Last: %s\n"
@@ -4339,6 +4376,8 @@ void Map::mouseMoveEvent( QMouseEvent* event )
            spawned.toLatin1().data(),
            remaining.toLatin1().data(),
            sp->count());
+#endif
+
 
     m_mapTip->setText( string  );
     QPoint popPoint = mapToGlobal(event->pos());
@@ -4359,7 +4398,11 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     {
       QString guild;
       if (!spawn->guildTag().isEmpty())
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+          guild.asprintf("<%s>", spawn->guildTag().toLatin1().data());
+#else
           guild.sprintf("<%s>", spawn->guildTag().toLatin1().data());
+#endif
       else if (spawn->guildID())
           guild = QString::number(spawn->guildID());
       else
@@ -4387,6 +4430,21 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       else
         lastName = "";
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+      string.asprintf("%s %s%s\n"
+             "Level: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5d\n"
+             "Race: %s\t Class: %s",
+             spawn->transformedName().toUtf8().data(),
+             lastName.toUtf8().data(),
+             guild.toLatin1().data(),
+             spawn->level(), hp.toLatin1().data(),
+             showeq_params->retarded_coords ? "Y/X" : "X/Y",
+             showeq_params->retarded_coords ? spawn->y() : spawn->x(),
+             showeq_params->retarded_coords ? spawn->x() : spawn->y(),
+             item->z(),
+             spawn->raceString().toLatin1().data(),
+             spawn->classString().toLatin1().data());
+#else
       string.sprintf("%s %s%s\n"
              "Level: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5d\n"
              "Race: %s\t Class: %s",
@@ -4400,6 +4458,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
              item->z(),
              spawn->raceString().toLatin1().data(),
              spawn->classString().toLatin1().data());
+#endif
       if (m_deityPvP)
         string += " Deity: " + spawn->deityName();
 
@@ -4412,6 +4471,18 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     }
     else
     {
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+      string.asprintf("%s\n"
+             "%.3s/Z: %5d/%5d/%5d\n"
+             "Race: %s\t Class: %s",
+             item->transformedName().toUtf8().data(),
+             showeq_params->retarded_coords ? "Y/X" : "X/Y",
+             showeq_params->retarded_coords ? item->y() : item->x(),
+             showeq_params->retarded_coords ? item->x() : item->y(),
+             item->z(),
+             item->raceString().toLatin1().data(),
+             item->classString().toLatin1().data());
+#else
       string.sprintf("%s\n"
              "%.3s/Z: %5d/%5d/%5d\n"
              "Race: %s\t Class: %s",
@@ -4422,6 +4493,8 @@ void Map::mouseMoveEvent( QMouseEvent* event )
              item->z(),
              item->raceString().toLatin1().data(),
              item->classString().toLatin1().data());
+#endif
+
 
       if ((door) && (door->zonePoint() != 0xFFFFFFFF))
       {
@@ -5177,7 +5250,11 @@ void MapFrame::regexpok(int ok)
 void MapFrame::mouseLocation(int16_t x, int16_t y)
 {
   QString cursorPos;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  cursorPos.asprintf(" %+5hd, %+5hd", y, x);
+#else
   cursorPos.sprintf(" %+5hd, %+5hd", y, x);
+#endif
   m_mouseLocation->setText(cursorPos);
 }
 
@@ -5185,7 +5262,11 @@ void MapFrame::setPlayer(int16_t x, int16_t y, int16_t z,
              int16_t Dx, int16_t Dy, int16_t Dz, int32_t degrees)
 {
   QString playerPos;
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  playerPos.asprintf(" %+5hd, %+5hd, %+5hd", y, x, z);
+#else
   playerPos.sprintf(" %+5hd, %+5hd, %+5hd", y, x, z);
+#endif
   m_playerLocation->setText(playerPos);
 }
 
