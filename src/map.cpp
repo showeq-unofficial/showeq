@@ -688,9 +688,15 @@ void MapMgr::addLocation(QWidget* parent, const MapPoint& point)
 
   // if the user clicked ok, and actually gave a name, add it
   if (ok && !name.isEmpty())
-    m_mapData.addLocation(name, m_curLocationColor, 
-              QPoint(point.x(), point.y()));
-  
+  {
+      //m_curLocationColor doesn't get set anywhere, so for now, we'll
+      //use whatever the current line color is.  Maybe we'll add selecting
+      //a separate location color later. TODO
+    m_mapData.addLocation(name, m_curLineColor, QPoint(point.x(), point.y()));
+  }
+
+  emit mapUpdated();
+
 #ifdef DEBUGMAP
   seqDebug("addLocation(): Location x added at %d/%d", 
      point.x(), point.y()); 
