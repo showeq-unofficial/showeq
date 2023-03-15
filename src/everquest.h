@@ -414,12 +414,14 @@ struct SessionResponseStruct
  * Session disconnect on a stream. This is the server telling the client to
  * close a stream.
  *
- * Size: 8 Octets
+ * Size: 9 Octets
  */
 struct SessionDisconnectStruct
 {
-/*0000*/ uint8_t unknown[8];
-/*0008*/
+/*0000*/ uint8_t unknown0000;
+/*0001*/ uint32_t sessionId;
+/*0005*/ uint8_t unknown[4];
+/*0009*/
 };
 
 /* 

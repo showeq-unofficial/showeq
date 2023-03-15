@@ -1144,6 +1144,19 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
     break;
     case OP_SessionDisconnect:
     {
+
+      // When session tracking isn't enabled, random UDP traffic on the LAN can
+      // cause unexpected session disconnects if the packet payload happens
+      // to start with the same bytes as the OP_SessionDisconnect netOp.
+      //
+      // So check the sessionId in the disconnect packet, and only process
+      // it if it matches the current sessionId.
+      SessionDisconnectStruct* disconnect = (SessionDisconnectStruct*) packet.payload();
+      uint32_t  disconnectedSessionId = eqntohuint32((uint8_t*)&(disconnect->sessionId));
+      if (m_sessionId != disconnectedSessionId) {
+          break;
+      }
+
 #if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
       seqDebug("EQPacket: SessionDisconnect found %s:%u->%s:%u, resetting expected seq, stream %s (%d) (session tracking %s)",
         ((EQUDPIPPacketFormat&) packet).getIPv4SourceA().ascii(),
