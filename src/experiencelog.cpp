@@ -664,7 +664,7 @@ void ExperienceWindow::viewClear()
    if (QMessageBox::information( this, "ShowEQ",
       "This function will clear all data listed in the experience "
       "log.  Do you want to continue?",
-      "&OK", "&Cancel", QString::null, 1, 1) == 0) 
+      "&OK", "&Cancel", "", 1, 1) == 0) 
    {
      clear();
    }

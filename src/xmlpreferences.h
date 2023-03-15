@@ -104,7 +104,7 @@ class XMLPreferences
   
   // getPref{} methods retrieve the current value of a preference
   QString getPrefString(const QString& inName, const QString& inSection, 
-			const QString& outDefault = QString::null,
+			const QString& outDefault = "",
 			Persistence pers = Any);
   int getPrefInt(const QString& inName, const QString& inSection, 
 		 int def = -1, Persistence pers = Any);
@@ -153,7 +153,7 @@ class XMLPreferences
 
   // setPref{} methods set the current value of a preference
   void setPrefString(const QString& inName, const QString& inSection, 
-		     const QString& inValue = QString::null, 
+		     const QString& inValue = "", 
 		     Persistence pers = User);
   void setPrefInt(const QString& inName, const QString& inSection, 
 		  int inValue, Persistence pers = User);

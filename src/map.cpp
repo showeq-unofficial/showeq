@@ -667,7 +667,7 @@ void MapMgr::addLocation(QWidget* parent, const MapPoint& point)
   QString name = QInputDialog::getText(parent, "Location Name",
                        "Please enter a location name",
                        QLineEdit::Normal,
-                       QString::null, &ok);
+                       "", &ok);
 
   // if the user clicked ok, and actually gave a name, add it
   if (ok && !name.isEmpty())

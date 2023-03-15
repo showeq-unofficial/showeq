@@ -46,7 +46,7 @@ class MessageFilterListBoxText : public QListWidgetItem
 {
 public:
   MessageFilterListBoxText(QListWidget * listbox,
-			   const QString & text = QString::null, 
+			   const QString & text = "", 
 			   uint32_t data = 0);
 
   virtual ~MessageFilterListBoxText();

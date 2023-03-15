@@ -1062,7 +1062,7 @@ void CombatWindow::clearMob()
 	switch( QMessageBox::information( this, "ShowEQ",
 		"This function will clear all data listed on the mob "
 		"tab.  Do you want to continue?",
-		"&OK", "&Cancel", QString::null, 1, 1 ) )
+		"&OK", "&Cancel", "", 1, 1 ) )
 	{
 		case 0:
             qDeleteAll(m_combat_mob_list);
@@ -1079,7 +1079,7 @@ void CombatWindow::clearOffense()
 	switch( QMessageBox::information( this, "ShowEQ",
 		"This function will clear all data listed on the offense "
 		"tab.  Do you want to continue?",
-		"&OK", "&Cancel", QString::null, 1, 1 ) )
+		"&OK", "&Cancel", "", 1, 1 ) )
 	{
 		case 0:
             qDeleteAll(m_combat_offense_list);

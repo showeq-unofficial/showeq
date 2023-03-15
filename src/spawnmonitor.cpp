@@ -44,7 +44,7 @@ SpawnPoint::SpawnPoint(uint16_t spawnID,
     m_diffTime(diffTime),
     m_count(count),
     m_name( name ),
-    m_last( QString::null ),
+    m_last( "" ),
     m_lastID(spawnID)
 {
 }
