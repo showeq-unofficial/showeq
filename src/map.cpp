@@ -1089,20 +1089,6 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   addMenu(subMenu);
 
 
-  /*
-  subMenu = new QMenu;
-  subMenu->setCheckable(true);
-  m_id_mapOptimization_Memory = subMenu->insertItem("Memory");
-  subMenu->setItemParameter(m_id_mapOptimization_Memory, tMap_MemoryOptim); 
-  m_id_mapOptimization_Normal = subMenu->insertItem("Normal");
-  subMenu->setItemParameter(m_id_mapOptimization_Normal, tMap_NormalOptim);
-  m_id_mapOptimization_Best = subMenu->insertItem("Speed");
-  subMenu->setItemParameter(m_id_mapOptimization_Best, tMap_BestOptim);
-  connect(subMenu, SIGNAL(activated(int)),
-      this, SLOT(select_mapOptimization(int)));
-  m_id_mapOptimization = insertItem("Map Optimization", subMenu);
-  */
-
   m_action_gridTickColor = addAction("Grid Tick Color...", this,
           SLOT(select_gridTickColor()));
 
@@ -1313,13 +1299,6 @@ void MapMenu::init_Menu(void)
 #ifdef DEBUG
   m_action_debugInfo->setChecked(m_map->showDebugInfo());
 #endif
-  /*
-  MapOptimizationMethod method = m_map->mapOptimization();
-
-  setItemChecked(m_id_mapOptimization_Memory, (method == tMap_MemoryOptim));
-  setItemChecked(m_id_mapOptimization_Normal, (method == tMap_NormalOptim));
-  setItemChecked(m_id_mapOptimization_Best, (method == tMap_BestOptim));
-  */
 
   m_drawSizeSpinBox->setValue(m_mapIcons->drawSize());
 
@@ -1551,13 +1530,6 @@ void MapMenu::toggle_instanceLocationMarker()
 {
   m_map->setShowInstanceLocationMarker(!m_map->showInstanceLocationMarker());
 }
-
-/*
-void MapMenu::select_mapOptimization(int itemId)
-{
-  m_map->setMapOptimization((MapOptimizationMethod)itemParameter(itemId));
-}
-*/
 
 void MapMenu::select_gridTickColor()
 {
@@ -1832,11 +1804,6 @@ Map::Map(MapMgr* mapMgr,
   tmpPrefString = "FloorRoom";
   m_param.setFloorRoom(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 75));
 
-  /*
-  tmpPrefString = "OptimizeMethod";
-  m_param.setMapOptimizationMethod((MapOptimizationMethod)pSEQPrefs->getPrefInt(tmpPrefString, prefString, (int)tMap_NormalOptim));
-  */
-
   tmpPrefString = "ZoomDefault";
   m_param.setZoomDefault(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 1));
 
@@ -1922,7 +1889,6 @@ Map::Map(MapMgr* mapMgr,
   
   // Setup offscreen image
   m_offscreen = QPixmap(m_param.screenLength());
-//  m_offscreen.setOptimization(m_param.pixmapOptimizationMethod());
   
   m_mapTip = new MapLabel( this );
   this->setMouseTracking( true );
@@ -2791,21 +2757,6 @@ void Map::setMapLineStyle(MapLineStyle style)
     refreshMap ();
 }
 
-/*
-void Map::setMapOptimization(MapOptimizationMethod method) 
-{ 
-  // set the general optimization method
-  m_param.setMapOptimizationMethod(method);
-
-  QString tmpPrefString = "OptimizeMethod";
-  pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(),  
-              (int)m_param.mapOptimizationMethod());
-
-  // set the offscreen images optimization method
-  m_offscreen.setOptimization(m_param.pixmapOptimizationMethod());
-}
-*/
-
 void Map::setZoom(int val) 
 { 
   if (m_player->id() != 1)
@@ -3086,7 +3037,6 @@ void Map::dumpInfo(QTextStream& out)
   out << "BackgroundColor: " << m_param.backgroundColor().name() << endl;
   out << "HeadRoom: " << m_param.headRoom() << endl;
   out << "FloorRoom: " << m_param.floorRoom() << endl;
-//  out << "OptimizeMethod: " << (int)m_param.mapOptimizationMethod() << endl;
 
   out << endl;
   m_mapIcons->dumpInfo(out);

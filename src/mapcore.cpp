@@ -82,7 +82,6 @@ MapParameters::MapParameters(const MapData& mapData)
   m_showLines = true;
   m_showGridLines = true;
   m_showGridTicks = true;
-  //m_optimization = tMap_NormalOptim;
 
   reset();
 }
@@ -234,34 +233,6 @@ void MapParameters::reAdjust()
   m_curPlayerOffset.setY(calcYOffset(m_curPlayer.y()));
 }
 
-#if 0
-QPixmap::Optimization MapParameters::pixmapOptimizationMethod()
-{
-  switch (m_optimization)
-  {
-  case tMap_MemoryOptim:  
-    return QPixmap::MemoryOptim; 
-  case tMap_NoOptim:
-    return QPixmap::NoOptim; 
-  case tMap_NormalOptim:  
-    return QPixmap::NormalOptim;
-  case tMap_BestOptim:  
-    return QPixmap::BestOptim;
-  case tMap_DefaultOptim:
-  default: 
-    return QPixmap::DefaultOptim;
-  }
-   /* Optimization Methods:
-        DefaultOptim - A pixmap with this optimization mode set always has the default optimization type
-               - default optimization type for qPixMap is NormalOptim
-        NoOptim      - no optimization (currently the same as MemoryOptim).
-        MemoryOptim  - optimize for minimal memory use. 
-        NormalOptim  - optimize for typical usage. Often uses more memory than MemoryOptim, and often faster. 
-        BestOptim    - optimize for pixmaps that are drawn very often and where performance is critical.
-                       Generally uses more memory than NormalOptim and may provide a little better speed
-   */
-}
-#endif
 
 void MapParameters::setPlayer(const MapPoint& pos)
 { 
@@ -2364,12 +2335,6 @@ const QPixmap& MapCache::getMapImage(MapParameters& param)
   // increment paint count
   m_paintCount++;
 #endif
-  /*
-  // set pixmap optimization if it's changed
-  if (m_lastParam.mapOptimizationMethod() !=
-      param.mapOptimizationMethod())
-    m_mapImage.setOptimization(param.pixmapOptimizationMethod());
-    */
 
   // make sure the map is the correct size
   m_mapImage = QPixmap(param.screenLength());

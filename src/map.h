@@ -275,7 +275,6 @@ class MapMenu : public QMenu
   void toggle_cacheChanges();
   void toggle_zoneSafePoint();
   void toggle_instanceLocationMarker();
-  //void select_mapOptimization(int itemId);
   void select_gridTickColor();
   void select_gridLineColor();
   void select_backgroundColor();
@@ -335,12 +334,6 @@ class MapMenu : public QMenu
 #ifdef DEBUG
   QAction* m_action_debugInfo;
 #endif
-  /*
-  int m_id_mapOptimization;
-  int m_id_mapOptimization_Memory;
-  int m_id_mapOptimization_Normal;
-  int m_id_mapOptimization_Best;
-  */
   QAction* m_action_gridTickColor;
   QAction* m_action_gridLineColor;
   QAction* m_action_backgroundColor;
@@ -398,10 +391,6 @@ class Map :public QWidget
   void          setZEM (unsigned char newZEM);
   
   // old methods
-  /*
-  MapOptimizationMethod getMapOptimization(void) 
-    { return m_param.mapOptimizationMethod(); }
-  */
   
   MapMenu* menu();
   
@@ -440,7 +429,6 @@ class Map :public QWidget
   bool showInstanceLocationMarker() const { return m_showInstanceLocationMarker; }
 
   MapLineStyle mapLineStyle() { return m_param.mapLineStyle(); }
-  //MapOptimizationMethod mapOptimization() { return m_param.mapOptimizationMethod(); }
   int zoom() const { return m_param.zoom(); }
   int zoomDefault() const { return m_param.zoomDefault(); }
   int panOffsetX() const { return m_param.panOffsetX(); }
@@ -540,7 +528,6 @@ class Map :public QWidget
   void setRacePvP(bool val);
   
   void setMapLineStyle(MapLineStyle style);
-  //void setMapOptimization(MapOptimizationMethod method);
   void setZoom(int val);
   void setZoomDefault(int val);
   void setPanOffsetX(int val);

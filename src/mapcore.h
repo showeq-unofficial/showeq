@@ -75,22 +75,6 @@ enum MapLineStyle
   tMap_FadedFloors,
 };
 
-/*
- * QT4 no longer allows the user to set the pixmap optimization.
- * As a result, all of the pixmap optimization code is being commented out
- * and can be deleted once it's determined to not unexpectedly break
- * anything. - cn187
- */
-/*
-enum MapOptimizationMethod
-{
-  tMap_MemoryOptim = 0,
-  tMap_NormalOptim = 1,
-  tMap_BestOptim = 2,
-  tMap_DefaultOptim = 3,
-  tMap_NoOptim = 4,
-};
-*/
 
 //----------------------------------------------------------------------
 // constants
@@ -141,10 +125,6 @@ class MapParameters
   const QFont& font() const { return m_font; }
   int16_t headRoom() const { return m_headRoom; }
   int16_t floorRoom() const { return m_floorRoom; }
-  /*
-  MapOptimizationMethod mapOptimizationMethod() { return m_optimization; }
-  QPixmap::Optimization pixmapOptimizationMethod();
-  */
   MapLineStyle mapLineStyle() { return m_mapLineStyle; }
   bool fadeFloors() const { return (m_mapLineStyle == tMap_FadedFloors); }
   bool depthFiltering() const { return (m_mapLineStyle == tMap_DepthFiltered); }
@@ -183,10 +163,6 @@ class MapParameters
   void setScreenSize(const QSize& size);
   void setBackgroundColor(const QColor& color) { m_backgroundColor = color; }
   void setFont(const QFont& font) { m_font = font; }
-  /*
-  void setMapOptimizationMethod(MapOptimizationMethod method) 
-    { m_optimization = method; }  
-    */
   void setMapLineStyle(MapLineStyle style) { m_mapLineStyle = style; }
   void setShowBackgroundImage(bool val) { m_showBackgroundImage = val; }
   void setShowLocations(bool val) { m_showLocations = val; }
@@ -232,7 +208,6 @@ class MapParameters
   MapPoint m_targetPoint;
   bool m_targetPointSet;
 
-  //MapOptimizationMethod m_optimization;
   MapLineStyle m_mapLineStyle;
   bool m_showBackgroundImage; 
   bool m_showLocations;
