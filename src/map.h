@@ -177,6 +177,7 @@ class MapMgr : public QObject
           bool import = false, bool force = false);
   void saveMap(void);
   void saveSOEMap(void);
+  void createNewLayer();
 
   // Spawn Handling
   void addItem(const Item* item);
@@ -296,6 +297,7 @@ class MapMenu : public QMenu
   QAction* m_action_followMenu_Player;
   QAction* m_action_followMenu_Spawn;
   QAction* m_action_followMenu_None;
+  QAction* m_action_createNewLayer;
   QAction* m_action_addLocation;
   QAction* m_action_startLine;
   QAction* m_action_addLinePoint;
@@ -469,6 +471,7 @@ class Map :public QWidget
   void toggleMapLayerVisibility(QAction* layer);
 
   // map editing
+  void createNewLayer();
   void addLocation();
   void startLine();
   void addLinePoint();

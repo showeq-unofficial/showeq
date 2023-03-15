@@ -599,6 +599,16 @@ void MapMgr::saveSOEMap ()
   }
 }
 
+void MapMgr::createNewLayer()
+{
+  m_mapData.createNewLayer();
+  // signal that the map has been loaded
+  // note, the layers are populated in order, so the highest layer
+  // number (0-indexed) will be the one we just loaded
+  if (m_mapData.mapLayer(m_mapData.numLayers()-1)->mapLoaded())
+    emit mapLoaded();
+}
+
 void MapMgr::addItem(const Item* item)
 {
   if ((item == NULL) || (item->type() != tSpawn))
@@ -879,6 +889,9 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
    *
    * - cn187
    */
+
+  m_action_createNewLayer = subMenu->addAction(
+          QString("Create New Layer\t"), m_map, SLOT(createNewLayer()));
 
   QMenu* layerMenu = new QMenu("Select Edit Layer");
   m_editLayerSpinBox = new QSpinBox(layerMenu);
@@ -3203,6 +3216,11 @@ void Map::reAdjust()
     m_scaledFOVDistance = m_mapIcons->fovDistance();
     break;
   }
+}
+
+void Map::createNewLayer()
+{
+    m_mapMgr->createNewLayer();
 }
 
 void Map::addLocation(void)
