@@ -1447,7 +1447,11 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    QStringList availableStyles = QStyleFactory::keys();
 
+#if QT_VERSION >= 0x050000
    availableStyles.sort(Qt::CaseInsensitive);
+#else
+   availableStyles.sort();
+#endif
 
    QString currentStyleName = qApp->style()->objectName();
 
