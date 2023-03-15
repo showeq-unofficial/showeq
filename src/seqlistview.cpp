@@ -147,14 +147,14 @@ void SEQListView::savePrefs()
         QString tempStr, tempStr2;
         if (header()->count() > 0)
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-            tempStr.asprintf("%d", header()->logicalIndex(0));
+            tempStr = QString::asprintf("%d", header()->logicalIndex(0));
 #else
             tempStr.sprintf("%d", header()->logicalIndex(0));
 #endif
         for(i=1; i < header()->count(); i++)
         {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-            tempStr2.asprintf(":%d", header()->logicalIndex(i));
+            tempStr2 = QString::asprintf(":%d", header()->logicalIndex(i));
 #else
             tempStr2.sprintf(":%d", header()->logicalIndex(i));
 #endif

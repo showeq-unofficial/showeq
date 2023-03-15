@@ -107,7 +107,7 @@ void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
     if ((cmsg->target[0] != 0) && target)
     {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf( "'%s' -> '%s' - %s {%s}",
+      tempStr = QString::asprintf( "'%s' -> '%s' - %s {%s}",
 		       cmsg->sender,
 		       cmsg->target,
 		       cmsg->message,
@@ -125,7 +125,7 @@ void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
     else
     {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf( "'%s' - %s {%s}",
+      tempStr = QString::asprintf( "'%s' - %s {%s}",
 		       cmsg->sender,
 		       cmsg->message,
 		       language_name(cmsg->language).toLatin1().data()
@@ -144,7 +144,7 @@ void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
     if ((cmsg->target[0] != 0) && target)
     {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf( "'%s' -> '%s' - %s",
+      tempStr = QString::asprintf( "'%s' -> '%s' - %s",
 		       cmsg->sender,
 		       cmsg->target,
 		       cmsg->message
@@ -160,7 +160,7 @@ void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
     else
     {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf( "'%s' - %s",
+      tempStr = QString::asprintf( "'%s' - %s",
 		       cmsg->sender,
 		       cmsg->message
 		       );
@@ -385,7 +385,7 @@ void MessageShell::randomRequest(const uint8_t* data)
   QString tempStr;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tempStr.asprintf("Request random number between %d and %d",
+  tempStr = QString::asprintf("Request random number between %d and %d",
 		  randr->bottom,
 		  randr->top);
 #else
@@ -403,7 +403,7 @@ void MessageShell::random(const uint8_t* data)
   QString tempStr;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tempStr.asprintf("Random number %d rolled between %d and %d by %s",
+  tempStr = QString::asprintf("Random number %d rolled between %d and %d by %s",
 		  randr->result,
 		  randr->bottom,
 		  randr->top,
@@ -437,7 +437,7 @@ void MessageShell::inspectData(const uint8_t* data)
     if (strnlen(inspt->itemNames[inp], 64) > 0)
     {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf("He has %s (icn:%i)", inspt->itemNames[inp], inspt->icons[inp]);
+      tempStr = QString::asprintf("He has %s (icn:%i)", inspt->itemNames[inp], inspt->icons[inp]);
 #else
       tempStr.sprintf("He has %s (icn:%i)", inspt->itemNames[inp], inspt->icons[inp]);
 #endif
@@ -448,7 +448,7 @@ void MessageShell::inspectData(const uint8_t* data)
   if (strnlen(inspt->mytext, 200) > 0)
   {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    tempStr.asprintf("His info: %s", inspt->mytext);
+    tempStr = QString::asprintf("His info: %s", inspt->mytext);
 #else
     tempStr.sprintf("His info: %s", inspt->mytext);
 #endif
@@ -583,7 +583,7 @@ void MessageShell::handleSpell(const uint8_t* data, size_t, uint8_t dir)
   default:
     {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf( "Unknown Spell Event ( %s ) - '",
+      tempStr = QString::asprintf( "Unknown Spell Event ( %s ) - '",
 		       client  ?
 		     "Client --> Server"   :
 		       "Server --> Client"
@@ -612,7 +612,7 @@ void MessageShell::handleSpell(const uint8_t* data, size_t, uint8_t dir)
 
     if (mem->param1 != 4)
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf("%s%s', slot %d.",
+      tempStr = QString::asprintf("%s%s', slot %d.",
               tempStr.toLatin1().data(),
               spellName.toLatin1().data(),
               mem->slotId);
@@ -654,7 +654,7 @@ void MessageShell::beginCast(const uint8_t* data)
     
     if (tempStr == "" || tempStr.isEmpty())
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf("UNKNOWN (ID: %d)", bcast->spawnId);
+      tempStr = QString::asprintf("UNKNOWN (ID: %d)", bcast->spawnId);
 #else
       tempStr.sprintf("UNKNOWN (ID: %d)", bcast->spawnId);
 #endif
@@ -672,7 +672,7 @@ void MessageShell::beginCast(const uint8_t* data)
     spellName = spell_name(bcast->spellId);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tempStr.asprintf( "%s%s' - Casting time is %g Second%s",
+  tempStr = QString::asprintf( "%s%s' - Casting time is %g Second%s",
           tempStr.toLatin1().data(),
           spellName.toLatin1().data(), casttime,
           casttime == 1 ? "" : "s");
@@ -694,7 +694,7 @@ void MessageShell::spellFaded(const uint8_t* data)
   if (strlen(sf->message) > 0)
   {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf( "Faded: %s", sf->message);
+      tempStr = QString::asprintf( "Faded: %s", sf->message);
 #else
       tempStr.sprintf( "Faded: %s", sf->message);
 #endif
@@ -711,7 +711,7 @@ void MessageShell::interruptSpellCast(const uint8_t* data)
   QString tempStr;
   if (item != NULL)
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    tempStr.asprintf("%s(%d): %s",
+    tempStr = QString::asprintf("%s(%d): %s",
             item->name().toLatin1().data(), icast->spawnId, icast->message);
 #else
     tempStr.sprintf("%s(%d): %s",
@@ -719,7 +719,7 @@ void MessageShell::interruptSpellCast(const uint8_t* data)
 #endif
   else
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    tempStr.asprintf("spawn(%d): %s",
+    tempStr = QString::asprintf("spawn(%d): %s",
             icast->spawnId, icast->message);
 #else
     tempStr.sprintf("spawn(%d): %s",
@@ -752,7 +752,7 @@ void MessageShell::startCast(const uint8_t* data)
   QString tempStr;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tempStr.asprintf("You begin casting %s.  Current Target is %s(%d)",
+  tempStr = QString::asprintf("You begin casting %s.  Current Target is %s(%d)",
           spellName.toLatin1().data(), targetName.toLatin1().data(),
           cast->targetId);
 #else
@@ -780,21 +780,21 @@ void MessageShell::groupUpdate(const uint8_t* data, size_t size, uint8_t dir)
   {
     case GUA_Joined :
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf ("Update: %s has joined the group.", gmem->membername);
+      tempStr = QString::asprintf ("Update: %s has joined the group.", gmem->membername);
 #else
       tempStr.sprintf ("Update: %s has joined the group.", gmem->membername);
 #endif
       break;
     case GUA_Left :
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf ("Update: %s has left the group.", gmem->membername);
+      tempStr = QString::asprintf ("Update: %s has left the group.", gmem->membername);
 #else
       tempStr.sprintf ("Update: %s has left the group.", gmem->membername);
 #endif
       break;
     case GUA_LastLeft :
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf ("Update: The group has been disbanded when %s left.",
+      tempStr = QString::asprintf ("Update: The group has been disbanded when %s left.",
          gmem->membername);
 #else
       tempStr.sprintf ("Update: The group has been disbanded when %s left.",
@@ -803,7 +803,7 @@ void MessageShell::groupUpdate(const uint8_t* data, size_t size, uint8_t dir)
       break;
     case GUA_MakeLeader : 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf ("Update: %s is now the leader of the group.", 
+      tempStr = QString::asprintf ("Update: %s is now the leader of the group.", 
          gmem->membername);
 #else
       tempStr.sprintf ("Update: %s is now the leader of the group.", 
@@ -812,14 +812,14 @@ void MessageShell::groupUpdate(const uint8_t* data, size_t size, uint8_t dir)
       break;
     case GUA_Started :
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tempStr.asprintf ("Update: %s has formed the group.", gmem->membername);
+      tempStr = QString::asprintf ("Update: %s has formed the group.", gmem->membername);
 #else
       tempStr.sprintf ("Update: %s has formed the group.", gmem->membername);
 #endif
       break;
     default :
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-       tempStr.asprintf ("Update: Unknown Update action:%d - %s - %s)", 
+       tempStr = QString::asprintf ("Update: Unknown Update action:%d - %s - %s)", 
 		   gmem->action, gmem->yourname, gmem->membername);
 #else
        tempStr.sprintf ("Update: Unknown Update action:%d - %s - %s)", 
@@ -837,13 +837,13 @@ void MessageShell::groupInvite(const uint8_t* data, size_t len, uint8_t dir)
 
   if(dir == DIR_Client)
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     tempStr.asprintf("Invite: You invite %s to join the group", gmem->invitee);
+     tempStr = QString::asprintf("Invite: You invite %s to join the group", gmem->invitee);
 #else
      tempStr.sprintf("Invite: You invite %s to join the group", gmem->invitee);
 #endif
   else
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     tempStr.asprintf("Invite: %s invites %s to join the group", gmem->inviter, gmem->invitee);
+     tempStr = QString::asprintf("Invite: %s invites %s to join the group", gmem->inviter, gmem->invitee);
 #else
      tempStr.sprintf("Invite: %s invites %s to join the group", gmem->inviter, gmem->invitee);
 #endif
@@ -859,7 +859,7 @@ void MessageShell::groupDecline(const uint8_t* data)
   {
      case 1:
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-        tempStr.asprintf("Invite: %s declines invite from %s (player is grouped)", 
+        tempStr = QString::asprintf("Invite: %s declines invite from %s (player is grouped)", 
                         gmem->membername, gmem->yourname);
 #else
         tempStr.sprintf("Invite: %s declines invite from %s (player is grouped)", 
@@ -868,7 +868,7 @@ void MessageShell::groupDecline(const uint8_t* data)
         break;
      case 3:
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-        tempStr.asprintf("Invite: %s declines invite from %s", 
+        tempStr = QString::asprintf("Invite: %s declines invite from %s", 
                         gmem->membername, gmem->yourname);
 #else
         tempStr.sprintf("Invite: %s declines invite from %s", 
@@ -877,7 +877,7 @@ void MessageShell::groupDecline(const uint8_t* data)
         break;
      default:
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-        tempStr.asprintf("Invite: %s declines invite from %s (unknown reason: %i)", 
+        tempStr = QString::asprintf("Invite: %s declines invite from %s (unknown reason: %i)", 
                         gmem->membername, gmem->yourname, gmem->reason);
 #else
         tempStr.sprintf("Invite: %s declines invite from %s (unknown reason: %i)", 
@@ -897,7 +897,7 @@ void MessageShell::groupFollow(const uint8_t* data)
      tempStr = "Follow: You have joined the group";
   else
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     tempStr.asprintf("Follow: %s has joined the group", gFollow->invitee);
+     tempStr = QString::asprintf("Follow: %s has joined the group", gFollow->invitee);
 #else
      tempStr.sprintf("Follow: %s has joined the group", gFollow->invitee);
 #endif
@@ -910,7 +910,7 @@ void MessageShell::groupDisband(const uint8_t* data)
   QString tempStr;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tempStr.asprintf ("Disband: %s disbands from the group", gmem->membername);
+  tempStr = QString::asprintf ("Disband: %s disbands from the group", gmem->membername);
 #else
   tempStr.sprintf ("Disband: %s disbands from the group", gmem->membername);
 #endif
@@ -922,7 +922,7 @@ void MessageShell::groupLeaderChange(const uint8_t* data)
    const groupLeaderChangeStruct *gmem = (const groupLeaderChangeStruct*)data;
    QString tempStr;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-   tempStr.asprintf("Update: %s is now the leader of the group", 
+   tempStr = QString::asprintf("Update: %s is now the leader of the group", 
                     gmem->membername);
 #else
    tempStr.sprintf("Update: %s is now the leader of the group", 
@@ -936,7 +936,7 @@ void MessageShell::player(const charProfileStruct* player)
   QString message;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  message.asprintf("Name: '%s' Last: '%s'", 
+  message = QString::asprintf("Name: '%s' Last: '%s'", 
 		  player->name, player->lastName);
 #else
   message.sprintf("Name: '%s' Last: '%s'", 
@@ -945,14 +945,14 @@ void MessageShell::player(const charProfileStruct* player)
   m_messages->addMessage(MT_Player, message);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  message.asprintf("Level: %d", player->profile.level);
+  message = QString::asprintf("Level: %d", player->profile.level);
 #else
   message.sprintf("Level: %d", player->profile.level);
 #endif
   m_messages->addMessage(MT_Player, message);
   
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  message.asprintf("PlayerMoney: P=%d G=%d S=%d C=%d",
+  message = QString::asprintf("PlayerMoney: P=%d G=%d S=%d C=%d",
 		 player->profile.platinum, player->profile.gold, 
 		 player->profile.silver, player->profile.copper);
 #else
@@ -963,7 +963,7 @@ void MessageShell::player(const charProfileStruct* player)
   m_messages->addMessage(MT_Player, message);
   
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  message.asprintf("BankMoney: P=%d G=%d S=%d C=%d",
+  message = QString::asprintf("BankMoney: P=%d G=%d S=%d C=%d",
 		  player->platinum_bank, player->gold_bank, 
 		  player->silver_bank, player->copper_bank);
 #else
@@ -974,7 +974,7 @@ void MessageShell::player(const charProfileStruct* player)
   m_messages->addMessage(MT_Player, message);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  message.asprintf("CursorMoney: P=%d G=%d S=%d C=%d",
+  message = QString::asprintf("CursorMoney: P=%d G=%d S=%d C=%d",
 		  player->profile.platinum_cursor, player->profile.gold_cursor, 
 		  player->profile.silver_cursor, player->profile.copper_cursor);
 #else
@@ -985,7 +985,7 @@ void MessageShell::player(const charProfileStruct* player)
   m_messages->addMessage(MT_Player, message);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  message.asprintf("SharedMoney: P=%d",
+  message = QString::asprintf("SharedMoney: P=%d",
 		  player->platinum_shared);
 #else
   message.sprintf("SharedMoney: P=%d",
@@ -994,7 +994,7 @@ void MessageShell::player(const charProfileStruct* player)
   m_messages->addMessage(MT_Player, message);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  message.asprintf("DoN Crystals: Radiant=%d Ebon=%d",
+  message = QString::asprintf("DoN Crystals: Radiant=%d Ebon=%d",
           player->currentRadCrystals, player->currentEbonCrystals);
 #else
   message.sprintf("DoN Crystals: Radiant=%d Ebon=%d",
@@ -1046,13 +1046,13 @@ void MessageShell::player(const charProfileStruct* player)
 
       if(player->profile.buffs[buffnumber].duration == -1)
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-        message.asprintf("You have buff %s (permanent).", spellName.toLatin1().data());
+        message = QString::asprintf("You have buff %s (permanent).", spellName.toLatin1().data());
 #else
         message.sprintf("You have buff %s (permanent).", spellName.toLatin1().data());
 #endif
       else
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-        message.asprintf("You have buff %s duration left is %d in ticks.",
+        message = QString::asprintf("You have buff %s duration left is %d in ticks.",
 #else
         message.sprintf("You have buff %s duration left is %d in ticks.",
 #endif
@@ -1081,7 +1081,7 @@ void MessageShell::increaseSkill(const uint8_t* data)
   const skillIncStruct* skilli = (const skillIncStruct*)data;
   QString tempStr;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tempStr.asprintf("Skill: %s has increased (%d)",
+  tempStr = QString::asprintf("Skill: %s has increased (%d)",
           skill_name(skilli->skillId).toLatin1().data(),
           skilli->value);
 #else
@@ -1097,7 +1097,7 @@ void MessageShell::updateLevel(const uint8_t* data)
   const levelUpUpdateStruct *levelup = (const levelUpUpdateStruct *)data;
   QString tempStr;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tempStr.asprintf("NewLevel: %d", levelup->level);
+  tempStr = QString::asprintf("NewLevel: %d", levelup->level);
 #else
   tempStr.sprintf("NewLevel: %d", levelup->level);
 #endif
@@ -1198,7 +1198,7 @@ void MessageShell::setExp(uint32_t totalExp, uint32_t totalTick,
 {
     QString tempStr;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    tempStr.asprintf("Exp: Set: %u total, with %u (%u/330) into level with %u left, where 1/330 = %u",
+    tempStr = QString::asprintf("Exp: Set: %u total, with %u (%u/330) into level with %u left, where 1/330 = %u",
 		    totalExp, (totalExp - minExpLevel), totalTick, 
 		    (maxExpLevel - totalExp), tickExpLevel);
 #else
@@ -1225,7 +1225,7 @@ void MessageShell::newExp(uint32_t newExp, uint32_t totalExp,
     uint32_t needKills = leftExp / newExp;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    tempStr.asprintf("Exp: New: %u, %u (%u/330) into level with %u left [~%u kills]",
+    tempStr = QString::asprintf("Exp: New: %u, %u (%u/330) into level with %u left [~%u kills]",
 		    newExp, (totalExp - minExpLevel), totalTick, 
 		    leftExp, needKills);
 #else
@@ -1236,7 +1236,7 @@ void MessageShell::newExp(uint32_t newExp, uint32_t totalExp,
   }
   else
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    tempStr.asprintf("Exp: New: < %u, %u (%u/330) into level with %u left",
+    tempStr = QString::asprintf("Exp: New: < %u, %u (%u/330) into level with %u left",
 		    tickExpLevel, (totalExp - minExpLevel), totalTick, 
 		    leftExp);
 #else
@@ -1254,7 +1254,7 @@ void MessageShell::setAltExp(uint32_t totalExp,
 {
   QString tempStr;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tempStr.asprintf("ExpAA: Set: %u total, with %u aapoints",
+  tempStr = QString::asprintf("ExpAA: Set: %u total, with %u aapoints",
 		  totalExp, aaPoints);
 #else
   tempStr.sprintf("ExpAA: Set: %u total, with %u aapoints",
@@ -1275,7 +1275,7 @@ void MessageShell::newAltExp(uint32_t newExp, uint32_t totalExp,
   // ie. a > 1/330'th experience increment.
   if (newExp)
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    tempStr.asprintf("ExpAA: %u, %u (%u/330) with %u left",
+    tempStr = QString::asprintf("ExpAA: %u, %u (%u/330) with %u left",
 		    newExp, totalExp, totalTick, maxExp - totalExp);
 #else
     tempStr.sprintf("ExpAA: %u, %u (%u/330) with %u left",
@@ -1283,7 +1283,7 @@ void MessageShell::newAltExp(uint32_t newExp, uint32_t totalExp,
 #endif
   else
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    tempStr.asprintf("ExpAA: < %u, %u (%u/330) with %u left",
+    tempStr = QString::asprintf("ExpAA: < %u, %u (%u/330) with %u left",
 		    tickExp, totalExp, totalTick, maxExp - totalExp);
 #else
     tempStr.sprintf("ExpAA: < %u, %u (%u/330) with %u left",
@@ -1361,7 +1361,7 @@ void MessageShell::filterMessage(const QString& prefix, MessageType type,
   // extra info if it is a spawn
   if (spawn)
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    spawnInfo.asprintf(" LVL %d, HP %d/%d", 
+    spawnInfo = QString::asprintf(" LVL %d, HP %d/%d", 
 		      spawn->level(), spawn->HP(), spawn->maxHP());
 #else
     spawnInfo.sprintf(" LVL %d, HP %d/%d", 

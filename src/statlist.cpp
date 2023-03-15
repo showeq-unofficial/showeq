@@ -58,7 +58,7 @@ StatList::StatList(Player* player,
    for (int nloop = 0; nloop < LIST_MAXLIST; nloop++)
    {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     statPrefName.asprintf("show%s", statNames[nloop]);
+     statPrefName = QString::asprintf("show%s", statNames[nloop]);
 #else
      statPrefName.sprintf("show%s", statNames[nloop]);
 #endif
@@ -248,7 +248,7 @@ void StatList::enableStat(uint8_t stat, bool enabled)
 
   QString statPrefName;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  statPrefName.asprintf("show%s", statNames[stat]);
+  statPrefName = QString::asprintf("show%s", statNames[stat]);
 #else
   statPrefName.sprintf("show%s", statNames[stat]);
 #endif

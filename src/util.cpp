@@ -84,13 +84,13 @@ Commanate(uint32_t number)
    threeDigits = number % 1000L;
    if (oldstring.isEmpty())
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     buffer.asprintf("%u", threeDigits);
+     buffer = QString::asprintf("%u", threeDigits);
 #else
      buffer.sprintf("%u", threeDigits);
 #endif
    else
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     buffer.asprintf("%03u", threeDigits);
+     buffer = QString::asprintf("%03u", threeDigits);
 #else
      buffer.sprintf("%03u", threeDigits);
 #endif
@@ -348,7 +348,7 @@ print_material (uint8_t material)
   {
     QString mat_str;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    mat_str.asprintf("U%02x", material);
+    mat_str = QString::asprintf("U%02x", material);
 #else
     mat_str.sprintf("U%02x", material);
 #endif
@@ -433,7 +433,7 @@ print_skill (uint8_t skill)
 
   QString skill_name;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  skill_name.asprintf("U0x%2.2x", skill);
+  skill_name = QString::asprintf("U0x%2.2x", skill);
 #else
   skill_name.sprintf("U0x%2.2x", skill);
 #endif
@@ -497,7 +497,7 @@ print_slot (uint32_t equipableSlots)
       QString tmp;
       // generate a string containing only the unknown flags
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tmp.asprintf("U0x%8.8x", (equipableSlots & (~  0x003fffff)));
+      tmp = QString::asprintf("U0x%8.8x", (equipableSlots & (~  0x003fffff)));
 #else
       tmp.sprintf("U0x%8.8x", (equipableSlots & (~  0x003fffff)));
 #endif
@@ -532,7 +532,7 @@ print_faction (int32_t faction)
   {
     QString tmp;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    tmp.asprintf("Unknown faction: %d", faction);
+    tmp = QString::asprintf("Unknown faction: %d", faction);
 #else
     tmp.sprintf("Unknown faction: %d", faction);
 #endif
@@ -754,7 +754,7 @@ QString reformatMoney (unsigned int uiCopper)
   if (uiDivisor == 1000 && (uiCopper / uiDivisor) > 0)
   {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    qsMoney.asprintf("%d Platinum", uiCopper / uiDivisor);
+    qsMoney = QString::asprintf("%d Platinum", uiCopper / uiDivisor);
 #else
     qsMoney.sprintf("%d Platinum", uiCopper / uiDivisor);
 #endif
@@ -767,7 +767,7 @@ QString reformatMoney (unsigned int uiCopper)
   if (uiDivisor == 100 && (uiCopper / uiDivisor) > 0)
   {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    qsMoney.asprintf("%s%s%d Gold", qsMoney.toLatin1().data(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
+    qsMoney = QString::asprintf("%s%s%d Gold", qsMoney.toLatin1().data(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
 #else
     qsMoney.sprintf("%s%s%d Gold", qsMoney.toLatin1().data(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
 #endif
@@ -780,7 +780,7 @@ QString reformatMoney (unsigned int uiCopper)
   if (uiDivisor == 10 && (uiCopper / uiDivisor) > 0)
   {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    qsMoney.asprintf("%s%s%d Silver", qsMoney.toLatin1().data(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
+    qsMoney = QString::asprintf("%s%s%d Silver", qsMoney.toLatin1().data(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
 #else
     qsMoney.sprintf("%s%s%d Silver", qsMoney.toLatin1().data(), bNeedComma ? ", " : "", uiCopper / uiDivisor);
 #endif
@@ -792,7 +792,7 @@ QString reformatMoney (unsigned int uiCopper)
 
   if (uiDivisor == 1 && uiCopper != 0)
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    qsMoney.asprintf("%s%s%d Copper", qsMoney.toLatin1().data(), bNeedComma ? ", " : "", uiCopper);
+    qsMoney = QString::asprintf("%s%s%d Copper", qsMoney.toLatin1().data(), bNeedComma ? ", " : "", uiCopper);
 #else
     qsMoney.sprintf("%s%s%d Copper", qsMoney.toLatin1().data(), bNeedComma ? ", " : "", uiCopper);
 #endif

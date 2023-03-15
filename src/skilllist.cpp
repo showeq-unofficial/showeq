@@ -110,7 +110,7 @@ void SkillList::addSkill (int skillId, int value)
   QString str;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  str.asprintf("%3d", value);
+  str = QString::asprintf("%3d", value);
 #else
   str.sprintf("%3d", value);
 #endif
@@ -142,7 +142,7 @@ void SkillList::changeSkill (int skillId, int value)
   QString str;
   /* Update skill value with new value */
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  str.asprintf ("%3d", value);
+  str = QString::asprintf ("%3d", value);
 #else
   str.sprintf ("%3d", value);
 #endif
@@ -195,7 +195,7 @@ void SkillList::addLanguage (int langId, int value)
     str = " NA";
   else
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    str.asprintf ("%3d", value);
+    str = QString::asprintf ("%3d", value);
 #else
     str.sprintf ("%3d", value);
 #endif
@@ -231,7 +231,7 @@ void SkillList::changeLanguage (int langId, int value)
 
   /* Update skill value with new value */
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  str.asprintf ("%3d", value);
+  str = QString::asprintf ("%3d", value);
 #else
   str.sprintf ("%3d", value);
 #endif

@@ -3127,7 +3127,7 @@ void EQInterface::set_main_WindowFont(QAction* win)
       int i = winnum - mapCaptionBase;
       if (i)
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-	title.asprintf("Map %d", i);
+	title = QString::asprintf("Map %d", i);
 #else
 	title.sprintf("Map %d", i);
 #endif
@@ -3727,7 +3727,7 @@ void EQInterface::dumpSpellBook(void)
     if (spell)
     {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-        txt.asprintf("%.3d %.2d %.2d %#4.04x %02d\t%s",
+        txt = QString::asprintf("%.3d %.2d %.2d %#4.04x %02d\t%s",
                 i, ((i / 8) + 1), ((i % 8) + 1),
                 spellid, spell->level(playerClass),
                 spell->name().toLatin1().data());
@@ -3741,7 +3741,7 @@ void EQInterface::dumpSpellBook(void)
     else
     {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-        txt.asprintf("%.3d %.2d %.2d %#4.04x   \t%s",
+        txt = QString::asprintf("%.3d %.2d %.2d %#4.04x   \t%s",
                 i, ((i / 8) + 1), ((i % 8) + 1),
                 spellid,
                 spell_name(spellid).toLatin1().data());
@@ -4698,7 +4698,7 @@ void EQInterface::levelChanged(uint8_t level)
 {
   QString tempStr;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tempStr.asprintf("New Level: %u", level);
+  tempStr = QString::asprintf("New Level: %u", level);
 #else
   tempStr.sprintf("New Level: %u", level);
 #endif
@@ -4727,7 +4727,7 @@ EQInterface::numSpawns(int num)
 
    QString tempStr;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-   tempStr.asprintf("Mobs: %d", num);
+   tempStr = QString::asprintf("Mobs: %d", num);
 #else
    tempStr.sprintf("Mobs: %d", num);
 #endif
@@ -4745,7 +4745,7 @@ EQInterface::newSpeed(double speed)
 
    QString tempStr;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-   tempStr.asprintf("Run Speed: %3.6f", speed);
+   tempStr = QString::asprintf("Run Speed: %3.6f", speed);
 #else
    tempStr.sprintf("Run Speed: %3.6f", speed);
 #endif
@@ -4783,13 +4783,13 @@ EQInterface::numPacket(int num, int stream)
    num -= m_initialcount;
    if (num && delta)
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     tempStr.asprintf("Pkt: %d (%2.1f)", num, (float) (num<<10) / (float) delta);
+     tempStr = QString::asprintf("Pkt: %d (%2.1f)", num, (float) (num<<10) / (float) delta);
 #else
      tempStr.sprintf("Pkt: %d (%2.1f)", num, (float) (num<<10) / (float) delta);
 #endif
    else   
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     tempStr.asprintf("Pkt: %d", num);
+     tempStr = QString::asprintf("Pkt: %d", num);
 #else
      tempStr.sprintf("Pkt: %d", num);
 #endif
@@ -4848,7 +4848,7 @@ void EQInterface::zoneBegin(const QString& shortZoneName)
   float percentZEM = ((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100;
   QString tempStr;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tempStr.asprintf("ZEM: %3.2f%%", percentZEM);
+  tempStr = QString::asprintf("ZEM: %3.2f%%", percentZEM);
 #else
   tempStr.sprintf("ZEM: %3.2f%%", percentZEM);
 #endif
@@ -4864,7 +4864,7 @@ void EQInterface::zoneEnd(const QString& shortZoneName,
   float percentZEM = ((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100;
   QString tempStr;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tempStr.asprintf("ZEM: %3.2f%%", percentZEM);
+  tempStr = QString::asprintf("ZEM: %3.2f%%", percentZEM);
 #else
   tempStr.sprintf("ZEM: %3.2f%%", percentZEM);
 #endif
@@ -4879,7 +4879,7 @@ void EQInterface::zoneChanged(const QString& shortZoneName)
   emit newZoneName(shortZoneName);
   float percentZEM = ((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tempStr.asprintf("ZEM: %3.2f%%", percentZEM);
+  tempStr = QString::asprintf("ZEM: %3.2f%%", percentZEM);
 #else
   tempStr.sprintf("ZEM: %3.2f%%", percentZEM);
 #endif
@@ -5009,7 +5009,7 @@ void EQInterface::updateSelectedSpawnStatus(const Item* item)
   QString string("");
   if (spawn != 0)
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    string.asprintf("%d: %s:%d (%d/%d) Pos:", // "%d/%d/%d (%d) %s %s Item:%s",
+    string = QString::asprintf("%d: %s:%d (%d/%d) Pos:", // "%d/%d/%d (%d) %s %s Item:%s",
             item->id(),
             item->name().toUtf8().data(),
             spawn->level(), spawn->HP(),
@@ -5023,7 +5023,7 @@ void EQInterface::updateSelectedSpawnStatus(const Item* item)
 #endif
   else
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    string.asprintf("%d: %s: Pos:", // "%d/%d/%d (%d) %s %s Item:%s",
+    string = QString::asprintf("%d: %s: Pos:", // "%d/%d/%d (%d) %s %s Item:%s",
             item->id(),
             item->name().toUtf8().data());
 #else
@@ -5088,7 +5088,7 @@ void EQInterface::saveSelectedSpawnPath(void)
 {
   QString fileName;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  fileName.asprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toLatin1().data());
+  fileName = QString::asprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toLatin1().data());
 #else
   fileName.sprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toLatin1().data());
 #endif
@@ -5110,7 +5110,7 @@ void EQInterface::saveSpawnPaths(void)
 {
   QString fileName;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  fileName.asprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toLatin1().data());
+  fileName = QString::asprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toLatin1().data());
 #else
   fileName.sprintf("%s_mobpath.map", m_zoneMgr->shortZoneName().toLatin1().data());
 #endif

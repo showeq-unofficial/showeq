@@ -4218,7 +4218,7 @@ void Map::paintDebugInfo(MapParameters& param,
   p.setPen( Qt::yellow );
   QString ts;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  ts.asprintf( "(%d, %d)", 
+  ts = QString::asprintf( "(%d, %d)", 
           (int)(param.screenCenterX() * param.ratioX()), 
           (int)(param.screenCenterY() * param.ratioY()));
 #else
@@ -4228,7 +4228,7 @@ void Map::paintDebugInfo(MapParameters& param,
 #endif
   p.drawText( 10, 8, ts );
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  ts.asprintf( "(%d, %d)",
+  ts = QString::asprintf( "(%d, %d)",
           (int)((param.screenCenterX() - param.screenLength().width()) * 
             param.ratioX()),
           (int)((param.screenCenterY() - param.screenLength().height()) *
@@ -4244,7 +4244,7 @@ void Map::paintDebugInfo(MapParameters& param,
   
   // show frame times
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  ts.asprintf( "%2.0ffps/%dms", fps, drawTime);
+  ts = QString::asprintf( "%2.0ffps/%dms", fps, drawTime);
 #else
   ts.sprintf( "%2.0ffps/%dms", fps, drawTime);
 #endif
@@ -4327,7 +4327,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     
       if ( secs > 0 )
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    remaining.asprintf( "%2ld:%02ld", secs / 60, secs % 60  );
+    remaining = QString::asprintf( "%2ld:%02ld", secs / 60, secs % 60  );
 #else
     remaining.sprintf( "%2ld:%02ld", secs / 60, secs % 60  );
 #endif
@@ -4349,7 +4349,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     
     QString string;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    string.asprintf("SpawnPoint: %s\n"
+    string = QString::asprintf("SpawnPoint: %s\n"
            "%.3s/Z: %5d/%5d/%5d\n"
            "Last: %s\n"
            "Spawned: %s\t Remaining: %s\t Count: %d",
@@ -4399,7 +4399,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       QString guild;
       if (!spawn->guildTag().isEmpty())
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-          guild.asprintf("<%s>", spawn->guildTag().toLatin1().data());
+          guild = QString::asprintf("<%s>", spawn->guildTag().toLatin1().data());
 #else
           guild.sprintf("<%s>", spawn->guildTag().toLatin1().data());
 #endif
@@ -4431,7 +4431,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
         lastName = "";
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      string.asprintf("%s %s%s\n"
+      string = QString::asprintf("%s %s%s\n"
              "Level: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5d\n"
              "Race: %s\t Class: %s",
              spawn->transformedName().toUtf8().data(),
@@ -4472,7 +4472,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     else
     {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      string.asprintf("%s\n"
+      string = QString::asprintf("%s\n"
              "%.3s/Z: %5d/%5d/%5d\n"
              "Race: %s\t Class: %s",
              item->transformedName().toUtf8().data(),
@@ -5251,7 +5251,7 @@ void MapFrame::mouseLocation(int16_t x, int16_t y)
 {
   QString cursorPos;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  cursorPos.asprintf(" %+5hd, %+5hd", y, x);
+  cursorPos = QString::asprintf(" %+5hd, %+5hd", y, x);
 #else
   cursorPos.sprintf(" %+5hd, %+5hd", y, x);
 #endif
@@ -5263,7 +5263,7 @@ void MapFrame::setPlayer(int16_t x, int16_t y, int16_t z,
 {
   QString playerPos;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  playerPos.asprintf(" %+5hd, %+5hd, %+5hd", y, x, z);
+  playerPos = QString::asprintf(" %+5hd, %+5hd, %+5hd", y, x, z);
 #else
   playerPos.sprintf(" %+5hd, %+5hd, %+5hd", y, x, z);
 #endif

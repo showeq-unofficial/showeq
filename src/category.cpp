@@ -338,7 +338,7 @@ void CategoryMgr::reloadCategories(void)
   for(i = 1; i <= tMaxNumCategories; i++)
   {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    prefBaseName.asprintf("Category%d_", i);
+    prefBaseName = QString::asprintf("Category%d_", i);
 #else
     prefBaseName.sprintf("Category%d_", i);
 #endif
@@ -391,7 +391,7 @@ void CategoryMgr::savePrefs(void)
           break;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    prefBaseName.asprintf("Category%d_", count++);
+    prefBaseName = QString::asprintf("Category%d_", count++);
 #else
     prefBaseName.sprintf("Category%d_", count++);
 #endif
@@ -409,7 +409,7 @@ void CategoryMgr::savePrefs(void)
   while (count <= tMaxNumCategories)
   {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    prefBaseName.asprintf("Category%d_", count++);
+    prefBaseName = QString::asprintf("Category%d_", count++);
 #else
     prefBaseName.sprintf("Category%d_", count++);
 #endif

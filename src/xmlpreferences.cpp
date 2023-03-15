@@ -53,7 +53,7 @@ XMLPreferences::XMLPreferences(const QString& defaultsFileName,
     m_defaultsSections()
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  m_templateDoc.asprintf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+  m_templateDoc = QString::asprintf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 			"<!DOCTYPE %s SYSTEM \"%s\">\n"
 			"<seqpreferences version=\"%1.1f\">\n"
 			"<!-- ============================================================= -->"

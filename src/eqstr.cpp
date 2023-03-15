@@ -144,7 +144,7 @@ QString EQStr::formatMessage(uint32_t formatid,
 	uint32_t arg_len;
 	unsigned char *cp;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-	tempStr.asprintf( "Unknown: %04x:", formatid);
+	tempStr = QString::asprintf( "Unknown: %04x:", formatid);
 #else
 	tempStr.sprintf( "Unknown: %04x:", formatid);
 #endif

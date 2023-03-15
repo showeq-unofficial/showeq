@@ -161,7 +161,7 @@ void SpawnList::setPlayer(int16_t x, int16_t y, int16_t z,
        if (litem->type() != tUnknown)
        {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-           buff.asprintf("%5d", litem->item()->calcDist2DInt(x, y));
+           buff = QString::asprintf("%5d", litem->item()->calcDist2DInt(x, y));
 #else
            buff.sprintf("%5d", litem->item()->calcDist2DInt(x, y));
 #endif
@@ -179,7 +179,7 @@ void SpawnList::setPlayer(int16_t x, int16_t y, int16_t z,
        if (litem->type() != tUnknown)
        {
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-           buff.asprintf("%5.1f", litem->item()->calcDist(x, y, z));
+           buff = QString::asprintf("%5.1f", litem->item()->calcDist(x, y, z));
 #else
            buff.sprintf("%5.1f", litem->item()->calcDist(x, y, z));
 #endif

@@ -161,7 +161,7 @@ EditorWindow::EditorWindow(const char *fileName)
      setWindowTitle( fileName );
      QString s;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     s.asprintf( "Opened %s", fileName );
+     s = QString::asprintf( "Opened %s", fileName );
 #else
      s.sprintf( "Opened %s", fileName );
 #endif

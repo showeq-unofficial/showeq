@@ -191,7 +191,7 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      {
        // Level
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-       buff.asprintf("%2d", spawn->level());
+       buff = QString::asprintf("%2d", spawn->level());
 #else
        buff.sprintf("%2d", spawn->level());
 #endif
@@ -202,7 +202,7 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      {
        // Hitpoints
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-       buff.asprintf("%5d", spawn->HP());
+       buff = QString::asprintf("%5d", spawn->HP());
 #else
        buff.sprintf("%5d", spawn->HP());
 #endif
@@ -210,7 +210,7 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
        
        // Maximum Hitpoints
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-       buff.asprintf("%5d", spawn->maxHP());
+       buff = QString::asprintf("%5d", spawn->maxHP());
 #else
        buff.sprintf("%5d", spawn->maxHP());
 #endif
@@ -241,7 +241,7 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
    {
      // X position
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     buff.asprintf("%5d", showeq_params->retarded_coords ? 
+     buff = QString::asprintf("%5d", showeq_params->retarded_coords ? 
 		  (int)item()->y() : (int)item()->x());
 #else
      buff.sprintf("%5d", showeq_params->retarded_coords ? 
@@ -251,7 +251,7 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      
      // Y position
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     buff.asprintf("%5d", showeq_params->retarded_coords ? 
+     buff = QString::asprintf("%5d", showeq_params->retarded_coords ? 
 		  (int)item()->x() : (int)item()->y());
 #else
      buff.sprintf("%5d", showeq_params->retarded_coords ? 
@@ -261,7 +261,7 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      
      // Z position
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     buff.asprintf("%5d", item()->z());
+     buff = QString::asprintf("%5d", item()->z());
 #else
      buff.sprintf("%5d", item()->z());
 #endif
@@ -272,7 +272,7 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      {
        //buff.sprintf("%5d", player->calcDist2DInt(*item()));
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-       buff.asprintf("%5d", item()->getIDistanceToPlayer());
+       buff = QString::asprintf("%5d", item()->getIDistanceToPlayer());
 #else
        buff.sprintf("%5d", item()->getIDistanceToPlayer());
 #endif
@@ -281,7 +281,7 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      {
        //buff.sprintf("%5.1f", player->calcDist(*item()));
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-       buff.asprintf("%5.1f", item()->getFDistanceToPlayer());
+       buff = QString::asprintf("%5.1f", item()->getFDistanceToPlayer());
 #else
        buff.sprintf("%5.1f", item()->getFDistanceToPlayer());
 #endif
@@ -293,7 +293,7 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
    {
      // Id
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     buff.asprintf("%5d", item()->id());
+     buff = QString::asprintf("%5d", item()->id());
 #else
      buff.sprintf("%5d", item()->id());
 #endif
@@ -325,7 +325,7 @@ void SpawnListItem::updateTitle(const QString& name)
   // update childcount in header
   QString temp;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  temp.asprintf("%s (%d)",
+  temp = QString::asprintf("%s (%d)",
           name.toLatin1().data(), childCount());
 #else
   temp.sprintf("%s (%d)",

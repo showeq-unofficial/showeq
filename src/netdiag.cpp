@@ -220,7 +220,7 @@ void NetDiag::seqReceive(int seq, int stream)
 {
   QString disp;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  disp.asprintf("%4.4x", seq);
+  disp = QString::asprintf("%4.4x", seq);
 #else
   disp.sprintf("%4.4x", seq);
 #endif
@@ -231,7 +231,7 @@ void NetDiag::seqExpect(int seq, int stream)
 {
   QString disp;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  disp.asprintf("%4.4x", seq);
+  disp = QString::asprintf("%4.4x", seq);
 #else
   disp.sprintf("%4.4x", seq);
 #endif
@@ -250,7 +250,7 @@ void NetDiag::clientChanged(in_addr_t addr)
   {
   case 2:
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    tmp.asprintf(":%d", 
+    tmp = QString::asprintf(":%d", 
 		m_packet->clientPort());
 #else
     tmp.sprintf(":%d", 
@@ -274,7 +274,7 @@ void NetDiag::clientPortLatched(in_port_t clientPort)
 
   disp = print_addr(addr);
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  tmp.asprintf(":%d", clientPort);
+  tmp = QString::asprintf(":%d", clientPort);
 #else
   tmp.sprintf(":%d", clientPort);
 #endif
@@ -345,7 +345,7 @@ void NetDiag::numPacket(int num, int stream)
    int delta = mTime() - m_packetStartTime[stream];
    if (numdelta && delta)
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     tempStr.asprintf("%2.1f", 
+     tempStr = QString::asprintf("%2.1f", 
 		     (float) (numdelta<<10) / (float) delta);
 #else
      tempStr.sprintf("%2.1f", 
@@ -353,7 +353,7 @@ void NetDiag::numPacket(int num, int stream)
 #endif
    else   
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-     tempStr.asprintf("0.0");
+     tempStr = QString::asprintf("0.0");
 #else
      tempStr.sprintf("0.0");
 #endif
@@ -379,7 +379,7 @@ QString NetDiag::print_addr(in_addr_t  addr)
   QString paddr;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  paddr.asprintf ( "%d.%d.%d.%d",
+  paddr = QString::asprintf ( "%d.%d.%d.%d",
 		  addr & 0x000000ff,
 		  (addr & 0x0000ff00) >> 8,
 		  (addr & 0x00ff0000) >> 16,

@@ -77,7 +77,7 @@ void SpawnPointListItem::update()
     
     if ( secs > 0 )
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-      tmpStr.asprintf( "%2ld:%02ld", secs / 60, secs % 60  );
+      tmpStr = QString::asprintf( "%2ld:%02ld", secs / 60, secs % 60  );
 #else
       tmpStr.sprintf( "%2ld:%02ld", secs / 60, secs % 60  );
 #endif
@@ -348,7 +348,7 @@ void SpawnPointList::deleteItem(const SpawnPointListItem* item)
     def = sp->last();
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  def.asprintf("%d/%d/%d '%s'",
+  def = QString::asprintf("%d/%d/%d '%s'",
           sp->x(), sp->y(), sp->z(), def.toLatin1().data());
 #else
   def.sprintf("%d/%d/%d '%s'",

@@ -1113,7 +1113,7 @@ void MapIcons::paintSpawnIcon(MapParameters& param,
     QString spawnNameText;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    spawnNameText.asprintf("%2d: %s",
+    spawnNameText = QString::asprintf("%2d: %s",
             spawn->level(),
             spawn->name().toLatin1().data());
 #else
@@ -1233,7 +1233,7 @@ void MapIcons::paintSpawnPointIcon(MapParameters& param,
     QString spawnNameText;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-    spawnNameText.asprintf("sp:%s %s (%d)",
+    spawnNameText = QString::asprintf("sp:%s %s (%d)",
             sp->name().toLatin1().data(),
             sp->last().toLatin1().data(),
             sp->count());
