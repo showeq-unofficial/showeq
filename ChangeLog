@@ -1,3 +1,22 @@
+cn187 (03/15/23)
+----------------
+- Update to version 6.3.0
+  - Features:
+    - Map related
+      - Multilayer map support with automatic conversion
+      - Mouse scroll adjusts map zoom
+      - Other miscellaneous map fixes
+    - Interface related
+      - Themes are no longer forced by ShowEQ
+      - Support for using system-installed Qt themes, including dark themes
+      - Miscellaneous Qt5 fixes
+    - Reliability related
+      - Additional packet filtering to reduce session disconnects due to
+        random LAN traffic
+      - Session tracking is now enabled by default
+- Support for EQ Patch 03/15/23
+- Struct and opcode updates
+
 cn187 (02/19/23)
 - Update to version 6.2.18
 - Support for EQ Patch 02/15/23
