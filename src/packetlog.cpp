@@ -29,6 +29,13 @@
 #include "decode.h"
 #include "diagnosticmessages.h"
 
+#pragma message("Once our minimum supported Qt version is greater than 5.14, this check can be removed and ENDL replaced with Qt::endl")
+#if (QT_VERSION >= QT_VERSION_CHECK(5,14,0))
+#define ENDL Qt::endl
+#else
+#define ENDL endl
+#endif
+
 //----------------------------------------------------------------------
 // PacketLog
 PacketLog::PacketLog(EQPacket& packet, const QString& fname, 
@@ -143,10 +150,10 @@ void PacketLog::logData(const uint8_t* data,
   
   // data direction and size
   m_out << ((dir == DIR_Server) ? "[Server->Client] " : "[Client->Server] ")
-      << "[Size: " << QString::number(len) << "]" << endl;
+      << "[Size: " << QString::number(len) << "]" << ENDL;
 
   // output opcode info
-  m_out << opCodeToString(opcode) << endl;
+  m_out << opCodeToString(opcode) << ENDL;
 
   flush();
 
@@ -154,7 +161,7 @@ void PacketLog::logData(const uint8_t* data,
   if (len)
     outputData(len, data);
   else
-    m_out << endl;
+    m_out << ENDL;
 
   flush();
 }
@@ -182,10 +189,10 @@ void PacketLog::logData(const uint8_t* data,
   
   // data direction and size
   m_out << ((dir == DIR_Server) ? "[Server->Client] " : "[Client->Server] ")
-      << "[Size: " << QString::number(len) << "]" << endl;
+      << "[Size: " << QString::number(len) << "]" << ENDL;
 
   // output opcode info
-  m_out << opCodeToString(opcode) << endl;
+  m_out << opCodeToString(opcode) << ENDL;
 
   if (opcodeEntry)
   {
@@ -213,7 +220,7 @@ void PacketLog::logData(const uint8_t* data,
       }
     }
 
-    m_out  << endl;
+    m_out  << ENDL;
   }
 
   flush();
@@ -222,7 +229,7 @@ void PacketLog::logData(const uint8_t* data,
   if (len)
     outputData(len, data);
   else
-    m_out << endl;
+    m_out << ENDL;
 
   flush();
 }
@@ -247,7 +254,7 @@ void PacketLog::logData(const EQUDPIPPacketFormat& packet)
       << " [" << sourceStr << ":" << QString::number(packet.getSourcePort())
       << "->" << destStr << ":" << QString::number(packet.getDestPort()) 
       << "] [Size: " << QString::number(packet.getUDPPayloadLength()) << "]"
-      << endl;
+      << ENDL;
 
   uint16_t calcedCRC;
 
@@ -270,18 +277,18 @@ void PacketLog::logData(const EQUDPIPPacketFormat& packet)
 
     if (packet.hasCRC())
     {
-      m_out << " [CRC ok]" << endl;
+      m_out << " [CRC ok]" << ENDL;
     }
 
-    m_out << endl;
+    m_out << ENDL;
   }
   else
   {
     m_out << "[BAD CRC (" << QString::number(calcedCRC, 16) 
 	  << " != " << QString::number(packet.crc(), 16) 
-	  << ")! Sessions crossed or unitialized or non-EQ packet! ]" << endl;
+	  << ")! Sessions crossed or unitialized or non-EQ packet! ]" << ENDL;
     m_out << "[SessionKey: " << QString::number(packet.getSessionKey(), 16) <<
-      "]" << endl;
+      "]" << ENDL;
   }
 
   flush();
@@ -291,7 +298,7 @@ void PacketLog::logData(const EQUDPIPPacketFormat& packet)
     outputData(packet.getUDPPayloadLength(), 
 	      (const uint8_t*)packet.getUDPPayload());
   else
-    m_out << endl;
+    m_out << ENDL;
 
   flush();
 }

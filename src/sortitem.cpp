@@ -27,6 +27,13 @@
 
 #include "util.h"
 
+#pragma message("Once our minimum supported Qt version is greater than 5.14, this check can be removed and ENDL replaced with Qt::endl")
+#if (QT_VERSION >= QT_VERSION_CHECK(5,14,0))
+#define ENDL Qt::endl
+#else
+#define ENDL endl
+#endif
+
 // This code used to be used to sort the old format item databases
 // It is now a test program for use with regression testing the functions
 // that provide printable names
@@ -42,7 +49,7 @@ int main (int, char *[])
   int dp = 8; // decimal precision
   int i, j;
   
-  out << "Skills:" << endl;
+  out << "Skills:" << ENDL;
   for (i = 0; i <=74; ++i)
     out << format.arg(i, dp).arg(i, hp, 16).arg(skill_name(i));
   out << "\n\n";

@@ -83,6 +83,13 @@
 #include <QTextStream>
 #include <QMouseEvent>
 
+#pragma message("Once our minimum supported Qt version is greater than 5.14, this check can be removed and ENDL replaced with Qt::endl")
+#if (QT_VERSION >= QT_VERSION_CHECK(5,14,0))
+#define ENDL Qt::endl
+#else
+#define ENDL endl
+#endif
+
 //----------------------------------------------------------------------
 // Macros
 //#define DEBUG
@@ -787,32 +794,32 @@ void MapMgr::savePrefs(void)
 
 void MapMgr::dumpInfo(QTextStream& out)
 {
-  out << "[MapMgr]" << endl;
-  out << "DefaultLineColor: " << m_curLineColor << endl;
-  out << "DefaultLineName: " << m_curLineName << endl;
-  out << "DefaultLocationColor: " << m_curLocationColor << endl;
-  out << "ImageLoaded: " << m_mapData.imageLoaded() << endl;
-  out << "ZoneShortName: " << m_mapData.zoneShortName() << endl;
-  out << "ZoneLongName: " << m_mapData.zoneLongName() << endl;
+  out << "[MapMgr]" << ENDL;
+  out << "DefaultLineColor: " << m_curLineColor << ENDL;
+  out << "DefaultLineName: " << m_curLineName << ENDL;
+  out << "DefaultLocationColor: " << m_curLocationColor << ENDL;
+  out << "ImageLoaded: " << m_mapData.imageLoaded() << ENDL;
+  out << "ZoneShortName: " << m_mapData.zoneShortName() << ENDL;
+  out << "ZoneLongName: " << m_mapData.zoneLongName() << ENDL;
   out << "boundingRect: top(" << m_mapData.boundingRect().top() 
       << ") bottom(" << m_mapData.boundingRect().bottom() 
       << ") left(" << m_mapData.boundingRect().left()
-      << ") right(" << m_mapData.boundingRect().right() << ") " << endl;
+      << ") right(" << m_mapData.boundingRect().right() << ") " << ENDL;
   out << "size: width(" << m_mapData.size().width()
-      << ") height(" << m_mapData.size().height() << ")" << endl;
-  out << "ZoneZEM: " << m_mapData.zoneZEM() << endl;
-  out << "numLayers: " << m_mapData.numLayers() << endl;
+      << ") height(" << m_mapData.size().height() << ")" << ENDL;
+  out << "ZoneZEM: " << m_mapData.zoneZEM() << ENDL;
+  out << "numLayers: " << m_mapData.numLayers() << ENDL;
   for (int i = 0; i < m_mapData.numLayers(); ++i)
   {
-      out << "Layer " << i << ":" << endl;
-      out << "\tMapFileName: " << m_mapData.mapLayer(i)->fileName() << endl;
-      out << "\tMapLoaded: " << m_mapData.mapLayer(i)->mapLoaded() << endl;
-      out << "\tLLines: " << m_mapData.mapLayer(i)->lLines().count() << endl;
-      out << "\tMLines: " << m_mapData.mapLayer(i)->mLines().count() << endl;
-      out << "\tLocations: " << m_mapData.mapLayer(i)->locations().count() << endl;
+      out << "Layer " << i << ":" << ENDL;
+      out << "\tMapFileName: " << m_mapData.mapLayer(i)->fileName() << ENDL;
+      out << "\tMapLoaded: " << m_mapData.mapLayer(i)->mapLoaded() << ENDL;
+      out << "\tLLines: " << m_mapData.mapLayer(i)->lLines().count() << ENDL;
+      out << "\tMLines: " << m_mapData.mapLayer(i)->mLines().count() << ENDL;
+      out << "\tLocations: " << m_mapData.mapLayer(i)->locations().count() << ENDL;
   }
-  out << "Aggros: " << m_mapData.aggros().count() << endl;
-  out << endl;
+  out << "Aggros: " << m_mapData.aggros().count() << ENDL;
+  out << ENDL;
 }
 
 //----------------------------------------------------------------------
@@ -3000,82 +3007,82 @@ void Map::toggleMapLayerVisibility(QAction* layer)
 
 void Map::dumpInfo(QTextStream& out)
 {
-  out << "[" << preferenceName() << "]" << endl;
-  out << "Caption: " << windowTitle() << endl;
-  out << "AnimateSpawnMovement: " << m_animate << endl;
-  out << "VelocityLines: " << m_showVelocityLines << endl;
-  out << "SpawnDepthFilter: " << m_showVelocityLines << endl;
-  out << "FrameRate: " << m_frameRate << endl;
+  out << "[" << preferenceName() << "]" << ENDL;
+  out << "Caption: " << windowTitle() << ENDL;
+  out << "AnimateSpawnMovement: " << m_animate << ENDL;
+  out << "VelocityLines: " << m_showVelocityLines << ENDL;
+  out << "SpawnDepthFilter: " << m_showVelocityLines << ENDL;
+  out << "FrameRate: " << m_frameRate << ENDL;
 #ifdef DEBUG
-  out << "ShowDebugInfo: " << m_showDebugInfo << endl;
+  out << "ShowDebugInfo: " << m_showDebugInfo << ENDL;
 #endif
-  out << "ShowPlayer: " << m_showPlayer << endl;
-  out << "ShowPlayerBackground: " << m_showPlayerBackground << endl;
-  out << "ShowPlayerView: " << m_showPlayerView << endl;
-  out << "ShowDroppedItems: " << m_showDrops << endl;
-  out << "ShowDoors: " << m_showDoors << endl;
-  out << "ShowSpawns: " << m_showSpawns << endl;
-  out << "ShowFiltered: " << m_showFiltered << endl;
-  out << "HighlightConsideredSpawns: " << m_highlightConsideredSpawns << endl;
-  out << "ShowTooltips: " << m_showTooltips << endl;
-  out << "WalkPathShowSelect: " << m_walkpathshowselect << endl;
-  out << "FOVStyle: " << m_fovStyle << endl;
-  out << "FOVMode: " << m_fovMode << endl;
-  out << "FOVColor: " << m_fovColor.name() << endl;
+  out << "ShowPlayer: " << m_showPlayer << ENDL;
+  out << "ShowPlayerBackground: " << m_showPlayerBackground << ENDL;
+  out << "ShowPlayerView: " << m_showPlayerView << ENDL;
+  out << "ShowDroppedItems: " << m_showDrops << ENDL;
+  out << "ShowDoors: " << m_showDoors << ENDL;
+  out << "ShowSpawns: " << m_showSpawns << ENDL;
+  out << "ShowFiltered: " << m_showFiltered << ENDL;
+  out << "HighlightConsideredSpawns: " << m_highlightConsideredSpawns << ENDL;
+  out << "ShowTooltips: " << m_showTooltips << ENDL;
+  out << "WalkPathShowSelect: " << m_walkpathshowselect << ENDL;
+  out << "FOVStyle: " << m_fovStyle << ENDL;
+  out << "FOVMode: " << m_fovMode << ENDL;
+  out << "FOVColor: " << m_fovColor.name() << ENDL;
 
-  out << endl;
-  out << "[" << preferenceName() << " Parameters]" << endl;
-  out << "MapLineStyle: " << m_param.mapLineStyle() << endl;
-  out << "ShowMapPoints: " << m_param.showLocations() << endl;
-  out << "ShowMapLines: " << m_param.showLines() << endl;
-  out << "ShowGridLines: " << m_param.showGridLines() << endl;
-  out << "ShowGridTicks: " << m_param.showGridTicks() << endl;
-  out << "ShowBackgroundImage: " << m_param.showBackgroundImage() << endl;
-  out << "GridResolution: " << m_param.gridResolution() << endl; 
-  out << "GridTickColor: " << m_param.gridTickColor().name() << endl;
-  out << "GridLineColor: " << m_param.gridLineColor().name() << endl;
-  out << "BackgroundColor: " << m_param.backgroundColor().name() << endl;
-  out << "HeadRoom: " << m_param.headRoom() << endl;
-  out << "FloorRoom: " << m_param.floorRoom() << endl;
+  out << ENDL;
+  out << "[" << preferenceName() << " Parameters]" << ENDL;
+  out << "MapLineStyle: " << m_param.mapLineStyle() << ENDL;
+  out << "ShowMapPoints: " << m_param.showLocations() << ENDL;
+  out << "ShowMapLines: " << m_param.showLines() << ENDL;
+  out << "ShowGridLines: " << m_param.showGridLines() << ENDL;
+  out << "ShowGridTicks: " << m_param.showGridTicks() << ENDL;
+  out << "ShowBackgroundImage: " << m_param.showBackgroundImage() << ENDL;
+  out << "GridResolution: " << m_param.gridResolution() << ENDL; 
+  out << "GridTickColor: " << m_param.gridTickColor().name() << ENDL;
+  out << "GridLineColor: " << m_param.gridLineColor().name() << ENDL;
+  out << "BackgroundColor: " << m_param.backgroundColor().name() << ENDL;
+  out << "HeadRoom: " << m_param.headRoom() << ENDL;
+  out << "FloorRoom: " << m_param.floorRoom() << ENDL;
 
-  out << endl;
+  out << ENDL;
   m_mapIcons->dumpInfo(out);
 
-  out << "[" << preferenceName() << " State]" << endl;
+  out << "[" << preferenceName() << " State]" << ENDL;
   out << "screenLength: width(" << m_param.screenLength().width()
-      << ") height(" << m_param.screenLength().height() << ")" << endl;
+      << ") height(" << m_param.screenLength().height() << ")" << ENDL;
   out << "screenBounds: top(" << m_param.screenBounds().top() 
       << ") bottom(" << m_param.screenBounds().bottom() 
       << ") left(" << m_param.screenBounds().left()
-      << ") right(" << m_param.screenBounds().right() << ") " << endl;
+      << ") right(" << m_param.screenBounds().right() << ") " << ENDL;
   out << "screenCenter: x(" << m_param.screenCenter().x()
-      << ") y(" << m_param.screenCenter().y() << ")" << endl;
+      << ") y(" << m_param.screenCenter().y() << ")" << ENDL;
   out << "zoomMapLength: width(" << m_param.zoomMapLength().width() 
-      << ") height(" << m_param.zoomMapLength().height() << ")" << endl;
-  out << "panOffsetX: " << m_param.panOffsetX() << endl;
-  out << "panOffsetY: " << m_param.panOffsetY() << endl;
-  out << "zoom: " << m_param.zoom() << endl;
-  out << "ratio: " << m_param.ratio() << endl; 
+      << ") height(" << m_param.zoomMapLength().height() << ")" << ENDL;
+  out << "panOffsetX: " << m_param.panOffsetX() << ENDL;
+  out << "panOffsetY: " << m_param.panOffsetY() << ENDL;
+  out << "zoom: " << m_param.zoom() << ENDL;
+  out << "ratio: " << m_param.ratio() << ENDL; 
   out << "ratioIFixPt: " << m_param.ratioIFixPt() 
-      << " (q = " << MapParameters::qFormat << ")" << endl;
+      << " (q = " << MapParameters::qFormat << ")" << ENDL;
   out << "player: x(" << m_param.player().x() 
       << ") y(" << m_param.player().y() 
-      << ") z(" << m_param.player().z() << ")" << endl;
+      << ") z(" << m_param.player().z() << ")" << ENDL;
   out << "playerOffset: x(" << m_param.playerOffset().x() 
-      << ") y(" << m_param.playerOffset().y() << ")" << endl;
-  out << "scaledFOVDistance: " << m_scaledFOVDistance << endl;
-  out << "playerHeadRoom: " << m_param.playerHeadRoom() << endl;
-  out << "playerFloorRoom: " << m_param.playerFloorRoom() << endl;
-  out << "FollowMode: " << m_followMode << endl;
-  out << "MapPanning: " << m_mapPanning << endl;
-  out << "PvP: " << m_pvp << endl;
-  out << "DeityPvP: " << m_deityPvP << endl;
-  out << "RacePvP: " << m_racePvP << endl;
-  out << "CacheAlwaysRepaint: " << m_mapCache.alwaysRepaint() << endl;
-  out << endl;
+      << ") y(" << m_param.playerOffset().y() << ")" << ENDL;
+  out << "scaledFOVDistance: " << m_scaledFOVDistance << ENDL;
+  out << "playerHeadRoom: " << m_param.playerHeadRoom() << ENDL;
+  out << "playerFloorRoom: " << m_param.playerFloorRoom() << ENDL;
+  out << "FollowMode: " << m_followMode << ENDL;
+  out << "MapPanning: " << m_mapPanning << ENDL;
+  out << "PvP: " << m_pvp << ENDL;
+  out << "DeityPvP: " << m_deityPvP << ENDL;
+  out << "RacePvP: " << m_racePvP << ENDL;
+  out << "CacheAlwaysRepaint: " << m_mapCache.alwaysRepaint() << ENDL;
+  out << ENDL;
 
 #ifdef DEBUG
-  out << "[" << preferenceName() << " Statistics]" << endl;
+  out << "[" << preferenceName() << " Statistics]" << ENDL;
   if (m_showDebugInfo)
   {
     long totalTime = 0;
@@ -3085,16 +3092,16 @@ void Map::dumpInfo(QTextStream& out)
   
     fps = float(maxFrameTimes) / (totalTime / 1000.0);
 
-    out << "Actual FPS: " << fps << endl;
+    out << "Actual FPS: " << fps << ENDL;
   }
-  out << "Paint Count: " << m_paintCount << endl;
-  out << "Cache Paint Count: " << m_mapCache.paintCount() << endl;
+  out << "Paint Count: " << m_paintCount << ENDL;
+  out << "Cache Paint Count: " << m_mapCache.paintCount() << ENDL;
   out << "Average Cache Paints per Map Paint: " <<
-    double(m_mapCache.paintCount()) / double(m_paintCount) << endl;
+    double(m_mapCache.paintCount()) / double(m_paintCount) << ENDL;
   out << "Average Paint Time: " 
       << double(m_paintTimeSum) / double(m_paintCount) 
-      << " milliseconds " << endl;
-  out << endl;
+      << " milliseconds " << ENDL;
+  out << ENDL;
 #endif // DEBUG
 }
 
@@ -5267,22 +5274,22 @@ void MapFrame::loadLayerButtons()
 void MapFrame::dumpInfo(QTextStream& out)
 {
   // first dump information about the map frame
-  out << "[" << preferenceName() << "]" << endl;
-  out << "Caption: " << windowTitle() << endl;
-  out << "ShowStatusBox: " << m_topControlBox->isVisible() << endl;
-  out << "ShowZoom: " << m_zoomBox->isVisible() << endl;
-  out << "ShowPlayerLocation: " << m_playerLocationBox->isVisible() << endl;
-  out << "ShowMouseLocation: " << m_mouseLocationBox->isVisible() << endl;
-  out << "ShowFilter: " << m_filterBox->isVisible() << endl;
-  out << "ShowControlBox: " << m_bottomControlBox->isVisible() << endl;
-  out << "ShowFrameRate: " << m_frameRateBox->isVisible() << endl;
-  out << "ShowLayersControl: " << m_layersBox->isVisible() << endl;
-  out << "ShowPanControls: " << m_panBox->isVisible() << endl; 
-  out << "ShowDepthFilterControls: " << m_depthControlBox->isVisible() << endl;
-  out << "CurrentFilter: '" << m_lastFilter << "'" << endl;
-  out << "RuntimeFilterFlag: " << m_runtimeFilterFlag << endl;
-  out << "RuntimeFilterFlagMask: " << m_runtimeFilterFlagMask << endl;
-  out << endl;
+  out << "[" << preferenceName() << "]" << ENDL;
+  out << "Caption: " << windowTitle() << ENDL;
+  out << "ShowStatusBox: " << m_topControlBox->isVisible() << ENDL;
+  out << "ShowZoom: " << m_zoomBox->isVisible() << ENDL;
+  out << "ShowPlayerLocation: " << m_playerLocationBox->isVisible() << ENDL;
+  out << "ShowMouseLocation: " << m_mouseLocationBox->isVisible() << ENDL;
+  out << "ShowFilter: " << m_filterBox->isVisible() << ENDL;
+  out << "ShowControlBox: " << m_bottomControlBox->isVisible() << ENDL;
+  out << "ShowFrameRate: " << m_frameRateBox->isVisible() << ENDL;
+  out << "ShowLayersControl: " << m_layersBox->isVisible() << ENDL;
+  out << "ShowPanControls: " << m_panBox->isVisible() << ENDL; 
+  out << "ShowDepthFilterControls: " << m_depthControlBox->isVisible() << ENDL;
+  out << "CurrentFilter: '" << m_lastFilter << "'" << ENDL;
+  out << "RuntimeFilterFlag: " << m_runtimeFilterFlag << ENDL;
+  out << "RuntimeFilterFlagMask: " << m_runtimeFilterFlagMask << ENDL;
+  out << ENDL;
 
   // dump information about the map
   if (m_map)

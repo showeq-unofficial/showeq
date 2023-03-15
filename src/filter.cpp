@@ -36,6 +36,13 @@
 
 #define MAXLEN   5000
 
+#pragma message("Once our minimum supported Qt version is greater than 5.14, this check can be removed and ENDL replaced with Qt::endl")
+#if (QT_VERSION >= QT_VERSION_CHECK(5,14,0))
+#define ENDL Qt::endl
+#else
+#define ENDL endl
+#endif
+
 //#define DEBUG_FILTER
 
 //----------------------------------------------------------------------
@@ -229,7 +236,7 @@ bool FilterItem::save(QString& indent, QTextStream& out)
     out << "/>";
   }
 
-  out << "</oldfilter>" << endl;
+  out << "</oldfilter>" << ENDL;
 
   return true;
 }
@@ -565,9 +572,9 @@ bool Filters::save(const QString& filename) const
   out.setFieldAlignment(QTextStream::AlignLeft);
 
   // print document header
-  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl
-      << "<!DOCTYPE seqfilters SYSTEM \"seqfilters.dtd\">" << endl
-      << "<seqfilters>" << endl;
+  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << ENDL
+      << "<!DOCTYPE seqfilters SYSTEM \"seqfilters.dtd\">" << ENDL
+      << "<seqfilters>" << ENDL;
 
   // set initial indent
   QString indent = "    ";
@@ -579,17 +586,17 @@ bool Filters::save(const QString& filename) const
   {
     // section start tag
     out << indent << "<section name=\"" << m_types.name(it->first)
-	<< "\">" << endl;
+	<< "\">" << ENDL;
 
     // persist the filter
     it->second->save(indent, out);
 
     // section end tag
-    out << indent << "</section>" << endl;
+    out << indent << "</section>" << ENDL;
   }
 
   // output closing entity
-  out << "</seqfilters>" << endl;
+  out << "</seqfilters>" << ENDL;
 
   return true;
 }

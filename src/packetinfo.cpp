@@ -38,6 +38,13 @@
 #include "everquest.h"
 #include "diagnosticmessages.h"
 
+#pragma message("Once our minimum supported Qt version is greater than 5.14, this check can be removed and ENDL replaced with Qt::endl")
+#if (QT_VERSION >= QT_VERSION_CHECK(5,14,0))
+#define ENDL Qt::endl
+#else
+#define ENDL endl
+#endif
+
 //----------------------------------------------------------------------
 // Macros
 
@@ -329,9 +336,9 @@ bool EQPacketOPCodeDB::save(const QString& filename)
   out.setFieldAlignment(QTextStream::AlignLeft);
 
   // print document header
-  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl
-      << "<!DOCTYPE seqopcodes SYSTEM \"seqopcodes.dtd\">" << endl
-      << "<seqopcodes>" << endl;
+  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << ENDL
+      << "<!DOCTYPE seqopcodes SYSTEM \"seqopcodes.dtd\">" << ENDL
+      << "<seqopcodes>" << ENDL;
 
   // set initial indent
   QString indent = "    ";
@@ -374,7 +381,7 @@ bool EQPacketOPCodeDB::save(const QString& filename)
       out << " implicitlen=\"" << currentOPCode->implicitLen() << "\"";
     if (!currentOPCode->updated().isEmpty())
       out << " updated=\"" << currentOPCode->updated() << "\"";
-    out << ">" << endl;
+    out << ">" << ENDL;
 
     // increase the indent
     indent += "    ";
@@ -383,7 +390,7 @@ bool EQPacketOPCodeDB::save(const QString& filename)
     QStringList comments = currentOPCode->comments();
     for (QStringList::Iterator cit = comments.begin(); 
 	 cit != comments.end(); ++cit)
-      out << indent << "<comment>" << *cit << "</comment>" << endl;
+      out << indent << "<comment>" << *cit << "</comment>" << ENDL;
 
     QByteArray dirStr;
     QByteArray sztStr;
@@ -401,18 +408,18 @@ bool EQPacketOPCodeDB::save(const QString& filename)
 	  << "\" typename=\"" << currentPayload->typeName() 
 	  << "\" sizechecktype=\""
 	  << sztStrs[currentPayload->sizeCheckType()]
-	  << "\"/>" << endl;
+	  << "\"/>" << ENDL;
     }
 
     // decrease the indent
     indent.remove(0, 4);
 
     // close the opcode entity
-    out << indent << "</opcode>" << endl;
+    out << indent << "</opcode>" << ENDL;
   }
 
   // output closing entity
-  out << "</seqopcodes>" << endl;
+  out << "</seqopcodes>" << ENDL;
 
   return true;
 }

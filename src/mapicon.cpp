@@ -34,6 +34,13 @@
 #include <QTextStream>
 #include <QPolygon>
 
+#pragma message("Once our minimum supported Qt version is greater than 5.14, this check can be removed and ENDL replaced with Qt::endl")
+#if (QT_VERSION >= QT_VERSION_CHECK(5,14,0))
+#define ENDL Qt::endl
+#else
+#define ENDL endl
+#endif
+
 //----------------------------------------------------------------------
 // constants
 static const QString iconSizeNames[] = 
@@ -822,11 +829,11 @@ void MapIcons::save()
 
 void MapIcons::dumpInfo(QTextStream& out)
 {
-  out << "[" << preferenceName() << " MapIcons]" << endl;
-  out << "ShowSpawnNames: " << m_showSpawnNames << endl;
-  out << "FOVDistance: " << m_fovDistance << endl;
-  out << "DrawSize: " << m_drawSize << endl;
-  out << endl;
+  out << "[" << preferenceName() << " MapIcons]" << ENDL;
+  out << "ShowSpawnNames: " << m_showSpawnNames << ENDL;
+  out << "FOVDistance: " << m_fovDistance << ENDL;
+  out << "DrawSize: " << m_drawSize << ENDL;
+  out << ENDL;
 }
 
 const QString& MapIcons::iconTypeName(MapIconType type)

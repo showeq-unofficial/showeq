@@ -30,6 +30,13 @@
 
 #include <QTextStream>
 
+#pragma message("Once our minimum supported Qt version is greater than 5.14, this check can be removed and ENDL replaced with Qt::endl")
+#if (QT_VERSION >= QT_VERSION_CHECK(5,14,0))
+#define ENDL Qt::endl
+#else
+#define ENDL endl
+#endif
+
 GroupMgr::GroupMgr(SpawnShell* spawnShell,
         Player* player,
         QObject* parent, const char* name)
@@ -326,17 +333,17 @@ void GroupMgr::killSpawn(const Item* item)
 void GroupMgr::dumpInfo(QTextStream& out)
 {
   // dump general group manager information
-  out << "[GroupMgr]" << endl;
-  out << "Members: " << m_memberCount << endl;
-  out << "MembersInZone: " << m_membersInZoneCount << endl;
-  out << "Player: " << m_player->name() << endl;
-  out << "GroupBonus: " << groupBonus() << endl;
-  out << "GroupTotalLevels: " << totalLevels() << endl;
+  out << "[GroupMgr]" << ENDL;
+  out << "Members: " << m_memberCount << ENDL;
+  out << "MembersInZone: " << m_membersInZoneCount << ENDL;
+  out << "Player: " << m_player->name() << ENDL;
+  out << "GroupBonus: " << groupBonus() << ENDL;
+  out << "GroupTotalLevels: " << totalLevels() << ENDL;
   out << "GroupAverageLevel: ";
   if (m_membersInZoneCount)
-    out << totalLevels()/m_membersInZoneCount << endl;
+    out << totalLevels()/m_membersInZoneCount << ENDL;
   else
-    out << totalLevels() << endl;
+    out << totalLevels() << ENDL;
 
   // iterate over the group members
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
@@ -351,7 +358,7 @@ void GroupMgr::dumpInfo(QTextStream& out)
 	  << " " << m_members[i]->m_spawn->raceString()
 	  << " " << m_members[i]->m_spawn->classString();
 
-    out << endl;
+    out << ENDL;
   }  
 }
 

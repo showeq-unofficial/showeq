@@ -94,6 +94,13 @@
 #include <QDesktopWidget>
 #include <QStyleFactory>
 
+#pragma message("Once our minimum supported Qt version is greater than 5.14, this check can be removed and ENDL replaced with Qt::endl")
+#if (QT_VERSION >= QT_VERSION_CHECK(5,14,0))
+#define ENDL Qt::endl
+#else
+#define ENDL endl
+#endif
+
 // this define is used to diagnose the order with which zone packets are rcvd
 #define ZONE_ORDER_DIAG
 
@@ -3553,11 +3560,11 @@ void EQInterface::listInterfaceInfo(void)
   // open the output data stream
   QTextStream out(&outText, QIODevice::WriteOnly);
 
-  out << "Map window layout info:" << endl;
-  out << "-----------------------" << endl;
+  out << "Map window layout info:" << ENDL;
+  out << "-----------------------" << ENDL;
   //FIXME out << *this;
-  out << "FIXME" << endl;
-  out << "-----------------------" << endl;
+  out << "FIXME" << ENDL;
+  out << "-----------------------" << ENDL;
 
   seqInfo(outText.toLatin1().data());
 }
@@ -3698,7 +3705,7 @@ void EQInterface::dumpSpellBook(void)
   out << "Spellbook of " << m_player->name() << " a level " 
       << m_player->level() << " " << m_player->raceString() 
       << " " << m_player->classString()
-      << endl;
+      << ENDL;
 
   uint8_t playerClass = m_player->classVal();
 
@@ -3728,7 +3735,7 @@ void EQInterface::dumpSpellBook(void)
                 spell_name(spellid).toLatin1().data());
     }
 
-    out << txt << endl;
+    out << txt << ENDL;
   }
 }
 
@@ -5044,7 +5051,7 @@ void EQInterface::saveSpawnPaths(void)
     QTextStream out(&mobPathFile);
     // map header line
     out << m_zoneMgr->longZoneName() << ","
-	<< m_zoneMgr->shortZoneName() << ",0,0" << endl;
+	<< m_zoneMgr->shortZoneName() << ",0,0" << ENDL;
 
     // iterate over the spawns adding their paths to the file
     ItemConstIterator it(m_spawnShell->getConstMap(tSpawn));
@@ -5098,7 +5105,7 @@ void EQInterface::saveSpawnPath(QTextStream& out, const Item* item)
          << "," <<  trackPoint->y()
          << "," << trackPoint->z();
    }
-   out << endl;
+   out << ENDL;
 }
 
 void EQInterface::toggle_net_real_time_thread(bool realtime)
