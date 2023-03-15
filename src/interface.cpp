@@ -92,6 +92,7 @@
 #include <QMenu>
 #include <QWidgetAction>
 #include <QDesktopWidget>
+#include <QStyleFactory>
 
 // this define is used to diagnose the order with which zone packets are rcvd
 #define ZONE_ORDER_DIAG
@@ -1444,40 +1445,43 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    QMenu* pStyleMenu = new QMenu("&Style");
    pInterfaceMenu->addMenu(pStyleMenu);
 
-   tmpAction = pStyleMenu->addAction( "Plastique");
-   tmpAction->setCheckable(true);
-   tmpAction->setData(1);
-   ActionList_StyleMenu.append(tmpAction);
+   QStringList availableStyles = QStyleFactory::keys();
 
-   tmpAction = pStyleMenu->addAction( "Windows (Default)");
-   tmpAction->setCheckable(true);
-   tmpAction->setData(2);
-   ActionList_StyleMenu.append(tmpAction);
+   availableStyles.sort(Qt::CaseInsensitive);
 
-   tmpAction = pStyleMenu->addAction( "CDE");
-   tmpAction->setCheckable(true);
-   tmpAction->setData(3);
-   ActionList_StyleMenu.append(tmpAction);
+   QString currentStyleName = qApp->style()->objectName();
 
-   tmpAction = pStyleMenu->addAction( "CDE Polished");
-   tmpAction->setCheckable(true);
-   tmpAction->setData(4);
-   ActionList_StyleMenu.append(tmpAction);
+   QStringList::Iterator styleItr = availableStyles.begin();
 
-   tmpAction = pStyleMenu->addAction( "Motif");
-   tmpAction->setCheckable(true);
-   tmpAction->setData(5);
-   ActionList_StyleMenu.append(tmpAction);
+   while (styleItr != availableStyles.end()) {
 
-   tmpAction = pStyleMenu->addAction( "Cleanlooks");
-   tmpAction->setCheckable(true);
-   tmpAction->setData(6);
-   ActionList_StyleMenu.append(tmpAction);
+     tmpAction = pStyleMenu->addAction(*styleItr);
+     tmpAction->setCheckable(true);
 
+     if (currentStyleName.toLower() == (*styleItr).toLower())
+	tmpAction->setChecked(true);
+
+     tmpAction->setData(*styleItr);
+     ActionList_StyleMenu.append(tmpAction);
+
+     ++styleItr;
+   }
+   
    connect (pStyleMenu, SIGNAL(triggered(QAction*)), this,
            SLOT(selectTheme(QAction*)));
 
-   setTheme(pSEQPrefs->getPrefInt("Theme", section, 2));
+   QString themeName = pSEQPrefs->getPrefString("ThemeName", section, "");
+
+   //Use the text name if there is one.  If not, fall back to old numeric id.  If no
+   //numeric id, then just use whatever Qt started with (no forced default)
+   if (!themeName.isEmpty())
+   {
+     setTheme(themeName);
+   } else {
+     int themeId = pSEQPrefs->getPrefInt("Theme", section, -1);
+     if (themeId >= 0)
+       setTheme(themeId);
+   }
 
    // Interface -> Status Bar
    QMenu* statusBarMenu = new QMenu("&Status Bar");
@@ -5659,19 +5663,28 @@ void EQInterface::toggleUseColor(bool enable)
   m_terminal->setUseColor(enable);
 }
 
-int EQInterface::setTheme(int id)
+QString EQInterface::setTheme(QString name)
 {
     static QFont OrigFont = qApp->font();
     static QPalette OrigPalette = qApp->palette();;
 
+    QString currentStyleName = qApp->style()->objectName();
+
+    QStringList availableStyles = QStyleFactory::keys();
+
+    if (!availableStyles.contains(name, Qt::CaseInsensitive)) 
+	return currentStyleName;
+
+    qApp->setStyle(QStyleFactory::create(name));
+
     MenuActionList::Iterator iter;
-    int theme = 2;
+
     for ( iter = ActionList_StyleMenu.begin(); iter != ActionList_StyleMenu.end(); ++iter)
     {
-      if ((*iter)->data().value<int>() == id)
+      if ((*iter)->data().value<QString>().toLower() == name.toLower())
       {
         (*iter)->setChecked(true);
-        theme = (*iter)->data().value<int>();
+        currentStyleName = (*iter)->data().value<QString>();
       }
       else
       {
@@ -5679,86 +5692,61 @@ int EQInterface::setTheme(int id)
       }
     }
 
-    switch ( theme )
+    return currentStyleName;
+}
+
+int EQInterface::setTheme(int id)
+{
+
+    int current_theme = 2;
+
+    MenuActionList::Iterator iter;
+
+    for ( iter = ActionList_StyleMenu.begin(); iter != ActionList_StyleMenu.end(); ++iter)
     {
-    case 1: // plastique
-    {
-      QPalette p( QColor( 239, 239, 239 ) );
-      qApp->setStyle("plastique");
-      qApp->setPalette(p);
-    }
-    break;
-    case 2: // windows
-    {
-      qApp->setStyle("windows");
-      qApp->setFont( OrigFont );
-      qApp->setPalette(OrigPalette);
-    }
-    break;
-    case 3: // cde 
-    case 4: // cde polished
-    {
-      QPalette p( QColor( 75, 123, 130 ) );
-      qApp->setStyle("cde");
-      p.setColor( QPalette::Active, QPalette::Base, QColor( 55, 77, 78 ) );
-      p.setColor( QPalette::Inactive, QPalette::Base, QColor( 55, 77, 78 ) );
-      p.setColor( QPalette::Disabled, QPalette::Base, QColor( 55, 77, 78 ) );
-      p.setColor( QPalette::Active, QPalette::Highlight, Qt::white );
-      p.setColor( QPalette::Active, QPalette::HighlightedText, QColor( 55, 77, 78 ) );
-      p.setColor( QPalette::Inactive, QPalette::Highlight, Qt::white );
-      p.setColor( QPalette::Inactive, QPalette::HighlightedText, QColor( 55, 77, 78 ) );
-      p.setColor( QPalette::Disabled, QPalette::Highlight, Qt::white );
-      p.setColor( QPalette::Disabled, QPalette::HighlightedText, QColor( 55, 77, 78 ) );
-      p.setColor( QPalette::Active, QPalette::Foreground, Qt::white );
-      p.setColor( QPalette::Active, QPalette::Text, Qt::white );
-      p.setColor( QPalette::Active, QPalette::ButtonText, Qt::white );
-      p.setColor( QPalette::Inactive, QPalette::Foreground, Qt::white );
-      p.setColor( QPalette::Inactive, QPalette::Text, Qt::white );
-      p.setColor( QPalette::Inactive, QPalette::ButtonText, Qt::white );
-      p.setColor( QPalette::Disabled, QPalette::Foreground, Qt::lightGray );
-      p.setColor( QPalette::Disabled, QPalette::Text, Qt::lightGray );
-      p.setColor( QPalette::Disabled, QPalette::ButtonText, Qt::lightGray );
-      qApp->setPalette(p);
-      qApp->setFont( QFont( "times", OrigFont.pointSize() ) );
-    }
-    break;
-    case 5: // motif
-    {
-      QPalette p( QColor( 192, 192, 192 ) );
-      qApp->setStyle("motif");
-      qApp->setPalette(p);
-      qApp->setFont( OrigFont );
-    }
-    break;
-    case 6: // cleanlooks
-    {
-      //QPalette p( QColor( 192, 192, 192 ) );
-      qApp->setStyle("cleanlooks");
-      qApp->setPalette(OrigPalette);
-      qApp->setFont( OrigFont );
-    }
-    break;
-    default: // system default
-    {
-      QPalette p( QColor( 192, 192, 192 ) );
-      qApp->setStyle("motif");
-      qApp->setPalette(p);
-      qApp->setFont( OrigFont );
-      theme = 2;
-    }
-    break;
+      if ((*iter)->isChecked())
+        current_theme = (*iter)->data().value<int>();
     }
 
-    // make sure the windows that override the application font, do so
+    QString new_theme;
+
+    switch ( id )
+    {
+      case 1: // plastique
+        new_theme = "plastique";
+        break;
+      case 2: // windows
+        new_theme = "windows";
+        break;
+      case 3: // cde
+      case 4: // cde polished
+        new_theme = "cde";
+        break;
+      case 5: // motif
+        new_theme = "motif";
+        break;
+      case 6: // cleanlooks
+        new_theme = "cleanlooks";
+        break;
+      default: // system default
+        return current_theme;
+        break;
+    }
+
+    QString set_theme = setTheme(new_theme);
+
     emit restoreFonts();
 
-    return theme;
+    if (new_theme.toLower() == set_theme.toLower())
+        return id;
+    else
+        return current_theme;
 }
 
 void EQInterface::selectTheme(QAction* selection)
 {
-  int theme = setTheme(selection->data().value<int>());
-  pSEQPrefs->setPrefInt("Theme", "Interface", theme);
+  QString theme = setTheme(selection->data().value<QString>());
+  pSEQPrefs->setPrefString("ThemeName", "Interface", theme);
 }
 
 void EQInterface::showMap(int i)

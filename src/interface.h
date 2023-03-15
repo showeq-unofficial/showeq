@@ -317,6 +317,7 @@ class EQInterface:public QMainWindow
 
  protected:
    bool getMonitorOpCodeList(const QString& title, QString& opcodeList);
+   QString setTheme(QString name);
    int setTheme(int id);
    void loadFormatStrings();
    void showMap(int mapNum);
