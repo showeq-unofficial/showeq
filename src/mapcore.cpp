@@ -1332,7 +1332,7 @@ void MapData::saveSOEMap(const QString& fileName, const uint8_t layerNum) const
     currentLineL = *mlit;
     z1 = float(currentLineL->z());
 
-    const QColor& color = currentLineL->origColor().isValid() ? currentLineL->color() : currentLineL->origColor();
+    const QColor& color = currentLineL->color().isValid() ? currentLineL->color() : currentLineL->origColor();
     r = color.red();
     g = color.green();
     b = color.blue();
@@ -1363,7 +1363,7 @@ void MapData::saveSOEMap(const QString& fileName, const uint8_t layerNum) const
   for (; mmit != m_mapLayers[layerNum]->mLines().end(); ++mmit)
   {
     currentLineM = *mmit;
-    const QColor& color = currentLineM->origColor().isValid() ? currentLineM->color() : currentLineM->origColor();
+    const QColor& color = currentLineM->color().isValid() ? currentLineM->color() : currentLineM->origColor();
     r = color.red();
     g = color.green();
     b = color.blue();
@@ -1391,7 +1391,8 @@ void MapData::saveSOEMap(const QString& fileName, const uint8_t layerNum) const
   for (; lit != m_mapLayers[layerNum]->locations().end(); ++lit)
   {
     currentLoc = *lit;
-    const QColor& color = currentLoc->origColor().isValid() ? currentLoc->color() : currentLoc->origColor();
+    //TODO why is this zero?
+    const QColor& color = currentLoc->color().isValid() ? currentLoc->color() : currentLoc->origColor();
 
     // convert spaces to underscores
     name = currentLoc->name();
