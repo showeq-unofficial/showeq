@@ -59,6 +59,7 @@ class MapLine;
 class MapLocation;
 class MapParameters;
 class MapImage;
+class MapLayer;
 
 ///////////////////////////////////////////
 // type definitions
@@ -131,6 +132,7 @@ class MapParameters
   double ratioX() const { return m_ratio; }
   double ratioY() const { return m_ratio; } 
   int ratioIFixPt() const { return m_ratioIFixPt; }
+  bool isLayerVisible(uint8_t layerNum) const;
 
   int gridResolution() const { return m_gridResolution; }
   const QColor& gridLineColor() const { return m_gridLineColor; }
@@ -195,6 +197,7 @@ class MapParameters
   void setGridTickColor(const QColor& color) { m_gridTickColor = color; }
   void setHeadRoom(int16_t headRoom);
   void setFloorRoom(int16_t floorRoom);
+  void setLayerVisibility(uint8_t layerNum, bool isVisible);
   
   void reAdjust(MapPoint* targetPoint);
   void reAdjust();
@@ -236,6 +239,8 @@ class MapParameters
   bool m_showLines;
   bool m_showGridLines;
   bool m_showGridTicks;
+
+  uint32_t m_layerVisibility;
 };
 
 inline 
@@ -530,6 +535,31 @@ class MapAggro
 };
 
 //----------------------------------------------------------------------
+// MapLayer
+class MapLayer
+{
+  public:
+    MapLayer();
+    ~MapLayer();
+    void clear();
+    QList<MapLineL*>& lLines() { return m_lLines; }
+    QList<MapLineM*>& mLines() { return m_mLines; }
+    QList<MapLocation*>& locations() { return m_locations; }
+    void setFileName(QString fileName) { m_fileName = fileName; }
+    QString fileName() const { return m_fileName; }
+    bool mapLoaded() const { return m_mapLoaded; }
+    void setMapLoaded(bool mapLoaded) { m_mapLoaded = mapLoaded; }
+
+  private:
+    QList<MapLineL*> m_lLines;
+    QList<MapLineM*> m_mLines;
+    QList<MapLocation*> m_locations;
+    QString m_fileName;
+    bool m_mapLoaded;
+
+};
+
+//----------------------------------------------------------------------
 // MapData
 class MapData
 {
@@ -542,11 +572,10 @@ class MapData
   void clear();
   void loadMap(const QString& fileName, bool import = false);
   void loadSOEMap(const QString& fileName, bool import = false);
-  void saveMap(const QString& fileName) const;
-  void saveSOEMap(const QString& fileName) const;
+  void saveMap(const QString& fileName, const uint8_t layerNum) const;
+  void saveSOEMap(const QString& fileName, const uint8_t layerNum) const;
 
   // accessors
-  const QString& fileName() const { return m_fileName; }
   const QString& zoneShortName() const { return m_zoneShortName; }
   const QString& zoneLongName() const { return m_zoneLongName; }
   const QRect& boundingRect() const { return m_boundingRect; }
@@ -556,13 +585,11 @@ class MapData
   int16_t minY() const { return m_minY; }
   int16_t maxX() const { return m_maxX; }
   int16_t maxY() const { return m_maxY; }
-  QList<MapLineL*>& lLines() { return m_lLines; }
-  QList<MapLineM*>& mLines() { return m_mLines; }
-  QList<MapLocation*>& locations() { return m_locations; }
+  MapLayer* mapLayer(uint8_t layerNum);
+  uint8_t numLayers() const { return m_mapLayers.count(); }
   QList<MapAggro*>& aggros() { return m_aggros; }
   const QPixmap& image() const { return m_image; }
   bool imageLoaded() const { return m_imageLoaded; }
-  bool mapLoaded() const { return m_mapLoaded; }
   bool isAggro(const QString& name, uint16_t* range) const;
 
   // make sure map is big enough, returns true if size modified
@@ -579,12 +606,13 @@ class MapData
   void delLinePoint(void);
   void setLineName(const QString& name);
   void setLineColor(const QString& color);
-  void setFileName(const QString& name) { m_fileName = name; }
   void setZoneLongName(const QString& name) { m_zoneShortName = name; }
   void setZoneShortName(const QString& name) { m_zoneLongName = name; }
   void setZoneZEM(uint8_t zem) { m_zoneZEM = zem; }
   void scaleDownZ(int16_t factor);
   void scaleUpZ(int16_t factor);
+  void setEditLayer(uint8_t layerNum) { m_editLayer = layerNum; }
+  uint8_t editLayer() const { return m_editLayer; }
 
   // map painting
   void paintGrid(MapParameters& param, QPainter& p) const;
@@ -601,19 +629,16 @@ class MapData
   int16_t m_maxY;
   QRect m_boundingRect;
   QSize m_size;
-  QString m_fileName;
   QString m_zoneLongName;
   QString m_zoneShortName;
-  QList<MapLineL*> m_lLines;
-  QList<MapLineM*> m_mLines;
+  QVector<MapLayer*> m_mapLayers;
   MapLineM* m_editLineM;
-  QList<MapLocation*> m_locations;
   MapLocation* m_editLocation;
   QList<MapAggro*> m_aggros;
   uint8_t m_zoneZEM;
   QPixmap m_image;
   bool m_imageLoaded;
-  bool m_mapLoaded;
+  uint8_t m_editLayer;
 };
 
 inline

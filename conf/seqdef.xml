@@ -604,6 +604,10 @@
    <bool value="true" />
    <comment>Display map frame rate control</comment>
   </property>
+  <property name="ShowLayersControl" >
+   <bool value="true" />
+   <comment>Display map layer control</comment>
+  </property>
   <property name="ShowFilter" >
    <bool value="true" />
    <comment>Display the map's runtime filter control</comment>
@@ -631,6 +635,9 @@
   <property name="Framerate" >
    <int value="5" />
    <comment>Map frame rate (number of map refreshes per second)</comment>
+  </property>
+  <property name="MapLayerMask">
+   <int value="-7"/>
   </property>
   <property name="CacheChanges" >
    <bool value="true" />
@@ -904,6 +911,10 @@
    <bool value="true" />
    <comment>Display map frame rate control</comment>
   </property>
+  <property name="ShowLayersControl" >
+   <bool value="true" />
+   <comment>Display map layer control</comment>
+  </property>
   <property name="ShowFilter" >
    <bool value="true" />
    <comment>Display the map's runtime filter control</comment>
@@ -931,6 +942,9 @@
   <property name="Framerate" >
    <int value="5" />
    <comment>Map frame rate (number of map refreshes per second)</comment>
+  </property>
+  <property name="MapLayerMask">
+   <int value="-7"/>
   </property>
   <property name="CacheChanges" >
    <bool value="true" />
@@ -1204,6 +1218,10 @@
    <bool value="true" />
    <comment>Display map frame rate control</comment>
   </property>
+  <property name="ShowLayersControl" >
+   <bool value="true" />
+   <comment>Display map layer control</comment>
+  </property>
   <property name="ShowFilter" >
    <bool value="true" />
    <comment>Display the map's runtime filter control</comment>
@@ -1231,6 +1249,9 @@
   <property name="Framerate" >
    <int value="5" />
    <comment>Map frame rate (number of map refreshes per second)</comment>
+  </property>
+  <property name="MapLayerMask">
+   <int value="-7"/>
   </property>
   <property name="CacheChanges" >
    <bool value="true" />
@@ -1504,6 +1525,10 @@
    <bool value="true" />
    <comment>Display map frame rate control</comment>
   </property>
+  <property name="ShowLayersControl" >
+   <bool value="true" />
+   <comment>Display map layer control</comment>
+  </property>
   <property name="ShowFilter" >
    <bool value="true" />
    <comment>Display the map's runtime filter control</comment>
@@ -1531,6 +1556,9 @@
   <property name="Framerate" >
    <int value="5" />
    <comment>Map frame rate (number of map refreshes per second)</comment>
+  </property>
+  <property name="MapLayerMask">
+   <int value="-7"/>
   </property>
   <property name="CacheChanges" >
    <bool value="true" />
@@ -1804,6 +1832,10 @@
    <bool value="true" />
    <comment>Display map frame rate control</comment>
   </property>
+  <property name="ShowLayersControl" >
+   <bool value="true" />
+   <comment>Display map layer control</comment>
+  </property>
   <property name="ShowFilter" >
    <bool value="true" />
    <comment>Display the map's runtime filter control</comment>
@@ -1830,6 +1862,9 @@
   <property name="Framerate" >
    <int value="5" />
    <comment>Map frame rate (number of map refreshes per second)</comment>
+  </property>
+  <property name="MapLayerMask">
+   <int value="-7"/>
   </property>
   <property name="CacheChanges" >
    <bool value="true" />

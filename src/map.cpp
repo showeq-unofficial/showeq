@@ -56,6 +56,7 @@
 #include <QFileDialog>
 #include <QEvent>
 #include <QPushButton>
+#include <QToolButton>
 #include <QLayout>
 #include <QShortcut>
 #include <QColorDialog>
@@ -359,27 +360,33 @@ void MapMgr::zoneEnd(const QString& shortZoneName, const QString& longZoneName)
 
 void MapMgr::loadZoneMap(const QString& shortZoneName)
 {
-  // first attempt to find map with .map suffix
-  QFileInfo fileInfo = m_dataLocMgr->findExistingFile("maps", 
-                              shortZoneName + ".map");
-  
-  // if that file doesn't exist, try a straight .txt suffix
-  if (!fileInfo.exists())
-    fileInfo = m_dataLocMgr->findExistingFile("maps", 
-                          shortZoneName + ".txt");
 
-  // if that file doesn't exist, try a  _1.txt suffix
-  if (!fileInfo.exists())
-    fileInfo = m_dataLocMgr->findExistingFile("maps", 
-                          shortZoneName + "_1.txt");
+  bool found = false;
+  QString extension = "";
 
-  if (fileInfo.exists())
+  QStringList mapFiles;
+
+  // find maps
+  QFileInfo mapFileInfo = m_dataLocMgr->findExistingFile("maps",
+          shortZoneName + ".map");
+
+  QFileInfo txtFileInfo = m_dataLocMgr->findExistingFile("maps",
+          shortZoneName + ".txt");
+
+  if (mapFileInfo.exists())
   {
-    // load the map if it's not already loaded
-    if (fileInfo.absoluteFilePath() != m_mapData.fileName())
-      loadFileMap(fileInfo.absoluteFilePath());
+      found = true;
+      extension = ".map";
+      mapFiles.append(mapFileInfo.absoluteFilePath());
+
+  } else if (txtFileInfo.exists())
+  {
+      found = true;
+      extension = ".txt";
+      mapFiles.append(txtFileInfo.absoluteFilePath());
   }
-  else 
+
+  if (!found)
   {
     seqInfo("No Map found for zone '%s'!", shortZoneName.toLatin1().data());
     seqInfo("    Checked for all variants of '%s.map', '%s.txt', and '%s_1.txt'",
@@ -389,7 +396,22 @@ void MapMgr::loadZoneMap(const QString& shortZoneName)
     seqInfo("    in directories '%s' and '%s'!",
         m_dataLocMgr->userDataDir("maps").absolutePath().toLatin1().data(),
         m_dataLocMgr->pkgDataDir("maps").absolutePath().toLatin1().data());
+
+    return;
   }
+
+  // add other layers
+  QFileInfo fileInfo;
+  for (int i = 1; i < 4; ++i)
+  {
+      fileInfo = m_dataLocMgr->findExistingFile("maps",
+              shortZoneName + "_" + QString::number(i) + extension);
+
+      if (fileInfo.exists())
+          mapFiles.append(fileInfo.absoluteFilePath());
+  }
+
+  loadFileMap(mapFiles);
 }
 
 void MapMgr::loadMap ()
@@ -398,22 +420,28 @@ void MapMgr::loadMap ()
   qDebug ("loadMap()");
 #endif /* DEBUGMAP */
 
-  QString fileName = m_mapData.fileName();
+  QStringList fileNames;
+  for (int i = 0; i < m_mapData.numLayers(); ++i)
+  {
+      fileNames.append(m_mapData.mapLayer(i)->fileName());
+  }
 
-  if (fileName.isEmpty())
-    fileName = m_dataLocMgr->findExistingFile("maps", fileName).absoluteFilePath();
+  if (fileNames.isEmpty())
+    fileNames.append(m_dataLocMgr->findExistingFile("maps", "").absoluteFilePath());
 
   // create a file dialog the defaults to the currently open map
-  fileName = QFileDialog::getOpenFileName(m_dialogParent, "Load Map", fileName,
+  // it doesn't look like we can start with all the loaded files selected, 
+  // so we pick the first one, which should be the base map
+  fileNames = QFileDialog::getOpenFileNames(m_dialogParent, "Load Map", fileNames.first(),
           "All maps (*.map *.txt);;SEQ maps (*.map);;EQ maps (*.txt)");
 
-  if (fileName.isEmpty ())
+  if (fileNames.isEmpty ())
     return;
 
-  seqInfo("Attempting to load map: %s", fileName.toLatin1().data());
+  fileNames.sort();
 
   // load the map
-  loadFileMap(fileName, false, true);
+  loadFileMap(fileNames, false, true);
 }
 
 void MapMgr::importMap ()
@@ -422,22 +450,26 @@ void MapMgr::importMap ()
   qDebug ("importMap()");
 #endif /* DEBUGMAP */
 
-  QString fileName = m_mapData.fileName();
+  QStringList fileNames;
+  for (int i = 0; i < m_mapData.numLayers(); ++i)
+  {
+      fileNames.append(m_mapData.mapLayer(i)->fileName());
+  }
 
-  if (fileName.isEmpty())
-    fileName = m_dataLocMgr->findExistingFile("maps", fileName).absoluteFilePath();
+  if (fileNames.isEmpty())
+    fileNames.append(m_dataLocMgr->findExistingFile("maps", "").absoluteFilePath());
 
   // create a file dialog the defaults to the currently open map
-  fileName = QFileDialog::getOpenFileName(m_dialogParent, "Import Map", fileName,
+  fileNames = QFileDialog::getOpenFileNames(m_dialogParent, "Import Map", fileNames.first(),
           "All maps (*.map *.txt);;SEQ maps (*.map);;EQ maps (*.txt)");
 
-  if (fileName.isEmpty ())
+  if (fileNames.isEmpty ())
     return;
 
-  seqInfo("Attempting to import map: %s", fileName.toLatin1().data());
+  fileNames.sort();
 
   // load the map
-  loadFileMap(fileName, true, true);
+  loadFileMap(fileNames, true, true);
 }
 
 
@@ -447,10 +479,23 @@ void MapMgr::loadFileMap (const QString& fileName, bool import, bool force)
   qDebug ("loadFileMap()");
 #endif /* DEBUGMAP */
 
+  if (import)
+    seqInfo("Attempting to import map: %s", fileName.toLatin1().data());
+  else
+    seqInfo("Attempting to load map: %s", fileName.toLatin1().data());
+
+
   // if not a forced load, and the same map is already loaded, do nothing
-  if (!force && m_mapData.mapLoaded() && 
-      (m_mapData.fileName() == fileName))
-    return;
+  if (!force)
+  {
+      for (int i = 0; i < m_mapData.numLayers(); ++i)
+      {
+          if (m_mapData.mapLayer(i)->mapLoaded() &&
+                  m_mapData.mapLayer(i)->fileName() == fileName)
+              return;
+      }
+  }
+
 
   // load the specified map
   if (!fileName.endsWith(".txt"))
@@ -489,9 +534,28 @@ void MapMgr::loadFileMap (const QString& fileName, bool import, bool force)
   m_mapData.updateBounds();
 
   // signal that the map has been loaded
-  if (m_mapData.mapLoaded())
+  // note, the layers are populated in order, so the highest layer
+  // number (0-indexed) will be the one we just loaded
+  if (m_mapData.mapLayer(m_mapData.numLayers()-1)->mapLoaded())
     emit mapLoaded();
 } // END loadFileMap
+
+
+void MapMgr::loadFileMap (const QStringList& files, bool import, bool force)
+{
+    QStringList::const_iterator it = files.begin();
+    for (; it != files.end(); ++it)
+    {
+        // if we're loading multiple files, it doesn't sense to load and
+        // immediately clear/replace each one.  So if import isn't specified,
+        // we clear the current maps, load the first one, then import the
+        // rest as layers
+        if (!import && it == files.begin())
+            loadFileMap(*it, false, force);
+        else
+            loadFileMap(*it, true, force);
+    }
+}
 
 
 void MapMgr::saveMap ()
@@ -499,12 +563,16 @@ void MapMgr::saveMap ()
 #ifdef DEBUGMAP
   qDebug ("saveMap()");
 #endif /* DEBUGMAP */
-  QFileInfo fileInfo(m_mapData.fileName());
 
-  fileInfo = m_dataLocMgr->findWriteFile("maps", fileInfo.baseName() + ".map", 
+  for (int i = 0; i < m_mapData.numLayers(); ++i)
+  {
+      QFileInfo fileInfo(m_mapData.mapLayer(i)->fileName());
+
+      fileInfo = m_dataLocMgr->findWriteFile("maps", fileInfo.baseName() + ".map", 
                      false);
 
-  m_mapData.saveMap(fileInfo.absoluteFilePath());
+     m_mapData.saveMap(fileInfo.absoluteFilePath(), i);
+  }
 }
 
 void MapMgr::saveSOEMap ()
@@ -512,12 +580,16 @@ void MapMgr::saveSOEMap ()
 #ifdef DEBUGMAP
   qDebug ("saveMap()");
 #endif /* DEBUGMAP */
-  QFileInfo fileInfo(m_mapData.fileName());
 
-  fileInfo = m_dataLocMgr->findWriteFile("maps", fileInfo.baseName() + "_2.txt", 
+  for (int i = 0; i < m_mapData.numLayers(); ++i)
+  {
+      QFileInfo fileInfo(m_mapData.mapLayer(i)->fileName());
+
+      fileInfo = m_dataLocMgr->findWriteFile("maps", fileInfo.baseName() + ".txt", 
                      false);
 
-  m_mapData.saveSOEMap(fileInfo.absoluteFilePath());
+      m_mapData.saveSOEMap(fileInfo.absoluteFilePath(), i);
+  }
 }
 
 void MapMgr::addItem(const Item* item)
@@ -696,6 +768,16 @@ void MapMgr::scaleUpZ(int16_t factor)
   emit mapUpdated();
 }
 
+void MapMgr::setEditLayer(int layerNum)
+{
+    if (layerNum >= m_mapData.numLayers())
+        return;
+
+    m_mapData.setEditLayer(layerNum);
+
+    emit editLayerChanged();
+}
+
 void MapMgr::savePrefs(void)
 {
 #if 0 // ZBTEMP: Migrate to place where ever this is set
@@ -710,8 +792,6 @@ void MapMgr::dumpInfo(QTextStream& out)
   out << "DefaultLineName: " << m_curLineName << endl;
   out << "DefaultLocationColor: " << m_curLocationColor << endl;
   out << "ImageLoaded: " << m_mapData.imageLoaded() << endl;
-  out << "MapLoaded: " << m_mapData.mapLoaded() << endl;
-  out << "MapFileName: " << m_mapData.fileName() << endl;
   out << "ZoneShortName: " << m_mapData.zoneShortName() << endl;
   out << "ZoneLongName: " << m_mapData.zoneLongName() << endl;
   out << "boundingRect: top(" << m_mapData.boundingRect().top() 
@@ -721,9 +801,16 @@ void MapMgr::dumpInfo(QTextStream& out)
   out << "size: width(" << m_mapData.size().width()
       << ") height(" << m_mapData.size().height() << ")" << endl;
   out << "ZoneZEM: " << m_mapData.zoneZEM() << endl;
-  out << "LLines: " << m_mapData.lLines().count() << endl;
-  out << "MLines: " << m_mapData.mLines().count() << endl;
-  out << "Locations: " << m_mapData.locations().count() << endl;
+  out << "numLayers: " << m_mapData.numLayers() << endl;
+  for (int i = 0; i < m_mapData.numLayers(); ++i)
+  {
+      out << "Layer " << i << ":" << endl;
+      out << "\tMapFileName: " << m_mapData.mapLayer(i)->fileName() << endl;
+      out << "\tMapLoaded: " << m_mapData.mapLayer(i)->mapLoaded() << endl;
+      out << "\tLLines: " << m_mapData.mapLayer(i)->lLines().count() << endl;
+      out << "\tMLines: " << m_mapData.mapLayer(i)->mLines().count() << endl;
+      out << "\tLocations: " << m_mapData.mapLayer(i)->locations().count() << endl;
+  }
   out << "Aggros: " << m_mapData.aggros().count() << endl;
   out << endl;
 }
@@ -785,6 +872,28 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
    *
    * - cn187
    */
+
+  QWidget* tmpWidget = new QWidget(subMenu);
+  QHBoxLayout* tmpLayout = new QHBoxLayout(tmpWidget);
+  tmpLayout->setContentsMargins(1, 1, 1, 1);
+  m_editLayerSpinBox = new QSpinBox(tmpWidget);
+  QLabel* tmpLabel = new QLabel("Edit Layer:", tmpWidget);
+  tmpLayout->addWidget(tmpLabel);
+  tmpLayout->addWidget(m_editLayerSpinBox);
+  QWidgetAction* tmpWidgetAction = new QWidgetAction(subMenu);
+  tmpWidgetAction->setDefaultWidget(tmpWidget);
+  subMenu->addAction(tmpWidgetAction);
+
+  m_editLayerSpinBox->setMinimum(0);
+  m_editLayerSpinBox->setSingleStep(1);
+  m_editLayerSpinBox->setMaximum(m_map->mapMgr()->mapData().numLayers()-1);
+  m_editLayerSpinBox->setValue(m_map->mapMgr()->mapData().editLayer());
+
+  connect(m_editLayerSpinBox, SIGNAL(valueChanged(int)),
+          m_map->mapMgr(), SLOT(setEditLayer(int)));
+
+  connect(m_map->mapMgr(), SIGNAL(mapLoaded(void)), this, SLOT(editLayerChanged(void)));
+  connect(m_map->mapMgr(), SIGNAL(editLayerChanged(void)), this, SLOT(editLayerChanged(void)));
 
   key = pSEQPrefs->getPrefKey("AddLocationKey", preferenceName, "Ctrl+O");
   m_action_addLocation = subMenu->addAction(
@@ -1269,6 +1378,15 @@ void MapMenu::init_fovMenu(void)
   m_action_FOVScaledClassic->setChecked(fovMode == tFOVScaledClassic);
   m_action_FOVClassic->setChecked(fovMode == tFOVClassic);
 }
+
+void MapMenu::editLayerChanged(void)
+{
+  m_editLayerSpinBox->setMinimum(0);
+  m_editLayerSpinBox->setSingleStep(1);
+  m_editLayerSpinBox->setMaximum(m_map->mapMgr()->mapData().numLayers()-1);
+  m_editLayerSpinBox->setValue(m_map->mapMgr()->mapData().editLayer());
+}
+
 void MapMenu::select_follow(QAction* item)
 {
   int mode = item->data().value<int>();
@@ -1739,6 +1857,12 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "ShowInstanceLocationMarker";
   m_showInstanceLocationMarker = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
+
+  tmpPrefString = "MapLayerMask";
+  uint32_t mask = pSEQPrefs->getPrefInt(tmpPrefString, prefString, 0xffffffff);
+  for (int i = 0; i < 32; ++i)
+    m_param.setLayerVisibility(i, mask & (1 << i));
+
 
   // Accelerators
   QShortcut *tmpShortcut = nullptr;
@@ -2902,6 +3026,25 @@ void Map::setShowInstanceLocationMarker(bool val)
 
   if(!m_cacheChanges)
     refreshMap ();
+}
+
+void Map::toggleMapLayerVisibility(QAction* layer)
+{
+  int layerNum = layer->data().value<int>();
+  int layerChecked = layer->isChecked();
+
+  m_param.setLayerVisibility(layerNum, layerChecked);
+
+  QString tmpPrefString = "MapLayerMask";
+  uint32_t mask = pSEQPrefs->getPrefInt(tmpPrefString, preferenceName(), 0xffffffff);
+  if (layerChecked)
+      mask |= (1 << layerNum);
+  else
+      mask &= ~(1 << layerNum);
+  pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(), mask);
+
+  if(!m_cacheChanges)
+    refreshMap();
 }
 
 void Map::dumpInfo(QTextStream& out)
@@ -4785,6 +4928,23 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 #endif
   topControlBoxLayout->addWidget(m_filterBox);
 
+  // setup Layers control
+  m_layersBox = new QWidget(m_bottomControlBox);
+  m_layersBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  QHBoxLayout* layersBoxLayout = new QHBoxLayout(m_layersBox);
+  layersBoxLayout->setSpacing(1);
+  layersBoxLayout->setMargin(0);
+
+  loadLayerButtons();
+
+  tmpPrefString = "ShowLayersControl";
+  if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
+    m_layersBox->hide();
+
+  bottomControlBoxLayout->addWidget(m_layersBox);
+
+  connect(mapMgr, SIGNAL(mapLoaded()), this, SLOT(mapLoaded()));
+
   // setup Frame Rate control
   m_frameRateBox = new QWidget(m_bottomControlBox);
   m_frameRateBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -4959,6 +5119,10 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 
   subMenu = new QMenu("Bottom Controls");
 
+  m_action_layers = subMenu->addAction("Show Layer Controls", this,
+          SLOT(toggle_layers()));
+  m_action_layers->setCheckable(true);
+
   m_action_frameRate = subMenu->addAction("Show Frame Rate", this,
           SLOT(toggle_frameRate()));
   m_action_frameRate->setCheckable(true);
@@ -5077,6 +5241,74 @@ void MapFrame::savePrefs(void)
     m_map->savePrefs();
 }
 
+void MapFrame::mapLoaded()
+{
+    loadLayerButtons();
+}
+
+
+void MapFrame::loadLayerButtons()
+{
+
+  //delete existing buttons
+  QLayout* layersBoxLayout = m_layersBox->layout();
+  QLayoutItem* item;
+  while ((item = layersBoxLayout->takeAt(0)))
+  {
+    if (item)
+    {
+      delete item->widget();
+      delete item;
+    }
+  }
+
+  QLabel* tmpLabel = new QLabel(m_layersBox);
+  tmpLabel->setText("Layers:");
+  layersBoxLayout->addWidget(tmpLabel);
+
+  QToolButton* tmpButton = NULL;
+  int w = tmpLabel->minimumSizeHint().width();
+
+  QAction* tmpAction = NULL;
+
+  int numLayers = m_map->mapMgr()->mapData().numLayers();
+
+  for (int i = 0; i < numLayers; ++i)
+  {
+      QString label;
+      if (i == 0)
+          label = "Base";
+      else
+          label = QString::number(i);
+
+      tmpAction = new QAction(tmpButton);
+      tmpAction->setText(label);
+      tmpAction->setCheckable(true);
+      tmpAction->setData(i);
+      tmpAction->setChecked(m_map->isLayerVisible(i));
+
+      tmpButton = new QToolButton();
+      tmpButton->setDefaultAction(tmpAction);
+      tmpButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+      tmpButton->setMinimumWidth(fontMetrics().width(label));
+
+      layersBoxLayout->addWidget(tmpButton);
+      w += fontMetrics().width(label);
+
+      connect(tmpButton, SIGNAL(triggered(QAction*)),
+             m_map, SLOT(toggleMapLayerVisibility(QAction*)));
+  }
+
+  //minimum width should be the sum of all the minimum widths of the components
+  //minimum height should be the minimum height of the tallest component
+  m_layersBox->setMinimumSize(tmpLabel->minimumSizeHint().width() + w,
+          qMax(tmpLabel->minimumSizeHint().height(),
+              (tmpButton) ? tmpButton->minimumSizeHint().height():0));
+
+
+
+}
+
 void MapFrame::dumpInfo(QTextStream& out)
 {
   // first dump information about the map frame
@@ -5089,6 +5321,7 @@ void MapFrame::dumpInfo(QTextStream& out)
   out << "ShowFilter: " << m_filterBox->isVisible() << endl;
   out << "ShowControlBox: " << m_bottomControlBox->isVisible() << endl;
   out << "ShowFrameRate: " << m_frameRateBox->isVisible() << endl;
+  out << "ShowLayersControl: " << m_layersBox->isVisible() << endl;
   out << "ShowPanControls: " << m_panBox->isVisible() << endl; 
   out << "ShowDepthFilterControls: " << m_depthControlBox->isVisible() << endl;
   out << "CurrentFilter: '" << m_lastFilter << "'" << endl;
@@ -5116,6 +5349,7 @@ void MapFrame::init_Menu(void)
   m_action_bottomControl->setChecked(m_bottomControlBox->isVisible());
   if (m_bottomControlBox->isVisible())
   {
+    m_action_layers->setChecked(m_layersBox->isVisible());
     m_action_frameRate->setChecked(m_frameRateBox->isVisible());
     m_action_pan->setChecked(m_panBox->isVisible());
     m_action_depthControlRoom->setChecked(m_depthControlBox->isVisible());
@@ -5243,6 +5477,21 @@ void MapFrame::toggle_frameRate()
   {
     tmpPrefString = "ShowFrameRate";
     pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_frameRateBox->isVisible());
+  }
+}
+
+void MapFrame::toggle_layers()
+{
+  if (m_layersBox->isVisible())
+    m_layersBox->hide();
+  else
+    m_layersBox->show();
+
+  QString tmpPrefString = "SaveControls";
+  if (pSEQPrefs->getPrefBool(tmpPrefString, preferenceName(), true))
+  {
+    tmpPrefString = "ShowLayersControl";
+    pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_layersBox->isVisible());
   }
 }
 

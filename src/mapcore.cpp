@@ -291,6 +291,20 @@ void MapParameters::setFloorRoom(int16_t floorRoom)
   m_playerFloorRoom = m_curPlayer.z() - m_floorRoom;
 }
 
+bool MapParameters::isLayerVisible(uint8_t layerNum) const
+{
+    return m_layerVisibility & (1 << layerNum);
+}
+
+void MapParameters::setLayerVisibility(uint8_t layerNum, bool isVisible)
+{
+    if (isVisible)
+        m_layerVisibility |= (1 << layerNum);
+    else
+        m_layerVisibility &= ~(1 << layerNum);
+}
+
+
 //----------------------------------------------------------------------
 // MapCommon
 MapCommon::~MapCommon()
@@ -426,6 +440,34 @@ MapAggro::~MapAggro()
 {
 }
 
+//----------------------------------------------------------------------
+// MapLayer
+MapLayer::MapLayer()
+{
+  clear();
+}
+
+MapLayer::~MapLayer()
+{
+  clear();
+}
+
+void MapLayer::clear()
+{
+
+  m_mapLoaded = false;
+  m_fileName = QString();
+
+  qDeleteAll(m_lLines);
+  m_lLines.clear();
+
+  qDeleteAll(m_mLines);
+  m_mLines.clear();
+
+  qDeleteAll(m_locations);
+  m_locations.clear();
+}
+
 
 //----------------------------------------------------------------------
 // MapData
@@ -437,14 +479,9 @@ MapData::MapData()
 
 MapData::~MapData()
 {
-  qDeleteAll(m_lLines);
-  m_lLines.clear();
 
-  qDeleteAll(m_mLines);
-  m_mLines.clear();
-
-  qDeleteAll(m_locations);
-  m_locations.clear();
+  qDeleteAll(m_mapLayers);
+  m_mapLayers.clear();
 
   qDeleteAll(m_aggros);
   m_aggros.clear();
@@ -452,7 +489,6 @@ MapData::~MapData()
 
 void MapData::clear()
 {
-  m_fileName = "";
   m_zoneLongName = "";
   m_zoneShortName = "";
   m_minX = -50;
@@ -461,24 +497,27 @@ void MapData::clear()
   m_maxY = 50;
   updateBounds();
 
-  qDeleteAll(m_lLines);
-  m_lLines.clear();
-
-  qDeleteAll(m_mLines);
-  m_mLines.clear();
-
-  qDeleteAll(m_locations);
-  m_locations.clear();
+  qDeleteAll(m_mapLayers);
+  m_mapLayers.clear();
 
   qDeleteAll(m_aggros);
   m_aggros.clear();
 
-  m_mapLoaded = false;
   m_imageLoaded = false;
   
   m_editLineM = NULL;
   m_editLocation = NULL;
   m_zoneZEM = 75;
+
+  m_editLayer = 0;
+}
+
+MapLayer* MapData::mapLayer(uint8_t layerNum)
+{
+    if (layerNum < m_mapLayers.count())
+        return m_mapLayers[layerNum];
+
+    return NULL;
 }
 
 void MapData::loadMap(const QString& fileName, bool import)
@@ -495,9 +534,7 @@ void MapData::loadMap(const QString& fileName, bool import)
   uint32_t specifiedLinePoints;
   MapLineL* currentLineL = NULL;
   MapLineM* currentLineM = NULL;
-
-  // set the map filename
-  setFileName(fileName);
+  MapLayer* layer = NULL;
 
   // clear any existing map data (if not importing)
   if (!import)
@@ -519,8 +556,10 @@ void MapData::loadMap(const QString& fileName, bool import)
     return;
   }
 
-  // note the file name 
-  m_fileName = filename;
+  layer = new MapLayer();
+
+  // note the file name
+  layer->setFileName(fileName);
     
   // allocate memory in a QByteArray to hold the entire file contents
   QByteArray textData(mapFile.size() + 1, '\0');
@@ -686,7 +725,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 	quickCheckPos(bounds.right(), bounds.bottom());
 	
 	// add it to the list of L lines
-	m_mLines.append(currentLineM);
+	layer->mLines().append(currentLineM);
       }
       break;
 	
@@ -774,7 +813,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 	quickCheckPos(bounds.right(), bounds.bottom());
 	
 	// add it to the list of L lines
-	m_lLines.append(currentLineL);
+	layer->lLines().append(currentLineL);
       }
       break;
 
@@ -802,15 +841,15 @@ void MapData::loadMap(const QString& fileName, bool import)
 	  mz = (*fit++).toShort();
 	  
 	  // add the appropriate style Location depending on if the global height is set
-	  m_locations.append(new MapLocation(name, color, mx, my, mz));
+	  layer->locations().append(new MapLocation(name, color, mx, my, mz));
 	}
 	  
 	// add the appropriate style Location depending on if the global 
 	// height has been set
 	if (globHeightSet)
-	  m_locations.append(new MapLocation(name, color, mx, my, globHeight));
+	  layer->locations().append(new MapLocation(name, color, mx, my, globHeight));
 	else
-	  m_locations.append(new MapLocation(name, color, mx, my));
+	  layer->locations().append(new MapLocation(name, color, mx, my));
 	
 	// adjust map boundaries
 	quickCheckPos(mx, my);
@@ -908,8 +947,9 @@ void MapData::loadMap(const QString& fileName, bool import)
   // calculate the bounding rect
   updateBounds();
 
-  m_mapLoaded = true;
-  
+  m_mapLayers.append(layer);
+  layer->setMapLoaded(true);
+
   m_imageLoaded = false;
   QString imageFileName = filename;
   imageFileName.truncate(imageFileName.lastIndexOf('.'));
@@ -936,13 +976,15 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
   QString name;
   MapLineM* currentLineM = 0;
   size_t count;
+  MapLayer* layer = NULL;
 
   // if the same map is already loaded, don't reload it.
-  if (m_mapLoaded && (m_fileName.toLower() == fileName.toLower()))
-    return;
+  for (int i = 0; i < m_mapLayers.count(); ++i)
+  {
+    if (m_mapLayers[i]->mapLoaded() && m_mapLayers[i]->fileName().toLower() == fileName.toLower())
+        return;
+  }
 
-  // set the map filename
-  setFileName(fileName);
 
   // clear any existing map data if not importing
   if (!import)
@@ -963,8 +1005,10 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
     return;
   }
 
+  layer = new MapLayer();
+
   // note the file name 
-  m_fileName = filename;
+  layer->setFileName(fileName);
 
   // allocate memory in a QByteArray to hold the entire file contents
   QByteArray textData(mapFile.size() + 1, '\0');
@@ -992,7 +1036,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
 
   // use the file base name as the zone long/short name, it isn't perfect,
   // but neither is this file format
-  QFileInfo fileInfo(m_fileName);
+  QFileInfo fileInfo(fileName);
   QRegExp reStripTrailer("_[1-3]");
   
   m_zoneLongName = fileInfo.baseName().remove(reStripTrailer);
@@ -1072,7 +1116,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
 	  currentLineM->setPoint(checkPoint = numPoints++, x1, y1, z1);
 	
 	  // add it to the list of M lines
-	  m_mLines.append(currentLineM);
+	  layer->mLines().append(currentLineM);
 	}
 	else 
 	{
@@ -1124,7 +1168,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
 	name.replace("_", " ");
 
 	// add it to the list of locations
-	m_locations.append(new MapLocation(name, QColor(r, g, b), 
+	layer->locations().append(new MapLocation(name, QColor(r, g, b), 
 					   x1, y1, z1));
 	
 	// adjust map boundaries
@@ -1138,8 +1182,9 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
   // calculate the bounding rect
   updateBounds();
 
-  m_mapLoaded = true;
-  
+  m_mapLayers.append(layer);
+  layer->setMapLoaded(true);
+
   m_imageLoaded = false;
   QString imageFileName = filename;
   imageFileName.truncate(imageFileName.lastIndexOf('.'));
@@ -1154,7 +1199,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
   seqInfo("Loaded SOE map: '%s'", filename);
 }
 
-void MapData::saveMap(const QString& fileName) const
+void MapData::saveMap(const QString& fileName, const uint8_t layerNum) const
 {
 #ifdef DEBUG
   qDebug ("saveMap()");
@@ -1162,15 +1207,9 @@ void MapData::saveMap(const QString& fileName) const
   FILE * fh;
   uint32_t i;
 
-  const char* filename;
-  if (!fileName.isEmpty())
-    filename = fileName.toLatin1().data();
-  else
-    filename = m_fileName.toLatin1().data();
-
-  if ((fh = fopen(filename, "w")) == NULL)
+  if ((fh = fopen(fileName.toLatin1().data(), "w")) == NULL)
   {
-    seqWarn("Error saving map '%s'!", filename);
+    seqWarn("Error saving map '%s'!", fileName.toLatin1().data());
     return;
   }
 
@@ -1186,10 +1225,9 @@ void MapData::saveMap(const QString& fileName) const
   bool heightSet = false;
   int16_t lastHeightSet = 0;
   MapLineL* currentLineL;
-  QList<MapLineL*>::const_iterator mlit = m_lLines.begin();
-  for (mlit = m_lLines.begin();
-       mlit != m_lLines.end() && *mlit != NULL; 
-       ++mlit)
+  QList<MapLineL*>::const_iterator mlit = m_mapLayers[layerNum]->lLines().begin();
+  for (mlit = m_mapLayers[layerNum]->lLines().begin();
+       mlit != m_mapLayers[layerNum]->lLines().end(); ++mlit)
   {
     currentLineL = *mlit;
     // was the global height set?
@@ -1227,10 +1265,9 @@ void MapData::saveMap(const QString& fileName) const
 
   // write out the M (3D) lines
   MapLineM* currentLineM;
-  QList<MapLineM*>::const_iterator mmit = m_mLines.begin();
-  for (mmit = m_mLines.begin();
-       mmit != m_mLines.end() && *mmit != NULL;
-       ++mmit)
+  QList<MapLineM*>::const_iterator mmit = m_mapLayers[layerNum]->mLines().begin();
+  for (mmit = m_mapLayers[layerNum]->mLines().begin();
+       mmit != m_mapLayers[layerNum]->mLines().end(); ++mmit)
   {
     currentLineM = *mmit;
     // write out the start of the line info
@@ -1252,8 +1289,8 @@ void MapData::saveMap(const QString& fileName) const
   }
 
   // write out location information
-  QList<MapLocation*>::const_iterator lit = m_locations.begin();
-  for(; lit != m_locations.end() && *lit != NULL; ++lit)
+  QList<MapLocation*>::const_iterator lit = m_mapLayers[layerNum]->locations().begin();
+  for(; lit != m_mapLayers[layerNum]->locations().end(); ++lit)
   {
     MapLocation* currentLoc = *lit;
 
@@ -1283,16 +1320,18 @@ void MapData::saveMap(const QString& fileName) const
   }
 
 #ifdef DEBUGMAP
-  seqDebug("saveMap() - map '%s' saved with %d L lines, %d M lines, %d locations", filename,
-	 m_lLines.count(), m_mLines.count(), m_locations.count());
+  seqDebug("saveMap() - map '%s' saved with %d L lines, %d M lines, %d locations",
+          fileName.toLatin1().data(),
+          m_mapLayers[layerNum].m_lLines().count(), m_mapLayers[layerNum].m_mLines().count(),
+          m_mapLayers[layerNum].m_locations().count());
 #endif
   
   fclose (fh);
 
-  seqInfo("Saved map: '%s'", filename);
+  seqInfo("Saved map: '%s'", fileName.toLatin1().data());
 }
 
-void MapData::saveSOEMap(const QString& fileName) const
+void MapData::saveSOEMap(const QString& fileName, const uint8_t layerNum) const
 {
 #ifdef DEBUG
   qDebug ("saveMap()");
@@ -1300,15 +1339,9 @@ void MapData::saveSOEMap(const QString& fileName) const
   FILE * fh;
   uint i;
 
-  const char* filename;
-  if (!fileName.isEmpty())
-    filename = fileName.toLatin1().data();
-  else
-    filename = m_fileName.toLatin1().data();
-
-  if ((fh = fopen(filename, "w")) == NULL)
+  if ((fh = fopen(fileName.toLatin1().data(), "w")) == NULL)
   {
-    seqWarn("Error saving map '%s'!", filename);
+    seqWarn("Error saving map '%s'!", fileName.toLatin1().data());
     return;
   }
   
@@ -1317,8 +1350,8 @@ void MapData::saveSOEMap(const QString& fileName) const
   float z1;
   QString name;
   MapLineL* currentLineL;
-  QList<MapLineL*>::const_iterator mlit = m_lLines.begin();
-  for (; mlit != m_lLines.end() && *mlit != NULL; ++mlit)
+  QList<MapLineL*>::const_iterator mlit = m_mapLayers[layerNum]->lLines().begin();
+  for (; mlit != m_mapLayers[layerNum]->lLines().end(); ++mlit)
   {
     currentLineL = *mlit;
     z1 = float(currentLineL->z());
@@ -1348,10 +1381,10 @@ void MapData::saveSOEMap(const QString& fileName) const
     fprintf (fh, "\n");
   }
 
-  // write out the M (3D) lines
+  // write out the M (3D) lines)
   MapLineM* currentLineM;
-  QList<MapLineM*>::const_iterator mmit = m_mLines.begin();
-  for (; mmit != m_mLines.end() && *mmit != NULL; ++mmit)
+  QList<MapLineM*>::const_iterator mmit = m_mapLayers[layerNum]->mLines().begin();
+  for (; mmit != m_mapLayers[layerNum]->mLines().end(); ++mmit)
   {
     currentLineM = *mmit;
     const QColor& color = currentLineM->color();
@@ -1377,9 +1410,9 @@ void MapData::saveSOEMap(const QString& fileName) const
   }
 
   // write out location information
-  QList<MapLocation*>::const_iterator lit = m_locations.begin();
+  QList<MapLocation*>::const_iterator lit = m_mapLayers[layerNum]->locations().begin();
   MapLocation* currentLoc;
-  for (; lit != m_locations.end() && *lit != NULL; ++lit)
+  for (; lit != m_mapLayers[layerNum]->locations().end(); ++lit)
   {
     currentLoc = *lit;
     const QColor& color = currentLoc->color();
@@ -1395,13 +1428,15 @@ void MapData::saveSOEMap(const QString& fileName) const
             name.toLatin1().data());
   }
 #ifdef DEBUGMAP
-  seqDebug("saveMap() - map '%s' saved with %d L lines, %d M lines, %d locations", filename,
-	 m_lLines.count(), m_mLines.count(), m_locations.count());
+  seqDebug("saveMap() - map '%s' saved with %d L lines, %d M lines, %d locations",
+          fileName.toLatin1().data(),
+          m_mapLayers[layerNum]->m_lLines().count(), m_mapLayers[layerNum]->m_mLines().count(),
+          m_mapLayers[layerNum]->m_locations().count());
 #endif
   
   fclose (fh);
 
-  seqInfo("Saved SOE map: '%s'", filename);
+  seqInfo("Saved SOE map: '%s'", fileName.toLatin1().data());
 }
 
 bool MapData::isAggro(const QString& name, uint16_t* range) const
@@ -1428,11 +1463,13 @@ void MapData::addLocation(const QString& name,
 			  const QString& color, 
 			  const QPoint& point)
 {
+  if (m_editLayer >= m_mapLayers.count())
+      return;
   // create the new location
   m_editLocation = new MapLocation(name, color, point);
   
   // add it to the list of locations
-  m_locations.append(m_editLocation);
+  m_mapLayers[m_editLayer]->locations().append(m_editLocation);
 }
 
 void MapData::setLocationName(const QString& name)
@@ -1459,6 +1496,10 @@ void MapData::startLine(const QString& name,
 			const QString& color, 
 			const MapPoint& point)
 {
+
+  if (m_editLayer >= m_mapLayers.count())
+      return;
+
   // create the new line, with just the first point
   m_editLineM = new MapLineM(name, color, point); 
 
@@ -1466,7 +1507,7 @@ void MapData::startLine(const QString& name,
   m_editLineM->calcBounds();
 
   // add line to the line list
-  m_mLines.append(m_editLineM);
+  m_mapLayers[m_editLayer]->mLines().append(m_editLineM);
 }
 
 void MapData::addLinePoint(const MapPoint& point)
@@ -1493,6 +1534,9 @@ void MapData::delLinePoint(void)
   if (m_editLineM == NULL)
     return;
 
+  if (m_editLayer >= m_mapLayers.count())
+      return;
+
   // remove the last entry from the line
   m_editLineM->resize(m_editLineM->size() - 1);
 
@@ -1500,7 +1544,7 @@ void MapData::delLinePoint(void)
   if (m_editLineM->size() == 0)
   {
     // remove the line
-    delete m_mLines.takeAt(m_mLines.indexOf(m_editLineM));
+    delete m_mapLayers[m_editLayer]->mLines().takeAt(m_mapLayers[m_editLayer]->mLines().indexOf(m_editLineM));
 
     // clear the currently edited line entry
     m_editLineM = NULL;
@@ -1534,10 +1578,14 @@ void MapData::setLineColor(const QString& color)
 
 void MapData::scaleDownZ(int16_t factor)
 {
+
+  if (m_editLayer >= m_mapLayers.count())
+      return;
+
   // first scale down the L lines
   MapLineL* currentLineL;
-  QList<MapLineL*>::const_iterator mlit = m_lLines.begin();
-  for (; mlit != m_lLines.end() && *mlit != NULL; ++mlit)
+  QList<MapLineL*>::const_iterator mlit = m_mapLayers[m_editLayer]->lLines().begin();
+  for (; mlit != m_mapLayers[m_editLayer]->lLines().end(); ++mlit)
   {
     currentLineL = *mlit;
     currentLineL->setZPos(currentLineL->z() / factor);
@@ -1548,8 +1596,8 @@ void MapData::scaleDownZ(int16_t factor)
   MapPoint* mData;
   size_t numPoints;
   size_t i;
-  QList<MapLineM*>::const_iterator mmit = m_mLines.begin();
-  for (; mmit != m_mLines.end() && *mmit != NULL; ++mmit)
+  QList<MapLineM*>::const_iterator mmit = m_mapLayers[m_editLayer]->mLines().begin();
+  for (; mmit != m_mapLayers[m_editLayer]->mLines().end(); ++mmit)
   {
     currentLineM = *mmit;
     // get the number of points in the line
@@ -1565,10 +1613,14 @@ void MapData::scaleDownZ(int16_t factor)
 
 void MapData::scaleUpZ(int16_t factor)
 {
+
+  if (m_editLayer >= m_mapLayers.count())
+      return;
+
   // first scale down the L lines
   MapLineL* currentLineL;
-  QList<MapLineL*>::const_iterator mlit = m_lLines.begin();
-  for (; mlit != m_lLines.end() && *mlit != NULL; ++mlit)
+  QList<MapLineL*>::const_iterator mlit = m_mapLayers[m_editLayer]->lLines().begin();
+  for (; mlit != m_mapLayers[m_editLayer]->lLines().end(); ++mlit)
   {
     currentLineL = *mlit;
     currentLineL->setZPos(currentLineL->z() * factor);
@@ -1579,8 +1631,8 @@ void MapData::scaleUpZ(int16_t factor)
   MapPoint* mData;
   size_t numPoints;
   size_t i;
-  QList<MapLineM*>::const_iterator mmit = m_mLines.begin();
-  for (; mmit != m_mLines.end() && *mmit != NULL; ++mmit)
+  QList<MapLineM*>::const_iterator mmit = m_mapLayers[m_editLayer]->mLines().begin();
+  for (; mmit != m_mapLayers[m_editLayer]->mLines().end(); ++mmit)
   {
     currentLineM = *mmit;
     // get the number of points in the line
@@ -1717,103 +1769,111 @@ void MapData::paintLines(MapParameters& param, QPainter& p) const
   QPoint* lData;
   MapPoint* mData;
 
-  // first paint the L lines
-  QList<MapLineL*>::const_iterator mlit = m_lLines.begin();
-  for (; mlit != m_lLines.end() && *mlit != NULL; ++mlit)
+
+  for (int i = 0; i < m_mapLayers.count(); ++i)
   {
-    currentLineL = *mlit;
-    // if line is outside the currently visible region, skip it.
-    if (!currentLineL->boundingRect().intersects(screenBounds))
-      continue;
+    MapLayer* layer = m_mapLayers[i];
+    if (!param.isLayerVisible(i))
+        continue;
 
-    // get the number of points in the line
-    numPoints = currentLineL->size();
-
-    // get the underlying array
-    lData = currentLineL->data();
-
-    // set pen color
-#ifdef DEBUGMAP
-    seqDebug("lineColor = '%s'", (char *) currentLineL->color());
-#endif
-    p.setPen(currentLineL->color());
-
-    cur2DX_1 = lData[0].x();
-    cur2DY_1 = lData[0].y();
-
-    // see if the starting position is in bounds
-    lastInBounds = inRect(screenBounds, cur2DX_1, cur2DY_1);
-
-    // iterate over all the points in the line
-    for (uint32_t i = 1; i < numPoints; i++)
+    // first paint the L lines
+    QList<MapLineL*>::const_iterator mlit = layer->lLines().begin();
+    for (; mlit != layer->lLines().end(); ++mlit)
     {
-      cur2DX_2 = lData[i].x();
-      cur2DY_2 = lData[i].y();
+        currentLineL = *mlit;
+        // if line is outside the currently visible region, skip it.
+        if (!currentLineL->boundingRect().intersects(screenBounds))
+        continue;
 
-      // determine if the current position is in bounds
-      curInBounds = inRect(screenBounds, cur2DX_2, cur2DY_2);
+        // get the number of points in the line
+        numPoints = currentLineL->size();
 
-      // draw the line segment if either end is in bounds
-      if (lastInBounds || curInBounds)
-          p.drawLine(param.calcXOffsetI(cur2DX_1),
-                     param.calcYOffsetI(cur2DY_1),
-                     param.calcXOffsetI(cur2DX_2),
-                     param.calcYOffsetI(cur2DY_2));
+        // get the underlying array
+        lData = currentLineL->data();
 
-      // current becomes the last
-      lastInBounds = curInBounds;
-      cur2DX_1 = cur2DX_2;
-      cur2DY_1 = cur2DY_2;
+        // set pen color
+    #ifdef DEBUGMAP
+        seqDebug("lineColor = '%s'", (char *) currentLineL->color());
+    #endif
+        p.setPen(currentLineL->color());
+
+        cur2DX_1 = lData[0].x();
+        cur2DY_1 = lData[0].y();
+
+        // see if the starting position is in bounds
+        lastInBounds = inRect(screenBounds, cur2DX_1, cur2DY_1);
+
+        // iterate over all the points in the line
+        for (uint32_t i = 1; i < numPoints; i++)
+        {
+        cur2DX_2 = lData[i].x();
+        cur2DY_2 = lData[i].y();
+
+        // determine if the current position is in bounds
+        curInBounds = inRect(screenBounds, cur2DX_2, cur2DY_2);
+
+        // draw the line segment if either end is in bounds
+        if (lastInBounds || curInBounds)
+            p.drawLine(param.calcXOffsetI(cur2DX_1),
+                        param.calcYOffsetI(cur2DY_1),
+                        param.calcXOffsetI(cur2DX_2),
+                        param.calcYOffsetI(cur2DY_2));
+
+        // current becomes the last
+        lastInBounds = curInBounds;
+        cur2DX_1 = cur2DX_2;
+        cur2DY_1 = cur2DY_2;
+        }
     }
-  }
 
-  // then paint the M lines
-  QList<MapLineM*>::const_iterator mmit = m_mLines.begin();
-  for (; mmit != m_mLines.end() && *mmit != NULL; ++mmit)
-  {
-    currentLineM = *mmit;
-    // if line is outside the currently visible region, skip it.
-    if (!currentLineM->boundingRect().intersects(screenBounds))
-      continue;
-
-    // get the number of points in the line
-    numPoints = currentLineM->size();
-
-    // get the underlying array
-    mData = currentLineM->data();
-
-    // set pen color
-#ifdef DEBUGMAP
-    seqDebug("lineColor = '%s'", (char *) currentLineM->color());
-#endif
-    p.setPen(currentLineM->color());
-
-    curX_1 = mData[0].x();
-    curY_1 = mData[0].y();
-
-    // see if the starting position is in bounds
-    lastInBounds = inRect(screenBounds, curX_1, curY_1);
-
-    // iterate over all the points in the line
-    for (uint32_t i = 1; i < numPoints; i++)
+    // then paint the M lines
+    QList<MapLineM*>::const_iterator mmit = layer->mLines().begin();
+    for (; mmit != layer->mLines().end(); ++mmit)
     {
-      curX_2 = mData[i].x();
-      curY_2 = mData[i].y();
+        currentLineM = *mmit;
+        // if line is outside the currently visible region, skip it.
+        if (!currentLineM->boundingRect().intersects(screenBounds))
+        continue;
 
-      // determine if the current position is in bounds
-      curInBounds = inRect(screenBounds, curX_2, curY_2);
+        // get the number of points in the line
+        numPoints = currentLineM->size();
 
-      // draw the line segment if either end is in bounds
-      if (lastInBounds || curInBounds)
-          p.drawLine(param.calcXOffsetI(curX_1),
-                     param.calcYOffsetI(curY_1),
-                     param.calcXOffsetI(curX_2),
-                     param.calcYOffsetI(curY_2));
+        // get the underlying array
+        mData = currentLineM->data();
 
-      // current becomes the last
-      lastInBounds = curInBounds;
-      curX_1 = curX_2;
-      curY_1 = curY_2;
+        // set pen color
+    #ifdef DEBUGMAP
+        seqDebug("lineColor = '%s'", (char *) currentLineM->color());
+    #endif
+        p.setPen(currentLineM->color());
+
+        curX_1 = mData[0].x();
+        curY_1 = mData[0].y();
+
+        // see if the starting position is in bounds
+        lastInBounds = inRect(screenBounds, curX_1, curY_1);
+
+        // iterate over all the points in the line
+        for (uint32_t i = 1; i < numPoints; i++)
+        {
+        curX_2 = mData[i].x();
+        curY_2 = mData[i].y();
+
+        // determine if the current position is in bounds
+        curInBounds = inRect(screenBounds, curX_2, curY_2);
+
+        // draw the line segment if either end is in bounds
+        if (lastInBounds || curInBounds)
+            p.drawLine(param.calcXOffsetI(curX_1),
+                        param.calcYOffsetI(curY_1),
+                        param.calcXOffsetI(curX_2),
+                        param.calcYOffsetI(curY_2));
+
+        // current becomes the last
+        lastInBounds = curInBounds;
+        curX_1 = curX_2;
+        curY_1 = curY_2;
+        }
     }
   }
 }
@@ -1851,120 +1911,127 @@ void MapData::paintDepthFilteredLines(MapParameters& param, QPainter& p) const
   // get the players position for it's Z information
   MapPoint playerPos = param.player();
 
-  // first paint the L lines
-  QList<MapLineL*>::const_iterator mlit = m_lLines.begin();
-  for (; mlit != m_lLines.end() && *mlit != NULL; ++mlit)
+  for (int i = 0; i < m_mapLayers.count(); ++i)
   {
-    currentLineL = *mlit;
-    // if line is outside the currently visible region, skip it.
-    if (!currentLineL->boundingRect().intersects(screenBounds))
-      continue;
+    MapLayer* layer = m_mapLayers[i];
+    if (!param.isLayerVisible(i))
+        continue;
 
-    // since it's an L type line, check for the depth is easy
-    // just check if height is set, and if so, check if it's within range
-    if (currentLineL->heightSet() && 
-	!inRoom(param.playerHeadRoom(), param.playerFloorRoom(), 
-		currentLineL->z()))
-      continue;  // outside of range, continue to the next line
-
-    // get the number of points in the line
-    numPoints = currentLineL->size();
-
-    // get the underlying array
-    lData = currentLineL->data();
-
-    // set the line color
-#ifdef DEBUGMAP
-    seqDebug("lineColor = '%s'", (char *) currentLineL->color());
-#endif
-    p.setPen(currentLineL->color());
-
-    cur2DX_1 = lData[0].x();
-    cur2DY_1 = lData[0].y();
-
-    // see if the starting position is in bounds
-    lastInBounds = inRect(screenBounds, cur2DX_1, cur2DY_1);
-
-    // iterate over all the points in the line
-    for (uint32_t i = 1; i < numPoints; i++)
+    // first paint the L lines
+    QList<MapLineL*>::const_iterator mlit = layer->lLines().begin();
+    for (; mlit != layer->lLines().end(); ++mlit)
     {
-      cur2DX_2 = lData[i].x();
-      cur2DY_2 = lData[i].y();
+        currentLineL = *mlit;
+        // if line is outside the currently visible region, skip it.
+        if (!currentLineL->boundingRect().intersects(screenBounds))
+        continue;
 
-      // determine if the current position is in bounds
-      curInBounds = inRect(screenBounds, cur2DX_2, cur2DY_2);
+        // since it's an L type line, check for the depth is easy
+        // just check if height is set, and if so, check if it's within range
+        if (currentLineL->heightSet() && 
+        !inRoom(param.playerHeadRoom(), param.playerFloorRoom(), 
+            currentLineL->z()))
+        continue;  // outside of range, continue to the next line
 
-      // draw the line segment if either end is in bounds
-      if (lastInBounds || curInBounds)
-          p.drawLine(param.calcXOffsetI(cur2DX_1),
-                     param.calcYOffsetI(cur2DY_1),
-                     param.calcXOffsetI(cur2DX_2),
-                     param.calcYOffsetI(cur2DY_2));
+        // get the number of points in the line
+        numPoints = currentLineL->size();
 
-      // current becomes the last
-      lastInBounds = curInBounds;
-      cur2DX_1 = cur2DX_2;
-      cur2DY_1 = cur2DY_2;
+        // get the underlying array
+        lData = currentLineL->data();
+
+        // set the line color
+    #ifdef DEBUGMAP
+        seqDebug("lineColor = '%s'", (char *) currentLineL->color());
+    #endif
+        p.setPen(currentLineL->color());
+
+        cur2DX_1 = lData[0].x();
+        cur2DY_1 = lData[0].y();
+
+        // see if the starting position is in bounds
+        lastInBounds = inRect(screenBounds, cur2DX_1, cur2DY_1);
+
+        // iterate over all the points in the line
+        for (uint32_t i = 1; i < numPoints; i++)
+        {
+        cur2DX_2 = lData[i].x();
+        cur2DY_2 = lData[i].y();
+
+        // determine if the current position is in bounds
+        curInBounds = inRect(screenBounds, cur2DX_2, cur2DY_2);
+
+        // draw the line segment if either end is in bounds
+        if (lastInBounds || curInBounds)
+            p.drawLine(param.calcXOffsetI(cur2DX_1),
+                        param.calcYOffsetI(cur2DY_1),
+                        param.calcXOffsetI(cur2DX_2),
+                        param.calcYOffsetI(cur2DY_2));
+
+        // current becomes the last
+        lastInBounds = curInBounds;
+        cur2DX_1 = cur2DX_2;
+        cur2DY_1 = cur2DY_2;
+        }
     }
-  }
 
-  // then paint the M lines
-  QList<MapLineM*>::const_iterator mmit = m_mLines.begin();
-  for (; mmit != m_mLines.end() && *mmit != NULL; ++mmit)
-  {
-    currentLineM = *mmit;
-    // if line is outside the currently visible region, skip it.
-    if (!currentLineM->boundingRect().intersects(screenBounds))
-      continue;
-
-    // get the number of points in the line
-    numPoints = currentLineM->size();
-
-    // get the underlying array
-    mData = currentLineM->data();
-
-    // set the line color
-#ifdef DEBUGMAP
-    seqDebug("lineColor = '%s'", (char *) currentLineM->color());
-#endif
-    p.setPen(currentLineM->color());
-
-    // get current coordinates
-    curX_1 = mData[0].x();
-    curY_1 = mData[0].y();
-    curZ_1 = mData[0].z();
-
-    // see if the starting position is in bounds
-    lastInBounds = (inRect(screenBounds, curX_1, curY_1) &&
-            inRoom(param.playerHeadRoom(), param.playerFloorRoom(), curZ_1));
-
-#ifdef DEBUGMAP
-    seqDebug("Line has %i points:", currentLineM->size());
-#endif
-
-    // iterate over all the points in the line
-    for (uint32_t i = 1; i < numPoints; i++)
+    // then paint the M lines
+    QList<MapLineM*>::const_iterator mmit = layer->mLines().begin();
+    for (; mmit != layer->mLines().end(); ++mmit)
     {
-      // get current coordinates
-      curX_2 = mData[i].x();
-      curY_2 = mData[i].y();
-      curZ_2 = mData[i].z();
+        currentLineM = *mmit;
+        // if line is outside the currently visible region, skip it.
+        if (!currentLineM->boundingRect().intersects(screenBounds))
+        continue;
 
-      // determine if the current position is in bounds
-      curInBounds = (inRect(screenBounds, curX_2, curY_2) &&
-              inRoom(param.playerHeadRoom(), param.playerFloorRoom(), curZ_2));
+        // get the number of points in the line
+        numPoints = currentLineM->size();
 
-      // draw the line segment if either end is in bounds
-      if (lastInBounds || curInBounds)
-          p.drawLine(param.calcXOffsetI(curX_1),
-                     param.calcYOffsetI(curY_1),
-                     param.calcXOffsetI(curX_2),
-                     param.calcYOffsetI(curY_2));
+        // get the underlying array
+        mData = currentLineM->data();
 
-      // current becomes the last
-      lastInBounds = curInBounds;
-      curX_1 = curX_2;
-      curY_1 = curY_2;
+        // set the line color
+    #ifdef DEBUGMAP
+        seqDebug("lineColor = '%s'", (char *) currentLineM->color());
+    #endif
+        p.setPen(currentLineM->color());
+
+        // get current coordinates
+        curX_1 = mData[0].x();
+        curY_1 = mData[0].y();
+        curZ_1 = mData[0].z();
+
+        // see if the starting position is in bounds
+        lastInBounds = (inRect(screenBounds, curX_1, curY_1) &&
+                inRoom(param.playerHeadRoom(), param.playerFloorRoom(), curZ_1));
+
+    #ifdef DEBUGMAP
+        seqDebug("Line has %i points:", currentLineM->size());
+    #endif
+
+        // iterate over all the points in the line
+        for (uint32_t i = 1; i < numPoints; i++)
+        {
+        // get current coordinates
+        curX_2 = mData[i].x();
+        curY_2 = mData[i].y();
+        curZ_2 = mData[i].z();
+
+        // determine if the current position is in bounds
+        curInBounds = (inRect(screenBounds, curX_2, curY_2) &&
+                inRoom(param.playerHeadRoom(), param.playerFloorRoom(), curZ_2));
+
+        // draw the line segment if either end is in bounds
+        if (lastInBounds || curInBounds)
+            p.drawLine(param.calcXOffsetI(curX_1),
+                        param.calcYOffsetI(curY_1),
+                        param.calcXOffsetI(curX_2),
+                        param.calcYOffsetI(curY_2));
+
+        // current becomes the last
+        lastInBounds = curInBounds;
+        curX_1 = curX_2;
+        curY_1 = curY_2;
+        }
     }
   }
 }
@@ -2008,158 +2075,165 @@ void MapData::paintFadedFloorsLines(MapParameters& param, QPainter& p) const
   double topb = 255 - (topm * playerPos.z());
   double botb = 255 - (botm * playerPos.z());
 
-  // first paint the L lines
-  QList<MapLineL*>::const_iterator mlit = m_lLines.begin();
-  for (; mlit != m_lLines.end() && *mlit != NULL; ++mlit)
+  for (int i = 0; i < m_mapLayers.count(); ++i)
   {
-    currentLineL = *mlit;
-    // if line is outside the currently visible region, skip it.
-    if (!currentLineL->boundingRect().intersects(screenBounds))
-      continue;
+    MapLayer* layer = m_mapLayers[i];
+    if (!param.isLayerVisible(i))
+        continue;
 
-    // get the number of points in the line
-    numPoints = currentLineL->size();
-
-    // get the underlying array
-    lData = currentLineL->data();
-
-    // get first point coordinates
-    cur2DX_1 = lData[0].x();
-    cur2DY_1 = lData[0].y();
-    cur2DZ_1 = currentLineL->z();
-
-    // color determination is different depending on if a height was set
-    if (!currentLineL->heightSet())
+    // first paint the L lines
+    QList<MapLineL*>::const_iterator mlit = layer->lLines().begin();
+    for (; mlit != layer->lLines().end(); ++mlit)
     {
-      // set the line color
-#ifdef DEBUGMAP
-      seqDebug("lineColor = '%s'", (char *) currentLineL->color());
-#endif
-      p.setPen(currentLineL->color());
+        currentLineL = *mlit;
+        // if line is outside the currently visible region, skip it.
+        if (!currentLineL->boundingRect().intersects(screenBounds))
+        continue;
+
+        // get the number of points in the line
+        numPoints = currentLineL->size();
+
+        // get the underlying array
+        lData = currentLineL->data();
+
+        // get first point coordinates
+        cur2DX_1 = lData[0].x();
+        cur2DY_1 = lData[0].y();
+        cur2DZ_1 = currentLineL->z();
+
+        // color determination is different depending on if a height was set
+        if (!currentLineL->heightSet())
+        {
+        // set the line color
+    #ifdef DEBUGMAP
+        seqDebug("lineColor = '%s'", (char *) currentLineL->color());
+    #endif
+        p.setPen(currentLineL->color());
+        }
+        else
+        {
+        // calculate color to use for the line (since L type, only do this once)
+        if (currentLineL->z() > playerPos.z())
+        useColor = (int)((cur2DZ_1 * topm) + topb);
+        else 
+        useColor = (int)((cur2DZ_1 * botm) + botb);
+
+        if (useColor > 255) useColor = 255;
+        if (useColor < 0) useColor = 0;
+
+        // set the line color
+    #ifdef DEBUGMAP
+        seqDebug("lineColor = '#%2x%2x%2x'", useColor, useColor, useColor);
+    #endif
+        p.setPen(QColor(useColor, useColor, useColor));
+        }
+
+        // see if the starting position is in bounds
+        lastInBounds = inRect(screenBounds, cur2DX_1, cur2DY_1);
+
+        // iterate over all the points in the line
+        for (uint32_t i = 1; i < numPoints; i++)
+        {
+        // get coordinates
+        cur2DX_2 = lData[i].x();
+        cur2DY_2 = lData[i].y();
+
+        // determine if the current position is in bounds
+        curInBounds = inRect(screenBounds, cur2DX_2, cur2DY_2);
+
+        // draw the line segment if either end is in bounds
+        if (lastInBounds || curInBounds)
+            p.drawLine(param.calcXOffsetI(cur2DX_1),
+                        param.calcYOffsetI(cur2DY_1),
+                        param.calcXOffsetI(cur2DX_2),
+                        param.calcYOffsetI(cur2DY_2));
+
+        // current becomes the last
+        lastInBounds = curInBounds;
+        cur2DX_1 = cur2DX_2;
+        cur2DY_1 = cur2DY_2;
+        }
     }
-    else
+
+    // then paint the M lines
+    QList<MapLineM*>::const_iterator mmit = layer->mLines().begin();
+    for (; mmit != layer->mLines().end(); ++mmit)
     {
-      // calculate color to use for the line (since L type, only do this once)
-      if (currentLineL->z() > playerPos.z())
-	useColor = (int)((cur2DZ_1 * topm) + topb);
-      else 
-	useColor = (int)((cur2DZ_1 * botm) + botb);
+        currentLineM = *mmit;
+        // if line is outside the currently visible region, skip it.
+        if (!currentLineM->boundingRect().intersects(screenBounds))
+        continue;
 
-      if (useColor > 255) useColor = 255;
-      if (useColor < 0) useColor = 0;
+        // get the number of points in the line
+        numPoints = currentLineM->size();
 
-      // set the line color
-#ifdef DEBUGMAP
-      seqDebug("lineColor = '#%2x%2x%2x'", useColor, useColor, useColor);
-#endif
-      p.setPen(QColor(useColor, useColor, useColor));
-    }
+        // get the underlying array
+        mData = currentLineM->data();
 
-    // see if the starting position is in bounds
-    lastInBounds = inRect(screenBounds, cur2DX_1, cur2DY_1);
+        // set the line color
+    #ifdef DEBUGMAP
+        seqDebug("lineColor = '%s'", (char *) currentLineM->color());
+    #endif
+        p.setPen(currentLineM->color());
 
-    // iterate over all the points in the line
-    for (uint32_t i = 1; i < numPoints; i++)
-    {
-      // get coordinates
-      cur2DX_2 = lData[i].x();
-      cur2DY_2 = lData[i].y();
+        // get starting point coordinates
+        curX_1 = mData[0].x();
+        curY_1 = mData[0].y();
+        curZ_1 = mData[0].z();
 
-      // determine if the current position is in bounds
-      curInBounds = inRect(screenBounds, cur2DX_2, cur2DY_2);
+        // see if the starting position is in bounds
+        lastInBounds = inRect(screenBounds, curX_1, curY_1);
 
-      // draw the line segment if either end is in bounds
-      if (lastInBounds || curInBounds)
-          p.drawLine(param.calcXOffsetI(cur2DX_1),
-                     param.calcYOffsetI(cur2DY_1),
-                     param.calcXOffsetI(cur2DX_2),
-                     param.calcYOffsetI(cur2DY_2));
+    #ifdef DEBUGMAP
+        seqDebug("Line has %i points:", currentLineM->size());
+    #endif
 
-      // current becomes the last
-      lastInBounds = curInBounds;
-      cur2DX_1 = cur2DX_2;
-      cur2DY_1 = cur2DY_2;
-    }
-  }
+        // calculate starting color info for the line
+        if (curZ_1 > playerPos.z()) 
+        oldColor = (int)((curZ_1 * topm) + topb);
+        else 
+        oldColor = (int)((curZ_1 * botm) + botb);
 
-  // then paint the M lines
-  QList<MapLineM*>::const_iterator mmit = m_mLines.begin();
-  for (; mmit != m_mLines.end() && *mmit != NULL; ++mmit)
-  {
-    currentLineM = *mmit;
-    // if line is outside the currently visible region, skip it.
-    if (!currentLineM->boundingRect().intersects(screenBounds))
-      continue;
+        if (oldColor > 255) oldColor = 255;
+        if (oldColor < 0) oldColor = 0;
 
-    // get the number of points in the line
-    numPoints = currentLineM->size();
+        // iterate over all the points in the line
+        for (uint i = 1; i < numPoints; i++)
+        {
+        curX_2 = mData[i].x();
+        curY_2 = mData[i].y();
+        curZ_2 = mData[i].z();
 
-    // get the underlying array
-    mData = currentLineM->data();
+        // calculate the new color
+        if (curZ_2 > playerPos.z()) 
+        newColor = (int)((curZ_2 * topm) + topb);
+        else 
+        newColor = (int)((curZ_2 * botm) + botb);
+        if (newColor > 255) newColor = 255;
+        if (newColor < 0) newColor = 0;
 
-    // set the line color
-#ifdef DEBUGMAP
-    seqDebug("lineColor = '%s'", (char *) currentLineM->color());
-#endif
-    p.setPen(currentLineM->color());
+        // determine if the current position is in bounds
+        curInBounds = inRect(screenBounds, curX_2, curY_2);
 
-    // get starting point coordinates
-    curX_1 = mData[0].x();
-    curY_1 = mData[0].y();
-    curZ_1 = mData[0].z();
+        // the use color is the average of the two colors
+        useColor = (newColor + oldColor) >> 1;
 
-    // see if the starting position is in bounds
-    lastInBounds = inRect(screenBounds, curX_1, curY_1);
+        // draw the line segment if either end is in bounds
+        if ((lastInBounds || curInBounds) && (useColor != 0))
+        {
+            p.setPen(QColor(useColor, useColor, useColor));
+            p.drawLine(param.calcXOffsetI(curX_1),
+                        param.calcYOffsetI(curY_1),
+                        param.calcXOffsetI(curX_2),
+                        param.calcYOffsetI(curY_2));
+        }
 
-#ifdef DEBUGMAP
-    seqDebug("Line has %i points:", currentLineM->size());
-#endif
-
-    // calculate starting color info for the line
-    if (curZ_1 > playerPos.z()) 
-      oldColor = (int)((curZ_1 * topm) + topb);
-    else 
-      oldColor = (int)((curZ_1 * botm) + botb);
-
-    if (oldColor > 255) oldColor = 255;
-    if (oldColor < 0) oldColor = 0;
-
-    // iterate over all the points in the line
-    for (uint i = 1; i < numPoints; i++)
-    {
-      curX_2 = mData[i].x();
-      curY_2 = mData[i].y();
-      curZ_2 = mData[i].z();
-
-      // calculate the new color
-      if (curZ_2 > playerPos.z()) 
-	newColor = (int)((curZ_2 * topm) + topb);
-      else 
-	newColor = (int)((curZ_2 * botm) + botb);
-      if (newColor > 255) newColor = 255;
-      if (newColor < 0) newColor = 0;
-
-      // determine if the current position is in bounds
-      curInBounds = inRect(screenBounds, curX_2, curY_2);
-
-      // the use color is the average of the two colors
-      useColor = (newColor + oldColor) >> 1;
-
-      // draw the line segment if either end is in bounds
-      if ((lastInBounds || curInBounds) && (useColor != 0))
-      {
-          p.setPen(QColor(useColor, useColor, useColor));
-          p.drawLine(param.calcXOffsetI(curX_1),
-                     param.calcYOffsetI(curY_1),
-                     param.calcXOffsetI(curX_2),
-                     param.calcYOffsetI(curY_2));
-      }
-
-      // current becomes the last/old
-      lastInBounds = curInBounds;
-      oldColor = newColor;
-      curX_1 = curX_2;
-      curY_1 = curY_2;
+        // current becomes the last/old
+        lastInBounds = curInBounds;
+        oldColor = newColor;
+        curX_1 = curX_2;
+        curY_1 = curY_2;
+        }
     }
   }
 }
@@ -2177,26 +2251,33 @@ void MapData::paintLocations(MapParameters& param, QPainter& p) const
   // set the font
   p.setFont(param.font());
 
-  // iterate over all the map locations
-  QList<MapLocation*>::const_iterator lit = m_locations.begin();
-  for (; lit != m_locations.end() && *lit != NULL; ++lit)
+  for (int i = 0; i < m_mapLayers.count(); ++i)
   {
-    MapLocation* currentLoc = *lit;
+    MapLayer* layer = m_mapLayers[i];
+    if (!param.isLayerVisible(i))
+        continue;
 
-    // set the color
-    QColor color(currentLoc->color());
+    // iterate over all the map locations
+    QList<MapLocation*>::const_iterator lit = layer->locations().begin();
+    for (; lit != layer->locations().end(); ++lit)
+    {
+        MapLocation* currentLoc = *lit;
 
-    // make sure the color isn't the same as the background color
-    if (color == param.backgroundColor())
-      color = QColor( ~ param.backgroundColor().rgb());
+        // set the color
+        QColor color(currentLoc->color());
 
-    // set the pen color
-    p.setPen(color);
+        // make sure the color isn't the same as the background color
+        if (color == param.backgroundColor())
+        color = QColor( ~ param.backgroundColor().rgb());
 
-    // draw the text
-    p.drawText(param.calcXOffsetI(currentLoc->x()) - 2,
-	       param.calcYOffsetI(currentLoc->y()) - 2, 
-	       currentLoc->name());
+        // set the pen color
+        p.setPen(color);
+
+        // draw the text
+        p.drawText(param.calcXOffsetI(currentLoc->x()) - 2,
+            param.calcYOffsetI(currentLoc->y()) - 2, 
+            currentLoc->name());
+    }
   }
 }
 
@@ -2266,6 +2347,12 @@ bool MapCache::needRepaint(MapParameters& param)
       (m_lastParam.backgroundColor() != param.backgroundColor()) || 
       (m_lastParam.font() != param.font()))
     return true;
+
+  for (int i = 0; i < m_mapData.numLayers(); ++i)
+  {
+      if (m_lastParam.isLayerVisible(i) != param.isLayerVisible(i))
+          return true;
+  }
 
   // if none of the above conditions is true, no need to repaint.
   return false;

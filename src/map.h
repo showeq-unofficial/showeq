@@ -173,6 +173,8 @@ class MapMgr : public QObject
   void importMap(void);
   void loadFileMap(const QString& fileName, 
 		   bool import = false, bool force = false);
+  void loadFileMap(const QStringList& files,
+          bool import = false, bool force = false);
   void saveMap(void);
   void saveSOEMap(void);
 
@@ -196,6 +198,8 @@ class MapMgr : public QObject
   void scaleDownZ(int16_t);
   void scaleUpZ(int16_t);
 
+  void setEditLayer(int layerNum);
+
   // Preference handling
   void savePrefs(void);
 
@@ -206,6 +210,7 @@ class MapMgr : public QObject
   void mapLoaded(void);
   void mapUnloaded(void);
   void mapUpdated(void);
+  void editLayerChanged(void);
 
  private:
   const DataLocationMgr* m_dataLocMgr;
@@ -234,6 +239,8 @@ class MapMenu : public QMenu
  protected slots:
   void init_Menu(void);
   void init_fovMenu(void);
+
+  void editLayerChanged(void);
 
   void select_follow(QAction* item);
   void select_mapLine(QAction* item);
@@ -286,6 +293,7 @@ class MapMenu : public QMenu
   QSpinBox* m_fovSpinBox;
   QSpinBox* m_drawSizeSpinBox;
   QSpinBox* m_zoomDefaultSpinBox;
+  QSpinBox* m_editLayerSpinBox;
   QAction* m_action_followMenu_Player;
   QAction* m_action_followMenu_Spawn;
   QAction* m_action_followMenu_None;
@@ -451,7 +459,9 @@ class Map :public QWidget
   bool showGridLines() const { return m_param.showGridLines(); }
   bool showGridTicks() const { return m_param.showGridTicks(); }
   bool cacheAlwaysRepaint() const { return m_mapCache.alwaysRepaint(); }
-  
+
+  bool isLayerVisible(uint8_t layerNum) const { return m_param.isLayerVisible(layerNum); }
+
  public slots:   
   void savePrefs(void);
   void saveMapImage(void);
@@ -467,6 +477,8 @@ class Map :public QWidget
   void mapLoaded(void);
   void mapUnloaded(void);
   void mapUpdated(void);
+
+  void toggleMapLayerVisibility(QAction* layer);
 
   // map editing
   void addLocation();
@@ -708,6 +720,8 @@ class MapFrame : public SEQWindow
    Map* map() { return m_map; }
    const QString& mapPreferenceName() { return m_mapPreferenceName; }
 
+   void loadLayerButtons(void);
+
  public slots:
    void regexpok(int ok);
    void setregexp(const QString&);
@@ -716,6 +730,7 @@ class MapFrame : public SEQWindow
    void setPlayer(int16_t x, int16_t y, int16_t z, 
 		  int16_t Dx, int16_t Dy, int16_t Dz, int32_t degrees);
    virtual void savePrefs(void);
+   void mapLoaded(void);
 
   // dump debug info
   void dumpInfo(QTextStream& out);
@@ -730,6 +745,7 @@ class MapFrame : public SEQWindow
    void toggle_mouseLocation();
    void toggle_filter();
    void toggle_frameRate();
+   void toggle_layers();
    void toggle_pan();
    void toggle_depthControls();
    void set_font();
@@ -758,6 +774,7 @@ class MapFrame : public SEQWindow
    MapFilterLineEdit* m_filter;
 
    QWidget* m_bottomControlBox;
+   QWidget* m_layersBox;
    QWidget* m_frameRateBox;
    QSpinBox* m_frameRate;
    QWidget* m_panBox;
@@ -776,6 +793,7 @@ class MapFrame : public SEQWindow
    QAction* m_action_filter;
    QAction* m_action_topControl_Options;
    QAction* m_action_frameRate;
+   QAction* m_action_layers;
    QAction* m_action_pan;
    QAction* m_action_depthControlRoom;
    QAction* m_action_bottomControl_Options;
