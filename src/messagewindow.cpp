@@ -166,7 +166,7 @@ void MessageFindDialog::find()
 {
   // perform a find in the message window, starting at the current position
   // using the settings from the checkboxes.
-  QTextDocument::FindFlags options = 0;
+  QTextDocument::FindFlags options;
   if (m_matchCase->isChecked()) options |= QTextDocument::FindCaseSensitively;
   if (m_wholeWords->isChecked()) options |= QTextDocument::FindWholeWords;
   if (m_findBackwards->isChecked()) options |= QTextDocument::FindBackward;

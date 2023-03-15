@@ -43,7 +43,7 @@ class SEQWindow : public QDockWidget
 
  public:
    SEQWindow(const QString prefName, const QString caption,
-	    QWidget* parent = 0, const char* name = 0, Qt::WindowFlags f = 0);
+	    QWidget* parent = 0, const char* name = 0, Qt::WindowFlags f = Qt::Widget);
   ~SEQWindow();
 
   virtual QMenu* menu();
