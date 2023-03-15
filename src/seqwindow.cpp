@@ -104,9 +104,14 @@ void SEQWindow::mousePressEvent(QMouseEvent* e)
   {
     QMenu* popupMenu = menu();
     if (popupMenu)
+    {
       popupMenu->popup(mapToGlobal(e->pos()));
+      e->accept();
+    }
     else
+    {
       QDockWidget::mousePressEvent(e);
+    }
   }
   else
     QDockWidget::mousePressEvent(e);

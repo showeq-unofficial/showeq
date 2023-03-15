@@ -6455,6 +6455,11 @@ void EQInterface::setDockEnabled(QDockWidget* dw, bool enable)
       dw->setAllowedAreas(Qt::NoDockWidgetArea);
 }
 
+void EQInterface::contextMenuEvent(QContextMenuEvent* event)
+{
+    event->ignore();
+}
+
 #ifndef QMAKEBUILD
 #include "interface.moc"
 #endif

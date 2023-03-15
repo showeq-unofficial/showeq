@@ -345,6 +345,8 @@ class EQInterface:public QMainWindow
    QStringList enumerateDevices();
    QString promptForNetDevice();
 
+   virtual void contextMenuEvent(QContextMenuEvent* event) override;
+
  public:
    Player* m_player;
    MapMgr* mapMgr(void) { return m_mapMgr; }
