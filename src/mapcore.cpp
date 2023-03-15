@@ -1066,15 +1066,21 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
 	
 	if (!currentLineM || 
 	    !currentLineM->point(checkPoint).isEqual(x2, y2, z2) ||
-	    (currentLineM->color().red() != r) ||
-	    (currentLineM->color().green() != g) ||
-	    (currentLineM->color().blue() != b))
+        (
+         ((currentLineM->color().red() != r) ||
+          (currentLineM->color().green() != g) ||
+          (currentLineM->color().blue() != b)) &&
+         ((currentLineM->origColor().red() != r) ||
+          (currentLineM->origColor().green() != g) ||
+          (currentLineM->origColor().blue() != b))
+        ))
 	{
 	  numPoints = 0;
 
 	  // create an M line (start with 2 points because of SOE's lame
 	  // format).
-	  currentLineM = new MapLineM("soe", QColor(r, g, b), 2);
+	  currentLineM = new MapLineM("soe", getMapConvertColor(r, g, b), 2);
+      currentLineM->setOrigColor(QColor(r, g, b));
 
 	  // set the first point
 	  currentLineM->setPoint(numPoints++, x2, y2, z2);
@@ -1135,8 +1141,10 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
 	name.replace("_", " ");
 
 	// add it to the list of locations
-	layer->locations().append(new MapLocation(name, QColor(r, g, b), 
-					   x1, y1, z1));
+    MapLocation* loc = new MapLocation(name, getMapConvertColor(r, g, b),
+					   x1, y1, z1);
+    loc->setOrigColor(QColor(r, g, b));
+	layer->locations().append(loc);
 	
 	// adjust map boundaries
 	quickCheckPos(x1, y1);
@@ -1323,7 +1331,7 @@ void MapData::saveSOEMap(const QString& fileName, const uint8_t layerNum) const
     currentLineL = *mlit;
     z1 = float(currentLineL->z());
 
-    const QColor& color = currentLineL->color();
+    const QColor& color = currentLineL->origColor().isValid() ? currentLineL->color() : currentLineL->origColor();
     r = color.red();
     g = color.green();
     b = color.blue();
@@ -1354,7 +1362,7 @@ void MapData::saveSOEMap(const QString& fileName, const uint8_t layerNum) const
   for (; mmit != m_mapLayers[layerNum]->mLines().end(); ++mmit)
   {
     currentLineM = *mmit;
-    const QColor& color = currentLineM->color();
+    const QColor& color = currentLineM->origColor().isValid() ? currentLineM->color() : currentLineM->origColor();
     r = color.red();
     g = color.green();
     b = color.blue();
@@ -1382,7 +1390,7 @@ void MapData::saveSOEMap(const QString& fileName, const uint8_t layerNum) const
   for (; lit != m_mapLayers[layerNum]->locations().end(); ++lit)
   {
     currentLoc = *lit;
-    const QColor& color = currentLoc->color();
+    const QColor& color = currentLoc->origColor().isValid() ? currentLoc->color() : currentLoc->origColor();
 
     // convert spaces to underscores
     name = currentLoc->name();

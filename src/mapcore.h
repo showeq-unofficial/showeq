@@ -406,15 +406,19 @@ class MapCommon
 
   const QString& name() const { return m_name; }
   const QColor& color() const { return m_color; }
+  const QColor& origColor() const { return m_origColor; }
   QString colorName() const;
 
   void setName(const QString& name) { m_name = name; }
   void setColor(const QString& color) { m_color = color; }
+  void setOrigColor(const QColor& color) { m_origColor = color; }
+
 
  private:
   QString m_name;
   QString m_colorName;
   QColor m_color;
+  QColor m_origColor;
 };
 
 inline QString MapCommon::colorName() const
@@ -726,5 +730,86 @@ inline bool inRoom(const int16_t& headRoom,
   return ((z <= headRoom) &&
 	  (z >= floorRoom));
 }
+
+inline QString getMapConvertColor(const unsigned short r, const unsigned short g,
+        const unsigned short b)
+{
+    //adjust, convert, and return colors based on Razzle's original mapconvert script
+    //This adjusts the SOE map colors to colors that work for SEQs default color scheme
+
+    QString sColor[64] = {
+        "Black",        //0
+        "DarkRed",      //1
+        "FireBrick",    //2
+        "Red",          //3
+        "DarkGreen",    //4
+        "Orange",       //5
+        "DarkOrange",   //6
+        "DarkOrange",   //7
+        "Green",        //8
+        "Chartreuse",   //9
+        "Gold",         //10
+        "Gold",         //11
+        "Green",        //12
+        "Chartreuse",   //13
+        "Goldenrod",    //14
+        "Yellow",       //15
+        "DarkBlue",     //16
+        "Magenta",      //17
+        "DeepPink",     //18
+        "DeepPink",     //19
+        "DarkCyan",     //20
+        "Grey",         //21
+        "IndianRed",    //22
+        "LightCoral",   //23
+        "SpringGreen",  //24
+        "LightGreen",   //25
+        "DarkKhaki",    //26
+        "Khaki",        //27
+        "SpringGreen",  //28
+        "PaleGreen",    //29
+        "DarkOliveGreen",//30
+        "Khaki",        //31
+        "MediumBlue",   //32
+        "DarkViolet",   //33
+        "Magenta",      //34
+        "Maroon",       //35
+        "RoyalBlue",    //36
+        "SlateBlue",    //37
+        "Orchid",       //38
+        "HotPink",      //39
+        "Turquoise",    //40
+        "SkyBlue",      //41
+        "Snow",         //42
+        "LightPink",    //43
+        "Cyan",         //44
+        "Aquamarine",   //45
+        "DarkSeaGreen", //46
+        "Beige",        //47
+        "Blue",         //48
+        "Purple",       //49
+        "Purple",       //50
+        "Magenta",      //51
+        "DodgerBlue",   //52
+        "SlateBlue",    //53
+        "MediumPurple", //54
+        "Orchid",       //55
+        "DeepSkyBlue",  //56
+        "LightBlue",    //57
+        "Plum",         //58
+        "Cyan",         //59
+        "CadetBlue",    //60
+        "PaleTurquoise",//61
+        "LightCyan",    //62
+        "White"         //63
+    };
+
+    unsigned short color = floor(r/80) + floor(g/80)*4 + floor(b/80)*16;
+
+    if (color == 0) return sColor[63];
+
+    return sColor[color];
+}
+
 
 #endif // _MAPCORE_H
