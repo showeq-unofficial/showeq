@@ -2238,6 +2238,10 @@ void MapData::paintLocations(MapParameters& param, QPainter& p) const
     {
         MapLocation* currentLoc = *lit;
 
+        if (param.mapLineStyle() == tMap_DepthFiltered && currentLoc->heightSet() &&
+                !inRoom(param.playerHeadRoom(), param.playerFloorRoom(), currentLoc->z()))
+            continue;  // outside of range, continue to the next location
+
         // set the color
         QColor color(currentLoc->color());
 
