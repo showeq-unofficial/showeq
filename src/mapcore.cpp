@@ -545,13 +545,11 @@ void MapData::loadMap(const QString& fileName, bool import)
     return;
 
   
-  const char* filename = fileName.toLatin1().data();
-
   QFile mapFile(fileName);
 
   if (!mapFile.open(QIODevice::ReadOnly))
   {
-    seqWarn("Error opening map file '%s'!", filename);
+    seqWarn("Error opening map file '%s'!", fileName.toLatin1().data());
 
     return;
   }
@@ -592,14 +590,14 @@ void MapData::loadMap(const QString& fileName, bool import)
   if (!count)
   {
     seqWarn("Error, no fields in first line of map file '%s'",
-	    filename);
+	    fileName.toLatin1().data());
     return;
   }
   
   if (count < 2)
   {
     seqWarn("Error, too few fields in first line of map file '%s'",
-	    filename);
+	    fileName.toLatin1().data());
     return;
   }
 
@@ -658,7 +656,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 	if (count < 3)
 	{
 	  seqWarn("Error reading M line %d on map '%s'! %d is too few fields",
-		  filelines, filename, count);
+		  filelines, fileName.toLatin1().data(), count);
 	  continue;
 	}
 	
@@ -669,7 +667,7 @@ void MapData::loadMap(const QString& fileName, bool import)
         if (linePoints < 2)
 	{
 	  seqWarn("M Line %d in map '%s' only had %d points, not loading.",
-		  filelines, filename, linePoints );
+		  filelines, fileName.toLatin1().data(), linePoints );
 	  continue;
 	}
 	
@@ -686,14 +684,14 @@ void MapData::loadMap(const QString& fileName, bool import)
 	if (!ok) 
 	{
 	  seqWarn("Error reading number of points on line %d in map '%s'!",
-		  filelines, filename);
+		  filelines, fileName.toLatin1().data());
 	  continue;
 	}
 	
 	if ((specifiedLinePoints != linePoints) && (specifiedLinePoints != 0))
 	{
 	  seqWarn("M Line %d in map '%s' has %d points as opposed to the %d points it specified!", 
-		  filelines, filename, linePoints, specifiedLinePoints);
+		  filelines, fileName.toLatin1().data(), linePoints, specifiedLinePoints);
 	}
 	
 	// create an M line
@@ -739,7 +737,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 	if (count < 3)
         {
 	  seqWarn("Error reading L line %d on map '%s'! %d is too few fields",
-		  filelines, filename, count);
+		  filelines, fileName.toLatin1().data(), count);
 	  continue;
 	}
 
@@ -750,7 +748,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 	if (linePoints < 2)
 	{
 	  seqWarn("L Line %d in map '%s' only had %d points, not loading.",
-		  filelines, filename, linePoints);
+		  filelines, fileName.toLatin1().data(), linePoints);
 	  continue;
 	}
 	
@@ -767,14 +765,14 @@ void MapData::loadMap(const QString& fileName, bool import)
 	if (!ok) 
 	{
 	  seqWarn("Error reading number of points on line %d in map '%s'!",
-		  filelines, filename);
+		  filelines, fileName.toLatin1().data());
 	  continue;
 	}
 	
 	if ((specifiedLinePoints != linePoints) && (specifiedLinePoints != 0))
 	{
 	   seqWarn("L Line %d in map '%s' has %d points as opposed to the %d points it specified!", 
-		  filelines, filename, linePoints, specifiedLinePoints);
+		  filelines, fileName.toLatin1().data(), linePoints, specifiedLinePoints);
 	}
 	
 	// create the appropriate style L line depending on if the global 
@@ -827,7 +825,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 	if (count < 4)
         {
 	  seqWarn("Error reading P line %d on map '%s'! %d is too few fields",
-		  filelines, filename, count);
+		  filelines, fileName.toLatin1().data(), count);
 	  continue;
 	}
 
@@ -866,7 +864,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 	if (count < 2)
         {
 	  seqWarn("Line %d in map '%s' has an A record with too few fields (%d)!",
-		  filelines, filename, count);
+		  filelines, fileName.toLatin1().data(), count);
 	  break;
 	}
 	
@@ -874,14 +872,14 @@ void MapData::loadMap(const QString& fileName, bool import)
 	if (name.isEmpty()) 
         {
 	  seqWarn("Line %d in map '%s' has an A marker with no Name expression!", 
-		  filelines, filename);
+		  filelines, fileName.toLatin1().data());
 	  break;
 	}
 	rangeVal = (*fit++).toUShort();
 	if (!rangeVal) 
         {
 	  seqWarn("Line %d in map '%s' has an A marker with no or 0 Range radius!", 
-		  filelines, filename);
+		  filelines, fileName.toLatin1().data());
 	  break;
 	}
 	
@@ -898,7 +896,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 	if (count < 1)
         {
 	  seqWarn("Line %d in map '%s' has an H record with too few fields (%d)!", 
-		  filelines, filename, count);
+		  filelines, fileName.toLatin1().data(), count);
 	  break;
 	}
 	
@@ -907,7 +905,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 	if (!ok) 
         {
 	  seqWarn("Line %d in map '%s' has an H marker with invalid Z!", 
-		  filelines, filename);
+		  filelines, fileName.toLatin1().data());
 	  break;
 	}
 	globHeightSet = true;
@@ -924,7 +922,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 	if (count < 1)
         {
 	  seqWarn("Line %d in map '%s' has a Z record with too few fields (%d)!", 
-		  filelines, filename, count);
+		  filelines, fileName.toLatin1().data(), count);
 	  break;
 	}
 	
@@ -932,7 +930,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 	if (!ok) 
         {
 	  seqWarn("Line %d in map '%s' has an Z marker with invalid ZEM!", 
-		  filelines, filename);
+		  filelines, fileName.toLatin1().data());
 	  break;
 	}
 #ifdef DEBUGMAPLOAD
@@ -951,7 +949,7 @@ void MapData::loadMap(const QString& fileName, bool import)
   layer->setMapLoaded(true);
 
   m_imageLoaded = false;
-  QString imageFileName = filename;
+  QString imageFileName = fileName;
   imageFileName.truncate(imageFileName.lastIndexOf('.'));
   imageFileName += ".pgm";
 
@@ -961,7 +959,7 @@ void MapData::loadMap(const QString& fileName, bool import)
     seqInfo("Loaded map image: '%s'", imageFileName.toLatin1().data());
   }
 
-  seqInfo("Loaded map: '%s'", filename);
+  seqInfo("Loaded map: '%s'", fileName.toLatin1().data());
 }
 
 void MapData::loadSOEMap(const QString& fileName, bool import)
@@ -994,13 +992,11 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
   if (fileName.contains("/.txt") != 0)
     return;
 
-  const char* filename = fileName.toLatin1().data();
-
   QFile mapFile(fileName);
 
   if (!mapFile.open(QIODevice::ReadOnly))
   {
-    seqWarn("Error opening map file '%s'!", filename);
+    seqWarn("Error opening map file '%s'!", fileName.toLatin1().data());
 
     return;
   }
@@ -1083,7 +1079,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
 	if (count != 9)
 	{
 	  seqWarn("Error reading L line %d on map '%s'! %d is an incorrect field count!",
-		  filelines, filename, count);
+		  filelines, fileName.toLatin1().data(), count);
 	  continue;
 	}
 
@@ -1150,7 +1146,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
 	if (count != 8)
 	{
 	  seqWarn("Error reading L line %d on map '%s'! %d is an incorrect field count!",
-		  filelines, filename, count);
+		  filelines, fileName.toLatin1().data(), count);
 	  continue;
 	}
 
@@ -1186,7 +1182,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
   layer->setMapLoaded(true);
 
   m_imageLoaded = false;
-  QString imageFileName = filename;
+  QString imageFileName = fileName;
   imageFileName.truncate(imageFileName.lastIndexOf('.'));
   imageFileName += ".pgm";
 
@@ -1196,7 +1192,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
     seqInfo("Loaded map image: '%s'", imageFileName.toLatin1().data());
   }
 
-  seqInfo("Loaded SOE map: '%s'", filename);
+  seqInfo("Loaded SOE map: '%s'", fileName.toLatin1().data());
 }
 
 void MapData::saveMap(const QString& fileName, const uint8_t layerNum) const
