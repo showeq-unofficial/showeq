@@ -5262,8 +5262,14 @@ void MapFrame::loadLayerButtons()
     }
   }
 
+  int numLayers = m_map->mapMgr()->mapData().numLayers();
+
   QLabel* tmpLabel = new QLabel(m_layersBox);
-  tmpLabel->setText("Layers:");
+  if (numLayers == 0)
+    tmpLabel->setText("Layers: None");
+  else
+    tmpLabel->setText("Layers:");
+
   layersBoxLayout->addWidget(tmpLabel);
 
   QToolButton* tmpButton = NULL;
@@ -5271,7 +5277,6 @@ void MapFrame::loadLayerButtons()
 
   QAction* tmpAction = NULL;
 
-  int numLayers = m_map->mapMgr()->mapData().numLayers();
 
   for (int i = 0; i < numLayers; ++i)
   {
