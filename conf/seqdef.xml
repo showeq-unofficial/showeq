@@ -2435,10 +2435,6 @@
    <bool value="false" />
    <comment>Display time in unix time (seconds since 1970)</comment>
   </property>
-  <property name="Theme" >
-   <int value="2" />
-   <comment>0=Motif, 1=CDE, 2=Windows, 3=Platinum</comment>
-  </property>
   <property name="ShowMap" >
    <bool value="true" />
    <comment>Display Map</comment>
