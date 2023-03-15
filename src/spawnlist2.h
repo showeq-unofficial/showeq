@@ -91,6 +91,10 @@ public slots:
    void rebuildSpawnList(void);
    void refresh(void);
    virtual void savePrefs(void);
+
+
+   void styleChanged();
+
  private slots:
    // category combo box signals
    void categorySelected(int index);

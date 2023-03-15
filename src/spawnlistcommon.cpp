@@ -38,6 +38,7 @@
 
 #include <cstring>
 
+#include <QApplication>
 #include <QFontDialog>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -47,14 +48,16 @@
 
 SpawnListItem::SpawnListItem(SEQListViewItem *parent) : SEQListViewItem(parent)
 {
-  m_textColor = Qt::black;
+  m_textColor = qApp->palette().color(QPalette::WindowText);
+
   m_item = NULL;
   m_npc = 0;
 }
 
 SpawnListItem::SpawnListItem(SEQListView *parent) : SEQListViewItem(parent)
 {
-  m_textColor = Qt::black; 
+  m_textColor = qApp->palette().color(QPalette::WindowText);
+
   m_item = NULL;
   m_npc = 0;
 }
@@ -352,12 +355,22 @@ void SpawnListItem::pickTextColor(const Item* item,
 				  Player* player, 
 				  QColor def)
 {
+
+  QColor fg = qApp->palette().color(QPalette::WindowText);
+  QColor bg = qApp->palette().color(QPalette::Base);
+
+  //Black is the parameter default, so if it's black, we should use the
+  //foreground color instead.  That way we won't wind up with black text by
+  //default when using dark themesf
+  if (def == Qt::black)
+      def = fg;
+
   if (item == NULL)
   {
     m_textColor = def;
     return;
   }
-  
+
   const Spawn* spawn = NULL;
   if ((item->type() == tSpawn) || (item->type() == tPlayer))
     spawn = (const Spawn*)item;
@@ -367,7 +380,7 @@ void SpawnListItem::pickTextColor(const Item* item,
     m_textColor = def;
     return;
   }
-  
+
   switch (spawn->typeflag())
   {
   case 65:
@@ -417,8 +430,8 @@ void SpawnListItem::pickTextColor(const Item* item,
 
   // color by consider difficulty
   m_textColor = player->pickConColor(spawn->level());
-  if (m_textColor == Qt::white)
-    m_textColor = Qt::black;
+  if (m_textColor == Qt::white || m_textColor == Qt::black)
+    m_textColor = def;
   if (m_textColor == Qt::yellow)
     m_textColor = QColor(206,151,33);
 } // end pickTextColor

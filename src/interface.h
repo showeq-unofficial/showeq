@@ -237,6 +237,8 @@ class EQInterface:public QMainWindow
    void spellMessage(QString&);
    void restoreFonts();
 
+   void styleChanged();
+
    // Decoder signals
    void theKey(uint64_t);
    void backfillPlayer(charProfileStruct *);

@@ -5755,10 +5755,13 @@ QString EQInterface::setTheme(QString name)
 
     QStringList availableStyles = QStyleFactory::keys();
 
-    if (!availableStyles.contains(name, Qt::CaseInsensitive)) 
-	return currentStyleName;
+    if (!availableStyles.contains(name, Qt::CaseInsensitive))
+        return currentStyleName;
 
-    qApp->setStyle(QStyleFactory::create(name));
+    qApp->setPalette(OrigPalette);
+    QStyle* newStyle = QStyleFactory::create(name);
+    qApp->setStyle(newStyle);
+
 
     MenuActionList::Iterator iter;
 
@@ -5774,6 +5777,8 @@ QString EQInterface::setTheme(QString name)
         (*iter)->setChecked(false);
       }
     }
+
+    emit styleChanged();
 
     return currentStyleName;
 }
@@ -5967,6 +5972,8 @@ void EQInterface::showSpawnList(void)
      connect(this, SIGNAL(restoreFonts(void)),
 	     m_spawnList, SLOT(restoreFont(void)));
 
+     connect(this, SIGNAL(styleChanged()), m_spawnList, SLOT(styleChanged()));
+
     // insert its menu into the window menu
     insertWindowMenu(m_spawnList);
   }
@@ -6003,6 +6010,8 @@ void EQInterface::showSpawnList2(void)
 	     m_spawnList2, SLOT(savePrefs(void)));
      connect(this, SIGNAL(restoreFonts(void)),
 	     m_spawnList2, SLOT(restoreFont(void)));
+
+     connect(this, SIGNAL(styleChanged()), m_spawnList2, SLOT(styleChanged()));
 
     // insert its menu into the window menu
     insertWindowMenu(m_spawnList2);

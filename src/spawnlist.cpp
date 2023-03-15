@@ -50,6 +50,7 @@
 #include <cmath>
 #include <regex.h>
 #include <QMenu>
+#include <QApplication>
 
 // ------------------------------------------------------
 SpawnList::SpawnList(Player* player, 
@@ -1104,6 +1105,29 @@ void SpawnList::listItemDoubleClicked(QTreeWidgetItem* litem, int col)
   {
     seqInfo("%s", item->filterString().toLatin1().data());
   }
+}
+
+void SpawnList::styleChanged()
+{
+    QColor fg = qApp->palette().color(QPalette::WindowText);
+
+    SEQListViewItemIterator it(this);
+    while (*it)
+    {
+        SpawnListItem* litem = (SpawnListItem*)*it;
+        litem->pickTextColor(litem->item(), m_player, fg);
+        ++it;
+    }
+
+    //go back and do the categories, so we keep their configured colors
+    QHash<void*, SpawnListItem*>::iterator cit;
+    for (cit = m_categoryListItems.begin(); cit != m_categoryListItems.end(); ++cit)
+    {
+        Category* cat = (Category*)cit.key();
+        SpawnListItem* litem = (SpawnListItem*)cit.value();
+        fg = cat->color();
+        litem->pickTextColor(litem->item(), m_player, fg);
+    }
 }
 
 QString SpawnList::filterString(const Item* item, int flags)

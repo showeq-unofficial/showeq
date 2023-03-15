@@ -116,10 +116,12 @@ public slots:
    void delCategory(const Category* cat);
    void clearedCategories(void);
    void loadedCategories(void);
-   
+
    void rebuildSpawnList();
    void playerLevelChanged(uint8_t);
-   
+
+   void styleChanged();
+
 private slots:
    void selChanged();
 
@@ -138,6 +140,7 @@ private:
    Player *m_player;
    SpawnShell* m_spawnShell;
 
+private:
    // category pointer used as keys to look up the associated SpawnListItem
    QHash<void*, SpawnListItem*> m_categoryListItems;
 
@@ -158,11 +161,13 @@ class SpawnListWindow : public SEQWindow
   virtual QMenu* menu();
   SpawnList* spawnList() { return m_spawnList; }
 
- public slots:
-  virtual void savePrefs(void);
-
  protected:
   SpawnList* m_spawnList;
+
+ public slots:
+  virtual void savePrefs(void);
+  void styleChanged() { m_spawnList->styleChanged(); }
+
 };
 
 #endif // SPAWNLIST_H

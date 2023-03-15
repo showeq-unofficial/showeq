@@ -1017,6 +1017,22 @@ void SpawnListWindow2::populateSpawns(void)
 #endif 
 }
 
+void SpawnListWindow2::styleChanged()
+{
+    SEQListViewItemIterator it(m_spawnList);
+
+    QColor fg = palette().color(QPalette::WindowText);
+
+    while (*it)
+    {
+        SpawnListItem* litem = (SpawnListItem*)*it;
+        litem->pickTextColor(litem->item(), m_player, fg);
+
+        ++it;
+    }
+}
+
+
 #ifndef QMAKEBUILD
 #include "spawnlist2.moc"
 #endif
