@@ -880,16 +880,12 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
    * - cn187
    */
 
-  QWidget* tmpWidget = new QWidget(subMenu);
-  QHBoxLayout* tmpLayout = new QHBoxLayout(tmpWidget);
-  tmpLayout->setContentsMargins(1, 1, 1, 1);
-  m_editLayerSpinBox = new QSpinBox(tmpWidget);
-  QLabel* tmpLabel = new QLabel("Edit Layer:", tmpWidget);
-  tmpLayout->addWidget(tmpLabel);
-  tmpLayout->addWidget(m_editLayerSpinBox);
-  QWidgetAction* tmpWidgetAction = new QWidgetAction(subMenu);
-  tmpWidgetAction->setDefaultWidget(tmpWidget);
-  subMenu->addAction(tmpWidgetAction);
+  QMenu* layerMenu = new QMenu("Select Edit Layer");
+  m_editLayerSpinBox = new QSpinBox(layerMenu);
+  QWidgetAction* editLayerAction = new QWidgetAction(layerMenu);
+  editLayerAction->setDefaultWidget(m_editLayerSpinBox);
+  layerMenu->addAction(editLayerAction);
+  subMenu->addMenu(layerMenu);
 
   m_editLayerSpinBox->setMinimum(0);
   m_editLayerSpinBox->setSingleStep(1);
