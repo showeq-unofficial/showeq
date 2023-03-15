@@ -1004,7 +1004,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
   // use the file base name as the zone long/short name, it isn't perfect,
   // but neither is this file format
   QFileInfo fileInfo(fileName);
-  QRegExp reStripTrailer("_[1-3]");
+  QRegExp reStripTrailer("_[1-9]");
   
   m_zoneLongName = fileInfo.baseName().remove(reStripTrailer);
   m_zoneShortName = m_zoneLongName;
