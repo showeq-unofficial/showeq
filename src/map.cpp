@@ -2077,6 +2077,36 @@ void Map::mousePressEvent(QMouseEvent* me)
   }
 }
 
+
+void Map::wheelEvent( QWheelEvent * ev)
+{
+    int deltaY = 0;
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    deltaY = ev->angleDelta().y();
+#else
+    deltaY = ev->delta();
+#endif
+
+    //y is verticle, x is horizontal
+    //we only handle vertical scroll for zoom in/out.
+    //ignore anything else so it can be handled by parent.
+    if (deltaY > 0)
+    {
+        setZoom(zoom() + 1);
+        ev->accept();
+        return;
+    }
+    else if (deltaY < 0)
+    {
+        setZoom(zoom() - 1);
+        ev->accept();
+        return;
+    }
+
+    ev->ignore();
+}
+
 void Map::zoomIn()
 {
 #ifdef DEBUGMAP
