@@ -40,15 +40,15 @@
     NULL,                 // 0x10
     NULL,                 // 0x11
     NULL,                 // 0x12
-    NULL,                 // 0x13
-    NULL,                 // 0x14
-    NULL,                 // 0x15
+    "AlchemyTable",       // 0x13
+    "SpellResearchTable", // 0x14
+    "PoisonMakingTable",  // 0x15
     "FletchingTable",     // 0x16
     "JewelryMakingTable", // 0x17
-    NULL,                 // 0x18
-    NULL,                 // 0x19
-    NULL,                 // 0x1a
-    NULL,                 // 0x1b
+    "TinkeringTable",     // 0x18
+    "FishingTable",       // 0x19
+    "MixingBowl",         // 0x1a
+    "IceCreamChurn",      // 0x1b
     NULL,                 // 0x1c
     NULL,                 // 0x1d
     NULL,                 // 0x1e

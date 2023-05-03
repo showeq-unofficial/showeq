@@ -97,7 +97,7 @@
     NULL,                 // 0x49
     "Spit",               // 0x4a
     NULL,                 // 0x4b
-    NULL,                 // 0x4c
+    "BrewingBarrel",      // 0x4c
     NULL,                 // 0x4d
     NULL,                 // 0x4e
     NULL,                 // 0x4f
