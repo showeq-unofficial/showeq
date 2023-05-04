@@ -1,6 +1,6 @@
 /*
- *  weapons2b.h
- *  Copyright 2001-2010, 2019 by the respective ShowEQ Developers
+ *  weapons2e.h
+ *  Copyright 2023 by the respective ShowEQ Developers
  *
  *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
@@ -31,9 +31,9 @@
     NULL,                 // 0x07
     NULL,                 // 0x08
     NULL,                 // 0x09
-    "Haven Shield",       // 0x0a
-    "Katta Shield",       // 0x0b
-    "Seru Shield",        // 0x0c
+    NULL,                 // 0x0a
+    NULL,                 // 0x0b
+    NULL,                 // 0x0c
     NULL,                 // 0x0d
     NULL,                 // 0x0e
     NULL,                 // 0x0f
@@ -67,26 +67,26 @@
     NULL,                 // 0x2b
     NULL,                 // 0x2c
     NULL,                 // 0x2d
-    "Box",                // 0x2e
+    NULL,                 // 0x2e
     NULL,                 // 0x2f
-    "Plant",              // 0x30
-    "Rock",               // 0x31
-    "Bone",               // 0x32
-    "Books",              // 0x33
-    "Leaf",               // 0x34
+    NULL,                 // 0x30
+    NULL,                 // 0x31
+    NULL,                 // 0x32
+    NULL,                 // 0x33
+    NULL,                 // 0x34
     NULL,                 // 0x35
     NULL,                 // 0x36
     NULL,                 // 0x37
-    "Rock",               // 0x38
+    NULL,                 // 0x38
     NULL,                 // 0x39
     NULL,                 // 0x3a
     NULL,                 // 0x3b
-    "BrownRock",          // 0x3c
+    NULL,                 // 0x3c
     NULL,                 // 0x3d
     NULL,                 // 0x3e
     NULL,                 // 0x3f
     NULL,                 // 0x40
-    "Books",              // 0x41
+    NULL,                 // 0x41
     NULL,                 // 0x42
     NULL,                 // 0x43
     NULL,                 // 0x44
@@ -131,7 +131,7 @@
     NULL,                 // 0x6b
     NULL,                 // 0x6c
     NULL,                 // 0x6d
-    "DeadFish",           // 0x6e
+    NULL,                 // 0x6e
     NULL,                 // 0x6f
     NULL,                 // 0x70
     NULL,                 // 0x71
@@ -148,7 +148,7 @@
     NULL,                 // 0x7c
     NULL,                 // 0x7d
     NULL,                 // 0x7e
-    "Acorn",              // 0x7f
+    NULL,                 // 0x7f
     NULL,                 // 0x80
     NULL,                 // 0x81
     NULL,                 // 0x82
@@ -173,7 +173,7 @@
     NULL,                 // 0x95
     NULL,                 // 0x96
     NULL,                 // 0x97
-    "Crystal",            // 0x98
+    NULL,                 // 0x98
     NULL,                 // 0x99
     NULL,                 // 0x9a
     NULL,                 // 0x9b
@@ -196,13 +196,13 @@
     NULL,                 // 0xac
     NULL,                 // 0xad
     NULL,                 // 0xae
-    "Shield",             // 0xaf
+    NULL,                 // 0xaf
     NULL,                 // 0xb0
     NULL,                 // 0xb1
     NULL,                 // 0xb2
     NULL,                 // 0xb3
     NULL,                 // 0xb4
-    "Shield",             // 0xb5
+    NULL,                 // 0xb5
     NULL,                 // 0xb6
     NULL,                 // 0xb7
     NULL,                 // 0xb8
@@ -271,11 +271,10 @@
     NULL,                 // 0xf7
     NULL,                 // 0xf8
     NULL,                 // 0xf9
-    "GreenOrb",           // 0xfa
+    NULL,                 // 0xfa
     NULL,                 // 0xfb
     NULL,                 // 0xfc
-    "RedRock",            // 0xfd
-    "BlackRock",          // 0xfe
+    NULL,                 // 0xfd
+    NULL,                 // 0xfe
     NULL,                 // 0xff
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-

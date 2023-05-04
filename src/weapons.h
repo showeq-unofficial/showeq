@@ -76,7 +76,7 @@
     "Shovel",               // 0x34
     "Flamberge",            // 0x35
     NULL,                   // 0x36 - Unknown Weapon
-    NULL,                   // 0x37 - Unknown Weapon
+    "Pipe",                 // 0x37 - Unknown Weapon
     "Stein",                // 0x38
     "BroadSword",           // 0x39
     "BastardSword",         // 0x3a
