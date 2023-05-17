@@ -771,11 +771,11 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    // 12 bytes added to NPC only in 06/19/2013.
    if (spawn->NPC == 1)
    {
-       netStream.skipBytes(37);
+       netStream.skipBytes(49);
    }
    else
    {
-       netStream.skipBytes(25);
+       netStream.skipBytes(37);
    }
    race = spawn->race;
 
