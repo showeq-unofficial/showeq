@@ -25,7 +25,7 @@ doxygen-installdox: doxygen-doc dox/html/installdox
 
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
 
-CLEANFILES = configure.dbg libqt2.dbg libqt3.dbg
+CLEANFILES = configure.dbg libqt2.dbg libqt3.dbg libqt4.dbg libqt5.dbg libqt6.dbg
 
 dist-hook:
 	mkdir -p $(distdir)/doc
