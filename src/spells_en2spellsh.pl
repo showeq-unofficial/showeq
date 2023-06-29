@@ -46,7 +46,7 @@ $nameField = 1;
 # Target type ID
 $targetSelf = 0x06;
 
-unless (open(SPELLSEN, "<$infile")) 
+unless (open(SPELLSEN, "<$infile"))
 {
     die "Can't open $infile: $!\n";
 }
@@ -61,7 +61,7 @@ print "Writing: $outfile\n";
 $maxSpellId = 0;
 $header = "/*
  * spells.h
- * 
+ *
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  */
@@ -87,7 +87,7 @@ while($line = <SPELLSEN>)
     $spellId = $fields[$spellIdField];
     $spellName = $fields[$nameField];
 
-    $records[$spellId] = sprintf("/* 0x%04x - %5d */ { \"%s\" }, ", 
+    $records[$spellId] = sprintf("/* 0x%04x - %5d */ { \"%s\" },",
 				 $spellId,
 				 $spellId,
 				 $spellName);
@@ -98,7 +98,7 @@ while($line = <SPELLSEN>)
 $emptyCount = 0;
 for ($spellId = 0; $spellId < $maxSpellId; $spellId++)
 {
-    if ($records[$spellId]) 
+    if ($records[$spellId])
     {
 	print SPELLSH $records[$spellId], "\n";
     }
