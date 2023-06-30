@@ -155,6 +155,14 @@ ExperienceWindow::~ExperienceWindow()
 
    qDeleteAll(m_exp_list);
    m_exp_list.clear();
+
+   if (m_ZEM_menu)
+       delete m_ZEM_menu;
+   if (m_view_menu)
+       delete m_view_menu;
+   if (m_exp_rate_menu)
+       delete m_exp_rate_menu;
+
 }
 
 ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr, 

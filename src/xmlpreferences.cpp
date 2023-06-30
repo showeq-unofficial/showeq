@@ -75,10 +75,27 @@ XMLPreferences::XMLPreferences(const QString& defaultsFileName,
 
 XMLPreferences::~XMLPreferences()
 {
+  for (PrefSectionDict::iterator it = m_userSections.begin(); it != m_userSections.end(); ++it)
+  {
+      qDeleteAll(**it);
+      (*it)->clear();
+  }
   qDeleteAll(m_userSections);
   m_userSections.clear();
+
+  for (PrefSectionDict::iterator it = m_defaultsSections.begin(); it != m_defaultsSections.end(); ++it)
+  {
+      qDeleteAll(**it);
+      (*it)->clear();
+  }
   qDeleteAll(m_defaultsSections);
   m_defaultsSections.clear();
+
+  for (CommentSectionDict::iterator it = m_commentSections.begin(); it != m_commentSections.end(); ++it)
+  {
+      qDeleteAll(**it);
+      (*it)->clear();
+  }
   qDeleteAll(m_commentSections);
   m_commentSections.clear();
 }
@@ -106,12 +123,23 @@ void XMLPreferences::save()
 void XMLPreferences::revert()
 {
   // clear out all default preferecnes
+  for (PrefSectionDict::iterator it = m_defaultsSections.begin(); it != m_defaultsSections.end(); ++it)
+  {
+      qDeleteAll(**it);
+      (*it)->clear();
+  }
   qDeleteAll(m_defaultsSections);
   m_defaultsSections.clear();
 
   // clear out all user preferences
+  for (PrefSectionDict::iterator it = m_userSections.begin(); it != m_userSections.end(); ++it)
+  {
+      qDeleteAll(**it);
+      (*it)->clear();
+  }
   qDeleteAll(m_userSections);
   m_userSections.clear();
+
 
   // load the default preferences
   loadPreferences(m_defaultsFilename, m_defaultsSections);

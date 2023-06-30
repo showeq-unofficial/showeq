@@ -522,7 +522,12 @@ bool EQPacketOPCodeDB::remove(const QString& opcodeName)
 
   // if found, remove it from the opcodes table
   if (opcode)
-    return m_opcodes.remove(opcode->opcode());
+  {
+      m_opcodes.remove(opcode->opcode());
+      delete opcode;
+
+      return true;
+  }
 
   return false;
 }

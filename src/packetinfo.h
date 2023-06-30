@@ -291,8 +291,9 @@ class EQPacketOPCodeDB
 
 inline void EQPacketOPCodeDB::clear(void)
 {
-  m_opcodesByName.clear();
+  qDeleteAll(m_opcodes);
   m_opcodes.clear();
+  m_opcodesByName.clear();
 }
 
 inline EQPacketOPCode* EQPacketOPCodeDB::edit(uint16_t opcode)
