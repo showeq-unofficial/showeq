@@ -138,6 +138,12 @@ QString print_item (uint16_t item)
 #include "weapons30.h"
   };
 
+  // sparse array of item names (in 0x4e range), some are NULL
+  static const char*  itemnames4e[] =
+  {
+#include "weapons4e.h"
+  };
+
   // assume no material name found
   const char *itemStr = NULL;
 
@@ -215,6 +221,12 @@ QString print_item (uint16_t item)
     // retrieve pointer to item name
     if (itemLo < (sizeof(itemnames30) / sizeof (char*)))
       itemStr = itemnames30[itemLo];
+  }
+  else if (itemHi == 0x4e)
+  {
+    // retrieve pointer to item name
+    if (itemLo < (sizeof(itemnames4e) / sizeof (char*)))
+      itemStr = itemnames4e[itemLo];
   }
 
   // if race name exists, then return it, otherwise return a number string
