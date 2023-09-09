@@ -69,6 +69,7 @@ SpawnListItem::~SpawnListItem()
 QVariant SpawnListItem::data(int column, int role) const
 {
     QFont font = treeWidget()->font();
+    QFontMetrics metrics(font);
     uint32_t filterFlags = 0;
     if (m_item)
         filterFlags = m_item->filterFlags();
@@ -114,6 +115,9 @@ QVariant SpawnListItem::data(int column, int role) const
                 return QColor(Qt::gray);
             else
                 return m_textColor;
+
+        case Qt::SizeHintRole:
+            return QSize(-1, metrics.lineSpacing());
 
         default:
             return SEQListViewItem::data(column, role);
