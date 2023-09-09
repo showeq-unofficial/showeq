@@ -6264,9 +6264,11 @@ void EQInterface::createSpawnLog(void)
 	   m_spawnLogger, SLOT(logNewZone(const QString&)));
 
    // Connect SpawnLog slots to EQPacket signals
+#if 0 // No longer used as of 5-22-2008
    m_packet->connect2("OP_ZoneSpawns", SP_Zone, DIR_Server,
 		      "spawnStruct", SZC_Modulus,
 		      m_spawnLogger, SLOT(logZoneSpawns(const uint8_t*, size_t)));
+#endif
 // OP_NewSpawn is deprecated in the client
 //    m_packet->connect2("OP_NewSpawn", SP_Zone, DIR_Server,
 // 		      "spawnStruct", SZC_Match,
