@@ -437,7 +437,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->profile.endurance = netStream.readUInt32NC();
 
   // Unknown
-  netStream.skipBytes(42);
+  netStream.skipBytes(58);
 
   // Name
   int firstName = netStream.readUInt32NC();
@@ -486,7 +486,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->guildServerID = netStream.readUInt32NC();
 
   // Unknown
-  netStream.skipBytes(10);
+  netStream.skipBytes(2);
 
   player->platinum_bank = netStream.readUInt32NC();
   player->gold_bank = netStream.readUInt32NC();
