@@ -218,7 +218,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->checksum = netStream.readUInt32NC();
 
   // Unknown  
-  netStream.skipBytes(12);
+  netStream.skipBytes(16);
   
   player->profile.gender = netStream.readUInt8();
   player->profile.race = netStream.readUInt32();

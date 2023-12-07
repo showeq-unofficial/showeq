@@ -879,13 +879,13 @@
 { "deepshade", "Deepshade" }, // 856
 { "firefallpass", "Firefall Pass" }, // 857
 { "hollowshadetwo", "Hollowshade Moor" }, // 858
-{ NULL, NULL }, // 859
-{ NULL, NULL }, // 860
-{ NULL, NULL }, // 861
-{ NULL, NULL }, // 862
-{ NULL, NULL }, // 863
-{ NULL, NULL }, // 864
-{ NULL, NULL }, // 865
+{ "laurioninn", "Laurion Inn" }, // 859
+{ "ankexfen", "Ankexfen Keep" }, // 860
+{ "pallomen", "Pal'Lomen" }, // 861
+{ "herosforge", "The Hero's Forge" }, // 862
+{ "moorsofnokk", "Moors of Nokk" }, // 863
+{ "unkemptwoods", "Unkempt Woods" }, // 864
+{ "timorousfalls", "Timorous Falls" }, // 865
 { NULL, NULL }, // 866
 { NULL, NULL }, // 867
 { NULL, NULL }, // 868
