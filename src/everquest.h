@@ -2042,8 +2042,8 @@ struct action2Struct
 /*0022*/ int32_t  damage;
 /*0026*/ uint8_t  uknown0026[10];
 /*0036*/ uint8_t  type;                          // Bash, kick, cast, etc.
-/*0037*/ uint8_t  unknown0011[11];
-/*0040*/
+/*0037*/ uint8_t  unknown0037[19];
+/*0056*/
 };
 
 // This can be used to gather info on spells cast on us
@@ -2090,7 +2090,7 @@ struct clientTargetStruct
 
 /*
 ** Info sent when you start to cast a spell
-** Length: 44 Octets
+** Length: 39 Octets
 ** OpCode: StartCastCode
 */
 
@@ -2098,12 +2098,12 @@ struct startCastStruct
 {
 /*0000*/ int32_t  slot;                          // Spell slot
 /*0004*/ uint32_t spellId;                       // Spell ID
-/*0008*/ int32_t  inventorySlot;                 // ***Placeholder
-/*0012*/ uint8_t  unknown0012[8];                // ***Placeholder
-/*0020*/ uint32_t targetId;                      // The current selected target
-/*0024*/ uint8_t  unknown0024[4];                // ***Placeholder
-/*0028*/ uint8_t  unknown0028[16];	         // ***Placeholder (4/7/2009)
-/*0044*/
+/*0008*/ uint8_t  unknown0008[10];               // ***Placeholder
+/*0018*/ uint32_t targetId;                      // The current selected target
+/*0022*/ uint8_t  unknown0022[2];                // ***Placeholder
+/*0024*/ uint8_t  unknown0024[2];                // ***Placeholder
+/*0026*/ uint8_t  unknown0026[13];	             // ***Placeholder (4/7/2009)
+/*0039*/
 };
 
 /*
@@ -2656,7 +2656,7 @@ struct buffStruct
 struct GuildMemberUpdate
 {
 /*000*/ uint32_t guildId;                        // guild id
-/*004*/ uint8_t  unknown004[4];			 // 4 bytes added 11/16/16
+/*004*/ uint8_t  unknown004[4];			         // 4 bytes added 11/16/16
 /*008*/ char     name[64];                       // member name
 /*072*/ uint16_t zoneId;                         // zone id 
 /*074*/ uint16_t zoneInstance;                   // zone instance

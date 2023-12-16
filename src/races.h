@@ -942,4 +942,24 @@
     "Stitchwork Lion",            // 918
     "Fungus Man",                 // 919
     "Duck",                       // 920
+    "Squirrel Mount",	          // 921
+    "Kerran",	                  // 922
+    "Phoenix Mount",	          // 923
+    "Hotariton",	              // 924
+    "Skunk",	                  // 925
+    "Chest",	                  // 926
+    "Hotaria Fly Swarm",	      // 927
+    "Hotaria Fly",	              // 928
+    "Badger",	                  // 929
+    "Chicken",	                  // 930
+    "Cow",	                      // 931
+    "Deer",	                      // 932
+    "Ferret",	                  // 933
+    "Fox",	                      // 934
+    "Goat",	                      // 935
+    "Raccoon",	                  // 936
+    "Red Panda",	              // 937
+    "Sheep",	                  // 938
+    "Ogre NPC Rallosian",	      // 939
+    "Goblin",	                  // 940
 #endif
