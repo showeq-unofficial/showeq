@@ -74,7 +74,7 @@
 // constants
 
 const in_port_t WorldServerGeneralMinPort = 9000;
-const in_port_t WorldServerGeneralMaxPort = 9007;
+const in_port_t WorldServerGeneralMaxPort = 9013;
 const in_port_t WorldServerChatPort = 9876;
 const in_port_t WorldServerChat2Port = 9875; // xgame tells, mail
 const in_port_t LoginServerMinPort = 15900;
