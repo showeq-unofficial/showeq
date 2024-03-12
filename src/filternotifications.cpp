@@ -68,6 +68,10 @@ void FilterNotifications::addItem(const Item* item)
 {
   uint32_t filterFlags = item->filterFlags();
 
+  // ignore filtered spawns
+  if (filterFlags & FILTER_FLAG_FILTERED)
+      return;
+
   // first handle alert
   if (filterFlags & FILTER_FLAG_ALERT)
     handleAlert(item, "SpawnAudioCommand", "Spawned");
@@ -85,6 +89,10 @@ void FilterNotifications::addItem(const Item* item)
 
 void FilterNotifications::delItem(const Item* item)
 {
+  // ignore filtered spawns
+  if (item->filterFlags() & FILTER_FLAG_FILTERED)
+      return;
+
   // first handle alert
   if (item->filterFlags() & FILTER_FLAG_ALERT)
     handleAlert(item, "DeSpawnAudioCommand", "Despawned");
@@ -92,6 +100,10 @@ void FilterNotifications::delItem(const Item* item)
 
 void FilterNotifications::killSpawn(const Item* item)
 {
+  // ignore filtered spawns
+  if (item->filterFlags() & FILTER_FLAG_FILTERED)
+      return;
+
   // first handle alert
   if (item->filterFlags() & FILTER_FLAG_ALERT)
     handleAlert(item, "DeathAudioCommand", "Died");
