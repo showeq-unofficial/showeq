@@ -163,7 +163,7 @@ AC_MSG_ERROR([You need at least glibc-2.2 or greater to compile ShowEQ])
 AC_CHECK_LIB(X11, _init, [], AC_MSG_ERROR(cannot find X11 library.  Install the X11 development package))
 AC_CHECK_LIB(Xext, _init, [], AC_MSG_ERROR(cannot find Xext library.  Install the Xext development package))
 AC_CHECK_LIB(png, _init, [], AC_MSG_ERROR(cannot find PNG library.  Install the png development package))
-AC_CHECK_LIB(ICE, _init, [], AC_MSG_ERROR(cannot find ICE library.  Install the ICE development package))
+AC_CHECK_LIB(ICE, _init, [], AC_MSG_ERROR(cannot find ICE library.  Install the X11 Inter-Client Exchange development package))
 
 AC_PATH_QT_MOC
 AC_PATH_QT_UIC
