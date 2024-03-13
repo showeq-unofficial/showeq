@@ -2039,13 +2039,14 @@ struct action2Struct
 {
 /*0000*/ uint16_t target;                        // Target ID
 /*0002*/ uint16_t source;                        // Source ID
-/*0004*/ uint8_t  unknown0004[16];
-/*0020*/ int16_t  spell;                         // SpellID
-/*0022*/ int32_t  damage;
-/*0026*/ uint8_t  uknown0026[10];
-/*0036*/ uint8_t  type;                          // Bash, kick, cast, etc.
-/*0037*/ uint8_t  unknown0037[19];
-/*0056*/
+/*0004*/ uint8_t  unknown0004[4];
+/*0008*/ int32_t  damage;
+/*0012*/ int8_t   unknown0012[8];
+/*0020*/ int32_t  spell;                         // SpellID
+/*0024*/ uint8_t  uknown0024[16];
+/*0040*/ uint8_t  type;                          // Bash, kick, cast, etc.
+/*0041*/ uint8_t  unknown0042[7];
+/*0048*/
 };
 
 // This can be used to gather info on spells cast on us
