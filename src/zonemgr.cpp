@@ -293,7 +293,6 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     player->profile.aa_array[i].AA = netStream.readUInt32NC();
     player->profile.aa_array[i].value = netStream.readUInt32NC();
     player->profile.aa_array[i].unknown008 = netStream.readUInt32NC();
-    player->profile.aa_array[i].unknown012 = netStream.readUInt8();
   }
 
   // Number of SKills (100 ints)
