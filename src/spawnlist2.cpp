@@ -416,7 +416,11 @@ void SpawnListWindow2::killSpawn(const Item* item)
 void SpawnListWindow2::selectSpawn(const Item *item)
 {
   if (!item)
+  {
+    m_selectedItem = NULL;
+    m_spawnList->clearSelection();
     return;
+  }
 
   // cache the selected item
   m_selectedItem = item;
@@ -896,11 +900,18 @@ void SpawnListWindow2::toggle_keepSelectedVisible(bool enable)
 
 void SpawnListWindow2::setSelectedQuiet(SEQListViewItem* item, bool selected)
 {
-  if (!item || (item->isSelected() == selected) )
+  if (item->isSelected() == selected)
     return;
 
   // get the old selection
   SEQListViewItem *oldItem = m_spawnList->currentItem();
+
+  if (!item)
+  {
+    m_selectedItem = NULL;
+    m_spawnList->clearSelection();
+    return;
+  }
 
   // unselect the old selected item if any
   if ((oldItem != item) && (oldItem != NULL) && (oldItem->isSelected()))

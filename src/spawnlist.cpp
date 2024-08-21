@@ -514,7 +514,10 @@ void SpawnList::selectSpawn(const Item *item)
 {
 //    seqDebug("SpawnList::selectSpawn(name=%s)", item->name().latin1());
   if (item == NULL)
-    return;
+  {
+      clearSelection();
+      return;
+  }
 
   // start iterator at the beginning of this QListView
   SEQListViewItemIterator it(this);
@@ -606,12 +609,18 @@ void SpawnList::selectAndOpen(SpawnListItem *i)
 
 void SpawnList::setSelectedQuiet(SEQListViewItem* item, bool selected)
 {
-  if (!item || (item->isSelected() == selected ) ||
+  if ((item->isSelected() == selected ) ||
           !(item->flags() & Qt::ItemIsSelectable))
     return;
 
   // get the old selection
   SEQListViewItem *oldItem = currentItem();
+
+  if (!item)
+  {
+      clearSelection();
+      return;
+  }
 
   // unselect the old selected item if any
   if ((oldItem != item) && (oldItem != NULL) && (oldItem->isSelected()))

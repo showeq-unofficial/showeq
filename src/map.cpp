@@ -4572,10 +4572,6 @@ void Map::mouseMoveEvent( QMouseEvent* event )
 
 void Map::selectSpawn(const Item* item)
 {
-  // sanity check
-  if (item == NULL)
-    return;
-  
   /* seqDebug("%s", item->ID()); */
   m_selectedItem = item;
   

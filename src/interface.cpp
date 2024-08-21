@@ -171,6 +171,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
   m_selectOnConsider = pSEQPrefs->getPrefBool("SelectOnCon", section, false);
   m_selectOnTarget = pSEQPrefs->getPrefBool("SelectOnTarget", section, false);
+  m_deselectOnUntarget = pSEQPrefs->getPrefBool("DeselectOnUntarget", section, false);
 
   const char* player_classes[] = {"Warrior", "Cleric", "Paladin", "Ranger",
 				  "Shadow Knight", "Druid", "Monk", "Bard",
@@ -1016,6 +1017,12 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
        SLOT(toggle_opt_TarSelect()));
    m_action_opt_TarSelect->setCheckable(true);
    m_action_opt_TarSelect->setChecked(m_selectOnTarget);
+
+   m_action_opt_TarDeselect = pOptMenu->addAction("Deselect on Untarget?", this,
+       SLOT(toggle_opt_TarDeselect()));
+   m_action_opt_TarDeselect->setCheckable(true);
+   m_action_opt_TarDeselect->setChecked(m_deselectOnUntarget);
+
 
    m_action_opt_KeepSelectedVisible = pOptMenu->addAction("Keep Selected Visible?",
        this, SLOT(toggle_opt_KeepSelectedVisible()));
@@ -3829,6 +3836,14 @@ EQInterface::toggle_opt_TarSelect (void)
 }
 
 void
+EQInterface::toggle_opt_TarDeselect (void)
+{
+  m_deselectOnUntarget = !(m_deselectOnUntarget);
+  m_action_opt_TarDeselect->setChecked(m_deselectOnUntarget);
+  pSEQPrefs->setPrefBool("DeselectOnUntarget", "Interface", m_deselectOnUntarget);
+}
+
+void
 EQInterface::toggle_opt_Fast (void)
 {
   showeq_params->fast_machine = !(showeq_params->fast_machine);
@@ -4888,10 +4903,19 @@ void EQInterface::zoneChanged(const QString& shortZoneName)
 
 void EQInterface::clientTarget(const uint8_t* data)
 {
-  if (!m_selectOnTarget)
-    return;
 
   const clientTargetStruct* cts = (const clientTargetStruct*)data;
+
+  if (cts->newTarget == 0 && m_deselectOnUntarget)
+  {
+      m_selectedSpawn = 0;
+      emit selectSpawn(m_selectedSpawn);
+      updateSelectedSpawnStatus(m_selectedSpawn);
+      return;
+  }
+
+  if (!m_selectOnTarget)
+    return;
 
   // try to find the targeted spawn in the spawn shell
   const Item* item = m_spawnShell->findID(tSpawn, cts->newTarget);
@@ -4912,9 +4936,6 @@ void EQInterface::clientTarget(const uint8_t* data)
 
 void EQInterface::spawnSelected(const Item* item)
 {
-  if (item == 0)
-    return;
-
   // note the new selection
   m_selectedSpawn = item;
   
@@ -4997,7 +5018,10 @@ void EQInterface::changeItem(const Item* item)
 void EQInterface::updateSelectedSpawnStatus(const Item* item)
 {
   if (item == 0)
+  {
+    stsMessage("");
     return;
+  }
 
   const Spawn* spawn = 0;
 

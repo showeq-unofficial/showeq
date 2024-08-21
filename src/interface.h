@@ -253,6 +253,7 @@ class EQInterface:public QMainWindow
    void toggle_view_CombatWindow();
    void toggle_opt_ConSelect();
    void toggle_opt_TarSelect();
+   void toggle_opt_TarDeselect();
    void toggle_opt_KeepSelectedVisible();
    void toggle_opt_LogSpawns();
    void toggle_opt_PvPTeams();
@@ -477,6 +478,7 @@ class EQInterface:public QMainWindow
    QAction* m_action_view_SpawnList_Cols[tSpawnColMaxCols];
    QAction* m_action_opt_ConSelect;
    QAction* m_action_opt_TarSelect;
+   QAction* m_action_opt_TarDeselect;
    QAction* m_action_opt_KeepSelectedVisible;
    QAction* m_action_opt_LogSpawns;
    QAction* m_action_opt_PvPTeams;
@@ -511,6 +513,7 @@ class EQInterface:public QMainWindow
 
    bool m_selectOnConsider;
    bool m_selectOnTarget;
+   bool m_deselectOnUntarget;
    bool m_useUpdateRadius;
 };
 
