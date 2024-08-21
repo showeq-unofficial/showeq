@@ -356,6 +356,17 @@ class EQInterface:public QMainWindow
 
    virtual void contextMenuEvent(QContextMenuEvent* event) override;
 
+   void createFileMenu();
+   void createViewMenu();
+   void createOptionsMenu();
+   void createNetworkMenu();
+   void createCharacterMenu();
+   void createFiltersMenu();
+   void createInterfaceMenu();
+   void createWindowMenu();
+   void createDebugMenu();
+   void createStatusBar();
+
  public:
    Player* m_player;
    MapMgr* mapMgr(void) { return m_mapMgr; }
