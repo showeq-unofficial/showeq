@@ -301,13 +301,13 @@ QString Item::filterString() const
 {
   QString buff;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-  buff = QString::asprintf("Name:%s:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d",
+  buff = QString::asprintf("Name:%s:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:",
           transformedName().toUtf8().data(),
           raceString().toUtf8().data(),
           classString().toUtf8().data(),
           NPC(), x(), y(), z());
 #else
-  buff.sprintf("Name:%s:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d",
+  buff.sprintf("Name:%s:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:",
           transformedName().toUtf8().data(),
           raceString().toUtf8().data(),
           classString().toUtf8().data(),
@@ -960,7 +960,8 @@ QString Spawn::filterString() const
   QString buff;
 #if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
   buff = QString::asprintf("Name:%s:Level:%d:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:"
-          "Light:%s:Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:Spawn:%s:",
+          "Light:%s:Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:Spawn:%s:"
+          "Info:%s:",
           name.toUtf8().data(),
           level(),
           raceString().toUtf8().data(),
@@ -974,11 +975,13 @@ QString Spawn::filterString() const
           typeString().toUtf8().data(),
           lastName().toUtf8().data(),
           guildTag().toUtf8().data(),
-          spawnTimeStr ().replace (":", ".").toUtf8 ().data ()
+          spawnTimeStr ().replace (":", ".").toUtf8 ().data (),
+          info().toUtf8().data()
           );
 #else
   buff.sprintf("Name:%s:Level:%d:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:"
-          "Light:%s:Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:Spawn:%s:",
+          "Light:%s:Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:Spawn:%s:"
+          "Info:%s:",
           name.toUtf8().data(),
           level(),
           raceString().toUtf8().data(),
@@ -992,7 +995,8 @@ QString Spawn::filterString() const
           typeString().toUtf8().data(),
           lastName().toUtf8().data(),
           guildTag().toUtf8().data(),
-          spawnTimeStr ().replace (":", ".").toUtf8 ().data ()
+          spawnTimeStr ().replace (":", ".").toUtf8 ().data (),
+          info().toUtf8().data()
           );
 #endif
 
@@ -1021,6 +1025,7 @@ QString Spawn::dumpString() const
     + ":DTeam:" + QString::number(deityTeam())
     + ":Type:" + typeString()
     + ":Guild:" + guildTag()
+    + ":Info:" + info()
     + ":FilterFlags:" + QString::number(filterFlags())
     + ":";
 }

@@ -83,30 +83,52 @@ class DataLocationMgr;
 #define FILTER_FLAG_TRACER		(1 << TRACER_FILTER)
 
 
-#define FILTERSTRINGFIELD_TABLE \
-    X(FSF_Name, "Name")         \
-    X(FSF_Level, "Level")       \
-    X(FSF_Race, "Race")         \
-    X(FSF_Class, "Class")       \
-    X(FSF_NPC, "NPC")           \
-    X(FSF_X, "X")               \
-    X(FSF_Y, "Y")               \
-    X(FSF_Z, "Z")               \
-    X(FSF_Light, "Light")       \
-    X(FSF_Deity, "Deity")       \
-    X(FSF_RTeam, "RTeam")       \
-    X(FSF_DTeam, "DTeam")       \
-    X(FSF_Type, "Type")         \
-    X(FSF_LastName, "LastName") \
-    X(FSF_Guild, "Guild")       \
-    X(FSF_Spawn, "Spawn")       \
+#define FILTERSTRINGFIELD_TABLE  \
+    X(FSF_Name, "Name")          \
+    X(FSF_Level, "Level")        \
+    X(FSF_Race, "Race")          \
+    X(FSF_Class, "Class")        \
+    X(FSF_NPC, "NPC")            \
+    X(FSF_X, "X")                \
+    X(FSF_Y, "Y")                \
+    X(FSF_Z, "Z")                \
+    X(FSF_Light, "Light")        \
+    X(FSF_Deity, "Deity")        \
+    X(FSF_RTeam, "RTeam")        \
+    X(FSF_DTeam, "DTeam")        \
+    X(FSF_Type, "Type")          \
+    X(FSF_LastName, "LastName")  \
+    X(FSF_Guild, "Guild")        \
+    X(FSF_Spawn, "Spawn")        \
+    X(FSF_Info, "Info")          \
     X(FSF_GM, "GM")
+
+#define INFOFILTERSTRINGFIELD_TABLE \
+    X(IFSF_Light, "Light") \
+    X(IFSF_Head, "H")      \
+    X(IFSF_Chest, "C")     \
+    X(IFSF_Arms, "A")      \
+    X(IFSF_Waist, "W")     \
+    X(IFSF_Gloves, "G")    \
+    X(IFSF_Legs, "L")      \
+    X(IFSF_Feet, "F")      \
+    X(IFSF_Primary, "1")   \
+    X(IFSF_Secondary, "2")
+
 
 #define X(a, b) a,
 enum FilterStringField
 {
     FILTERSTRINGFIELD_TABLE
     FSF_Max
+};
+#undef X
+
+#define X(a, b) a,
+enum InfoFilterStringField
+{
+    INFOFILTERSTRINGFIELD_TABLE
+    IFSF_Max
 };
 #undef X
 

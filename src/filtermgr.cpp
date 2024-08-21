@@ -55,6 +55,11 @@ const QString FilterStringFieldName[] = {
 };
 #undef X
 
+#define X(a, b) b,
+const QString InfoFilterStringFieldName[] = {
+    INFOFILTERSTRINGFIELD_TABLE
+};
+
 //----------------------------------------------------------------------
 // FilterMgr
 FilterMgr::FilterMgr(const DataLocationMgr* dataLocMgr,
@@ -427,7 +432,15 @@ FilterDialog::FilterDialog(QWidget* parent, Qt::WindowFlags flags) :
     //init m_spawnFilterMap
     for (int field = FSF_Name; field < FSF_Max; ++field)
     {
+        if (field == FSF_Info) continue;
+
         QString name = FilterStringFieldName[field];
+        m_spawnFilterMap[name] = "";
+    }
+    //starting with Head since Light is handled above
+    for (int field = IFSF_Head; field < IFSF_Max; ++field)
+    {
+        QString name = InfoFilterStringFieldName[field];
         m_spawnFilterMap[name] = "";
     }
     m_spawnFilterMap[FSF_MINLEVEL_NAME] = "";
@@ -479,15 +492,30 @@ void FilterDialog::createForm()
 
     const QString labels[] = {
         "Name", "Level", "Race", "Class", "NPC", "X", "Y", "Z", "Light", "Deity",
-        "Race Team", "Deity Team", "Type", "Last Name", "Guild", "Spawn Time", "GM" };
+        "Race Team", "Deity Team", "Type", "Last Name", "Guild", "Spawn Time", "Info", "GM" };
 
     for (int field = FSF_Name; field < FSF_Max; ++field)
     {
+        if (field == FSF_Info) continue;
+
         QString name = FilterStringFieldName[field];
         QString label = labels[field];
         m_filterFields[name] = new FilterFormField(name, label);
         m_fieldCount++;
 
+    }
+
+    const QString info_labels[] = {
+        "Light", "Head", "Chest", "Arms", "Waist", "Gloves", "Legs", "Feet",
+        "Primary", "Secondary" };
+
+    // Starting with head, since Light is already created above.
+    for (int field = IFSF_Head; field < IFSF_Max; ++field)
+    {
+        QString name = InfoFilterStringFieldName[field];
+        QString label = info_labels[field];
+        m_filterFields[name] = new FilterFormField(name, label);
+        m_fieldCount++;
     }
 
     //not part of normal regex string, but still part of filter
@@ -497,7 +525,9 @@ void FilterDialog::createForm()
 
     const QString formFieldOrder[] = { "Name", "LastName", "Guild", "Race", "Class",
         "Deity", "Level", FSF_MINLEVEL_NAME, FSF_MAXLEVEL_NAME, "X", "Y", "Z", "NPC", "Type",
-        "GM", "RTeam", "DTeam", "Spawn", "Light" };
+        "GM", "RTeam", "DTeam", "Spawn", "Light",
+        //Info fields
+        "H", "C", "A", "W", "G", "L", "F", "1", "2" };
 
     int row = 1; //toggle all is row 0
     int col = 0;
@@ -510,7 +540,9 @@ void FilterDialog::createForm()
 
         if (fieldname == "Guild" || fieldname == "Deity" ||
                 fieldname == FSF_MAXLEVEL_NAME || fieldname == "Z" ||
-                fieldname == "GM" || fieldname == "Spawn")
+                fieldname == "GM" || fieldname == "Spawn" ||
+                fieldname == "Light" ||
+                fieldname == "A" || fieldname == "L")
         {
             row++;
             col = 0;
@@ -557,7 +589,10 @@ void FilterDialog::resetForm()
     m_fieldsCheckedCount = 0;
     for (int field = FSF_Name; field < FSF_Max; ++field)
     {
+        if (field == FSF_Info) continue;
+
         QString name = FilterStringFieldName[field];
+
         m_filterFields[name]->m_edit->setText(m_spawnFilterMap[name]);
 
         if (m_filterFields[name]->m_edit->text().length())
@@ -570,6 +605,24 @@ void FilterDialog::resetForm()
             m_filterFields[name]->stateChanged(Qt::Unchecked);
         }
     }
+
+    //starting with Head, since Light was handled above
+    for (int field = IFSF_Head; field < IFSF_Max; ++field)
+    {
+        QString name = InfoFilterStringFieldName[field];
+        m_filterFields[name]->m_edit->setText(m_spawnFilterMap[name]);
+
+        if (m_filterFields[name]->m_edit->text().length())
+        {
+            m_filterFields[name]->stateChanged(Qt::Checked);
+            m_fieldsCheckedCount++;
+        }
+        else
+        {
+            m_filterFields[name]->stateChanged(Qt::Unchecked);
+        }
+    }
+
     //not part of normal regex string, but still part of filter
     m_filterFields[FSF_MINLEVEL_NAME]->m_edit->setText(m_spawnFilterMap[FSF_MINLEVEL_NAME]);
     if (m_filterFields[FSF_MINLEVEL_NAME]->m_edit->text().length())
@@ -610,7 +663,16 @@ void FilterDialog::acceptDialog()
     //if enabled, add to map
     for (int field = FSF_Name; field < FSF_Max; ++field)
     {
+        if (field == FSF_Info) continue;
+
         QString name = FilterStringFieldName[field];
+        if (m_filterFields[name]->m_edit->isEnabled())
+            map[name] = m_filterFields[name]->m_edit->text();
+    }
+    //starting with Head since Light is handled above
+    for (int field = IFSF_Head; field < IFSF_Max; ++field)
+    {
+        QString name = InfoFilterStringFieldName[field];
         if (m_filterFields[name]->m_edit->isEnabled())
             map[name] = m_filterFields[name]->m_edit->text();
     }
@@ -768,17 +830,8 @@ void FilterString2FilterFieldMap(const QString filterString, FilterFieldMap* map
     //process filter string and set form fields
     QStringList tokens = regex.split(":");
 
-    //fields should be key:value, but split will create an extra item in the
-    //list after the last :, so for a well-formed filterString, there should
-    //always be an odd number of elements
-    if (tokens.length() % 2 != 1)
-    {
-        seqWarn("Malformed filterString regex: %s", regex.toLatin1().data());
-        return;
-    }
-
     QStringList::const_iterator itr = tokens.begin();
-    for (;itr < tokens.end(); ++itr)
+    for (; itr < tokens.end(); ++itr)
     {
         QString name = *itr;
         if (!map->contains(name))
@@ -789,29 +842,84 @@ void FilterString2FilterFieldMap(const QString filterString, FilterFieldMap* map
                 continue;
             }
 
-            seqWarn("Ignoring unknown filter string field: %s", name.toLatin1().data());
-            ++itr; // skip this field's data
-            continue;
+            // Info isn't in the map, but we need to process it
+            // otherwise, skip any unknown fields
+            if (name != "Info")
+            {
+                seqWarn("Ignoring unknown filter string field: %s", name.toLatin1().data());
+                ++itr; // skip this field's data
+                continue;
+            }
         }
+        // get field data
         if (++itr == tokens.end())
-            continue;
+            break;
         QString value = *itr;
+        if (!value.trimmed().length())
+            continue;
 
         if (name == "Name" && (value == "Door" || value == "Drop"))
         {
-            //infuriatingly, we add a colon to door and drop names.
-            //TODO try to find out how many people's filters this will break
-            //if we remove the : from door and drop names (maybe replace it with
-            //a - or something.  Or save it for 7.x and do it anyway.
-            //TODO also, check on adding trailing : to Item spawn filterstring
-            //to make it consistent with the Spawn filterstring
+            //we add a colon to door and drop names, so it makes
+            //parsing a little more complicated.
             value += ":";
             if (++itr == tokens.end())
-                continue;
+                break;
             value += *itr;
+            if (value.trimmed().length() <= 1)
+                continue;
         }
 
-        (*map)[name] = value.trimmed();
+        if (name == "Info")
+        {
+            //Info field contains space-separated slot:item pairs, and the
+            //items themselves can also contain spaces.  So special parsing
+            //is needed.
+            bool info_done = false;
+            QString subfield_name = value;
+            while (itr != tokens.end() && !info_done)
+            {
+                // Check the name against valid sub-fields, because we could
+                // be past the Info field and into the next main field
+                bool is_info_field = false;
+                for (int field = IFSF_Light; field < IFSF_Max; ++field)
+                {
+                    if (subfield_name == InfoFilterStringFieldName[field])
+                    {
+                        is_info_field = true;
+                        break;
+                    }
+                }
+
+                if (!is_info_field)
+                {
+                    info_done = true;
+                    continue;
+                }
+
+                // get value
+                if (++itr == tokens.end())
+                    break;
+                value = *itr;
+                if (!value.trimmed().length())
+                    continue;
+
+                QString next_subfield_name = value.section(" ", -1);
+                value = value.section(" ", 0, -2);
+
+                (*map)[subfield_name] = value.trimmed();
+
+                subfield_name = next_subfield_name;
+
+            }
+
+            if (itr == tokens.end())
+                break;
+        }
+        else
+        {
+            (*map)[name] = value.trimmed();
+        }
     }
 
     if (minLevel > -1)
@@ -835,30 +943,109 @@ QString FilterFieldMap2FilterString(FilterFieldMap* map)
     {
         QString name = FilterStringFieldName[field];
 
-        if (!map->contains(name) || !(*map)[name].trimmed().length())
+        if (name == "Info")
         {
-            if (has_first_match && !wildcard)
+            //info subfields need special handling
+            bool info_added = false;
+            bool info_wildcard = false;
+            for (int info_field = IFSF_Light; info_field < IFSF_Max; ++info_field)
             {
-                wildcard = true;
+                QString subfield_name = InfoFilterStringFieldName[info_field];
+                if (!map->contains(subfield_name) || !(*map)[subfield_name].trimmed().length())
+                {
+                    if (!info_wildcard)
+                    {
+                        info_wildcard = true;
+                    }
+                    continue;
+                }
+
+                QString value = (*map)[subfield_name];
+                value = value.trimmed();
+
+                if (!info_added)
+                {
+                    if (wildcard)
+                    {
+                        wildcard = false;
+                        filterString += ".*:Info:";
+                    }
+                    else
+                    {
+                        filterString += "Info:";
+                    }
+                    info_added = true;
+                }
+
+                if (info_wildcard)
+                {
+                    info_wildcard = false;
+                    // we need to handle 2 cases here
+                    // 1. match-field ignore-field match-field
+                    // 2. match-field matchfield
+                    // If we naively insert .* like we do elsewhere, we'll
+                    // wind up with " .* " which will never match case 2.
+                    // But we also don't want to just not include spaces
+                    // in the match, because we don't want to accidentally
+                    // match a different field/value (especially with short
+                    // field names like C or A.
+                    if (filterString.length() && filterString.endsWith(" "))
+                    {
+                        filterString.chop(1);
+                        filterString += "( | .* )";
+                    }
+                    else
+                    {
+                        filterString += ".*";
+                    }
+                }
+
+                filterString += subfield_name;
+                filterString += ":";
+                filterString += value;
+                filterString += " ";
             }
-            continue;
+            //end of Info loop, tidy up
+            if (info_added)
+            {
+                if (info_wildcard)
+                {
+                    info_wildcard = false;
+                    filterString += ".*:";
+                }
+                else
+                {
+                    filterString += ":";
+                }
+            }
         }
-
-        QString value = (*map)[name];
-        value = value.trimmed();
-
-        has_first_match = true;
-
-        if (wildcard)
+        else
         {
-            wildcard = false;
-            filterString += ".*:";
-        }
-        filterString += name;
-        filterString += ":";
-        filterString += value;
-        filterString += ":";
+            if (!map->contains(name) || !(*map)[name].trimmed().length())
+            {
+                if (has_first_match && !wildcard)
+                {
+                    wildcard = true;
+                }
+                continue;
+            }
 
+            QString value = (*map)[name];
+            value = value.trimmed();
+
+            has_first_match = true;
+
+            if (wildcard)
+            {
+                wildcard = false;
+                filterString += ".*:";
+            }
+            filterString += name;
+            filterString += ":";
+            filterString += value;
+            filterString += ":";
+
+        }
     }
 
     //min/max level are not part of normal regex string, but still part of filter
