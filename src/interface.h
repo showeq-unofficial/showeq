@@ -43,6 +43,7 @@
 #include "packetlog.h"
 #include "message.h"
 #include "messagefilter.h"
+#include "map.h"
 
 //--------------------------------------------------
 // forward declarations
@@ -264,6 +265,7 @@ class EQInterface:public QMainWindow
    void toggle_opt_RetardedCoords(bool enable);
    void toggle_opt_SystimeSpawntime(bool enable);
    void select_opt_conColorBase(QAction* con);
+   void select_opt_mapColors();
    void toggle_view_SpawnList();
    void toggle_view_SpawnList2();
    void toggle_view_SpawnPointList();
@@ -500,6 +502,8 @@ class EQInterface:public QMainWindow
 
    QStringList m_StringList;
    QDialog *dialogbox;
+
+   MapColorDialog* m_mapColorDialog;
 
    bool m_isSkillListDocked;
    bool m_isStatListDocked;

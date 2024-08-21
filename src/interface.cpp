@@ -149,7 +149,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
     m_netDiag(0),
     m_messageFilterDialog(0),
     m_guildListWindow(0),
-    m_deviceList(enumerateNetworkDevices())
+    m_deviceList(enumerateNetworkDevices()),
+    m_mapColorDialog(new MapColorDialog())
 {
   setObjectName(name);
   setWindowFlags(Qt::Window);
@@ -1155,6 +1156,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
        SLOT(select_opt_conColorBase(QAction*)));
 
    pOptMenu->addMenu(conColorBaseMenu);
+
+   pOptMenu->addAction("Map Colors...", this, SLOT(select_opt_mapColors()));
 
    m_action_opt_UseUpdateRadius = pOptMenu->addAction("Use EQ's Update Radius",
        this, SLOT(toggle_opt_UseUpdateRadius()));
@@ -4622,6 +4625,11 @@ EQInterface::select_opt_conColorBase(QAction* con)
     // force the spawn lists to get rebuilt with the new colors
     rebuildSpawnList();
   }
+}
+
+void EQInterface::select_opt_mapColors()
+{
+    m_mapColorDialog->show();
 }
 
 void EQInterface::setExp(uint32_t totalExp, uint32_t totalTick,

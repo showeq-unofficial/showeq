@@ -44,6 +44,7 @@
 #include <QDateTime>
 #include <QPen>
 #include <QBrush>
+#include <QPushButton>
 
 // includes required for MapMenu
 #include <QMenu>
@@ -69,6 +70,7 @@
 #include "seqwindow.h"
 #include "spawn.h"
 #include "mapicon.h"
+#include "mapcolors.h"
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -104,6 +106,8 @@ enum FOVMode
   tFOVScaledClassic = 1,
   tFOVClassic = 2
 };
+
+
 
 //----------------------------------------------------------------------
 // constants
@@ -788,6 +792,30 @@ class MapFrame : public SEQWindow
    QAction* m_action_pan;
    QAction* m_action_depthControlRoom;
    QAction* m_action_bottomControl_Options;
+};
+
+class MapColorDialog : public QDialog
+{
+    Q_OBJECT
+
+    public:
+        MapColorDialog(QWidget* parent=0);
+        ~MapColorDialog();
+
+    private slots:
+        void selectColor();
+        void resetDialog();
+        void acceptDialog();
+        void loadDefaults();
+
+    private:
+        void loadUserColors();
+        void updateUserColors();
+
+        QString m_color_base_table[SEQMAP_NUM_COLORS];
+        QString m_color_user_table[SEQMAP_NUM_COLORS];
+        QPushButton* m_color_pb[SEQMAP_NUM_COLORS];
+
 };
 
 #endif // _EQMAP_H_

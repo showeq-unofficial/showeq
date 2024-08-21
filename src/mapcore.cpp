@@ -47,6 +47,9 @@
 #include <QPolygon>
 #include <QByteArray>
 #include <QPixmap>
+#include "xmlpreferences.h"
+
+extern XMLPreferences* pSEQPrefs;
 
 //----------------------------------------------------------------------
 // MapParameters
@@ -1080,7 +1083,10 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
 
 	  // create an M line (start with 2 points because of SOE's lame
 	  // format).
-	  currentLineM = new MapLineM("soe", getMapConvertColor(r, g, b), 2);
+      unsigned short map_color_index = getMapConvertColorIndex(r, g, b);
+      QColor lineColor = pSEQPrefs->getPrefString("MapColor" + QString::number(map_color_index),
+              "MapColors", getMapConvertColor(r, g, b));
+	  currentLineM = new MapLineM("soe", lineColor, 2);
       currentLineM->setOrigColor(QColor(r, g, b));
 
 	  // set the first point
@@ -1142,8 +1148,10 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
 	name.replace("_", " ");
 
 	// add it to the list of locations
-    MapLocation* loc = new MapLocation(name, getMapConvertColor(r, g, b),
-					   x1, y1, z1);
+    unsigned short map_color_index = getMapConvertColorIndex(r, g, b);
+    QColor lineColor = pSEQPrefs->getPrefString("MapColor" + QString::number(map_color_index),
+            "MapColors", getMapConvertColor(r, g, b));
+    MapLocation* loc = new MapLocation(name, lineColor, x1, y1, z1);
     loc->setOrigColor(QColor(r, g, b));
 	layer->locations().append(loc);
 	

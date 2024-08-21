@@ -67,6 +67,8 @@
 #include <QImageWriter>
 #include <QMenu>
 #include <QWidgetAction>
+#include <QGridLayout>
+#include <QCommonStyle>
 
 #if 1 // ZBTEMP: Until we setup a better way to enter location name/color
 #include <QInputDialog>
@@ -5614,6 +5616,126 @@ void MapFrame::toggle_depthControls()
  }
 }
 
+MapColorDialog::MapColorDialog(QWidget* parent) : QDialog(parent)
+{
+    #define X(a,b) m_color_base_table[b] = a;
+    SEQMAP_COLOR_TABLE
+    #undef X
+
+    setWindowTitle("Map Colors");
+
+    loadUserColors();
+
+    QVBoxLayout* vbox = new QVBoxLayout(this);
+
+    QGridLayout* gridLayout = new QGridLayout();
+    vbox->addLayout(gridLayout);
+
+    int col = 0;
+    int row = 0;
+    for (int i = 0; i < SEQMAP_NUM_COLORS; ++i)
+    {
+        row = floor(i / 8);
+        col = i % 8;
+
+        m_color_pb[i] = new QPushButton(QString::number(i), this);
+        m_color_pb[i]->setStyle(new QCommonStyle());
+        m_color_pb[i]->setPalette(QPalette(QColor(m_color_user_table[i])));
+        m_color_pb[i]->setProperty("colorIndex", i);
+        connect(m_color_pb[i], SIGNAL(clicked()), this, SLOT(selectColor()));
+
+        gridLayout->addWidget(m_color_pb[i], row, col);
+    }
+
+    QHBoxLayout* hbox = new QHBoxLayout();
+    vbox->addItem(new QSpacerItem(20, 25));
+    vbox->addLayout(hbox);
+
+    QPushButton* resetButton = new QPushButton("Reset");
+    resetButton->setDefault(false);
+    resetButton->setAutoDefault(false);
+    hbox->addWidget(resetButton);
+    connect(resetButton, SIGNAL(clicked()), this, SLOT(resetDialog()));
+
+    QPushButton* defaultsButton = new QPushButton("Load Defaults");
+    defaultsButton->setDefault(false);
+    defaultsButton->setAutoDefault(false);
+    hbox->addWidget(defaultsButton);
+    connect(defaultsButton, SIGNAL(clicked()), this, SLOT(loadDefaults()));
+
+    hbox->addItem(new QSpacerItem(20, 1));
+
+    QPushButton* okButton = new QPushButton("Ok");
+    okButton->setDefault(false);
+    okButton->setAutoDefault(false);
+    hbox->addWidget(okButton);
+    connect(okButton, SIGNAL(clicked()), this, SLOT(acceptDialog()));
+
+    QPushButton* cancelButton = new QPushButton("Cancel");
+    okButton->setDefault(false);
+    okButton->setAutoDefault(false);
+    hbox->addWidget(cancelButton);
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
+
+    setLayout(vbox);
+
+    resetDialog();
+}
+
+MapColorDialog::~MapColorDialog()
+{ }
+
+void MapColorDialog::resetDialog()
+{
+    loadUserColors();
+    for (int i=0; i<SEQMAP_NUM_COLORS; ++i)
+        m_color_pb[i]->setPalette(QPalette(QColor(m_color_user_table[i])));
+}
+
+void MapColorDialog::acceptDialog()
+{
+    updateUserColors();
+    done(QDialog::Accepted);
+}
+
+void MapColorDialog::loadDefaults()
+{
+    for (int i=0; i<SEQMAP_NUM_COLORS; ++i)
+    {
+        m_color_user_table[i] = m_color_base_table[i];
+        m_color_pb[i]->setPalette(QPalette(QColor(m_color_base_table[i])));
+    }
+}
+
+void MapColorDialog::loadUserColors()
+{
+    for (int i=0; i<SEQMAP_NUM_COLORS; ++i)
+        m_color_user_table[i] = pSEQPrefs->getPrefString("MapColor" + QString::number(i),
+                "MapColors", m_color_base_table[i]);
+}
+
+void MapColorDialog::updateUserColors()
+{
+    for (int i=0; i<SEQMAP_NUM_COLORS; ++i)
+        pSEQPrefs->setPrefString("MapColor" + QString::number(i), "MapColors", m_color_user_table[i]);
+}
+
+
+
+void MapColorDialog::selectColor()
+{
+    QPushButton* pb = qobject_cast<QPushButton*>(sender());
+    if (!pb) return;
+
+    QColor newColor = QColorDialog::getColor(pb->palette().color(backgroundRole()), this);
+    if (newColor.isValid())
+    {
+        int i = pb->property("colorIndex").toInt();
+        m_color_user_table[i] = newColor.name();
+        pb->setPalette(QPalette(QColor(m_color_user_table[i])));
+    }
+
+}
 
 #ifndef QMAKEBUILD
 #include "map.moc"
