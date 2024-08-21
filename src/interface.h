@@ -199,7 +199,9 @@ class EQInterface:public QMainWindow
    void dumpGroup(void);
    void dumpGuild(void);
    void launch_editor_filters(void);
+   void launch_filterlistwindow_filters(void);
    void launch_editor_zoneFilters(void);
+   void launch_filterlistwindow_zoneFilters(void);
    void toggleAutoDetectPlayerSettings(bool enable);
    void SetDefaultCharacterClass(QAction*);
    void SetDefaultCharacterRace(QAction*);

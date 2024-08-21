@@ -33,10 +33,10 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QXmlStreamReader>
 
 #define MAXLEN   5000
 
-#pragma message("Once our minimum supported Qt version is greater than 5.14, this check can be removed and ENDL replaced with Qt::endl")
 #if (QT_VERSION >= QT_VERSION_CHECK(5,14,0))
 #define ENDL Qt::endl
 #else
@@ -45,9 +45,22 @@
 
 //#define DEBUG_FILTER
 
+#define X(a, b) #b,
+const QString FilterStringFieldName[FSF_Max] = {
+    FILTERSTRINGFIELD_TABLE
+};
+#undef X
+
+#define X(a, b) #b,
+const QString FilterStringInfoFieldName[FSIF_Max] = {
+    FILTERSTRINGINFOFIELD_TABLE
+};
+#undef X
+
+
 //----------------------------------------------------------------------
 //  LoadXmlContentHandler declaration
-class LoadXmlContentHandler : public QXmlDefaultHandler
+class LoadXmlContentHandler : public QObject
 {
 public:
   LoadXmlContentHandler(Filters& filters, const FilterTypes& types);
@@ -56,7 +69,7 @@ public:
   // QXmlContentHandler overrides
   bool startDocument();
   bool startElement( const QString&, const QString&, const QString& , 
-		     const QXmlAttributes& );
+		     const QXmlStreamAttributes& );
   bool characters(const QString& ch);
   bool endElement( const QString&, const QString&, const QString& );
   bool endDocument();
@@ -182,15 +195,41 @@ void FilterItem::init(const QString& regexString, bool caseSensitive,
 	 (const char*)regexString, minLevel, maxLevel);
 #endif
 
+  // in theory, we have minLevel and maxLevel, so there should be no level range
+  // appended to the filter string.  But there are situation where that can
+  // happen, so check for it and remove it if found. Otherwise, if
+  // we leave it attached, the filter will never match anything since the
+  // level range will be treated as part of the match string.
+
+  QString filterString;
+  QString workString = regexString;
+
+  // find the semi-colon that seperates the regex from the level info
+  int breakPoint = workString.indexOf(';');
+
+  // if no semi-colon, then it's all a regex
+  if (breakPoint == -1)
+    filterString = regexString;
+  else
+    // regex is the left most part of the string up to breakPoint characters
+    filterString = workString.left(breakPoint);
+
+  filterString = regexString;
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  if (!caseSensitive)
+      m_regexp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+#else
   m_regexp.setPatternSyntax(QRegExp::RegExp);
   m_regexp.setCaseSensitivity(caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+#endif
 
   // For the pattern, save off the original. This is what will be saved
   // during save operations. But the actual regexp we filter with will
   // mark the # in spawn names as optional to aid in filter writing.
-  m_regexpOriginalPattern = QString(regexString.toLatin1().data());
+  m_regexpOriginalPattern = filterString;
 
-  QString fixedFilterPattern = regexString;
+  QString fixedFilterPattern = filterString;
   fixedFilterPattern.replace("Name:", "Name:#?", Qt::CaseInsensitive);
   m_regexp.setPattern(fixedFilterPattern);
 
@@ -244,7 +283,7 @@ bool FilterItem::save(QString& indent, QTextStream& out)
 bool FilterItem::isFiltered(const QString& filterString, uint8_t level) const
 {
   // check the main filter string
-  if (m_regexp.indexIn(filterString) != -1)
+  if (filterString.indexOf(m_regexp) != -1)
   {
     // is there is a level range component to this filter
     if ((m_minLevel > 0) || (m_maxLevel > 0))
@@ -469,6 +508,49 @@ Filter::listFilters(void)
   }
 }
 
+QString Filter::getFilterString(int index) const
+{
+    if (index >= m_filterItems.size())
+        return QString();
+
+    FilterItem* item = m_filterItems[index];
+    QString pattern = item->filterPattern();
+
+    return pattern;
+}
+
+QString Filter::getOrigFilterString(int index) const
+{
+    if (index >= m_filterItems.size())
+        return QString();
+
+    FilterItem* item = m_filterItems[index];
+    QString pattern = item->origFilterPattern();
+
+    return pattern;
+}
+
+int Filter::getMinLevel(int index) const
+{
+    if (index >= m_filterItems.size())
+        return -1;
+
+    FilterItem* item = m_filterItems[index];
+
+    return item->minLevel();
+}
+
+int Filter::getMaxLevel(int index) const
+{
+    if (index >= m_filterItems.size())
+        return -1;
+
+    FilterItem* item = m_filterItems[index];
+
+    return item->maxLevel();
+};
+
+
 //----------------------------------------------------------------------
 //  Filters
 Filters::Filters(const FilterTypes& types)
@@ -533,23 +615,61 @@ bool Filters::load(const QString& filename)
   // load filters
   m_file = filename;
 
+  if (filename.isEmpty())
+      return false;
+
   // create XML content handler
   LoadXmlContentHandler handler(*this, m_types);
 
   // create a file object on the file
   QFile xmlFile(filename);
+  xmlFile.open(QIODevice::ReadOnly);
+  if (!xmlFile.isOpen())
+      return false;
 
-  // create an XmlInputSource on the file
-  QXmlInputSource source(&xmlFile);
-  
-  // create an XML parser
-  QXmlSimpleReader reader;
+  QXmlStreamReader reader(&xmlFile);
 
-  // set the content handler
-  reader.setContentHandler(&handler);
+  bool status = true;
+  while(!reader.atEnd() && status)
+  {
+      switch(reader.readNext())
+      {
+          case QXmlStreamReader::NoToken:
+              break;
+          case QXmlStreamReader::Invalid:
+              status = false;
+              break;
+          case QXmlStreamReader::StartDocument:
+              if (!handler.startDocument())
+                  status = false;
+              break;
+          case QXmlStreamReader::EndDocument:
+              if (!handler.endDocument())
+                  status = false;
+              break;
+          case QXmlStreamReader::StartElement:
+              if (!handler.startElement(QString(), QString(), reader.name().toString(), reader.attributes()))
+                  status = false;
+              break;
+          case QXmlStreamReader::EndElement:
+              if (!handler.endElement(QString(), QString(), reader.name().toString()))
+                  status = false;
+              break;
+          case QXmlStreamReader::Characters:
+              if (!handler.characters(reader.text().toString()))
+                  status = false;
+              break;
+          case QXmlStreamReader::Comment:
+          case QXmlStreamReader::DTD:
+          case QXmlStreamReader::EntityReference:
+          case QXmlStreamReader::ProcessingInstruction:
+              break;
+      }
+  }
 
-  // parse the file
-  return reader.parse(source);
+  xmlFile.close();
+
+  return status;
 }
 
 bool Filters::save(const QString& filename) const
@@ -565,7 +685,12 @@ bool Filters::save(const QString& filename) const
   QTextStream out(&file);
 
   // set the output encoding to be UTF8
+#if (QT_VERSION >= QT_VERSION_CHECK(6,0,0))
+  out.setEncoding(QStringConverter::Utf8);
+#else
   out.setCodec("UTF-8");
+#endif
+
 
   // set the number output to be left justified decimal
   out.setIntegerBase(10);
@@ -707,6 +832,59 @@ void Filters::remFilter(uint8_t type, const QString& filterPattern)
     filter->remFilter(filterPattern);
 }
 
+int Filters::numFilters(uint8_t type) const
+{
+    uint32_t mask = (1 << type);
+    FilterMap::const_iterator it = m_filters.find(mask);
+
+    if (it == m_filters.end()) return 0;
+
+    return it->second->numFilters();
+}
+
+QString Filters::getFilterString(uint8_t type, int index) const
+{
+    uint32_t mask = (1 << type);
+    FilterMap::const_iterator it = m_filters.find(mask);
+
+    if (it == m_filters.end()) return QString();
+
+    return it->second->getFilterString(index);
+}
+
+QString Filters::getOrigFilterString(uint8_t type, int index) const
+{
+    uint32_t mask = (1 << type);
+    FilterMap::const_iterator it = m_filters.find(mask);
+
+    if (it == m_filters.end()) return QString();
+
+    return it->second->getOrigFilterString(index);
+}
+
+int Filters::getMinLevel(uint8_t type, int index) const
+{
+    uint32_t mask = (1 << type);
+    FilterMap::const_iterator it = m_filters.find(mask);
+
+    if (it == m_filters.end()) return -1;
+
+    return it->second->getMinLevel(index);
+}
+
+int Filters::getMaxLevel(uint8_t type, int index) const
+{
+    uint32_t mask = (1 << type);
+    FilterMap::const_iterator it = m_filters.find(mask);
+
+    if (it == m_filters.end()) return -1;
+
+    return it->second->getMaxLevel(index);
+}
+
+
+
+
 ///////////////////////////////////
 //  FilterTypes
 FilterTypes::FilterTypes()
@@ -823,7 +1001,7 @@ bool LoadXmlContentHandler::startDocument()
 bool LoadXmlContentHandler::startElement(const QString&, 
 						  const QString&, 
 						  const QString& name, 
-						  const QXmlAttributes& attr)
+						  const QXmlStreamAttributes& attr)
 {
   if (name == "oldfilter")
   {
@@ -843,21 +1021,13 @@ bool LoadXmlContentHandler::startElement(const QString&,
 
   if (name == "level")
   {
-    int index;
-    
-    // first check for a min
-    index = attr.index("min");
-
     // if min attribute was found, use it
-    if (index != -1)
-      m_currentMinLevel = uint8_t(attr.value(index).toUShort());
-
-    // then check for a max
-    index = attr.index("max");
+    if (!attr.value("min").isEmpty())
+      m_currentMinLevel = uint8_t(attr.value("min").toString().toUShort());
 
     // if max attribute was found, use it
-    if (index != -1)
-      m_currentMaxLevel = uint8_t(attr.value(index).toUShort());
+    if (!attr.value("max").isEmpty())
+      m_currentMaxLevel = uint8_t(attr.value("max").toString().toUShort());
 
     // done
     return true;
@@ -865,17 +1035,16 @@ bool LoadXmlContentHandler::startElement(const QString&,
 
   if (name == "section")
   {
-    int index = attr.index("name");
     // section is only valid if a name is specified
-    if (index == -1)
+    if (attr.value("name").isEmpty())
       return false;
 
     // get the current type for the name
-    m_currentType = m_types.type(attr.value(index));
+    m_currentType = m_types.type(attr.value("name").toString());
 
     return true;
   }
-  
+
   return true;
 }
 

@@ -24,6 +24,7 @@
 #include "util.h"
 #include "main.h"
 #include "editor.h"
+#include "filterlistwindow.h"
 #include "packet.h"
 #include "zonemgr.h"
 #include "compassframe.h"
@@ -1396,14 +1397,17 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
            Qt::Key_F3);
    filterMenu->addAction("&Save Filters", m_filterMgr, SLOT(saveFilters()),
            Qt::Key_F4);
-   filterMenu->addAction("&Edit Filters", this, SLOT(launch_editor_filters()));
+   filterMenu->addAction("&Edit Filters", this, SLOT(launch_filterlistwindow_filters()));
+   filterMenu->addAction("&Edit Filters XML", this, SLOT(launch_editor_filters()));
    filterMenu->addAction("Select Fil&ter File", this, SLOT(select_filter_file()));
 
    filterMenu->addAction("Reload &Zone Filters", m_filterMgr,
            SLOT(loadZoneFilters()), Qt::SHIFT+Qt::Key_F3);
    filterMenu->addAction("S&ave Zone Filters", m_filterMgr,
            SLOT(saveZoneFilters()), Qt::SHIFT+Qt::Key_F4);
-   filterMenu->addAction("Edit Zone Fi&lters", this,
+   filterMenu->addAction("Edit Zone Filters", this,
+           SLOT(launch_filterlistwindow_zoneFilters()));
+   filterMenu->addAction("Edit Zone Fi&lters XML", this,
            SLOT(launch_editor_zoneFilters()));
 
    filterMenu->addAction("Re&filter Spawns", m_spawnShell, SLOT(refilterSpawns()));
@@ -3852,11 +3856,23 @@ EQInterface::launch_editor_filters(void)
 }
 
 void
+EQInterface::launch_filterlistwindow_filters(void)
+{
+  FilterListWindow * ew = new FilterListWindow(m_filterMgr->filterFile(), this);
+}
+
+void
 EQInterface::launch_editor_zoneFilters(void)
 {
   EditorWindow * ew = new EditorWindow(m_filterMgr->zoneFilterFile().toLatin1().data());
   ew->setWindowTitle(m_filterMgr->zoneFilterFile());
   ew->show();
+}
+
+void
+EQInterface::launch_filterlistwindow_zoneFilters(void)
+{
+  FilterListWindow * ew = new FilterListWindow(m_filterMgr->zoneFilterFile(), this);
 }
 
 void

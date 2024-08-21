@@ -33,11 +33,81 @@
 
 #include <QString>
 #include <QList>
-#include <QRegExp>
-#include <QXmlAttributes>
 #include <QTextStream>
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+#include <QRegularExpression>
+#else
+#include <QRegExp>
+#endif
+
 #include <map>
+
+
+//--------------------------------------------------
+// defines and enums
+
+// HumanReadableName, FilterStringFieldName
+#define FILTERSTRINGFIELD_TABLE  \
+    X(Name, Name)          \
+    X(Level, Level)        \
+    X(Race, Race)          \
+    X(Class, Class)        \
+    X(NPC, NPC)            \
+    X(X, X)                \
+    X(Y, Y)                \
+    X(Z, Z)                \
+    X(Light, Light)        \
+    X(Deity, Deity)        \
+    X(RaceTeam, RTeam)     \
+    X(DeityTeam, DTeam)    \
+    X(Type, Type)          \
+    X(LastName, LastName)  \
+    X(Guild, Guild)        \
+    X(SpawnTime, Spawn)    \
+    X(Info, Info)          \
+    X(GM, GM)
+
+// HumanReadableName, FilterStringFieldName
+#define FILTERSTRINGINFOFIELD_TABLE \
+    X(Light, Light) \
+    X(Head, H)      \
+    X(Chest, C)     \
+    X(Arms, A)      \
+    X(Waist, W)     \
+    X(Gloves, G)    \
+    X(Legs, L)      \
+    X(Feet, F)      \
+    X(Primary, 1)   \
+    X(Secondary, 2)
+
+
+#define X(a, b) FSF_##a,
+enum FilterStringField
+{
+    FILTERSTRINGFIELD_TABLE
+    FSF_Max
+};
+#undef X
+
+#define X(a, b) FSIF_##a,
+enum FilterStringInfoField
+{
+    FILTERSTRINGINFOFIELD_TABLE
+    FSIF_Max
+};
+#undef X
+
+extern const QString FilterStringFieldName[FSF_Max];
+extern const QString FilterStringInfoFieldName[FSIF_Max];
+
+
+// special handling for min/max level, which aren't part of regex filter string
+#define FSF_MINLEVEL_NAME "MinLevel"
+#define FSF_MINLEVEL_LABEL "Min Level"
+#define FSF_MAXLEVEL_NAME "MaxLevel"
+#define FSF_MAXLEVEL_LABEL "Max Level"
+
 
 //--------------------------------------------------
 // forward declarations
@@ -68,6 +138,7 @@ public:
 
   QString name() const { return m_regexp.pattern(); }
   QString filterPattern() const { return m_regexp.pattern(); }
+  QString origFilterPattern() const { return m_regexpOriginalPattern; }
   uint8_t minLevel() const { return m_minLevel; }
   uint8_t maxLevel() const { return m_maxLevel; }
   bool valid() { return m_regexp.isValid(); }
@@ -76,7 +147,11 @@ public:
   void init(const QString& filterPattern, bool caseSensitive, uint8_t minLevel,
          uint8_t maxLevel);
   
+#if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+  QRegularExpression m_regexp;
+#else
   QRegExp m_regexp;
+#endif
   QString m_regexpOriginalPattern;
   uint8_t m_minLevel;
   uint8_t m_maxLevel;
@@ -98,6 +173,12 @@ public:
    void remFilter(const QString& filterPattern); 
    void listFilters(void);
    void setCaseSensitive(bool caseSensitive);
+
+   int numFilters() const { return m_filterItems.size(); }
+   QString getFilterString(int index) const;
+   QString getOrigFilterString(int index) const;
+   int getMinLevel(int index) const;
+   int getMaxLevel(int index) const;
 
 private:
    FilterItem* findFilter(const QString& filterPattern);
@@ -128,7 +209,11 @@ class Filters
 		 uint8_t minLevel = 0, uint8_t maxLevel = 0);
   void remFilter(uint8_t type, const QString& filterString);
 
- protected:
+  int numFilters(uint8_t type) const;
+  QString getFilterString(uint8_t type, int index) const;
+  QString getOrigFilterString(uint8_t type, int index)const;
+  int getMinLevel(uint8_t type, int index) const;
+  int getMaxLevel(uint8_t type, int index) const;
 
  protected:
   QString m_file;

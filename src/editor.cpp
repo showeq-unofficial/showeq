@@ -43,54 +43,9 @@
 #include <QCloseEvent>
 
 #include "util.h"
+#include "toolbaricons.h"
 
 #include "editor.h"
-
-/* XPM */
-static const char *filesave[] = {
-"    14    14        4            1",
-". c #040404",
-"# c #808304",
-"a c #bfc2bf",
-"b c None",
-"..............",
-".#.aaaaaaaa.a.",
-".#.aaaaaaaa...",
-".#.aaaaaaaa.#.",
-".#.aaaaaaaa.#.",
-".#.aaaaaaaa.#.",
-".#.aaaaaaaa.#.",
-".##........##.",
-".############.",
-".##.........#.",
-".##......aa.#.",
-".##......aa.#.",
-".##......aa.#.",
-"b............."
-};
-
-/* XPM */
-static const char *fileopen[] = {
-"    16    13        5            1",
-". c #040404",
-"# c #808304",
-"a c None",
-"b c #f3f704",
-"c c #f3f7f3",
-"aaaaaaaaa...aaaa",
-"aaaaaaaa.aaa.a.a",
-"aaaaaaaaaaaaa..a",
-"a...aaaaaaaa...a",
-".bcb.......aaaaa",
-".cbcbcbcbc.aaaaa",
-".bcbcbcbcb.aaaaa",
-".cbcb...........",
-".bcb.#########.a",
-".cb.#########.aa",
-".b.#########.aaa",
-"..#########.aaaa",
-"...........aaaaa"
-};
 
 EditorWindow::EditorWindow(const char *fileName)
      : QMainWindow( 0 )
@@ -98,8 +53,8 @@ EditorWindow::EditorWindow(const char *fileName)
      setObjectName("ShowEQ - Editor");
      setAttribute(Qt::WA_DeleteOnClose);
      QPixmap openIcon, saveIcon;
-     openIcon = QPixmap( fileopen );
-     saveIcon = QPixmap( filesave );
+     openIcon = ToolbarIcons::FileOpen();
+     saveIcon = ToolbarIcons::FileSave();
 
      fileTools = new QToolBar(this);
      fileTools->setWindowTitle( tr( "File Operations" ) );

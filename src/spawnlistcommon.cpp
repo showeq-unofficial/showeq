@@ -35,6 +35,7 @@
 #include "main.h"
 #include "player.h"
 #include "diagnosticmessages.h"
+#include "filterlistwindow.h"
 
 #include <cstring>
 
@@ -655,7 +656,7 @@ void SpawnListMenu::add_filter(QAction* selection)
   // get the user edited filter string, based on the items filterString
   bool ok = false;
   filterString =
-    FilterDialog::getFilter(m_spawnlist, filterName + " Filter",
+    FilterDialog::getFilter(m_spawnlist, "Add " + filterName + " Filter",
             filterString, &ok);
 
   // if the user clicked ok, add the filter
@@ -675,7 +676,7 @@ void SpawnListMenu::add_zoneFilter(QAction* selection)
   // get the user edited filter string, based on the items filterString
   bool ok = false;
   filterString =
-    FilterDialog::getFilter(m_spawnlist, filterName + " Zone Filter",
+    FilterDialog::getFilter(m_spawnlist, "Add " + filterName + " Zone Filter",
             filterString, &ok);
 
   // if the user clicked ok, add the filter
