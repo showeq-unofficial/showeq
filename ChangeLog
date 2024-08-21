@@ -1,3 +1,29 @@
+cn187 (08/21/24)
+- Update to version 6.4.0
+- Support for EQ Patch 08/21/24
+- Struct and opcode updates
+- Fixes:
+    - Improvements/fixes to various column sort/reorder/hide behavior
+    - Fixes for player-controlled external entity detection and updates, and related crash
+    - Rework packet capture filter to improve reliability of session detection
+    - Update OP_Consider logic to correctly display con colors and level
+    - Enable menu options to rename/delete spawnpoints
+    - Don't auto-select another mob when a targeted corpse decays
+    - Fixes for formatted messages
+    - Remove config.sub/config.guess from source and regenerate them as needed
+    - Character menu now allows selecting level 125
+    - Correctly interpret character x/y when loading map (fixes tiny map in northro, etc.)
+    - Correctly interpret zone ID for player purchased housing/guildhalls
+- Enhancements:
+    - Add option to deselect your target if mob is untargeted
+    - Add support for configuring map line/location colors
+    - Add support for configuring PCAP snaplen and ring buffer size
+    - PCAP will now attempt to detect dropped packets and emit a warning with possible fixes
+    - New UI for adding and editing spawn filters
+    - Add support for using info/equipment fields in spawn filter matches
+- Misc:
+    - Some internal and build system reorganization to make future changes less cumbersome
+
 cn187 (07/17/24)
 ----------------
 - Update to version 6.3.16
