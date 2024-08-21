@@ -112,7 +112,7 @@ class EQPacketStream : public QObject
 
   // this signals a change in the session tracking state
   void sessionTrackingChanged(uint8_t);
-  void lockOnClient(in_port_t serverPort, in_port_t clientPort);
+  void lockOnClient(in_port_t serverPort, in_port_t clientPort, in_addr_t clientAddr);
 
   // Signal a new session key being received
   void sessionKey(uint32_t sessionId, EQStreamID streadid, uint32_t sessionKey);
@@ -155,6 +155,7 @@ class EQPacketStream : public QObject
   uint32_t m_sessionId;
   uint32_t m_sessionKey;
   in_port_t m_sessionClientPort;
+  in_addr_t m_sessionClientIP;
   uint32_t m_maxLength;
 
   // encryption

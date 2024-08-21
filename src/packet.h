@@ -1,6 +1,6 @@
 /*
  *  packet.h
- *  Copyright 2000-2008, 2019 by the respective ShowEQ Developers
+ *  Copyright 2000-2024 by the respective ShowEQ Developers
  *  Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net).
  *
  *  This file is part of ShowEQ.
@@ -51,7 +51,7 @@ enum EQStreamPairs
 //----------------------------------------------------------------------
 // forward declarations
 class VPacket;
-class PacketCaptureThread;
+class PacketCaptureProviderThread;
 class EQPacketStream;
 class EQUDPIPPacketFormat;
 class EQPacketTypeDB;
@@ -121,7 +121,8 @@ class EQPacket : public QObject
 
  protected slots:
    void closeStream(uint32_t sessionId, EQStreamID streamId);
-   void lockOnClient(in_port_t serverPort, in_port_t clientPort);
+   void unlatchClientPort();
+   void lockOnClient(in_port_t serverPort, in_port_t clientPort, in_addr_t clientAddr);
 
  signals:
    // used for net_stats display
@@ -158,8 +159,9 @@ class EQPacket : public QObject
 			  bool unknown);
 
  private:
+   void validateIP();
 
-   PacketCaptureThread* m_packetCapture;
+   PacketCaptureProviderThread* m_packetCapture;
    VPacket* m_vPacket;
    QTimer* m_timer;
 

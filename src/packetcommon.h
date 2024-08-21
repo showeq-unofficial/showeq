@@ -46,10 +46,19 @@
 #include <endian.h>
 #endif
 
+#include <netdb.h>
 
 //----------------------------------------------------------------------
 // Constants
 const char* const AUTOMATIC_CLIENT_IP = "127.0.0.0";
+
+const in_port_t WorldServerGeneralMinPort = 9000;
+const in_port_t WorldServerGeneralMaxPort = 9015;
+const in_port_t WorldServerChatPort = 9876;
+const in_port_t WorldServerChat2Port = 9875; // xgame tells, mail
+const in_port_t LoginServerMinPort = 15900;
+const in_port_t LoginServerMaxPort = 15910;
+const in_port_t ChatServerPort = 5998;
 
 // Preference constants for VPacket.Playback.
 #define PLAYBACK_OFF 0

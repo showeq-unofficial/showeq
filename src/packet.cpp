@@ -1,6 +1,6 @@
 /*
  *  packet.cpp
- *  Copyright 2000-2008, 2016, 2019 by the respective ShowEQ Developers
+ *  Copyright 2000-2024 by the respective ShowEQ Developers
  *  Portions Copyright 2001-2004,2007 Zaphod (dohpaz@users.sourceforge.net).
  *
  *  This file is part of ShowEQ.
@@ -36,6 +36,7 @@
 
 #include "everquest.h"
 #include "packet.h"
+#include "packetcommon.h"
 #include "packetcapture.h"
 #include "packetformat.h"
 #include "packetstream.h"
@@ -72,14 +73,6 @@
 
 //----------------------------------------------------------------------
 // constants
-
-const in_port_t WorldServerGeneralMinPort = 9000;
-const in_port_t WorldServerGeneralMaxPort = 9013;
-const in_port_t WorldServerChatPort = 9876;
-const in_port_t WorldServerChat2Port = 9875; // xgame tells, mail
-const in_port_t LoginServerMinPort = 15900;
-const in_port_t LoginServerMaxPort = 15910;
-const in_port_t ChatServerPort = 5998;
 
 //----------------------------------------------------------------------
 // Here begins the code
@@ -188,54 +181,38 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
   // no client/server ports yet
   m_clientPort = 0;
   m_serverPort = 0;
-  
-  struct hostent *he;
-  struct in_addr  ia;
-  if (m_ip.isEmpty() && m_mac.isEmpty())
-    seqFatal("No address specified");
-  
-  if (!m_ip.isEmpty())
-  {
-    /* Substitute "special" IP which is interpreted 
-       to set up a different filter for picking up new sessions */
-    
-    if (m_ip == "auto")
-      inet_aton (AUTOMATIC_CLIENT_IP, &ia);
-    else if (inet_aton (m_ip.toLatin1().data(), &ia) == 0)
-    {
-      he = gethostbyname(m_ip.toLatin1().data());
-      if (!he)
-          seqFatal("Invalid address; %s", m_ip.toLatin1().data());
 
-      memcpy (&ia, he->h_addr_list[0], he->h_length);
-    }
-    m_client_addr = ia.s_addr;
-    m_ip = inet_ntoa(ia);
-    
-    if (m_ip ==  AUTOMATIC_CLIENT_IP)
-    {
-      m_detectingClient = true;
-      seqInfo("Listening for first client seen.");
-    }
-    else
-    {
-      m_detectingClient = false;
-      seqInfo("Listening for client: %s", m_ip.toLatin1().data());
-    }
+  if (m_ip.isEmpty() && m_mac.isEmpty())
+  {
+    seqInfo("No address specified. Defaulting to client auto-detect");
+    m_ip = AUTOMATIC_CLIENT_IP;
   }
+
+  validateIP();
 
   if (m_playbackPackets == PLAYBACK_OFF)
   {
     // create the pcap object and initialize, either with MAC or IP
     m_packetCapture = new PacketCaptureThread();
     if (m_mac.length() == 17)
+    {
+      seqInfo("Listening for client MAC: %s", m_mac.toLatin1().data());
+
       m_packetCapture->start(m_device.toLatin1().data(),
               m_mac.toLatin1().data(),
               m_realtime, MAC_ADDRESS_TYPE );
+    }
     else
+    {
+      if (m_detectingClient)
+        seqInfo("Listening for next client seen. (you must zone for this to work!)");
+      else
+        seqInfo("Listening for client: %s", m_ip.toLatin1().data());
+
       m_packetCapture->start(m_device.toLatin1().data(),
               m_ip.toLatin1().data(),
               m_realtime, IP_ADDRESS_TYPE );
+    }
     emit filterChanged();
   }
   else if (m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
@@ -308,6 +285,43 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     m_recordPackets = 0;
     m_playbackPackets = PLAYBACK_OFF;
   }
+}
+
+//helper function to verify specified IP is a valid IP or hostname, and/or
+//to set up auto detection.
+void EQPacket::validateIP()
+{
+  struct in_addr  ia;
+  struct hostent *he;
+
+  if (m_ip.isEmpty() || m_ip == AUTOMATIC_CLIENT_IP)
+  {
+    /* Substitute "special" IP which is interpreted
+       to set up a different filter for picking up new sessions */
+    inet_aton (AUTOMATIC_CLIENT_IP, &ia);
+  }
+  else if (inet_aton (m_ip.toLatin1().data(), &ia) == 0)
+  {
+    he = gethostbyname(m_ip.toLatin1().data());
+    if (he)
+    {
+        memcpy (&ia, he->h_addr_list[0], he->h_length);
+    }
+    else
+    {
+        // If the IP or host is invalid, default to auto-detect, rather
+        // than immediately exiting (the previous behavior)
+        seqWarn("Invalid address or hostname: %s", m_ip.toLatin1().data());
+        seqWarn("Defaulting to client auto-detect");
+        m_ip = AUTOMATIC_CLIENT_IP;
+        inet_aton (AUTOMATIC_CLIENT_IP, &ia);
+    }
+  }
+  m_client_addr = ia.s_addr;
+  m_ip = inet_ntoa(ia);
+
+  m_detectingClient = (m_ip == AUTOMATIC_CLIENT_IP);
+
 }
 
 ////////////////////////////////////////////////////
@@ -564,9 +578,9 @@ void EQPacket::connectStream(EQPacketStream* stream)
       this,
       SIGNAL(sessionTrackingChanged(uint8_t)));
   connect(stream,
-      SIGNAL(lockOnClient(in_port_t, in_port_t)),
+      SIGNAL(lockOnClient(in_port_t, in_port_t, in_addr_t)),
       this,
-      SLOT(lockOnClient(in_port_t, in_port_t)));
+      SLOT(lockOnClient(in_port_t, in_port_t, in_addr_t)));
   connect(stream,
       SIGNAL(closing(uint32_t, EQStreamID)),
       this,
@@ -704,22 +718,31 @@ void EQPacket::closeStream(uint32_t sessionId, EQStreamID streamId)
   // If we just closed the zone server session, unlatch the client port
   if (streamId == zone2client || streamId == client2zone)
   {
-    m_clientPort = 0;
-    m_serverPort = 0;
-
-    emit clientPortLatched(m_clientPort);
+    unlatchClientPort();
 
     seqInfo("EQPacket: SessionDisconnect detected, awaiting next zone session,  pcap filter: EQ Client %s",
-            m_ip.toLatin1().data());
+            (m_ip == AUTOMATIC_CLIENT_IP) ? "auto-detect" : m_ip.toLatin1().data());
   }
 }
 
+// Unlatch a locked-on client port, so the next client is detected correctly
+void EQPacket::unlatchClientPort()
+{
+    m_clientPort = 0;
+    m_serverPort = 0;
+    emit clientPortLatched(m_clientPort);
+}
+
+
 ////////////////////////////////////////////////////
 // Locks onto a specific client port (for session tracking)
-void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
+void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort, in_addr_t clientAddr)
 {
   m_serverPort = serverPort;
   m_clientPort = clientPort;
+  m_client_addr = clientAddr;
+
+  in_addr ia = inet_makeaddr(ntohl(m_client_addr), ntohl(m_client_addr));
 
   if (m_playbackPackets == PLAYBACK_OFF ||
           m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
@@ -753,7 +776,7 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
   else
   {
     seqInfo("EQPacket: SessionRequest detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
-      m_ip.toLatin1().data(), m_clientPort, m_serverPort);
+      inet_ntoa(ia), m_clientPort, m_serverPort);
   }
 
   emit clientPortLatched(m_clientPort);
@@ -928,14 +951,14 @@ void EQPacket::decPlayback(void)
 void EQPacket::monitorIPClient(const QString& ip)
 {
   m_ip = ip;
-  struct in_addr  ia;
-  inet_aton (m_ip.toLatin1().data(), &ia);
-  m_client_addr = ia.s_addr;
+
+  validateIP();
+
   emit clientChanged(m_client_addr);
 
   resetEQPacket();
 
-  seqInfo("Listening for IP client: %s", m_ip.toLatin1().data());
+  seqInfo("Listening for IP client: %s", (m_ip == AUTOMATIC_CLIENT_IP) ? "auto-detect" : m_ip.toLatin1().data());
   if (m_playbackPackets == PLAYBACK_OFF ||
           m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
   {
@@ -952,24 +975,32 @@ void EQPacket::monitorIPClient(const QString& ip)
 void EQPacket::monitorMACClient(const QString& mac)
 {
   m_mac = mac;
-  m_detectingClient = true;
   struct in_addr  ia;
   inet_aton (AUTOMATIC_CLIENT_IP, &ia);
+  m_detectingClient = true;
   m_client_addr = ia.s_addr;
   emit clientChanged(m_client_addr);
 
   resetEQPacket();
 
-  seqInfo("Listening for MAC client: %s", m_mac.toLatin1().data());
-
-  if (m_playbackPackets == PLAYBACK_OFF ||
-          m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
+  if (!m_mac.isEmpty() && m_mac.length() == 17)
   {
-    m_packetCapture->setFilter(m_device.toLatin1().data(),
-            m_ip.toLatin1().data(),
-            m_realtime,
-            IP_ADDRESS_TYPE, 0, 0);
-    emit filterChanged();
+    seqInfo("Listening for MAC client: %s", m_mac.toLatin1().data());
+
+    if (m_playbackPackets == PLAYBACK_OFF ||
+            m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
+    {
+        m_packetCapture->setFilter(m_device.toLatin1().data(),
+                m_mac.toLatin1().data(),
+                m_realtime,
+                MAC_ADDRESS_TYPE, 0, 0);
+        emit filterChanged();
+    }
+  }
+  else
+  {
+      seqWarn("Invalid MAC specified.  Defaulting to auto-detect of next client.");
+      monitorNextClient();
   }
 }
 
@@ -1012,50 +1043,31 @@ void EQPacket::monitorDevice(const QString& dev)
   // stop the current packet capture
   m_packetCapture->stop();
 
-  // setup for capture on new device
-  if (!m_ip.isEmpty())
-  {
-    struct hostent *he;
-    struct in_addr  ia;
-
-    /* Substitute "special" IP which is interpreted 
-       to set up a different filter for picking up new sessions */
-
-    if (m_ip == "auto")
-      inet_aton (AUTOMATIC_CLIENT_IP, &ia);
-    else if (inet_aton (m_ip.toLatin1().data(), &ia) == 0)
-    {
-      he = gethostbyname(m_ip.toLatin1().data());
-      if (!he)
-          seqFatal("Invalid address; %s", m_ip.toLatin1().data());
-
-      memcpy (&ia, he->h_addr_list[0], he->h_length);
-    }
-    m_client_addr = ia.s_addr;
-    m_ip = inet_ntoa(ia);
-
-    if (m_ip ==  AUTOMATIC_CLIENT_IP)
-    {
-      m_detectingClient = true;
-      seqInfo("Listening for first client seen.");
-    }
-    else
-    {
-      m_detectingClient = false;
-      seqInfo("Listening for client: %s", m_ip.toLatin1().data());
-    }
-  }
+  validateIP();
 
   resetEQPacket();
 
   // restart packet capture
   if (m_mac.length() == 17)
+  {
+    seqInfo("Listening for client MAC: %s", m_mac.toLatin1().data());
+
     m_packetCapture->start(m_device.toLatin1().data(),
             m_mac.toLatin1().data(),
             m_realtime, MAC_ADDRESS_TYPE );
+  }
   else
-      m_packetCapture->start(m_device.toLatin1().data(), m_ip.toLatin1().data(),
-              m_realtime, IP_ADDRESS_TYPE );
+  {
+    if (m_detectingClient)
+      seqInfo("Listening for next client seen. (you must zone for this to work!)");
+    else
+      seqInfo("Listening for client: %s", m_ip.toLatin1().data());
+
+    m_packetCapture->start(m_device.toLatin1().data(),
+            m_ip.toLatin1().data(),
+            m_realtime, IP_ADDRESS_TYPE );
+  }
+
   emit filterChanged();
 }
 
@@ -1134,10 +1146,7 @@ void EQPacket::resetEQPacket()
   m_zone2ClientStream->reset();
   m_zone2ClientStream->setSessionTracking(m_session_tracking);
 
-  m_clientPort = 0;
-  m_serverPort = 0;
-  
-  emit clientPortLatched(m_clientPort);
+  unlatchClientPort();
 }
 
 ///////////////////////////////////////////

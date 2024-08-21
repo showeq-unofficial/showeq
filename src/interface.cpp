@@ -71,7 +71,6 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <cstdio>
-#include <ifaddrs.h>
 
 #include <QFont>
 #include <QApplication>
@@ -150,7 +149,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
     m_netDiag(0),
     m_messageFilterDialog(0),
     m_guildListWindow(0),
-    m_deviceList(enumerateDevices())
+    m_deviceList(enumerateNetworkDevices())
 {
   setObjectName(name);
   setWindowFlags(Qt::Window);
@@ -5230,7 +5229,7 @@ void EQInterface::set_net_client_MAC_address()
              maclst, 0, true, &ok);
   if (ok)
   {
-    if (address.length() != 17)
+    if (address.length() != 17 && !address.isEmpty())
     {
       seqWarn("Invalid MAC Address (%s)! Ignoring!", address.toLatin1().data());
       return;
@@ -5246,35 +5245,10 @@ void EQInterface::set_net_client_MAC_address()
   }
 }
 
-QStringList EQInterface::enumerateDevices()
-{
-    struct ifaddrs *ifaddr, *ifa;
-    int n;
-    QStringList devices;
-
-    if (getifaddrs(&ifaddr) == -1)
-    {
-        seqWarn("Could not enumerate network devices");
-        return QStringList();
-    }
-
-    for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++)
-    {
-        if (ifa->ifa_addr == NULL)
-            continue;
-
-        if (ifa->ifa_addr->sa_family == AF_INET)
-            devices.append(ifa->ifa_name);
-    }
-
-    freeifaddrs(ifaddr);
-
-    return devices;
-}
 
 QString EQInterface::promptForNetDevice()
 {
-    m_deviceList = enumerateDevices();
+    m_deviceList = enumerateNetworkDevices();
 
     int current = 0;
     if (m_packet)

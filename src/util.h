@@ -82,6 +82,8 @@ void diagFileReadFail(QString filename);
 uint32_t calcCRC32(const uint8_t* p, uint32_t length);
 uint16_t calcCRC16(uint8_t* p, uint32_t length, uint32_t seed);
 
+QStringList enumerateNetworkDevices();
+
 // Templatized function to generate a string representing the bit pattern 
 // of the passed in value.  
 // Note: For use with integral data types.

@@ -92,6 +92,7 @@ EQPacketStream::EQPacketStream(EQStreamID streamid, uint8_t dir,
     m_sessionId(0),
     m_sessionKey(0),
     m_sessionClientPort(0),
+    m_sessionClientIP(0),
     m_maxLength(0),
     m_decodeKey(0),
     m_validKey(true)
@@ -196,6 +197,7 @@ void EQPacketStream::reset()
   m_arqSeqExp = 0;
   m_arqSeqFound = false;
   m_sessionClientPort = 0;
+  m_sessionClientIP = 0;
   m_sessionId = 0;
   m_sessionKey = 0;
 }
@@ -543,9 +545,11 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
   // Only accept packets that correspond to our latched client port, if
   // it is set. This helps filter out multiple sessions on the same physical
   // host when two eq clients zone at the same time. The first one will win.
-  if (m_sessionClientPort != 0 &&
+  if (m_sessionClientPort != 0 && m_sessionClientIP != 0 &&
       ((dir() == DIR_Server && m_sessionClientPort != packet.getDestPort()) ||
-       (dir() == DIR_Client && m_sessionClientPort != packet.getSourcePort())))
+       (dir() == DIR_Client && m_sessionClientPort != packet.getSourcePort()) ||
+       (dir() == DIR_Server && m_sessionClientIP != packet.getIPv4DestN()) ||
+       (dir() == DIR_Client && m_sessionClientIP != packet.getIPv4SourceN())))
   {
 #if (defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)) || (defined(PACKET_SESSION_DIAG) && PACKET_SESSION_DIAG > 1)
     seqDebug("discarding packet %s:%d ==>%s:%d netopcode=%04x size=%d. Multiple sessions on the same box? Ignoring all but one of them. Latched client port %d. Session tracking %s.",
@@ -1038,6 +1042,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
         // later. SessionRequest should always be an outer protocol packet
         // so we can cast it to EQUDPIPPacketFormat to get the ip headers.
         m_sessionClientPort = ((EQUDPIPPacketFormat&) packet).getSourcePort();
+        m_sessionClientIP = ((EQUDPIPPacketFormat&) packet).getIPv4SourceN();
       }
     }
     break;
@@ -1132,6 +1137,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
         // later. SessionRequest should always be an outer protocol packet
         // so we can cast it to EQUDPIPPacketFormat to get the ip headers.
         m_sessionClientPort = ((EQUDPIPPacketFormat&) packet).getDestPort();
+        m_sessionClientIP = ((EQUDPIPPacketFormat&) packet).getIPv4DestN();
 
         // If this is the world server talking to us, reset session tracking if
         // it is on so we unlatch the client in case of getting kicked.
@@ -1149,8 +1155,9 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           // headers!
           m_session_tracking_enabled = 2;
   
-          emit lockOnClient(((EQUDPIPPacketFormat&) packet).getSourcePort(), 
-            ((EQUDPIPPacketFormat&) packet).getDestPort());
+          emit lockOnClient(((EQUDPIPPacketFormat&) packet).getSourcePort(),
+            ((EQUDPIPPacketFormat&) packet).getDestPort(),
+            ((EQUDPIPPacketFormat&) packet).getIPv4DestN());
           emit sessionTrackingChanged(m_session_tracking_enabled);
         }
       }
@@ -1200,6 +1207,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
         emit sessionTrackingChanged(m_session_tracking_enabled);
 
         m_sessionClientPort = 0;
+        m_sessionClientIP = 0;
       }
 
       emit closing(m_sessionId, m_streamid);
