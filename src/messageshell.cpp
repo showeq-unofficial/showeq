@@ -1150,7 +1150,9 @@ void MessageShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
       // yes
       deity = spawn->deityName();
 
-      msg += item->name();
+      lvl = QString::number(spawn->level());
+
+      msg += item->name() + " (Lvl: " + lvl + ")";
     } // end if spawn found
     else
       msg += "Spawn:" + QString::number(con->targetid, 16);
@@ -1159,8 +1161,12 @@ void MessageShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
   switch (con->level) 
   {
   case 0:
+  case 5:
   case 20:
     msg += " (even)";
+    break;
+  case 1:
+    msg += " (grey)";
     break;
   case 2:
     msg += " (green)";
@@ -1168,12 +1174,15 @@ void MessageShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
   case 4:
     msg += " (blue)";
     break;
+  case 7:
   case 13:
     msg += " (red)";
     break;
+  case 6:
   case 15:
     msg += " (yellow)";
     break;
+  case 3:
   case 18:
     msg += " (cyan)";
     break;
