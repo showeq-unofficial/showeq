@@ -468,11 +468,11 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->zoneId = netStream.readUInt16NC();
   player->zoneInstance = netStream.readUInt16NC();
 
-  memcpy(&player->x, netStream.pos(), sizeof(player->x));
-  netStream.skipBytes(sizeof(player->x));
-
   memcpy(&player->y, netStream.pos(), sizeof(player->y));
   netStream.skipBytes(sizeof(player->y));
+
+  memcpy(&player->x, netStream.pos(), sizeof(player->x));
+  netStream.skipBytes(sizeof(player->x));
 
   memcpy(&player->z, netStream.pos(), sizeof(player->z));
   netStream.skipBytes(sizeof(player->z));
