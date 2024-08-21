@@ -242,7 +242,9 @@ void SpawnPointList::handleSelectItem()
 
   // the list is limited to one selection at a time, so we can take the first
   SEQListViewItem* item = selected.first();
+  m_menu->setCurrentItem((SpawnPointListItem*)item);
   if (item == NULL) return;
+
 
   const SpawnPoint* sp = NULL;
   
@@ -527,6 +529,8 @@ SpawnPointListMenu::~SpawnPointListMenu()
 void SpawnPointListMenu::setCurrentItem(const SpawnPointListItem* item)
 {
   m_currentItem = item;
+  m_action_rename->setEnabled(m_currentItem != NULL);
+  m_action_delete->setEnabled(m_currentItem != NULL);
 }
 
 void SpawnPointListMenu::init_menu()
