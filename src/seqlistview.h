@@ -69,6 +69,7 @@ class SEQListView : public QTreeWidget
         virtual void restoreColumns(void);
         virtual void savePrefs(void);
         void setColumnVisible(int column, bool visible);
+	virtual void setSorting(int column, Qt::SortOrder order);
         void mousePressEvent(QMouseEvent* event);
 
     signals:

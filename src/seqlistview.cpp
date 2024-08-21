@@ -51,8 +51,11 @@ SEQListView::SEQListView(const QString prefName,
     setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    // don't stretch the last column, otherwise we can't hide it
-    header()->setStretchLastSection(false);
+#if (QT_VERSION >= QT_VERSION_CHECK(5,11,0))
+    header()->setFirstSectionMovable(true);
+    connect(header(), SIGNAL(sortIndicatorChanged(int, Qt::SortOrder)), this, SLOT(setSorting(int, Qt::SortOrder)));
+#endif
+
 }
 
 SEQListView::~SEQListView()
@@ -119,6 +122,13 @@ void SEQListView::setSorting(int column, bool increasing)
     sortByColumn(column, increasing ? Qt::AscendingOrder : Qt::DescendingOrder);
 }
 
+void SEQListView::setSorting(int column, Qt::SortOrder order)
+{
+    m_sortColumn = column;
+    m_sortIncreasing = (order == Qt::AscendingOrder) ? true : false;
+    sortByColumn(column, order);
+}
+
 void SEQListView::savePrefs()
 {
     // only save the preferences if visible
@@ -134,7 +144,7 @@ void SEQListView::savePrefs()
         {
             columnName = columnPreferenceName(i);
             width = columnWidth(i);
-            if (width != 0)
+            if (!header()->isSectionHidden(i) && width != 0)
             {
                 pSEQPrefs->setPrefInt(columnName + "Width", preferenceName(), width);
                 pSEQPrefs->setPrefBool(show + columnName, preferenceName(), true);
@@ -202,6 +212,7 @@ void SEQListView::restoreColumns()
 #endif
             header()->resizeSection(i, width);
             setColumnWidth(i, width);
+            header()->setSectionHidden(i, false);
         }
         else
         {
@@ -213,6 +224,7 @@ void SEQListView::restoreColumns()
 #endif
             header()->resizeSection(i, 0);
             setColumnWidth(i, 0);
+            header()->setSectionHidden(i, true);
         }
     }
 
@@ -273,6 +285,9 @@ void SEQListView::setColumnVisible(int column, bool visible)
 #endif
     header()->resizeSection(column, width);
     setColumnWidth(column, width);
+
+    header()->setSectionHidden(column, !visible);
+
 
     // set the the preferences as to if the column is shown
     pSEQPrefs->setPrefBool(QString("Show") + columnName, preferenceName(),
