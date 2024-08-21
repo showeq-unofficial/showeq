@@ -39,6 +39,11 @@
 #include <map>
 
 #include <QObject>
+#include <QDialog>
+#include <QString>
+#include <QLabel>
+#include <QLineEdit>
+#include <QCheckBox>
 
 #include "everquest.h"
 
@@ -74,8 +79,45 @@ class DataLocationMgr;
 #define FILTER_FLAG_DANGER		(1 << DANGER_FILTER)
 #define FILTER_FLAG_LOCATE		(1 << LOCATE_FILTER)
 #define FILTER_FLAG_ALERT		(1 << ALERT_FILTER)
-#define FILTER_FLAG_FILTERED		(1 << FILTERED_FILTER)
+#define FILTER_FLAG_FILTERED	(1 << FILTERED_FILTER)
 #define FILTER_FLAG_TRACER		(1 << TRACER_FILTER)
+
+
+#define FILTERSTRINGFIELD_TABLE \
+    X(FSF_Name, "Name")         \
+    X(FSF_Level, "Level")       \
+    X(FSF_Race, "Race")         \
+    X(FSF_Class, "Class")       \
+    X(FSF_NPC, "NPC")           \
+    X(FSF_X, "X")               \
+    X(FSF_Y, "Y")               \
+    X(FSF_Z, "Z")               \
+    X(FSF_Light, "Light")       \
+    X(FSF_Deity, "Deity")       \
+    X(FSF_RTeam, "RTeam")       \
+    X(FSF_DTeam, "DTeam")       \
+    X(FSF_Type, "Type")         \
+    X(FSF_LastName, "LastName") \
+    X(FSF_Guild, "Guild")       \
+    X(FSF_Spawn, "Spawn")       \
+    X(FSF_GM, "GM")
+
+#define X(a, b) a,
+enum FilterStringField
+{
+    FILTERSTRINGFIELD_TABLE
+    FSF_Max
+};
+#undef X
+
+
+// special handling for min/max level, which aren't part of regex filter string
+#define FSF_MINLEVEL_NAME "MinLevel"
+#define FSF_MINLEVEL_LABEL "Min Level"
+#define FSF_MAXLEVEL_NAME "MaxLevel"
+#define FSF_MAXLEVEL_LABEL "Max Level"
+
+typedef QHash<QString, QString> FilterFieldMap;
 
 //----------------------------------------------------------------------
 // FilterMgr
@@ -87,7 +129,7 @@ class FilterMgr : public QObject
   FilterMgr(const DataLocationMgr* dataLocMgr, 
 	    const QString filterFile, bool spawnfilter_case);
   ~FilterMgr();
-  
+
   const QString& filterFile(void) { return m_filterFile; }
   const QString& zoneFilterFile(void) { return m_zoneFilterFile; }
   bool caseSensitive(void) { return m_caseSensitive; }
@@ -139,5 +181,77 @@ class FilterMgr : public QObject
 
   bool m_caseSensitive;
 };
+
+
+class FilterFormField : public QWidget
+{
+    Q_OBJECT
+
+    public:
+        FilterFormField(QString name, QString labeltext = QString(), QWidget* parent=nullptr);
+
+        QString m_name;
+        QString m_labeltext;
+        QCheckBox* m_check;
+        QLabel* m_label;
+        QLineEdit* m_edit;
+
+    public slots:
+        void stateChanged(int state);
+};
+
+//SubClassing QCheckBox so we can control the sequence of check/uncheck/partial when
+//clicking "Toggle All"
+class ToggleAllCheckBox : public QCheckBox
+{
+    protected:
+        virtual void nextCheckState() override;
+
+};
+
+
+class FilterDialog : public QDialog
+{
+    Q_OBJECT
+
+    public:
+
+        static QString getFilter(QWidget* parent, const QString& title,
+                const QString& filterString, bool* ok=nullptr,
+                Qt::WindowFlags flags = Qt::WindowFlags(),
+                Qt::InputMethodHints inputMethodHints = Qt::ImhNone);
+
+    protected:
+        FilterDialog(QWidget* parent=nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
+        ~FilterDialog();
+
+        void setData(const QString filterString);
+        void createForm();
+
+        QHash<QString, FilterFormField*> m_filterFields;
+        ToggleAllCheckBox* m_toggleAll;
+
+        QString m_spawnFilterString;
+        FilterFieldMap m_spawnFilterMap;
+
+        QString m_filterString;
+        int m_fieldCount;
+        int m_fieldsCheckedCount;
+        bool m_hasTrailingColon;
+
+    signals:
+        void stateChanged(int state);
+
+    protected slots:
+        void resetForm();
+        void acceptDialog();
+        void fieldToggled(bool checked);
+        void toggleAllToggled(int state);
+
+};
+
+// helper functions
+void FilterString2FilterFieldMap(const QString filterString, FilterFieldMap* map);
+QString FilterFieldMap2FilterString(FilterFieldMap* map);
 
 #endif // FILTERMGR_H

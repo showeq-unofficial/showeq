@@ -655,11 +655,8 @@ void SpawnListMenu::add_filter(QAction* selection)
   // get the user edited filter string, based on the items filterString
   bool ok = false;
   filterString =
-    QInputDialog::getText(m_spawnlist, filterName + " Filter",
-            "Enter the filter string:",
-            QLineEdit::Normal,
+    FilterDialog::getFilter(m_spawnlist, filterName + " Filter",
             filterString, &ok);
-
 
   // if the user clicked ok, add the filter
   if (ok)
@@ -678,11 +675,8 @@ void SpawnListMenu::add_zoneFilter(QAction* selection)
   // get the user edited filter string, based on the items filterString
   bool ok = false;
   filterString =
-    QInputDialog::getText(m_spawnlist, filterName + " Filter",
-            "Enter the filter string:",
-            QLineEdit::Normal,
+    FilterDialog::getFilter(m_spawnlist, filterName + " Zone Filter",
             filterString, &ok);
-
 
   // if the user clicked ok, add the filter
   if (ok)
