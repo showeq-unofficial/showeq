@@ -5988,7 +5988,7 @@ void EQInterface::showSpawnList2(void)
   {
     m_spawnList2 = new SpawnListWindow2(m_player, m_spawnShell, 
 					m_categoryMgr,
-					0, "spawnlist");
+					0, "spawnlist2");
    setDockEnabled(m_spawnList2, 
 		  pSEQPrefs->getPrefBool("DockableSpawnList2",
 					 "Interface", true));

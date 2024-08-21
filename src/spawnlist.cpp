@@ -474,7 +474,7 @@ void SpawnList::delItem(const Item* item)
      {
        if (j == currentItem())
        {
-           selectionModel()->setCurrentIndex(QModelIndex(), QItemSelectionModel::NoUpdate);
+           selectionModel()->setCurrentIndex(QModelIndex(), QItemSelectionModel::Clear);
            clearSelection();
        }
        delList += j->takeChildren();
@@ -1070,7 +1070,11 @@ void SpawnList::selChanged()
 
   // the list is limited to one selection at a time, so we can take the first
   SEQListViewItem* litem = selected.first();
-  if (litem == NULL) return;
+  if (litem == NULL)
+  {
+	 clearSelection();
+	 return;
+  }
 
   const Item* item = ((SpawnListItem*)litem)->item();
 

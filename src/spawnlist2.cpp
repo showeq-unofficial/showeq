@@ -76,7 +76,7 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
 
   // create the spawn list combo box
   m_categoryCombo = new QComboBox(this);
-  m_categoryCombo->setObjectName("spawnlistcombo");
+  m_categoryCombo->setObjectName("spawnlist2combo");
   m_categoryCombo->setEditable(false);
   m_categoryCombo->setDuplicatesEnabled(false);
   hLayout->addWidget(m_categoryCombo, 0, Qt::AlignLeft);
@@ -108,7 +108,7 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
 
   // create the spawn listview
   m_spawnList = new SEQListView(preferenceName(), 
-				this, "spawnlistview");
+				this, "spawnlist2view");
   vLayout->addWidget(m_spawnList);
 
   m_spawnList->addColumn ("Name");
@@ -245,7 +245,7 @@ QMenu* SpawnListWindow2::menu()
   }
 
   m_menu = new SpawnListMenu(m_spawnList, this, m_spawnShell->filterMgr(),
-          m_categoryMgr, this, "spawnlist menu");
+          m_categoryMgr, this, "spawnlist2 menu");
   m_menu->addSeparator();
 
   QAction* tmpAction;
@@ -292,8 +292,9 @@ void SpawnListWindow2::delItem(const Item* item)
   if (item == m_selectedItem)
   {
       m_selectedItem = NULL;
-      m_spawnList->selectionModel()->setCurrentIndex(QModelIndex(), QItemSelectionModel::NoUpdate);
+      m_spawnList->selectionModel()->setCurrentIndex(QModelIndex(), QItemSelectionModel::Clear);
       m_spawnList->clearSelection();
+      m_spawnList->setCurrentItem(NULL);
   }
 
   // delete the list item
@@ -418,7 +419,9 @@ void SpawnListWindow2::selectSpawn(const Item *item)
   if (!item)
   {
     m_selectedItem = NULL;
+    m_spawnList->selectionModel()->setCurrentIndex(QModelIndex(), QItemSelectionModel::Clear);
     m_spawnList->clearSelection();
+    m_spawnList->setCurrentItem(NULL);
     return;
   }
 
@@ -798,7 +801,14 @@ void SpawnListWindow2::selChanged()
 
     // the list is limited to one selection at a time, so we can take the first
     SEQListViewItem* litem = selected.first();
-    if (litem == NULL) return;
+    if (litem == NULL)
+    {
+        m_selectedItem = NULL;
+        m_spawnList->selectionModel()->setCurrentIndex(QModelIndex(), QItemSelectionModel::Clear);
+        m_spawnList->clearSelection();
+        m_spawnList->setCurrentItem(NULL);
+        return;
+    }
 
     m_selectedItem = ((SpawnListItem*)litem)->item();
 
@@ -909,7 +919,9 @@ void SpawnListWindow2::setSelectedQuiet(SEQListViewItem* item, bool selected)
   if (!item)
   {
     m_selectedItem = NULL;
+    m_spawnList->selectionModel()->setCurrentIndex(QModelIndex(), QItemSelectionModel::Clear);
     m_spawnList->clearSelection();
+    m_spawnList->setCurrentItem(NULL);
     return;
   }
 
