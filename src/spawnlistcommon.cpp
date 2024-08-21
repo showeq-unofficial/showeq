@@ -144,9 +144,19 @@ bool SpawnListItem::operator<(const SEQListViewItem& other) const
         case 5: // coord 2
         case 6: // coord 3
         case 7: // ID
-        case 8: // distance
             return data(column, Qt::DisplayRole).value<int>() <
                 other.data(column, Qt::DisplayRole).value<int>();
+
+        case 8: // distance
+            // "fast machine" option will use float, not int
+            return
+                ((data(column, Qt::DisplayRole).canConvert<float>()) ?
+                data(column, Qt::DisplayRole).value<float>() :
+                data(column, Qt::DisplayRole).value<int>())
+                <
+                ((other.data(column, Qt::DisplayRole).canConvert<float>()) ?
+                other.data(column, Qt::DisplayRole).value<float>() :
+                other.data(column, Qt::DisplayRole).value<int>());
 
         case 0: // name
         case 9: // race
