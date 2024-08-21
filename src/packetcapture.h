@@ -79,6 +79,8 @@ class PacketCaptureThread : public PacketCaptureProviderThread
     private:
         static void* loop(void *param);
         static void packetCallBack(u_char * param, const struct pcap_pkthdr *ph, const u_char *data);
+        static unsigned int last_ps_ifdrop;
+        static unsigned int last_ps_drop;
 
         pcap_t *m_pcache_pcap;
 

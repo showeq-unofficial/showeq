@@ -35,7 +35,10 @@
 #include "diagnosticmessages.h"
 
 //#define PCAP_DEBUG 1
-  
+
+unsigned int PacketCaptureThread::last_ps_ifdrop = 0;
+unsigned int PacketCaptureThread::last_ps_drop = 0;
+
 //----------------------------------------------------------------------
 // PacketCaptureThread
 //  start and stop the thread
@@ -45,8 +48,7 @@ PacketCaptureThread::PacketCaptureThread(int snaplen, int buffersize) : PacketCa
     m_playbackSpeed(0),
     m_snaplen(snaplen),
     m_buffersize(buffersize)
-{
-}
+{ }
 
 PacketCaptureThread::~PacketCaptureThread()
 {
@@ -55,7 +57,6 @@ PacketCaptureThread::~PacketCaptureThread()
         // Turn off pcap
         pcap_close(m_pcache_pcap);
     }
-
 }
 
 void PacketCaptureThread::setPlaybackSpeed(int playbackSpeed)
@@ -335,6 +336,31 @@ void PacketCaptureThread::packetCallBack(u_char * param,
     }
 
     pthread_mutex_unlock (&myThis->m_pcache_mutex);
+
+    struct pcap_stat ps = {0};
+
+    //NOTE: using fprintf here because seqWarn sends a MessageEntry, which
+    //can't cross thread boundaries using signals/slots without doing work
+    //to change MessageEntry to a proper Qt MetaType FIXME
+    pcap_stats(myThis->m_pcache_pcap, &ps);
+    if (ps.ps_ifdrop > 0 && ps.ps_ifdrop != last_ps_ifdrop)
+    {
+        fprintf(stderr, "PCAP detected %d packets dropped at the network interface! "
+                "This could cause ShowEQ to malfunction.  Read FAQ #5 in the "
+                "FAQ located in the ShowEQ source directory for information "
+                "about tuning your kernel networking parameters.\n", ps.ps_ifdrop);
+        fprintf(stderr, "Packet loss due to dropping at the interface: %02f%%\n", (ps.ps_ifdrop * 1.0) / (ps.ps_recv * 1.0) * 100.0);
+        last_ps_ifdrop = ps.ps_ifdrop;
+    }
+
+    if (ps.ps_drop > 0 && ps.ps_drop != last_ps_drop)
+    {
+        fprintf(stderr, "PCAP detected %d packets dropped due to insufficent PCAP buffer size! "
+                "This could cause ShowEQ to malfunction.  Increase the PCAP buffer "
+                "size and/or decrease the PCAP snapshot length.\n", ps.ps_drop);
+        fprintf(stderr, "Packet loss due to dropping at the PCAP buffer: %02f%%\n", (ps.ps_drop * 1.0) / (ps.ps_recv * 1.0) * 100.0);
+        last_ps_drop = ps.ps_drop;
+    }
 }
 
 void PacketCaptureThread::setFilter (const char *device,
