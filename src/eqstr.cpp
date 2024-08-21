@@ -254,11 +254,11 @@ QString EQStr::formatMessage(uint32_t formatid,
 #else
         if (!substFormatStringRes.isEmpty())
         {
-            formatString.replace(curPos-2, rxt.matchedLength()+2, substFormatStringRes);
+            formatString.replace(curPos, rxt.matchedLength(), substFormatStringRes);
         }
         else
         {
-            formatString.replace(curPos-2, rxt.matchedLength()+2, "");
+            formatString.replace(curPos, rxt.matchedLength(), "");
             curPos += rxt.matchedLength(); // if no replacement string, skip over
         }
 
@@ -293,7 +293,7 @@ QString EQStr::formatMessage(uint32_t formatid,
             // some messages contains spell names with additional delimited fields
             if (sub.contains('^'))
             {
-                sub = sub.section("^", -1);
+                sub = sub.mid(sub.lastIndexOf('^')+1);
                 // they also contain an oddball apostrophe
                 if (sub.startsWith("'"))
                     sub.replace(0, 1, "");
@@ -320,17 +320,17 @@ QString EQStr::formatMessage(uint32_t formatid,
             // some messages contains spell names with additional delimited fields
             if (sub.contains('^'))
             {
-                sub = sub.section("^", -1);
+                sub = sub.mid(sub.lastIndexOf('^')+1);
                 // they also contain an oddball apostrophe
                 if (sub.startsWith("'"))
                     sub.replace(0, 1, "");
             }
-            formatString.replace(curPos-1, rx.matchedLength()+1, argList[substArg-1]);
+            formatString.replace(curPos, rx.matchedLength(), sub);
         }
         else
         {
             //no argument for this replacement, so replace with empty string
-            formatString.replace(curPos-1, rx.matchedLength()+1, "");
+            formatString.replace(curPos, rx.matchedLength(), "");
             curPos += rx.matchedLength(); // if no such argument, skip over
         }
 
