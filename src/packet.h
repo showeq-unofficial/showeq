@@ -72,6 +72,8 @@ class EQPacket : public QObject
 	    QString m_ip,
 	    QString m_mac_address,
 	    bool m_realtime,
+        int snaplen,
+        int buffersize,
 	    bool m_session_tracking,
 	    bool m_recordPackets,
 	    int m_playbackPackets,
@@ -102,6 +104,10 @@ class EQPacket : public QObject
    bool connect2(const QString& opcodeName, EQStreamPairs sp,
 		 uint8_t dir, const char* payload,  EQSizeCheckType szt, 
 		 const QObject* receiver, const char* member);
+   int snaplen(void) { return m_snaplen; }
+   int buffersize(void) { return m_buffersize; }
+   void setSnapLen(int len) { m_snaplen = len; }
+   void setBufferSize(int size) { m_buffersize = size; }
 
  public slots:
    void processPackets(void);
@@ -176,6 +182,8 @@ class EQPacket : public QObject
    QString m_ip;
    QString m_mac;
    bool m_realtime;
+   int m_snaplen;
+   int m_buffersize;
    bool m_session_tracking;
    bool m_recordPackets;
    int m_playbackPackets;

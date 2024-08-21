@@ -40,9 +40,11 @@
 // PacketCaptureThread
 //  start and stop the thread
 //  get packets to the processing engine(dispatchPacket)
-PacketCaptureThread::PacketCaptureThread() : PacketCaptureProviderThread(),
+PacketCaptureThread::PacketCaptureThread(int snaplen, int buffersize) : PacketCaptureProviderThread(),
     m_pcache_pcap(NULL),
-    m_playbackSpeed(0)
+    m_playbackSpeed(0),
+    m_snaplen(snaplen),
+    m_buffersize(buffersize)
 {
 }
 
@@ -81,7 +83,6 @@ void PacketCaptureThread::start(const char *device, const char *host,
         bool realtime, uint8_t address_type)
 {
     char ebuf[PCAP_ERRBUF_SIZE]; // pcap error buffer
-    char filter_buf[256]; // pcap filter buffer 
 
     seqInfo("Initializing Packet Capture Thread: ");
     m_pcache_closed = false;
@@ -109,11 +110,8 @@ void PacketCaptureThread::start(const char *device, const char *host,
     }
 
     pcap_set_promisc(m_pcache_pcap, 1);
-    //PCAP docs say 64K snaplen should be enough for most networks.
-    pcap_set_snaplen(m_pcache_pcap, UINT16_MAX);
-    // default buffer size is 2M:  2*1024*1024
-    // but we can increase it in the future if needed
-    //pcap_set_buffer_size(m_pcache_pcap, 4*1024*1024);
+    pcap_set_snaplen(m_pcache_pcap, m_snaplen*1024);
+    pcap_set_buffer_size(m_pcache_pcap, m_buffersize*1024*1024);
 
 #ifndef __FreeBSD__
     pcap_set_immediate_mode(m_pcache_pcap, 1);

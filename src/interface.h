@@ -224,6 +224,8 @@ class EQInterface:public QMainWindow
    void set_net_client_IP_address();
    void set_net_client_MAC_address();
    void set_net_device();
+   void set_net_capture_snap_len(int len);
+   void set_net_capture_buffer_size(int size);
    void set_net_arq_giveup(int giveup);
    virtual void setCaption(const QString&);
    void restoreStatusFont();

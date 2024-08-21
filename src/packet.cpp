@@ -92,6 +92,8 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 		   QString ip,
 		   QString mac_address,
 		   bool realtime,
+           int snaplen,
+           int buffersize,
 		   bool sessionTrackingFlag,
 		   bool recordPackets,
 		   int playbackPackets,
@@ -107,6 +109,8 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     m_ip(ip),
     m_mac(mac_address),
     m_realtime(realtime),
+    m_snaplen(snaplen),
+    m_buffersize(buffersize),
     m_session_tracking(sessionTrackingFlag),
     m_recordPackets(recordPackets),
     m_playbackPackets(playbackPackets),
@@ -193,7 +197,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
   if (m_playbackPackets == PLAYBACK_OFF)
   {
     // create the pcap object and initialize, either with MAC or IP
-    m_packetCapture = new PacketCaptureThread();
+    m_packetCapture = new PacketCaptureThread(m_snaplen, m_buffersize);
     if (m_mac.length() == 17)
     {
       seqInfo("Listening for client MAC: %s", m_mac.toLatin1().data());
@@ -218,7 +222,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
   else if (m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
   {
     // Create the pcap object and initialize with the file input given
-    m_packetCapture = new PacketCaptureThread();
+    m_packetCapture = new PacketCaptureThread(m_snaplen, m_buffersize);
 
     QString filename = pSEQPrefs->getPrefString("Filename", "VPacket");
 

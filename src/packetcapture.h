@@ -54,7 +54,7 @@ const uint8_t MAC_ADDRESS_TYPE =  12;
 class PacketCaptureThread : public PacketCaptureProviderThread
 {
     public:
-        PacketCaptureThread();
+        PacketCaptureThread(int snaplen, int buffersize);
         ~PacketCaptureThread();
 
         bool offlinePlaybackSupported() { return true; }
@@ -88,6 +88,9 @@ class PacketCaptureThread : public PacketCaptureProviderThread
         int m_playbackSpeed; // -1=paused, 0=max, 1=1x speed, 2=2x speed, up to 9
         timeval m_tvLastProcessedActual;
         timeval m_tvLastProcessedOriginal;
+
+        int m_snaplen;
+        int m_buffersize;
 };
 
 #endif // _PACKETCAPTURE_H_

@@ -235,7 +235,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
        if (!selected.isEmpty())
        {
            // set it as the device to monitor next session
-           pSEQPrefs->setPrefString("Device", "Network", selected);
+           pSEQPrefs->setPrefString("Device", section, selected);
            net_device = selected;
        }
    }
@@ -249,6 +249,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			   pSEQPrefs->getPrefString("MAC", section, "0"),
 			   pSEQPrefs->getPrefBool("RealTimeThread", section,
 						  false),
+               pSEQPrefs->getPrefInt("CaptureSnapLen", section, 1),
+               pSEQPrefs->getPrefInt("CaptureBufferSize", section, 2),
 			   pSEQPrefs->getPrefBool("SessionTracking", 
 						  section, false),
 			   pSEQPrefs->getPrefBool("Record", vpsection, false),
@@ -1185,6 +1187,41 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
            SLOT(toggle_net_real_time_thread(bool)));
    tmpAction->setCheckable(true);
    tmpAction->setChecked(m_packet->realtime());
+
+   QMenu* captureMenu = new QMenu("Packet Capture Configuration");
+   m_netMenu->addMenu(captureMenu);
+
+
+   QWidgetAction* captureSettingNotice = new QWidgetAction(captureMenu);
+   QLabel* tmpLabel = new QLabel("NOTE: You must save preferences and restart ShowEQ for these changes to take effect (for now)");
+   tmpLabel->setWordWrap(true);
+   tmpLabel->setContentsMargins(30, 11, 11, 11);
+   captureSettingNotice->setDefaultWidget(tmpLabel);
+   captureMenu->addAction(captureSettingNotice);
+
+   captureMenu->addSeparator();
+
+   QMenu* tmpMenu = new QMenu("Snapshot Length (KB)");
+   QSpinBox* snapLenSpinBox = new QSpinBox(tmpMenu);
+   snapLenSpinBox->setMinimum(1);
+   snapLenSpinBox->setMaximum(64);
+   snapLenSpinBox->setValue(pSEQPrefs->getPrefInt("CaptureSnapLen", "Network", 1));
+   connect(snapLenSpinBox, SIGNAL(valueChanged(int)), this, SLOT(set_net_capture_snap_len(int)));
+   QWidgetAction* snapLenWidgetAction = new QWidgetAction(tmpMenu);
+   snapLenWidgetAction->setDefaultWidget(snapLenSpinBox);
+   tmpMenu->addAction(snapLenWidgetAction);
+   captureMenu->addMenu(tmpMenu);
+
+   tmpMenu = new QMenu("Capture Buffer Size (MB)");
+   QSpinBox* captureBufferSizeSpinBox = new QSpinBox();
+   captureBufferSizeSpinBox->setMinimum(2);
+   captureBufferSizeSpinBox->setMaximum(128);
+   captureBufferSizeSpinBox->setValue(pSEQPrefs->getPrefInt("CaptureBufferSize", "Network", 2));
+   connect(captureBufferSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(set_net_capture_buffer_size(int)));
+   QWidgetAction* captureBufferSizeWidgetAction = new QWidgetAction(tmpMenu);
+   captureBufferSizeWidgetAction->setDefaultWidget(captureBufferSizeSpinBox);
+   tmpMenu->addAction(captureBufferSizeWidgetAction);
+   captureMenu->addMenu(tmpMenu);
 
    m_netMenu->addSeparator();
 
@@ -5314,6 +5351,18 @@ void EQInterface::set_net_device()
         // set it as the device to monitor next session
         pSEQPrefs->setPrefString("Device", "Network", selected);
     }
+}
+
+void EQInterface::set_net_capture_snap_len(int len)
+{
+  m_packet->setSnapLen(len);
+  pSEQPrefs->setPrefInt("CaptureSnapLen", "Network", len);
+}
+
+void EQInterface::set_net_capture_buffer_size(int size)
+{
+  m_packet->setBufferSize(size);
+  pSEQPrefs->setPrefInt("CaptureBufferSize", "Network", size);
 }
 
 void EQInterface::set_net_arq_giveup(int giveup)
