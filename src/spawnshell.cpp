@@ -145,10 +145,12 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
    // connect Player signals to SpawnShell signals
    connect(m_player, SIGNAL(changeItem(const Item*, uint32_t)),
 	   this, SIGNAL(changeItem(const Item*, uint32_t)));
+   connect(m_player, SIGNAL(playerUpdate(const uint8_t*, size_t, uint8_t)),
+           this, SLOT(playerUpdate2(const uint8_t*, size_t, uint8_t)));
 
    // connect Player signals to SpawnShell slots
-   connect(m_player, SIGNAL(changedID(uint16_t)),
-	   this, SLOT(playerChangedID(uint16_t)));
+   connect(m_player, SIGNAL(changedID(uint16_t, uint16_t)),
+	   this, SLOT(playerChangedID(uint16_t, uint16_t)));
 
    // connect to guildmgr to receive notifications of guild tag updates
    connect(m_guildMgr, SIGNAL(guildTagUpdated(uint32_t)),
@@ -862,6 +864,7 @@ void SpawnShell::zoneEntry(const uint8_t* data, size_t len)
   if(!strcmp(spawn->name,m_player->realName().toLatin1().data()))
   {
     // Multiple zoneEntry packets are received for your spawn after you zone
+    m_player->setPlayerID(spawn->spawnId);
     m_player->update(spawn);
     emit changeItem(m_player, tSpawnChangedALL);
   }
@@ -962,6 +965,29 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      // send notification of new spawn count
      emit numSpawns(m_spawns.count());
    }
+}
+
+void SpawnShell::playerUpdate2(const uint8_t* data, size_t len, uint8_t dir)
+{
+  if (m_zoneMgr->isZoning())
+    return;
+
+  //This payload is normally handled by Player::playerUpdateSelf,
+  //but sometimes it contains an update for a different spawn, such as
+  //an Eye of Zomm cast by the player, a rowboat being controlled by the
+  //player, etc.  So in that case, we'll handle it.
+  const playerSelfPosStruct *pupdate = (const playerSelfPosStruct *)data;
+
+  int16_t py = int16_t(pupdate->y);
+  int16_t px = int16_t(pupdate->x);
+  int16_t pz = int16_t(pupdate->z);
+  int16_t pdeltaX = int16_t(pupdate->deltaX);
+  int16_t pdeltaY = int16_t(pupdate->deltaY);
+  int16_t pdeltaZ = int16_t(pupdate->deltaZ);
+
+
+  updateSpawn(pupdate->spawnId, px, py, pz, pdeltaX, pdeltaY, pdeltaZ,
+          pupdate->heading, pupdate->deltaHeading, pupdate->animation);
 }
 
 void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
@@ -1667,14 +1693,23 @@ void SpawnShell::corpseLoc(const uint8_t* data)
   }
 }
 
-void SpawnShell::playerChangedID(uint16_t playerID)
+void SpawnShell::playerChangedID(uint16_t oldPlayerID, uint16_t newPlayerID)
 {
   // remove the player from the list (if it had a 0 id)
-  m_players.take(0);
+  deleteItem(tPlayer, 0);
+
+  if (oldPlayerID == newPlayerID)
+      return;
+
+  //remove the old player 
+  deleteItem(tPlayer, oldPlayerID);
+
+
+  //if the new ID already exists an unknown spawn
+  deleteItem(tSpawn, newPlayerID);
 
   // re-insert the player into the list
-  delete m_players.take(playerID);
-  m_players.insert(playerID, m_player);
+  m_players.insert(newPlayerID, m_player);
 
   emit changeItem(m_player, tSpawnChangedALL);
 }

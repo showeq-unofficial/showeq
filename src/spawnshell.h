@@ -122,6 +122,7 @@ public slots:
    void zoneEntry(const uint8_t* spawn, size_t len);
    void newSpawn(const uint8_t* spawn);
    void newSpawn(const spawnStruct& s);
+   void playerUpdate2(const uint8_t*pupdate, size_t, uint8_t);
    void playerUpdate(const uint8_t*pupdate, size_t, uint8_t);
    void npcMoveUpdate(const uint8_t*npcupdate, size_t, uint8_t);
    void updateSpawn(uint16_t id, 
@@ -144,7 +145,7 @@ public slots:
    void respawnFromHover(const uint8_t* respawn, size_t len, uint8_t dir);
    void corpseLoc(const uint8_t* corpseLoc);
 
-   void playerChangedID(uint16_t playerID);
+   void playerChangedID(uint16_t oldPlayerID, uint16_t newPlayerID);
    void refilterSpawns();
    void refilterSpawnsRuntime();
    void saveSpawns(void);

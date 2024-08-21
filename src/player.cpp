@@ -833,14 +833,26 @@ void Player::zoneChanged()
   clear();
 }
 
-void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
+void Player::playerUpdateSelf(const uint8_t* data, size_t len, uint8_t dir)
 {
   const playerSelfPosStruct *pupdate = (const playerSelfPosStruct*)data;
 
   if ((dir != DIR_Client) && (pupdate->spawnId != id()))
     return;
-  else if (dir == DIR_Client)
-    setPlayerID(pupdate->spawnId);
+
+  if (dir == DIR_Client && id() == 0)
+      setPlayerID(pupdate->spawnId);
+  // When casting Eye of Zomm, using a row boat, or doing something else
+  // where you're controlling another spawn, the client will send multiple
+  // update packets, one for with your player spawn ID, and the other
+  // with the ID of the other object.  So we can't assume that if the
+  // id changes, we can automatically update the player's ID like we used to.
+  // Instead, we'll pass the other ID to spawnshell for handling
+  if (pupdate->spawnId != id())
+  {
+      emit playerUpdate(data, len, dir);
+      return;
+  }
 
   int16_t py = int16_t(pupdate->y);
   int16_t px = int16_t(pupdate->x);
@@ -968,9 +980,10 @@ void Player::setPlayerID(uint16_t playerID)
 {
   if (id() != playerID)
   {
+     uint16_t old_id = id();
      seqInfo("Your player's id is %i", playerID);
      setID(playerID);
-     emit changedID(id());
+     emit changedID(old_id, id());
      updateLastChanged();
      emit changeItem(this, tSpawnChangedALL);
   }

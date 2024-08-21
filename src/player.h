@@ -200,7 +200,7 @@ public:
                                
    void stamChanged            ( int, int, int, int);
   void hpChanged(int16_t, int16_t);
-  void changedID(uint16_t playerID);
+  void changedID(uint16_t oldPlayerID, uint16_t newPlayerID);
   void posChanged(int16_t x, int16_t y, int16_t z,
 		  int16_t deltaX, int16_t deltaY, int16_t deltaZ,
 		  int32_t heading);
@@ -208,6 +208,7 @@ public:
   void headingChanged(int32_t heading);
   void levelChanged(uint8_t level);
   void guildChanged();
+  void playerUpdate(const uint8_t* data, size_t len, uint8_t dir);
 
  protected:
   void fillConTable();
