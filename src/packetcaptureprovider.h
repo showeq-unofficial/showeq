@@ -26,6 +26,8 @@
 #include <cstdint>
 #include <QString>
 
+#include <pthread.h>
+
 class PacketCaptureProviderThread
 {
     public:
