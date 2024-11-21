@@ -459,6 +459,9 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
 
   player->expansions = netStream.readUInt32NC();
 
+  // Unknown
+  netStream.skipBytes(4);
+
   // MAX_KNOWN_LANGS (32 ints)
   int langCount = netStream.readUInt32NC();
   for (int i = 0; i < langCount; i++) {
