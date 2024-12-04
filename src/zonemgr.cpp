@@ -437,7 +437,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->profile.endurance = netStream.readUInt32NC();
 
   // Unknown
-  netStream.skipBytes(58);
+  netStream.skipBytes(64);
 
   // Name
   int firstName = netStream.readUInt32NC();

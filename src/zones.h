@@ -891,12 +891,12 @@
 { NULL, NULL }, // 867
 { NULL, NULL }, // 868
 { "anniversarytower", "Tides of Time" }, // 869
-{ NULL, NULL }, // 870
-{ NULL, NULL }, // 871
-{ NULL, NULL }, // 872
-{ NULL, NULL }, // 873
-{ NULL, NULL }, // 874
-{ NULL, NULL }, // 875
+{ "hodstock", "Hodstock Hills" }, // 870
+{ "toe", "The Theater of Eternity" }, // 871
+{ "aureatecovert", "Aureate Covert" }, // 872
+{ "harbingerscradle", "The Harbinger's Cradle" }, // 873
+{ "puissance", "The Chambers of Puissance" }, // 874
+{ "gildedspire", "The Gilded Spire" }, // 875
 { "clz-25anniversary", "clz-25anniversary" }, // 876
 { NULL, NULL }, // 877
 { NULL, NULL }, // 878

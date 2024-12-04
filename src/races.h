@@ -962,4 +962,23 @@
     "Sheep",	                  // 938
     "Ogre NPC Rallosian",	      // 939
     "Goblin",	                  // 940
+    "Leviathan Wing Right",       //941
+    "Leviathan Wing Left",        //942
+    "Leviathan Tail",             //943
+    "Outer Brood Dragon - Gold",  //944
+    "Scalewrought Monitor",       //945
+    "Hippocampus",                //946
+    "Scalewrought Flyer",         //947
+    "Scalewrought Manipulator",   //948
+    "Scalewrought Ground Attacker",//949
+    "Leviathan",                  //950
+    "Leviathan Transport",        //951
+    "Leviathan Mount",            //952
+    "Scalewrought Mount",         //953
+    "Otter Mount",                //954
+    "Web Tendon",                 //955
+    "Long Tendon",                //956
+    "Polyp",                      //957
+    "Bovoch",                     //958
+
 #endif
