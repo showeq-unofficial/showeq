@@ -1060,10 +1060,10 @@ QStringList enumerateNetworkDevices()
 
     for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++)
     {
-        if (ifa->ifa_addr == NULL)
+        if (ifa->ifa_addr == NULL || devices.contains(ifa->ifa_name))
             continue;
 
-        if (ifa->ifa_addr->sa_family == AF_INET)
+        if (ifa->ifa_addr->sa_family == AF_INET || ifa->ifa_addr->sa_family == AF_PACKET)
             devices.append(ifa->ifa_name);
     }
 
