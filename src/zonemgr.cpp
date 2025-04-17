@@ -697,6 +697,10 @@ void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
     // which causes failure to load maps.
     QRegExp ry("_int$");
     m_shortZoneName.replace(ry, "");
+
+    //anniversary missions
+    QRegExp rw("_errand$");
+    m_shortZoneName.replace(rw, "");
   }
 
   m_longZoneName = zoneNew->longName;

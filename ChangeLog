@@ -1,3 +1,11 @@
+cn187 (4/16/25)
+----------------
+- Update to version 6.4.10
+- Support for EQ Patch 4/16/25
+- Struct and opcode updates (Newby)
+- Allow SEQ to monitor interfaces that don't have an IP assigned
+- Fix anniversary mission map detection
+
 cn187 (3/18/25)
 ----------------
 - Update to version 6.4.9
