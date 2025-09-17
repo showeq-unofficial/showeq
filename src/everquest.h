@@ -1119,30 +1119,26 @@ struct spawnStruct
            struct
            {
 
-              signed   y:19;                              // y coord (2nd loc value)
+              signed   animation:10;                      // current animation
               signed   deltaHeading:10;                   // change in heading
-              unsigned padding00:3;
+              unsigned padding00:12;
 
               signed   deltaX:13;                         // change in x
-              unsigned pitch:12;                          // pitch (up/down heading)
-              unsigned padding01:7;
+              signed   z:19;                              // z coord (3rd loc value)
 
+              signed   y:19;                              // y coord (2nd loc value)
               unsigned heading:12;                        // heading
-              signed   deltaZ:13;                         // change in z
-              unsigned padding02:7;
-
-              signed   animation:10;                      // current animation
-              signed   deltaY:13;                         // change in y
-              unsigned padding03:9;
+              unsigned padding02:1;
 
               signed   x:19;                              // x coord (1st loc value)
-              unsigned padding04:13;
+              signed   deltaZ:13;                         // change in z
 
-              signed   z:19;                              // z coord (3rd loc value)
-              unsigned padding05:13;
+              unsigned pitch:12;                          // pitch (up/down heading)
+              signed   deltaY:13;                         // change in y
+              unsigned padding04:7;
 
            };
-           int32_t posData[6];
+           int32_t posData[5];
          };
 
 /*0000*/ union
@@ -2392,7 +2388,7 @@ struct randomStruct
 
 /*
 ** Player Position Update
-** Length: 28 Octets
+** Length: 24 Octets
 ** OpCode: PlayerPosCode
 */
 struct playerSpawnPosStruct
@@ -2400,33 +2396,29 @@ struct playerSpawnPosStruct
 /*0000*/ uint16_t spawnId;
 /*0002*/ uint16_t spawnId2;
 /*0004*/
-         signed   y:19;                            // y coord (2nd loc value)
+         signed   animation:10;                    // current animation
          signed   deltaHeading:10;                 // change in heading
-         unsigned padding00:3;
+         unsigned padding00:12;
 /*0008*/
          signed   deltaX:13;                       // change in x
-         unsigned pitch:12;                        // pitch (up/down heading)
-         unsigned padding01:7;
-/*0012*/
-         unsigned heading:12;                      // heading
-         signed   deltaZ:13;                       // change in z
-         unsigned padding02:7;
-/*0016*/
-         signed   animation:10;                    // current animation
-         signed   deltaY:13;                       // change in y
-         unsigned padding03:9;
-/*0020*/
-         signed   x:19;                            // x coord (1st loc value)
-         unsigned padding04:13;
-/*0024*/
          signed   z:19;                            // z coord (3rd loc value)
-         unsigned padding05:13;
-/*0028*/
+/*0012*/
+         signed   y:19;                            // y coord (2nd loc value)
+         unsigned heading:12;                      // heading
+         unsigned padding02:1;
+/*0016*/
+         signed   x:19;                            // x coord (1st loc value)
+         signed   deltaZ:13;                       // change in z
+/*0020*/
+         unsigned pitch:12;                        // pitch (up/down heading)
+         signed   deltaY:13;                       // change in y
+         unsigned padding04:7;
+/*0024*/
 };
 
 /*
 ** Self Position Update
-** Length: 46 Octets
+** Length: 42 Octets
 ** OpCode: PlayerPosCode
 */
 struct playerSelfPosStruct
@@ -2435,30 +2427,28 @@ struct playerSelfPosStruct
 /*0002*/ uint16_t spawnId;                       // Player's spawn id
 /*0004*/ uint16_t unknown0004;                   // ***Placeholder
 /*0006*/
-	 float    deltaX;                    // change in x
+	 float    y;                         // y coord (2nd loc value)
 /*0010*/
 	 float    deltaY;                    // change in y
 /*0014*/
 	 float    x;                         // x coord (1st loc value)
 /*0018*/
-	 unsigned pitch:12;                  // pitch (up/down heading)
-	 unsigned padding03:20;
-/*0022*/
-	 float    z;                         // z coord (3rd loc value)
-/*0026*/
-	 unsigned heading:12;                // heading
-	 unsigned padding05:20;
-/*0030*/
-	 float    y;                         // y coord (2nd loc value)
-/*0034*/
-	 signed   deltaHeading:10;           // change in heading
-	 unsigned padding07:22;
-/*0038*/
-	 float    deltaZ;                    // change in z
-/*0042*/
 	 signed   animation:10;              // current animation
-	 unsigned padding09:22;
-/*0046*/
+	 unsigned padding03:22;
+/*0022*/
+	 float    deltaX;                    // change in x
+/*0026*/
+	 float    z;                         // z coord (3rd loc value)
+/*0030*/
+	 float    deltaZ;                    // change in z
+/*0034*/
+	 unsigned heading:12;                // heading
+	 unsigned pitch:12;                  // pitch (up/down heading)
+	 unsigned padding07:8;
+/*0038*/
+	 signed   deltaHeading:10;           // change in heading
+	 unsigned padding08:22;
+/*0042*/
 };
 
 /*
