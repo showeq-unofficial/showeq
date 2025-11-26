@@ -2052,7 +2052,7 @@ void EQInterface::createCharacterMenu() {
    m_levelSpinBox = new QSpinBox(this);
    m_levelSpinBox->setObjectName("m_levelSpinBox");
    m_levelSpinBox->setMinimum(1);
-   m_levelSpinBox->setMaximum(125);
+   m_levelSpinBox->setMaximum(MAX_PLAYER_LEVEL);
    m_levelSpinBox->setSingleStep(1);
    QWidgetAction* levelSpinBoxAction = new QWidgetAction(m_charLevelMenu);
    levelSpinBoxAction->setDefaultWidget(m_levelSpinBox);

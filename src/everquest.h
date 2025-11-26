@@ -161,6 +161,8 @@
 #define PLAYER_CLASSES     16
 #define PLAYER_RACES       15
 
+#define MAX_PLAYER_LEVEL    130
+
 /*
 ** Item Packet Type
 */
