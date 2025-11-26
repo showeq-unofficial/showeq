@@ -1,6 +1,6 @@
 /*
  *  zones.h
- *  Copyright 2003-2024 by the respective ShowEQ Developers
+ *  Copyright 2003-2025 by the respective ShowEQ Developers
  *
  *  This file is part of ShowEQ.
  *  http://www.sourceforge.net/projects/seq
@@ -54,12 +54,12 @@
 { "everfrost", "Everfrost Peaks" }, // 30
 { "soldunga", "Solusek's Eye" }, // 31
 { "soldungb", "Nagafen's Lair" }, // 32
-{ "misty", "misty" }, // 33
+{ "misty", "Misty Thicket" }, // 33
 { "nro", "The Northern Desert of Ro" }, // 34
 { "sro", "The Southern Desert of Ro" }, // 35
 { "befallen", "Befallen" }, // 36
 { "oasis", "The Oasis of Marr" }, // 37
-{ "tox", "tox" }, // 38
+{ "tox", "Toxxulia Forest" }, // 38
 { "hole", "The Ruins of Old Paineel" }, // 39
 { "neriaka", "Neriak - Foreign Quarter" }, // 40
 { "neriakb", "Neriak - Commons" }, // 41
@@ -67,7 +67,7 @@
 { "neriakd", "Neriak - Fourth Gate" }, // 43
 { "najena", "Najena" }, // 44
 { "qcat", "The Qeynos Aqueduct System" }, // 45
-{ "innothule", "innothule" }, // 46
+{ "innothule", "Innothule Swamp" }, // 46
 { "feerrott", "The Feerrott" }, // 47
 { "cazicthule", "Temple of Cazic-Thule" }, // 48
 { "oggok", "Oggok" }, // 49
@@ -77,7 +77,7 @@
 { "aviak", "Aviak" }, // 53
 { "gfaydark", "The Greater Faydark" }, // 54
 { "akanon", "Ak'Anon" }, // 55
-{ "steamfont", "steamfont" }, // 56
+{ "steamfont", "The Steamfont Mountains" }, // 56
 { "lfaydark", "The Lesser Faydark" }, // 57
 { "crushbone", "Clan Crushbone" }, // 58
 { "mistmoore", "The Castle of Mistmoore" }, // 59
@@ -95,7 +95,7 @@
 { "airplane", "The Plane of Sky" }, // 71
 { "fearplane", "The Plane of Fear" }, // 72
 { "permafrost", "Permafrost Keep" }, // 73
-{ "kerraridge", "kerraridge" }, // 74
+{ "kerraridge", "Kerra Isle" }, // 74
 { "paineel", "Paineel" }, // 75
 { "hateplane", "The Plane of Hate" }, // 76
 { "arena", "The Arena" }, // 77
@@ -201,12 +201,12 @@
 { NULL, NULL }, // 177
 { NULL, NULL }, // 178
 { "akheva", "The Akheva Ruins" }, // 179
-{ "arena2", "arena2" }, // 180
+{ "arena2", "Arenatwo" }, // 180
 { "jaggedpine", "Jaggedpine Forest" }, // 181
 { "nedaria", "Nedaria's Landing" }, // 182
-{ "tutorial", "tutorial" }, // 183
-{ "load", "load" }, // 184
-{ "load2", "load2" }, // 185
+{ "tutorial", "Tutorial" }, // 183
+{ "load", "Load" }, // 184
+{ "load2", "Loadtwo" }, // 185
 { "hateplaneb", "The Plane of Hate" }, // 186
 { "shadowrest", "Shadowrest" }, // 187
 { "tutoriala", "tutoriala" }, // 188
@@ -500,7 +500,7 @@
 { "korascian", "Korascian Warrens" }, // 476
 { "rathechamber", "Rathe Council Chamber" }, // 477
 { "oldfieldofboneb", "Field of Scale" }, // 478
-{ "crafthalls", "crafthalls" }, // 479
+{ "crafthalls", "Ngreth's Den" }, // 479
 { "brellsrest", "Brell's Rest" }, // 480
 { "fungalforest", "Fungal Forest" }, // 481
 { "underquarry", "The Underquarry" }, // 482
@@ -782,13 +782,13 @@
 { "eviltree", "Evantil, the Vile Oak" }, // 758
 { "grelleth", "Grelleth's Palace, the Chateau of Filth" }, // 759
 { "chapterhouse", "Chapterhouse of the Fallen" }, // 760
-{ "pomischief", "pomischief" }, // 761
-{ "burnedwoods", "burnedwoods" }, // 762
+{ "pomischief", "The Plane of Mischief" }, // 761
+{ "burnedwoods", "The Burned Woods" }, // 762
 { "chelsithreborn", "Chelsith Reborn" }, // 763
 { "poshadow", "Plane of Shadow" }, // 764
 { "heartoffear", "Heart of Fear: The Threshold" }, // 765
 { "phinteriortree", "Evantil's Abode" }, // 766
-{ "interiorwalltest", "interiorwalltest" }, // 767
+{ "interiorwalltest", "Wall Wall Wall" }, // 767
 { "heartoffearb", "Heart of Fear: The Rebirth" }, // 768
 { "heartoffearc", "Heart of Fear: The Epicenter" }, // 769
 { "bixiewarfront", "Bixie Warfront" }, // 770
@@ -897,18 +897,18 @@
 { "harbingerscradle", "The Harbinger's Cradle" }, // 873
 { "puissance", "The Chambers of Puissance" }, // 874
 { "gildedspire", "The Gilded Spire" }, // 875
-{ "clz-25anniversary", "clz-25anniversary" }, // 876
-{ NULL, NULL }, // 877
-{ NULL, NULL }, // 878
-{ NULL, NULL }, // 879
-{ NULL, NULL }, // 880
-{ NULL, NULL }, // 881
-{ NULL, NULL }, // 882
-{ NULL, NULL }, // 883
-{ NULL, NULL }, // 884
-{ NULL, NULL }, // 885
-{ NULL, NULL }, // 886
-{ NULL, NULL }, // 887
+{ "clz-25anniversary", "Anniversary" }, // 876
+{ "dragonhouseinta", "Aureate Chalet Three Room" }, // 877
+{ "dragonhouseintb", "Aureate Chalet One Room" }, // 878
+{ "candlemakers", "Candlemaker's Workshop" }, // 879
+{ "embattledpogrowth", "Scarred Grove" }, // 880
+{ "arcstoneruins", "Arcstone, Shattered Isles" }, // 881
+{ "ruinedrelic", "Ruined Relic" }, // 882
+{ "vortex", "The Vortex" }, // 883
+{ "spite", "Labyrinth of Spite" }, // 884
+{ "guildhallsng", "Grand Guild Hall" }, // 885
+{ "giftygiver", "The Gifty Giver" }, // 886
+{ "clz-brewday", "Brew Day" }, // 887
 { NULL, NULL }, // 888
 { NULL, NULL }, // 889
 { NULL, NULL }, // 890
@@ -1020,4 +1020,4 @@
 { "arttest", "The Pit of Rathpher" }, // 996
 { NULL, NULL }, // 997
 { "fhalls", "The Forgotten Halls" }, // 998
-{ "apprentice", "apprentice" }, // 999
+{ "apprentice", "Plane of Noob" }, // 999
