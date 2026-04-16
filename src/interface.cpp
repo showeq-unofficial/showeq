@@ -248,8 +248,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			   pSEQPrefs->getPrefString("MAC", section, "0"),
 			   pSEQPrefs->getPrefBool("RealTimeThread", section,
 						  false),
-               pSEQPrefs->getPrefInt("CaptureSnapLen", section, 1),
-               pSEQPrefs->getPrefInt("CaptureBufferSize", section, 2),
+               pSEQPrefs->getPrefInt("CaptureSnapLen", section, 2),
+               pSEQPrefs->getPrefInt("CaptureBufferSize", section, 4),
 			   pSEQPrefs->getPrefBool("SessionTracking", 
 						  section, false),
 			   pSEQPrefs->getPrefBool("Record", vpsection, false),
@@ -1919,7 +1919,7 @@ void EQInterface::createNetworkMenu() {
    QSpinBox* snapLenSpinBox = new QSpinBox(tmpMenu);
    snapLenSpinBox->setMinimum(1);
    snapLenSpinBox->setMaximum(64);
-   snapLenSpinBox->setValue(pSEQPrefs->getPrefInt("CaptureSnapLen", "Network", 1));
+   snapLenSpinBox->setValue(pSEQPrefs->getPrefInt("CaptureSnapLen", "Network", 2));
    connect(snapLenSpinBox, SIGNAL(valueChanged(int)), this, SLOT(set_net_capture_snap_len(int)));
    QWidgetAction* snapLenWidgetAction = new QWidgetAction(tmpMenu);
    snapLenWidgetAction->setDefaultWidget(snapLenSpinBox);
@@ -1930,7 +1930,7 @@ void EQInterface::createNetworkMenu() {
    QSpinBox* captureBufferSizeSpinBox = new QSpinBox();
    captureBufferSizeSpinBox->setMinimum(2);
    captureBufferSizeSpinBox->setMaximum(128);
-   captureBufferSizeSpinBox->setValue(pSEQPrefs->getPrefInt("CaptureBufferSize", "Network", 2));
+   captureBufferSizeSpinBox->setValue(pSEQPrefs->getPrefInt("CaptureBufferSize", "Network", 4));
    connect(captureBufferSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(set_net_capture_buffer_size(int)));
    QWidgetAction* captureBufferSizeWidgetAction = new QWidgetAction(tmpMenu);
    captureBufferSizeWidgetAction->setDefaultWidget(captureBufferSizeSpinBox);
