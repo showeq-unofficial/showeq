@@ -221,8 +221,12 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   netStream.skipBytes(16);
   
   player->profile.gender = netStream.readUInt8();
-  player->profile.race = netStream.readUInt32();
-  player->profile.class_ = netStream.readUInt32();
+  // readUInt32() is big-endian; readUInt32NC() is little-endian (EQ wire
+  // format). The non-NC reader on race + class_ read class=2 as
+  // 0x02000000 then truncated to uint8_t=0, which silently broke
+  // calcMaxMana for casters in the player profile (mana bar at 0).
+  player->profile.race = netStream.readUInt32NC();
+  player->profile.class_ = netStream.readUInt32NC();
   player->profile.level = netStream.readUInt8();
   player->profile.level1 = netStream.readUInt8();
 
