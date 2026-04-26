@@ -1,0 +1,32 @@
+# Build outputs
+*.o
+*.moc
+src/showeq
+src/sortitem
+src/ui_*.h
+
+# Make-generated
+Makefile
+Makefile.in
+Makefile.dist.dbg
+src/.deps/
+
+# autoconf / automake generated
+aclocal.m4
+autom4te.cache/
+config.guess
+config.h
+config.h.in
+config.log
+config.status
+config.sub
+configure
+configure.dbg
+compile
+depcomp
+install-sh
+libtool
+ltmain.sh
+m4/
+missing
+stamp-h1
