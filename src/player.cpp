@@ -414,9 +414,13 @@ void Player::player(const charProfileStruct* player)
   m_validExp = true;
   
   emit expChangedInt (m_currentExp, m_minExp, m_maxExp);
-  emit expAltChangedInt(m_currentAltExp, 0, 15000000);
+  // Live OP_PlayerProfile reports expAA on a 0..100000 per-AA-point
+  // scale (matches OP_ExpUpdate's per-level scale). StatList's % calc
+  // is val / (max/100) — with the legacy 15M cap, 40318 / 150000 = 0%
+  // (integer-truncated), so the AA bar always read 0% on live.
+  emit expAltChangedInt(m_currentAltExp, 0, 100000);
 
-  emit setAltExp(m_currentAltExp, 15000000, 15000000/330, m_currentAApts);
+  emit setAltExp(m_currentAltExp, 100000, 100000/100, m_currentAApts);
 
   if (showeq_params->savePlayerState)
     savePlayerState();
