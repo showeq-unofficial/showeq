@@ -115,6 +115,7 @@ public:
    void setRealName(const QString& name) { m_realName = name; }
 
    virtual void killSpawn();
+   void update(const spawnStruct* s) override;
 
    // ZBTEMP: compatibility code
    uint16_t getPlayerID() const { return id(); }

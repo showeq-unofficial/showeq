@@ -837,6 +837,20 @@ void Player::zoneChanged()
   clear();
 }
 
+// spawnStruct.curHp is a 0-100 percentage and Spawn::update hardcodes
+// maxHP=100; for the local PC, HP/maxHP are authoritative from
+// OP_HPUpdate (raw values). Snapshot and restore so a spawnStruct (e.g.
+// the duplicate zoneEntry packets fired after zoning) can't overwrite
+// a real raw HP read with a percentage.
+void Player::update(const spawnStruct* s)
+{
+  const int32_t savedCurHP = HP();
+  const int32_t savedMaxHP = maxHP();
+  Spawn::update(s);
+  setHP(savedCurHP);
+  setMaxHP(savedMaxHP);
+}
+
 void Player::playerUpdateSelf(const uint8_t* data, size_t len, uint8_t dir)
 {
   const playerSelfPosStruct *pupdate = (const playerSelfPosStruct*)data;
