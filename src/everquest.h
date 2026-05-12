@@ -2345,20 +2345,33 @@ struct skillIncStruct
 };
 
 /*
-** When somebody changes what they're wearing
-**      or give a pet a weapon (model changes)
-** Length: 14 Octets
+** WearChange — multi-slot appearance update packet header
+** Variable length: header(11) + slotCount*(16+strlen(ownerName)+1) + 2 pad
+** count=0 → 13 bytes (appearance hash refresh, no slot records)
+** count=N → 11 + N*(16+name_len+1) + 2 bytes
 ** Opcode: WearChangeCode
 */
-
-// ZBTEMP: Find newItemID ***
 struct wearChangeStruct
 {
-/*0000*/ uint16_t spawnId;                       // SpawnID
-/*0002*/ Color_Struct color;                     // item color
-/*0006*/ uint8_t  wearSlotId;                    // Slot ID
-/*0007*/ uint8_t  unknown0007[7];                // unknown
-/*0014*/
+/*0000*/ uint32_t spawnId;                       // spawn whose appearance changed
+/*0004*/ uint32_t appearance;                    // overall appearance value (varies per equip)
+/*0008*/ uint8_t  unknown0008;                   // = 1 in all observed samples
+/*0009*/ uint8_t  slotCount;                     // number of wearChangeSlotStruct records following
+/*0010*/ uint8_t  unknown0010;                   // = 0
+/*0011*/
+};
+
+/*
+** WearChangeSlot — per-slot record following wearChangeStruct header
+** 16-byte fixed body + null-terminated ownerName (variable length).
+*/
+struct wearChangeSlotStruct
+{
+/*0000*/ uint32_t slotId;                        // wear slot index
+/*0004*/ uint32_t material;                      // material/texture ID
+/*0008*/ uint32_t color;                         // color tint
+/*0012*/ uint32_t unknown0012;                   // = 0
+/*0016*/ // char ownerName[] follows — null-terminated, variable length
 };
 
 /*
