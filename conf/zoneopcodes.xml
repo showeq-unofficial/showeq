@@ -159,6 +159,14 @@
         <comment>Other disbands from group</comment>
         <payload dir="server" typename="groupDisbandStruct" sizechecktype="match"/>
     </opcode>
+    <opcode id="59ab" name="OP_GroupInviteSent" updated="05/11/26">
+        <comment>S>C to inviter only after OP_GroupInvite2: server confirms invite relayed. Invitee name at offset 64.</comment>
+        <payload dir="server" typename="groupInviteStruct" sizechecktype="none"/>
+    </opcode>
+    <opcode id="1325" name="OP_GroupMemberLeave" updated="05/11/26">
+        <comment>S>C broadcast to remaining members on departure. Fires only when ≥2 members remain.</comment>
+        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
+    </opcode>
     <opcode id="ffff" name="OP_GroupLeader" updated="02/17/21">
         <comment>Group leader change</comment>
         <payload dir="server" typename="groupLeaderChangeStruct" sizechecktype="match"/>
