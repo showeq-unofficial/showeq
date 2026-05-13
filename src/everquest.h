@@ -2778,6 +2778,19 @@ struct clientLFGStruct
 };
 
 /*
+** buffWindowSlotStruct (OP_BuffWindow 0xbbf0)
+** Length: 12 Octets — fires 10x per zone-in (slots 0-9)
+*/
+
+struct buffWindowSlotStruct
+{
+/*0000*/ uint32_t slot;
+/*0004*/ uint32_t spellid;  // 0xffffffff = empty
+/*0008*/ uint32_t unknown;
+/*000C*/
+};
+
+/*
 ** buffStruct
 ** Length: 168 Octets
 ** 

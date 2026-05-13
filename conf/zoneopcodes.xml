@@ -579,9 +579,9 @@
         <comment>C>S 8B: {u32 buff_slot, u32 self_spawn_id}. Client requests server reconfirm buff slot N. Fires on second zone-in after buff applied.</comment>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="ffff" name="OP_BuffWindow" updated="11/28/12">
-        <comment>Changes to buff window or song window - 100 bytes</comment>
-        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
+    <opcode id="bbf0" name="OP_BuffWindow" updated="05/13/26">
+        <comment>S>C 12B per slot: {u32 slot(0-9), u32 spellid=0xffffffff, u32 pad}. Fires 10x per zone-in initializing short buff window. Always empty in captures.</comment>
+        <payload dir="server" typename="buffWindowSlotStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="5855" name="OP_SpawnAppearance2" updated="05/12/26">
         <comment>Extended 24-byte bidirectional appearance update. C>S type=0x24 with spawn_id=0 = OP_ClickBuffOff (buff_slot in value). S>C fires co-occur with buff landing messages.</comment>
