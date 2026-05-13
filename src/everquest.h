@@ -2308,11 +2308,11 @@ struct beginCastStruct
 
 struct memSpellStruct
 {
-/*0000*/ uint32_t slotId;                        // Slot spell is being memorized in
-/*0004*/ uint32_t spellId;                       // Id of spell
-/*0008*/ int16_t  param1;                        // Paramater 1
-/*0010*/ int16_t  param2;                        // Paramater 2
-/*0012*/ uint8_t  unknown0012[4];                // *** Placeholder
+/*0000*/ uint32_t slotId;    // gem slot (0-based)
+/*0004*/ uint32_t spellId;   // spell id
+/*0008*/ int16_t  action;    // 1=begin, 2=complete, 3=zone-in sync (wire-verified)
+/*0010*/ int16_t  unknown10; // always 0
+/*0012*/ uint8_t  unknown12[4];
 /*0016*/
 };
 

@@ -191,8 +191,8 @@
         <comment>TradeSpellBookSlotsCode</comment>
         <payload dir="both" typename="tradeSpellBookSlotsStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="ffff" name="OP_MemorizeSpell" updated="07/19/23">
-        <comment>MemSpellCode</comment>
+    <opcode id="e42f" name="OP_MemorizeSpell" updated="05/13/26">
+        <comment>16B: {u32 gem_slot, u32 spellId, int16 action(1=begin,2=complete,3=zone-sync), int16 pad, u8[4]}. Wire-verified.</comment>
         <payload dir="both" typename="memSpellStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="ce34" name="OP_InspectAnswer" updated="05/11/26">
