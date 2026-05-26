@@ -127,7 +127,7 @@
         <comment>old ZoneChangeCode</comment>
         <payload dir="both" typename="zoneChangeStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="ffff" name="OP_GroupInvite" updated="02/17/21">
+    <opcode id="ee64" name="OP_GroupInvite" updated="05/25/26">
         <payload dir="both" typename="groupInviteStruct" sizechecktype="none"/>
         <comment>You invite someone while ungrouped or get invited by someone ungrouped </comment>
     </opcode>
@@ -139,7 +139,7 @@
         <payload dir="client" typename="groupDeclineStruct" sizechecktype="none"/>
         <comment>Client-side decline-invite OR leave/disband-group request (modern: 168 bytes; name fields = self+self when leaving). C>S only in observed captures.</comment>
     </opcode>
-    <opcode id="ffff" name="OP_GroupFollow" updated="02/17/21">
+    <opcode id="01dc" name="OP_GroupFollow" updated="05/25/26">
         <payload dir="server" typename="groupFollowStruct" sizechecktype="match"/>
         <comment>You join a group or player joins group</comment>
     </opcode>
@@ -151,11 +151,11 @@
         <comment>Group updates</comment>
         <payload dir="both" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="ffff" name="OP_GroupDisband" updated="02/17/21">
+    <opcode id="8a85" name="OP_GroupDisband" updated="05/25/26">
         <comment>You disband from group</comment>
         <payload dir="server" typename="groupDisbandStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6c57" name="OP_GroupDisband2" updated="05/11/26">
+    <opcode id="2c76" name="OP_GroupDisband2" updated="05/25/26">
         <comment>S>C to all stayers when any member departs (not leader-only). Membername=peer at offset 64.</comment>
         <payload dir="server" typename="groupDisbandStruct" sizechecktype="none"/>
     </opcode>
@@ -171,7 +171,7 @@
         <comment>S>C broadcast to remaining members on departure. Fires only when ≥2 members remain.</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="ffff" name="OP_GroupLeader" updated="02/17/21">
+    <opcode id="b269" name="OP_GroupLeader" updated="05/25/26">
         <comment>Group leader change</comment>
         <payload dir="server" typename="groupLeaderChangeStruct" sizechecktype="match"/>
     </opcode>
@@ -195,7 +195,7 @@
         <comment>16B: {u32 gem_slot, u32 spellId, int16 action(1=begin,2=complete,3=zone-sync), int16 pad, u8[4]}. Wire-verified.</comment>
         <payload dir="both" typename="memSpellStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="ce34" name="OP_InspectAnswer" updated="05/11/26">
+    <opcode id="57f1" name="OP_InspectAnswer" updated="05/25/26">
         <comment>InspectDataCode</comment>
         <payload dir="server" typename="inspectDataStruct" sizechecktype="match"/>
     </opcode>
@@ -219,11 +219,11 @@
         <comment>Communicate textual info to client including hail responses etc</comment>
         <payload dir="server" typename="specialMessageStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="953e" name="OP_RandomReq" updated="05/12/26">
+    <opcode id="c71c" name="OP_RandomReq" updated="05/25/26">
         <comment>RandomReqCode - C>S: {u32 bottom, u32 top}</comment>
         <payload dir="client" typename="randomReqStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="3d0f" name="OP_RandomReply" updated="05/12/26">
+    <opcode id="4939" name="OP_RandomReply" updated="05/25/26">
         <comment>RandomCode - S>C broadcast: {u32 bottom, u32 top, u32 result, char name[64]}</comment>
         <payload dir="server" typename="randomStruct" sizechecktype="match"/>
     </opcode>
@@ -439,7 +439,7 @@
         <comment>WhoAllOutputCode - Variable length</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="a63b" name="OP_InspectRequest" updated="05/11/26">
+    <opcode id="14b6" name="OP_InspectRequest" updated="05/25/26">
         <comment>InspectRequestCode - 8 bytes C>S: {u32 target_spawn_id, u32 self_spawn_id}</comment>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
     </opcode>
