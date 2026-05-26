@@ -147,7 +147,7 @@
         <payload dir="server" typename="groupFollowStruct" sizechecktype="none"/>
         <comment>Player joins your group (modern: 168 bytes; member name at offset 64, leading 64 bytes zero)</comment>
     </opcode>
-    <opcode id="ffff" name="OP_GroupUpdate" updated="06/19/19">
+    <opcode id="ccfc" name="OP_GroupUpdate" updated="05/25/26">
         <comment>Group updates</comment>
         <payload dir="both" typename="uint8_t" sizechecktype="none"/>
     </opcode>
@@ -427,7 +427,7 @@
         <comment>List of available titles - 1520 bytes</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="ffff" name="OP_Animation" updated="11/28/12">
+    <opcode id="6dba" name="OP_Animation" updated="05/25/26">
         <comment>Combat animation, emote animations etc - 4 bytes</comment>
         <payload dir="both" typename="uint8_t" sizechecktype="none"/>
     </opcode>
@@ -515,7 +515,7 @@
         <comment>DoorClickCode response from server - 2 bytes</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="cb03" name="OP_MoveItem" updated="05/02/26">
+    <opcode id="dee3" name="OP_MoveItem" updated="05/25/26">
         <comment>Client moving an item from one slot to another - 28 bytes. Resolved via showeq-daemon inventory.opcodestats.txt: 30 C>S fires at exactly 28 bytes during a slot-swap session, no competing unknown opcode at that size+direction. Wire layout: two 12-byte invSlotStruct descriptors + uint32 stack count.</comment>
         <payload dir="client" typename="moveItemStruct" sizechecktype="match"/>
     </opcode>
@@ -824,7 +824,7 @@
     <opcode id="ffff" name="OP_TributeInfo" updated="02/13/07">
         <comment>Tribute information</comment>
     </opcode>
-    <opcode id="a1e1" name="OP_RespondAA" updated="05/03/26">
+    <opcode id="fb0a" name="OP_RespondAA" updated="05/25/26">
         <comment>Server response to OP_AAAction; carries 12B records (ability_id, rank, _) for player's full AA list incl. auto-grants and purchased ranks</comment>
     </opcode>
 
