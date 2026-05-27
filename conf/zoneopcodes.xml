@@ -179,11 +179,11 @@
         <comment>old BuffDropCode</comment>
         <payload dir="both" typename="buffStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="271f" name="OP_BeginCast" updated="05/11/26">
+    <opcode id="e6dd" name="OP_BeginCast" updated="05/26/26">
         <comment>BeginCastCode - S>C broadcast: {u32 spellId, u16 casterSpawnId, u16 castTime_ms, u8[7] pad}</comment>
         <payload dir="server" typename="beginCastStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="f571" name="OP_CastSpell" updated="05/11/26">
+    <opcode id="ead6" name="OP_CastSpell" updated="05/26/26">
         <comment>StartCastCode</comment>
         <payload dir="client" typename="startCastStruct" sizechecktype="match"/>
     </opcode>
@@ -191,8 +191,8 @@
         <comment>TradeSpellBookSlotsCode</comment>
         <payload dir="both" typename="tradeSpellBookSlotsStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="e42f" name="OP_MemorizeSpell" updated="05/13/26">
-        <comment>16B: {u32 gem_slot, u32 spellId, int16 action(1=begin,2=complete,3=zone-sync), int16 pad, u8[4]}. Wire-verified.</comment>
+    <opcode id="904f" name="OP_MemorizeSpell" updated="05/26/26">
+        <comment>16B: {u32 gem_slot, u32 spellId, int16 action(1=begin,2=complete,3=zone-sync,4=clear/forget), int16 pad, u8[4]}. Wire-verified.</comment>
         <payload dir="both" typename="memSpellStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="57f1" name="OP_InspectAnswer" updated="05/25/26">
