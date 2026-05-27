@@ -11,12 +11,12 @@
     </opcode>
 -->
 
-    <opcode id="ffff" name="OP_GuildList">
-        <comment>old GuildListCode. Live candidates from world handshake: S&gt;C 1932b (0xeb30) early in handshake, or S&gt;C 36805b (0x627f) catalog dump — needs payload inspection.</comment>
+    <opcode id="bc01" name="OP_GuildList" updated="05/27/26">
+        <comment>GuildListCode - S&gt;C ~14KB at login, full server guild roster. Confirmed 2026-05-27.</comment>
         <payload dir="server" typename="worldGuildListStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="ffff" name="OP_MOTD">
-        <comment>old MOTDCode Server message of the day. Live candidates: S&gt;C 157b (0x08aa) or 1188b (0x0fe3); not yet payload-confirmed.</comment>
+    <opcode id="f8e0" name="OP_MOTD" updated="05/27/26">
+        <comment>MOTDCode - server message of the day, S&gt;C world post-EnterWorld. Confirmed 2026-05-27 (154b readable MOTD text).</comment>
         <payload dir="server" typename="worldMOTDStruct" sizechecktype="none"/>
     </opcode>
 
@@ -64,13 +64,13 @@
     <opcode id="fc46" name="OP_WorldComplete" updated="05/25/26">
 	    <comment>Client telling world server it is done. Live: 0b C&gt;S, last C&gt;S packet of session immediately after OP_ZoneServerInfo. World replies by disconnecting. 2/2 confirmations.</comment>
     </opcode>
-    <opcode id="f768" name="OP_DeleteCharacter" updated="05/06/26">
+    <opcode id="48f9" name="OP_DeleteCharacter" updated="05/27/26">
 	    <comment>Delete character @ char select. Live: 68b C&gt;S, name@offset 0. 1/1 confirmation (fired exactly when user deleted a freshly-created char).</comment>
     </opcode>
-    <opcode id="b677" name="OP_CharacterCreate" updated="05/06/26">
+    <opcode id="0634" name="OP_CharacterCreate" updated="05/27/26">
 	    <comment>Create character @ char select. Live: 168b C&gt;S, fires once per submitted creation right after OP_ApproveName response.</comment>
     </opcode>
-    <opcode id="4451" name="OP_ApproveName" updated="05/06/26">
+    <opcode id="a24a" name="OP_ApproveName" updated="05/27/26">
 	    <comment>Approving new character name @ char creation. Live: 84b C&gt;S name candidate, 1b S&gt;C status (taken vs available). 2/2 confirmations across reject + accept cycle.</comment>
     </opcode>
     <opcode id="ffff" name="OP_RandomNameGenerator">
