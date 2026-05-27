@@ -135,7 +135,7 @@
         <payload dir="both" typename="groupInviteStruct" sizechecktype="none"/>
         <comment>Grouped invite: C>S 168B (inviter sends) / S>C 176B (server relays to invitee). Same opcode both dirs, size differs.</comment>
     </opcode>
-    <opcode id="bf04" name="OP_GroupCancelInvite" updated="05/07/26">
+    <opcode id="7ee2" name="OP_GroupCancelInvite" updated="05/27/26">
         <payload dir="client" typename="groupDeclineStruct" sizechecktype="none"/>
         <comment>Client-side decline-invite OR leave/disband-group request (modern: 168 bytes; name fields = self+self when leaving). C>S only in observed captures.</comment>
     </opcode>
@@ -143,7 +143,7 @@
         <payload dir="server" typename="groupFollowStruct" sizechecktype="match"/>
         <comment>You join a group or player joins group</comment>
     </opcode>
-    <opcode id="e92d" name="OP_GroupFollow2" updated="05/07/26">
+    <opcode id="4396" name="OP_GroupFollow2" updated="05/27/26">
         <payload dir="server" typename="groupFollowStruct" sizechecktype="none"/>
         <comment>Player joins your group (modern: 168 bytes; member name at offset 64, leading 64 bytes zero)</comment>
     </opcode>
@@ -315,7 +315,7 @@
         <comment>Seems to be sent to handle a variety of UI updates - Variable length</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="b7c6" name="OP_GroupMemberList" updated="05/07/26">
+    <opcode id="7324" name="OP_GroupMemberList" updated="05/27/26">
         <comment>List of group members - Variable length. Fires S>C once per form-event broadcast to all current members; in 2-person captures observed at 168 bytes (name+name+rich trailer).</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
