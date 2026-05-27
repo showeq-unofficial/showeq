@@ -70,7 +70,7 @@
         <comment>old NewCorpseCode</comment>
         <payload dir="server" typename="newCorpseStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="800e" name="OP_WearChange" updated="05/12/26">
+    <opcode id="0ecf" name="OP_WearChange" updated="05/27/26">
         <comment>Multi-slot appearance update. Header=wearChangeStruct(11B)+slotCount*wearChangeSlotStruct(16B+varname)+2B pad. count=0=13B refresh, count>0=full slot broadcast.</comment>
         <payload dir="server" typename="wearChangeStruct" sizechecktype="none"/>
     </opcode>
@@ -583,7 +583,7 @@
         <comment>S>C 12B per slot: {u32 slot(0-9), u32 spellid=0xffffffff, u32 pad}. Fires 10x per zone-in initializing short buff window. Always empty in captures.</comment>
         <payload dir="server" typename="buffWindowSlotStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="5855" name="OP_SpawnAppearance2" updated="05/12/26">
+    <opcode id="8cd3" name="OP_SpawnAppearance2" updated="05/27/26">
         <comment>Extended 24-byte bidirectional appearance update. C>S type=0x24 with spawn_id=0 = OP_ClickBuffOff (buff_slot in value). S>C fires co-occur with buff landing messages.</comment>
         <payload dir="both" typename="uint8_t" sizechecktype="none"/>
     </opcode>
