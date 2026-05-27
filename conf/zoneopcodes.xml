@@ -293,7 +293,7 @@
         <comment>old CorpseLocCode:</comment>
         <payload dir="server" typename="corpseLocStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="3f3b" name="OP_ItemPacket" updated="05/02/26">
+    <opcode id="e8bc" name="OP_ItemPacket" updated="05/26/26">
         <comment>S>C variable-length serialized item delivery; resolved via showeq-daemon inventory.opcodestats.txt where 34 fires carried inline ASCII item names verifiable against the player's loadout. Per-item, fires on slot move and zone-in pickup; the legacy bulk OP_ItemPlayerPacket appears obsolete on current Live.</comment>
         <payload dir="server" typename="itemPacketStruct" sizechecktype="none"/>
     </opcode>
