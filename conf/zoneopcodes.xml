@@ -131,7 +131,7 @@
         <payload dir="both" typename="groupInviteStruct" sizechecktype="none"/>
         <comment>You invite someone while ungrouped or get invited by someone ungrouped </comment>
     </opcode>
-    <opcode id="0d97" name="OP_GroupInvite2" updated="05/11/26">
+    <opcode id="7237" name="OP_GroupInvite2" updated="05/27/26">
         <payload dir="both" typename="groupInviteStruct" sizechecktype="none"/>
         <comment>Grouped invite: C>S 168B (inviter sends) / S>C 176B (server relays to invitee). Same opcode both dirs, size differs.</comment>
     </opcode>
