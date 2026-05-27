@@ -71,7 +71,7 @@
         <payload dir="server" typename="newCorpseStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="0ecf" name="OP_WearChange" updated="05/27/26">
-        <comment>Multi-slot appearance update. Header=wearChangeStruct(11B)+slotCount*wearChangeSlotStruct(16B+varname)+2B pad. count=0=13B refresh, count>0=full slot broadcast.</comment>
+        <comment>Spawn-state/appearance broadcast (multi-slot). Header=wearChangeStruct(11B)+slotCount*wearChangeSlotStruct(16B+varname)+2B pad. count=0=13B refresh, count>0=full slot broadcast. POLYMORPHIC: same wire opcode also carries buff-icon arrays (21B blocks: spellID+value+caster-name) as a spawn-state broadcast on zone-in / around buff events — do not mistake those for a buff opcode (dedicated buff broadcast is OP_Buff 0x18b4).</comment>
         <payload dir="server" typename="wearChangeStruct" sizechecktype="none"/>
     </opcode>
     <opcode id="ca91" name="OP_SpawnAppearance" updated="04/16/26">
@@ -579,8 +579,8 @@
         <comment>C>S 8B: {u32 buff_slot, u32 self_spawn_id}. Client requests server reconfirm buff slot N. Fires on second zone-in after buff applied.</comment>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="3f37" name="OP_BuffWindow" updated="05/25/26">
-        <comment>S>C 12B per slot: {u32 slot(0-9), u32 spellid=0xffffffff, u32 pad}. Fires 10x per zone-in initializing short buff window. Always empty in captures.</comment>
+    <opcode id="0a37" name="OP_BuffWindow" updated="05/27/26">
+        <comment>S>C 12B per slot: {u32 slot(0-9), u32 spellid=0xffffffff, u32 pad}. Fires 10x per zone-in initializing short buff window. Always empty in captures. Re-confirmed 2026-05-27 (30 fires = 10 slots x 3 zone-ins); prior 0x3f37 was a misidentification.</comment>
         <payload dir="server" typename="buffWindowSlotStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="8cd3" name="OP_SpawnAppearance2" updated="05/27/26">
