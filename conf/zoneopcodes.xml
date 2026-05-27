@@ -235,7 +235,7 @@
         <comment>Server replying with deny information after /deny</comment>
         <payload dir="server" typename="consentResponseStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="130c" name="OP_ManaChange" updated="04/25/26">
+    <opcode id="08fb" name="OP_ManaChange" updated="05/26/26">
         <comment>Mana change. Bards send this up with no size. Casters receive this for mana updates.</comment>
         <payload dir="server" typename="manaDecrementStruct" sizechecktype="match"/>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
@@ -323,7 +323,7 @@
         <comment>List of guild members - Variable length</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="37ad" name="OP_ManaUpdate" updated="05/07/26">
+    <opcode id="36d1" name="OP_ManaUpdate" updated="05/26/26">
         <comment>Mana Update opcode - 10 bytes (spawn_id u16, cur u32, max u32). Parallel to OP_EndUpdate; fires per regen tick.</comment>
         <payload dir="server" typename="manaUpdateStruct" sizechecktype="match"/>
     </opcode>
