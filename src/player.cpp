@@ -1158,14 +1158,19 @@ void Player::fillConTable()
     grayRange = -7;
     greenRange = -5;
   }
-  else if (level() < 21) 
-  { // 17-20 
-    grayRange = -8;
+  else if (level() < 21)
+  { // 17-20
+    // Live shows grey up to level-7 here (at L18, level 11 cons grey and 12
+    // green). The old -8 greyed only to level-8 (L18 -> 11 green); corrected
+    // against the live client.
+    grayRange = -7;
     greenRange = -6;
   }
-  else if (level() < 25) 
+  else if (level() < 25)
   { // 21-24
-    grayRange = -9;
+    // Same off-by-one as 17-20: live greys to level-8 (at L21, 13 cons grey,
+    // 14 green). Old -9 greyed only to level-9 (L21 -> 13 green); corrected.
+    grayRange = -8;
     greenRange = -7;
   }
   else if (level() < 29)
