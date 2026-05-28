@@ -346,17 +346,13 @@ void Player::loadProfile(const playerProfileStruct& player)
 
   m_currentAApts = player.aa_spent;
 
-  // Buffs
-  int buffnumber;
-  const struct spellBuff *buff;
-  for (buffnumber=0;buffnumber<MAX_BUFFS;buffnumber++)
-  {
-    if (player.buffs[buffnumber].spellid && player.buffs[buffnumber].duration)
-    {
-      buff = &(player.buffs[buffnumber]);
-      emit buffLoad(buff);
-    }
-  }
+  // Buffs: legacy charProfileStruct.buffs[42] at offset 0x8140 no longer
+  // matches modern Live's profile layout — reading these bytes lands in
+  // unrelated content but the spellid+duration!=0 gate passes for most
+  // entries by coincidence, polluting the spell list with bogus
+  // hour-scale durations. Active buffs now come from OP_Buff
+  // (variable-size; SpellShell::buff handles the modern wire form) and
+  // OP_Action. Mirrored from showeq-daemon/src/player.cpp.
 }
 
 void Player::player(const charProfileStruct* player)

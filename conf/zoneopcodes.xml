@@ -176,8 +176,8 @@
         <payload dir="server" typename="groupLeaderChangeStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="18b4" name="OP_Buff" updated="05/25/26">
-        <comment>old BuffDropCode</comment>
-        <payload dir="both" typename="buffStruct" sizechecktype="match"/>
+        <comment>S&gt;C buff broadcast — variable length (13/30/34/55/76 bytes), no legacy 168b buffStruct fit. See SpellShell::buff for the cracked wire forms. Mirrored from showeq-daemon.</comment>
+        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
     <opcode id="e6dd" name="OP_BeginCast" updated="05/26/26">
         <comment>BeginCastCode - S>C broadcast: {u32 spellId, u16 casterSpawnId, u16 castTime_ms, u8[7] pad}</comment>

@@ -973,8 +973,12 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_CastSpell", SP_Zone, DIR_Server|DIR_Client,
 		      "startCastStruct", SZC_Match,
 		      m_spellShell, SLOT(selfStartSpellCast(const uint8_t*)));
-   m_packet->connect2("OP_Buff", SP_Zone, DIR_Server|DIR_Client,
-		      "buffStruct", SZC_Match,
+   // OP_Buff is variable-size on modern Live (13/30/34/55/76b — see the
+   // size-dispatch in SpellShell::buff). The opcode table registers it
+   // as uint8_t/SZC_None so dispatch must match or every packet is
+   // silently dropped via EQPacketStream::connect2's typeName mismatch.
+   m_packet->connect2("OP_Buff", SP_Zone, DIR_Server,
+		      "uint8_t", SZC_None,
 		      m_spellShell, SLOT(buff(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_Action", SP_Zone, DIR_Server|DIR_Client,
 		      "actionStruct", SZC_Match,

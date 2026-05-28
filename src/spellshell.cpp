@@ -290,49 +290,64 @@ void SpellShell::buffLoad(const spellBuff* c)
   }
 }
 
-void SpellShell::buff(const uint8_t* data, size_t, uint8_t dir)
+void SpellShell::buff(const uint8_t* data, size_t size, uint8_t dir)
 {
-  // we only care about the server
   if (dir == DIR_Client)
     return;
 
-  const buffStruct* b = (const buffStruct*)data;
+  // Post-2026-05-22 Live OP_Buff (opcode 0x18b4) is variable-size — the
+  // legacy 168-byte buffStruct is dead. See showeq-daemon/src/spellshell.cpp
+  // (mirror) for the cracked wire forms; this filters to player buffs and
+  // extracts duration from block 1.
+  if (size < 8) return;
+  const uint32_t spawnId =
+      uint32_t(data[0]) | (uint32_t(data[1]) << 8) |
+      (uint32_t(data[2]) << 16) | (uint32_t(data[3]) << 24);
+  const uint32_t spellId =
+      uint32_t(data[4]) | (uint32_t(data[5]) << 8) |
+      (uint32_t(data[6]) << 16) | (uint32_t(data[7]) << 24);
 
-  // if this is the second server packet then ignore it
-  if (b->spellid == 0xffffffff)
+  if (m_player->id() != 0 && spawnId != m_player->id())
+    return;
+  if (spellId == 0xffffffff || spellId == 0)
     return;
 
-#ifdef DIAG_SPELLSHELL
-  seqDebug("Changing buff - id=%d from spawn=%d", b->spellid, b->spawnid);
-#endif // DIAG_SPELLSHELL
+  const Spell* spell = m_spells->spell(spellId);
+  SpellItem* item = findSpell(spellId, spawnId, QString());
 
-  const Spell* spell = m_spells->spell(b->spellid);
-
-  // find the spell item
-  SpellItem* item;
-  const Item* s;
-  QString targetName;
-  if (!spell || spell->targetType() != 6)
-  {
-    if (b->spawnid && 
-	((s = m_spawnShell->findID(tSpawn, b->spawnid))))
-      targetName = s->name();
-    
-    item = findSpell(b->spellid, b->spawnid, targetName);
+  // 13b fade form: clear the tracked buff if we have it.
+  if (size == 13) {
+    if (item) deleteSpell(item);
+    return;
   }
-  else
-    item = findSpell(b->spellid);
 
-  if (!item)
+  int duration = 0;
+  if (size == 30) {
+    if (spell) duration = spell->calcDuration(m_player->level()) * 6;
+    if (duration <= 0) return;
+  } else if (size >= 34) {
+    if (size < 19) return;
+    const uint32_t durTicks =
+        uint32_t(data[15]) | (uint32_t(data[16]) << 8) |
+        (uint32_t(data[17]) << 16) | (uint32_t(data[18]) << 24);
+    duration = int(durTicks) * 6;
+    if (duration <= 0) return;
+  } else {
     return;
+  }
 
-  if (b->changetype == 0x01) // removing buff
-    deleteSpell(item);
-  else if (b->changetype == 0x02)
-  {
-    // right now we only know how to find the updated duration
-    item->setDuration(b->duration * 6);
+  if (item) {
+    item->setDuration(duration);
     emit changeSpell(item);
+  } else {
+    item = new SpellItem();
+    item->update(spellId, spell, duration,
+                 0, QString(), spawnId, QString());
+    m_spellList.append(item);
+    if (!m_timer->isActive())
+      m_timer->start(1000 *
+                     pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
+    emit addSpell(item);
   }
 }
 
