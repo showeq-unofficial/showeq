@@ -2195,7 +2195,7 @@ struct actionStruct
 {
 /*0000*/ uint16_t target;                        // Target ID
 /*0002*/ uint16_t source;                        // SourceID
-/*0004*/ int16_t  spell;                         // SpellID
+/*0004*/ uint16_t spell;                         // SpellID (unsigned: modern IDs > 32767 sign-extend if int16)
 /*0006*/ uint8_t  unknown0006[6];
 /*0012*/ uint8_t  level;                         // Caster level
 /*0013*/ uint8_t  unknown0013[43];               // ***Placeholder
@@ -2211,7 +2211,7 @@ struct actionAltStruct
 {
 /*0000*/ uint16_t target;                        // Target ID
 /*0002*/ uint16_t source;                        // SourceID
-/*0004*/ int16_t  spell;                         // SpellID
+/*0004*/ uint16_t spell;                         // SpellID (unsigned: modern IDs > 32767 sign-extend if int16)
 /*0006*/ uint8_t  unknown0006[6];
 /*0012*/ uint8_t  level;                         // Caster level
 /*0013*/ uint8_t  unknown0013[43];               // ***Placeholder
