@@ -37,6 +37,10 @@
 #include <QDataStream>
 #include <QRegExp>
 
+#include <algorithm>
+#include <cstddef>
+#include <cstring>
+
 //----------------------------------------------------------------------
 // constants
 static const char magicStr[5] = "zon2"; // magic is the size of uint32_t + a null
@@ -615,6 +619,38 @@ void ZoneMgr::zonePlayer(const uint8_t* data, size_t len)
   memset(player,0,sizeof(charProfileStruct));
 
   fillProfileStruct(player,data,len,false); // don't bother checking the length since it's always going to not match up
+
+  // Buffs array signature-based locator. The netstream parser's
+  // position drifts on the post-2026-05-22 profile, so the array
+  // populated by fillProfileStruct is garbage. Each 110-byte spellBuff
+  // slot carries `float 1.0` at +98 (per-buff modifier); scan for ≥3
+  // such anchors at 110-byte intervals to locate the array start and
+  // overlay it. Mirrored from showeq-daemon/src/zonemgr.cpp.
+  {
+    constexpr size_t kModOffset = offsetof(spellBuff, modifier);
+    constexpr uint32_t kOneLE = 0x3f800000u;
+    size_t buffArrayStart = 0;
+    size_t bestRun = 0;
+    for (size_t off = 0x3000; off + sizeof(spellBuff) <= len; ++off) {
+      uint32_t v;
+      memcpy(&v, data + off + kModOffset, sizeof(v));
+      if (v != kOneLE) continue;
+      size_t run = 1;
+      size_t cur = off + sizeof(spellBuff);
+      while (cur + sizeof(spellBuff) <= len) {
+        memcpy(&v, data + cur + kModOffset, sizeof(v));
+        if (v != kOneLE) break;
+        ++run; cur += sizeof(spellBuff);
+      }
+      if (run > bestRun) { bestRun = run; buffArrayStart = off; }
+    }
+    if (bestRun >= 3) {
+      const size_t bufBytes = sizeof(player->profile.buffs);
+      const size_t copyBytes =
+          std::min(bufBytes, len - buffArrayStart);
+      memcpy(player->profile.buffs, data + buffArrayStart, copyBytes);
+    }
+  }
 
   m_shortZoneName = zoneNameFromID(player->zoneId);
   m_longZoneName = zoneLongNameFromID(player->zoneId);

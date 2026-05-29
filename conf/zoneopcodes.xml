@@ -315,8 +315,12 @@
         <comment>Seems to be sent to handle a variety of UI updates - Variable length</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="7324" name="OP_GroupMemberList" updated="05/27/26">
-        <comment>List of group members - Variable length. Fires S>C once per form-event broadcast to all current members; in 2-person captures observed at 168 bytes (name+name+rich trailer).</comment>
+    <opcode id="7324" name="OP_GroupMemberInfo" updated="05/28/26">
+        <comment>Recipient-only group event notification (168b; recipient name@64). NOT the actual roster — that's OP_GroupMemberList=0x312a. Renamed from prior misidentification. Mirrored from showeq-daemon.</comment>
+        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
+    </opcode>
+    <opcode id="312a" name="OP_GroupMemberList" updated="05/28/26">
+        <comment>Modern group roster broadcast. Variable length (54-301b). Header {u32 groupId, u32 memberCount} + slot-0 extended leader record + (memberCount-1) slot records with u32 slotIdx prefix and null-padded names. Fires S>C at zone-in AND every roster mutation. Mirrored from showeq-daemon.</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
     <opcode id="be23" name="OP_GuildMemberList" updated="04/16/26">

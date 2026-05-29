@@ -346,13 +346,20 @@ void Player::loadProfile(const playerProfileStruct& player)
 
   m_currentAApts = player.aa_spent;
 
-  // Buffs: legacy charProfileStruct.buffs[42] at offset 0x8140 no longer
-  // matches modern Live's profile layout — reading these bytes lands in
-  // unrelated content but the spellid+duration!=0 gate passes for most
-  // entries by coincidence, polluting the spell list with bogus
-  // hour-scale durations. Active buffs now come from OP_Buff
-  // (variable-size; SpellShell::buff handles the modern wire form) and
-  // OP_Action. Mirrored from showeq-daemon/src/player.cpp.
+  // Buffs: modern spellBuff is 110 bytes (same total as legacy) but with
+  // -12 field offsets — see everquest.h. The buff array is overlaid from
+  // the wire at the locator-derived offset by ZoneMgr::zonePlayer (the
+  // netstream parser drifts on post-patch wire). Mirrored from
+  // showeq-daemon/src/player.cpp.
+  for (int buffnumber = 0; buffnumber < MAX_BUFFS; buffnumber++)
+  {
+    if (player.buffs[buffnumber].spellid > 0 &&
+        player.buffs[buffnumber].spellid != int32_t(0xffffffff) &&
+        player.buffs[buffnumber].duration > 0)
+    {
+      emit buffLoad(&player.buffs[buffnumber]);
+    }
+  }
 }
 
 void Player::player(const charProfileStruct* player)
