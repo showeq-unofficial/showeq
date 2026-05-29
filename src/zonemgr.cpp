@@ -622,24 +622,35 @@ void ZoneMgr::zonePlayer(const uint8_t* data, size_t len)
 
   // Buffs array signature-based locator. The netstream parser's
   // position drifts on the post-2026-05-22 profile, so the array
-  // populated by fillProfileStruct is garbage. Each 110-byte spellBuff
-  // slot carries `float 1.0` at +98 (per-buff modifier); scan for ≥3
-  // such anchors at 110-byte intervals to locate the array start and
-  // overlay it. Mirrored from showeq-daemon/src/zonemgr.cpp.
+  // populated by fillProfileStruct is garbage. Locate the array by a
+  // 7-marker fingerprint per 110-byte spellBuff slot:
+  //   - float 1.0 (0x3f800000) at +98 (per-buff modifier)
+  //   - 0xFFFFFFFF at +26, +38, +50, +62, +74, +86
+  // The +98 anchor alone has false-positive matches in other profile
+  // regions; the six 0xFFFFFFFF sentinels are the discriminator.
+  // Mirrored from showeq-daemon/src/zonemgr.cpp.
   {
     constexpr size_t kModOffset = offsetof(spellBuff, modifier);
     constexpr uint32_t kOneLE = 0x3f800000u;
+    constexpr uint32_t kFF = 0xffffffffu;
+    constexpr size_t kMarkers[] = {26, 38, 50, 62, 74, 86};
+    auto looksLikeSlot = [&](size_t off) {
+      uint32_t v;
+      memcpy(&v, data + off + kModOffset, sizeof(v));
+      if (v != kOneLE) return false;
+      for (size_t m : kMarkers) {
+        memcpy(&v, data + off + m, sizeof(v));
+        if (v != kFF) return false;
+      }
+      return true;
+    };
     size_t buffArrayStart = 0;
     size_t bestRun = 0;
     for (size_t off = 0x3000; off + sizeof(spellBuff) <= len; ++off) {
-      uint32_t v;
-      memcpy(&v, data + off + kModOffset, sizeof(v));
-      if (v != kOneLE) continue;
+      if (!looksLikeSlot(off)) continue;
       size_t run = 1;
       size_t cur = off + sizeof(spellBuff);
-      while (cur + sizeof(spellBuff) <= len) {
-        memcpy(&v, data + cur + kModOffset, sizeof(v));
-        if (v != kOneLE) break;
+      while (cur + sizeof(spellBuff) <= len && looksLikeSlot(cur)) {
         ++run; cur += sizeof(spellBuff);
       }
       if (run > bestRun) { bestRun = run; buffArrayStart = off; }
