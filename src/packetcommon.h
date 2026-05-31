@@ -53,7 +53,10 @@
 const char* const AUTOMATIC_CLIENT_IP = "127.0.0.0";
 
 const in_port_t WorldServerGeneralMinPort = 9000;
-const in_port_t WorldServerGeneralMaxPort = 9015;
+// Live world-server instances now extend past the historical 9000-9015 block
+// (observed :9016 in 2026-05 captures). World traffic outside this range is
+// mis-tagged as zone. Headroom to 9020 (below WorldServerChat2Port 9875).
+const in_port_t WorldServerGeneralMaxPort = 9020;
 const in_port_t WorldServerChatPort = 9876;
 const in_port_t WorldServerChat2Port = 9875; // xgame tells, mail
 const in_port_t LoginServerMinPort = 15900;
