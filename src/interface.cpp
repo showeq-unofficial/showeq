@@ -613,6 +613,11 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      // connect GroupMgr slots to SpawnShell signals
      connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
 	     m_groupMgr, SLOT(killSpawn(const Item*)));
+     // SpawnShell::clear() (zone change) bulk-frees spawns and emits only
+     // clearItems() — without this the GroupMgr m_spawn pointers dangle past
+     // the zone and totalLevels() (on XP gain) dereferences freed Spawns.
+     connect(m_spawnShell, SIGNAL(clearItems()),
+	     m_groupMgr, SLOT(clear()));
    }
 
    if (m_dateTimeMgr)

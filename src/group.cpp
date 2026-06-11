@@ -330,6 +330,17 @@ void GroupMgr::killSpawn(const Item* item)
   }
 }
 
+void GroupMgr::clear()
+{
+  // Zone change: SpawnShell just freed every Spawn. Drop the now-dangling
+  // spawn pointers but keep the roster (names) — group membership survives
+  // zoning. Members re-attach via addItem() as their spawns re-enter zone,
+  // which re-increments m_membersInZoneCount from this zeroed baseline.
+  for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
+    m_members[i]->m_spawn = 0;
+  m_membersInZoneCount = 0;
+}
+
 void GroupMgr::dumpInfo(QTextStream& out)
 {
   // dump general group manager information
