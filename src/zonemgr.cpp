@@ -622,38 +622,58 @@ void ZoneMgr::zonePlayer(const uint8_t* data, size_t len)
 
   // Buffs array signature-based locator. The netstream parser's
   // position drifts on the post-2026-05-22 profile, so the array
-  // populated by fillProfileStruct is garbage. Locate the array by a
-  // 7-marker fingerprint per 110-byte spellBuff slot:
-  //   - float 1.0 (0x3f800000) at +98 (per-buff modifier)
-  //   - 0xFFFFFFFF at +26, +38, +50, +62, +74, +86
-  // The +98 anchor alone has false-positive matches in other profile
-  // regions; the six 0xFFFFFFFF sentinels are the discriminator.
-  // Mirrored from showeq-daemon/src/zonemgr.cpp.
+  // populated by fillProfileStruct is garbage. Locate the array by the
+  // only per-slot field the server initializes identically on every
+  // 110-byte spellBuff slot (occupied or empty): six 0xFFFFFFFF
+  // sentinels at +26, +38, +50, +62, +74, +86 (vacant sub-effect cells).
+  //
+  // Do NOT anchor on the +98 'modifier' float: it is 1.0 on occupied
+  // slots but holds residual garbage (e.g. 1.02) on some EMPTY slots,
+  // which splits the array and drops every buff before the dirty slot.
+  // The array also neighbours another 110-strided 0xff structure, so
+  // pick the marker run whose 42-slot window holds the MOST plausible
+  // occupied buffs; tie-break on run length. Mirrored from
+  // showeq-daemon/src/zonemgr.cpp.
   {
-    constexpr size_t kModOffset = offsetof(spellBuff, modifier);
-    constexpr uint32_t kOneLE = 0x3f800000u;
     constexpr uint32_t kFF = 0xffffffffu;
     constexpr size_t kMarkers[] = {26, 38, 50, 62, 74, 86};
-    auto looksLikeSlot = [&](size_t off) {
+    auto markersOk = [&](size_t off) {
+      if (off + sizeof(spellBuff) > len) return false;
       uint32_t v;
-      memcpy(&v, data + off + kModOffset, sizeof(v));
-      if (v != kOneLE) return false;
       for (size_t m : kMarkers) {
         memcpy(&v, data + off + m, sizeof(v));
         if (v != kFF) return false;
       }
       return true;
     };
+    auto countBuffs = [&](size_t start) {
+      int n = 0;
+      for (int i = 0; i < MAX_BUFFS; ++i) {
+        const size_t b = start + size_t(i) * sizeof(spellBuff);
+        if (b + sizeof(spellBuff) > len) break;
+        int32_t dur, sp;
+        memcpy(&dur, data + b, sizeof(dur));
+        memcpy(&sp, data + b + 9, sizeof(sp)); // unaligned spellid
+        const uint8_t lvl = data[b + 8];
+        if (sp >= 1 && sp <= 200000 && dur >= 1 && dur <= 400000 &&
+            lvl >= 1 && lvl <= 127)
+          ++n;
+      }
+      return n;
+    };
     size_t buffArrayStart = 0;
+    int bestBuffs = -1;
     size_t bestRun = 0;
-    for (size_t off = 0x3000; off + sizeof(spellBuff) <= len; ++off) {
-      if (!looksLikeSlot(off)) continue;
+    for (size_t off = 0x3000; off + sizeof(spellBuff) <= len; ) {
+      if (!markersOk(off)) { ++off; continue; }
       size_t run = 1;
       size_t cur = off + sizeof(spellBuff);
-      while (cur + sizeof(spellBuff) <= len && looksLikeSlot(cur)) {
-        ++run; cur += sizeof(spellBuff);
+      while (markersOk(cur)) { ++run; cur += sizeof(spellBuff); }
+      const int nb = countBuffs(off);
+      if (nb > bestBuffs || (nb == bestBuffs && run > bestRun)) {
+        bestBuffs = nb; bestRun = run; buffArrayStart = off;
       }
-      if (run > bestRun) { bestRun = run; buffArrayStart = off; }
+      off = cur;
     }
     if (bestRun >= 3) {
       const size_t bufBytes = sizeof(player->profile.buffs);
