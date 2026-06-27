@@ -103,10 +103,11 @@ void SpawnPoint::update(const Spawn* spawn)
     m_last = "";
   
   m_spawnTime = time(0);
-  
+
   if (m_deathTime != 0)
     m_diffTime = m_spawnTime - m_deathTime;
-  
+
+  m_deathTime = 0;
   m_count++;
 }
 

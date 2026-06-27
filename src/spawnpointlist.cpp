@@ -70,7 +70,7 @@ void SpawnPointListItem::update()
 
   // construct and set the time remaining string
   if ( m_spawnPoint->diffTime() == 0 || m_spawnPoint->deathTime() == 0 )
-    tmpStr = "\277 ?";  // upside down questoin mark followed by question mark
+    tmpStr = QString(QChar(0x00BF)) + " ?";  // U+00BF ¿, Qt3/4/5/6-safe
   else
   {
     long secs = m_spawnPoint->secsLeft();
